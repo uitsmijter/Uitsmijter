@@ -1,0 +1,14 @@
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  namespace: {{ include "uitsmijter.namespace" . }}
+  name: uitsmijter-config
+data:
+  LOG_FORMAT: {{ .Values.config.logFormat | default "ndjson" | quote }}
+  LOG_LEVEL: {{ .Values.config.logLevel | default "info" | quote }}
+  COOKIE_EXPIRATION_IN_DAYS: {{ .Values.config.cookieExpirationInDays | default 7 | quote }}
+  TOKEN_EXPIRATION_IN_HOURS: {{ .Values.config.tokenExpirationInHours | default 2 | quote }}
+  TOKEN_REFRESH_EXPIRATION_IN_HOURS: {{ .Values.config.tokenRefreshExpirationInHours | default 720 | quote }}
+  SUPPORT_KUBERNETES_CRD: "true"
+  DISPLAY_VERSION: {{ if hasKey .Values.config "displayVersion" }}{{ .Values.config.displayVersion | quote }}{{ else }}"true"{{ end }}

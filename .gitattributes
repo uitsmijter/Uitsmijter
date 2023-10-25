@@ -1,0 +1,4 @@
+Graphics/** filter=lfs diff=lfs merge=lfs -text
+Resources/Fonts/** filter=lfs diff=lfs merge=lfs -text
+Tests/e2e/playwright/tests/**/*-snapshots filter=lfs diff=lfs merge=lfs -text
+

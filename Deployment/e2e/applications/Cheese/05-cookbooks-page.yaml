@@ -1,0 +1,275 @@
+# Cookbooks Interceptor page
+---
+kind: Pod
+apiVersion: v1
+metadata:
+  name: cookbooks-webserver
+  namespace: cheese
+  labels:
+    app: cookbooks-webserver
+
+spec:
+  containers:
+    - name: nginx
+      image: nginx
+
+      volumeMounts:
+        - name: content
+          mountPath: "/usr/share/nginx/html"
+          readOnly: true
+        - name: config-templates
+          mountPath: "/etc/nginx/templates"
+          readOnly: true
+
+  volumes:
+    - name: content
+      configMap:
+        name: cookbooks-content
+    - name: config-templates
+      configMap:
+        name: nginx-config-templates
+
+---
+kind: Service
+apiVersion: v1
+metadata:
+  name: cookbooks-webserver
+  namespace: cheese
+
+spec:
+  selector:
+    app: cookbooks-webserver
+
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 80
+
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: nginx-config-templates
+  namespace: cheese
+data:
+  default.conf.template: |
+    server {
+      listen        80;
+      server_name   cookbooks.example.com;
+      location / {
+        root   /usr/share/nginx/html;
+        index  /index.html;
+        add_header Cache-Control no-cache;
+        try_files $uri $uri.html $uri/index.html;
+      }
+    }
+    server {
+      listen        80;
+      server_name   toast.example.com;
+      location / {
+        root   /usr/share/nginx/html;
+        index  /toast.html;
+        add_header Cache-Control no-cache;
+        try_files $uri $uri.html $uri/toast.html;
+      }
+    }
+    server {
+      listen        80;
+      server_name   spa.example.net;
+      location / {
+        root   /usr/share/nginx/html;
+        index  /spa.html;
+        add_header Cache-Control no-cache;
+        try_files $uri $uri.html $uri/spa.html;
+      }
+    }
+
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: cookbooks-content
+  namespace: cheese
+data:
+  index.html: |
+    <html>
+    <head>
+        <title>Cookbooks</title>
+        <meta http-equiv="Pragma" content="no-cache"/>
+        <meta http-equiv="Cache-Control" content="no-cache"/>
+    </head>
+    <body>
+    <h1 class="headline">Ingredients for an Uitsmijter</h1>
+    <img width="300" src="https://docs.uitsmijter.io//resources/uitsmijter-ingredients.jpg"
+         alt="A delicious Uitsmijter"/>
+    <ul>
+        <li>1 teaspoon butter</li>
+        <li>2 large eggs</li>
+        <li>2 slices white bread
+        </li>
+        <li>2 slices shaved boiled ham
+        </li>
+        <li>2 large slices aged Gouda cheese
+        </li>
+        <li>Salt and Pepper
+        </li>
+    </ul>
+    <p>
+        First melt the butter in a frying pan or skillet and fry the eggs. Once the bottoms of the eggs are set, take
+        the pan
+        off the heat, place a lid on the pan and allow the eggs to steam until the top has firmed up. If you prefer your
+        eggs more thoroughly cooked, flip them over and fry until the yolk is done to your liking.
+    </p>
+    <p>
+        Lightly toast the bread and place the slices of toast on a plate. Top the toast with ham and cheese and put the
+        fried eggs on top of it.
+    </p>
+    <p>Season to taste with salt and pepper.</p>
+    <footer>
+        <a href="//login.example.com/logout?post_logout_redirect_uri=//cookbooks.example.com">logout</a>
+    </footer>
+    </body>
+    </html>
+  toast.html: |
+    <html>
+    <head>
+        <title>Toast</title>
+        <meta http-equiv="Pragma" content="no-cache"/>
+        <meta http-equiv="Cache-Control" content="no-cache"/>
+    </head>
+    <body>
+    <h1 class="headline">Toast</h1>
+    <p>
+        Just a toasty test page.
+    </p>
+    <footer>
+        <a href="//login.example.com/logout?post_logout_redirect_uri=//toast.example.com">logout</a>
+    </footer>
+    </body>
+    </html>
+  spa.html: |
+    <html>
+    <head>
+        <title>SPA</title>
+        <meta http-equiv="Pragma" content="no-cache"/>
+        <meta http-equiv="Cache-Control" content="no-cache"/>
+        <script src="spa.js"></script>
+        <style>
+            footer a, pre {
+              display: none;
+            }
+        </style>
+    </head>
+    <body>
+    <h1 class="headline">SPA</h1>
+    <p>
+        A new Single-Page-Application.
+    </p>
+    <pre id="tokenInfo"></pre>
+    <footer>
+        <a id="login" href="//login.example.com/authorize?client_id=5cb5b72f-b223-4c59-a4cf-a0ac96234de7&redirect_uri=https%3A%2F%2Fspa.example.net%2F&response_type=code&scope=access&state=d3026d3b5eff4f47b8764fe50a230380&response_mode=query">login</a>
+        <a id="logout" href="//login.example.com/logout?post_logout_redirect_uri=https%3A%2F%2Fspa.example.net%2F&client_id=5cb5b72f-b223-4c59-a4cf-a0ac96234de7">logout</a>
+    </footer>
+    </body>
+    </html>
+  spa.js: |
+    document.addEventListener("DOMContentLoaded", () => {
+        let get = window.location.search.slice(1).split('&')
+            .reduce((params, input) => {
+                input = input.split('=')
+                params[input[0]] = decodeURIComponent(input[1])
+                return params
+            }, {})
+
+        if ('code' in get) {
+            console.log('logged in')
+            document.getElementById('logout').style.display = 'inherit'
+
+            fetch("//login.example.com/token", {
+                method: "POST",
+                headers: {
+                    "Content-type": "application/json"
+                },
+                body: JSON.stringify({
+                    grant_type: "authorization_code",
+                    client_id: "5cb5b72f-b223-4c59-a4cf-a0ac96234de7",
+                    code: "" + get.code,
+                    redirect_uri: "https://spa.example.net/",
+                })
+            })
+                .then((response) => response.json())
+                .then((json) => {
+                    console.log("Tokendata:", json)
+                    let pre = document.getElementsByTagName('pre')[0]
+                    pre.textContent = JSON.stringify(json, undefined, 4)
+                    pre.style.display = 'inherit'
+                });
+
+        } else {
+            console.log('logged out')
+            document.getElementById('login').style.display = 'inherit'
+        }
+    })
+
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+
+metadata:
+  name: cookbooks-webserver
+  namespace: cheese
+  annotations:
+    traefik.ingress.kubernetes.io/router.entrypoints: websecure
+    traefik.ingress.kubernetes.io/router.tls: "true"
+    traefik.ingress.kubernetes.io/router.middlewares: uitsmijter-forward-auth@kubernetescrd
+
+spec:
+  tls:
+    - secretName: example.com
+  rules:
+    - host: cookbooks.example.com
+      http:
+        paths:
+          - path: "/"
+            pathType: Prefix
+            backend:
+              service:
+                name: cookbooks-webserver
+                port:
+                  number: 80
+    - host: toast.example.com
+      http:
+        paths:
+          - path: "/"
+            pathType: Prefix
+            backend:
+              service:
+                name: cookbooks-webserver
+                port:
+                  number: 80
+
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+
+metadata:
+  name: spa-webserver
+  namespace: cheese
+  annotations:
+    traefik.ingress.kubernetes.io/router.entrypoints: websecure
+    traefik.ingress.kubernetes.io/router.tls: "true"
+
+spec:
+  tls:
+    - secretName: example.net
+  rules:
+    - host: spa.example.net
+      http:
+        paths:
+          - path: "/"
+            pathType: Prefix
+            backend:
+              service:
+                name: cookbooks-webserver
+                port:
+                  number: 80

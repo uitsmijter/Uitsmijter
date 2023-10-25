@@ -1,0 +1,41 @@
+{{ if .Values.installCRD }}
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: uitsmijter-resources-read
+rules:
+  - apiGroups:
+      - uitsmijter.io
+    resources:
+      - tenants
+      - clients
+    verbs:
+      - get
+      - list
+      - watch
+{{ end }}
+
+
+{{ if .Values.installSA }}
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: uitsmijter
+  namespace: {{ include "uitsmijter.namespace" . }}
+
+---
+kind: ClusterRoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: uitsmijter-{{ include "uitsmijter.namespace" . | trunc 52 }}
+subjects:
+  - kind: ServiceAccount
+    name: uitsmijter
+    namespace: {{ include "uitsmijter.namespace" . }}
+roleRef:
+  kind: ClusterRole
+  name: uitsmijter-resources-read
+  apiGroup: "rbac.authorization.k8s.io"
+{{ end }}

@@ -1,0 +1,67 @@
+{{ if .Values.installCRD }}
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  # name must match the spec fields below, and be in the form: <plural>.<group>
+  name: clients.uitsmijter.io
+spec:
+  # group name to use for REST API: /apis/<group>/<version>
+  group: uitsmijter.io
+  # list of versions supported by this CustomResourceDefinition
+  versions:
+    - name: v1
+      # Each version can be enabled/disabled by Served flag.
+      served: true
+      # One and only one version must be marked as the storage version.
+      storage: true
+      schema:
+        openAPIV3Schema:
+          type: object
+          properties:
+            spec:
+              type: object
+              properties:
+                ident:
+                  type: string
+                  format: uuid
+                tenantname:
+                  type: string
+                redirect_urls:
+                  type: array
+                  items:
+                    type: string
+                    minItems: 1
+                scopes:
+                  type: array
+                  items:
+                    type: string
+                referrers:
+                  type: array
+                  items:
+                    type: string
+                grant_types:
+                  type: array
+                  items:
+                    type: string
+                isPkceOnly:
+                  type: boolean
+                secret:
+                  type: string
+              required:
+                - ident
+                - tenantname
+                - redirect_urls
+
+  # either Namespaced or Cluster
+  scope: Namespaced
+  names:
+    # plural name to be used in the URL: /apis/<group>/<version>/<plural>
+    plural: clients
+    # singular name to be used as an alias on the CLI and for display
+    singular: client
+    # kind is normally the CamelCased singular type. Your resource manifests use this.
+    kind: Client
+    # shortNames allow shorter string to match your resource on the CLI
+    shortNames:
+      - client
+{{ end }}

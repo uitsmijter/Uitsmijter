@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="de">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>#(title)</title>
+    <link rel="stylesheet" href="https://page.ham.test/static/login.css">
+</head>
+
+<body>
+<header>
+
+</header>
+<main data-tenant="ham">
+    <div class="container">
+        <div class="login">
+
+            <div class="logo-box">
+                <img class="logo" src="https://page.ham.test/static/img/logo-littleletter.svg">
+            </div>
+
+            <form action="#(serviceUrl)/login" method="post">
+                <input type="hidden" name="location" value="#(requestUri)"/>
+                <input type="hidden" name="mode" value="#(mode)"/>
+
+                #if(error != nil):
+                <div class="error">#t(error)</div>
+                #endif
+                #if(requestInfo != nil):
+                <div class="error">#t(requestInfo.description)</div>
+                #endif
+
+                <div class="field">
+                    <input type="text" id="username" name="username" placeholder='#t("LOGIN.UI.NAME")'>
+                </div>
+
+                <div class="field">
+                    <input type="password" id="password" name="password" placeholder='#t("LOGIN.UI.PASSWORD")'>
+                </div>
+
+                <div class="button-box">
+                    <button class="button" name="button" id="loginButton">#t("LOGIN.UI.LOGIN")</button>
+                </div>
+            </form>
+
+            #if(tenant != nil && tenant.config.informations != nil):
+            <div class="footer">
+                <ul class="footer-item">
+                    #if(tenant.config.informations.imprint_url != nil):
+                    <li><a href="#(tenant.config.informations.imprint_url)" data-type="imprint">Impressum</a></li>
+                    #endif
+                    #if(tenant.config.informations.privacy_url != nil):
+                    <li><a href="#(tenant.config.informations.privacy_url)" data-type="privacy">Datenschutz</a></li>
+                    #endif
+                    #if(tenant.config.informations.register_url != nil):
+                    <li><a href="#(tenant.config.informations.register_url)" data-type="register">Registrieren</a></li>
+                    #endif
+                </ul>
+            </div>
+            #endif
+
+        </div>
+        <div class="img"></div>
+    </div>
+</main>
+
+</body>
+
+</html>

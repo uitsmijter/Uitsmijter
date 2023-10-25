@@ -1,0 +1,27 @@
+---
+apiVersion: "uitsmijter.io/v1"
+kind: Client
+metadata:
+  name: bnbc
+  namespace: bnbc
+spec:
+  ident: e942df47-4810-4a9a-8f25-47e8cf03325d
+  tenantname: bnbc/bnbc
+  redirect_urls:
+    - 'https?://(.*\.)?bnbc\.example(:8080)?/.*'
+  grant_types:
+    - authorization_code
+
+---
+apiVersion: "uitsmijter.io/v1"
+kind: Client
+metadata:
+  name: another-bnbc
+  namespace: bnbc
+spec:
+  ident: 4ad5d978-98b1-436b-8df6-316d700cf8f2
+  tenantname: bnbc/bnbc
+  redirect_urls:
+    - 'https?://(.*\.)?bnbc\.example(:8080)?/.*'
+  grant_types:
+    - authorization_code

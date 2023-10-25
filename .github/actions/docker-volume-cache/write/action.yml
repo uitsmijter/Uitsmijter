@@ -1,0 +1,43 @@
+name: "Docker Volume Cache [read]"
+description: "Restores docker volumes"
+author: "aus der Technik | Uitsmijter"
+
+inputs:
+  volume:
+    description: 'Volume name to cache'
+    required: true
+    default: ''
+  path:
+    description: "Path of the target file."
+    required: false
+    default: ".volumes"
+  retention-days:
+    description: "Duration after which artifact will expire in days."
+    required: false
+    default: "1"
+
+runs:
+  using: composite
+  steps:
+    - name: Set current date as env variable
+      shell: sh
+      run: echo "NOW=$(date +'%s')" >> $GITHUB_ENV
+
+    - name: Archive data form the volume
+      shell: sh
+      env:
+        VOLUME_NAME: ${{ inputs.volume }}
+        TARGET_PATH: ${{ inputs.path }}
+      run: |
+        mkdir -p ${TARGET_PATH}
+        docker run --rm \
+          -v "${VOLUME_NAME}":/data \
+          -v "${PWD}/${TARGET_PATH}":/backup \
+          ubuntu \
+          tar cpf /backup/${VOLUME_NAME}.tar /data
+
+    - name: Cache
+      uses: actions/cache/save@v3
+      with:
+        path: ${{ inputs.path }}
+        key: volume-${{ inputs.volume }}-${{ github.run_id }}-${{ env.NOW }}

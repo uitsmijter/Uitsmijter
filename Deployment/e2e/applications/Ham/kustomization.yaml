@@ -1,0 +1,27 @@
+---
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+  - namespace.yaml
+  - tenant.yaml
+  - clients.yaml
+  - ham-page.yaml
+  - ham-shop.yaml
+  - login-page-proxy.yaml
+
+configMapGenerator:
+  - name: webserver-static
+    namespace: ham
+    files:
+      - template-techy/login.css
+  - name: webserver-static-img
+    namespace: ham
+    files:
+      - template-techy/img/circles.jpg
+      - template-techy/img/logo-littleletter.svg
+  - name: webserver-static-fonts
+    namespace: ham
+    files:
+      - template-techy/fonts/SourceSansPro-Regular.ttf
+      - template-techy/fonts/SourceSansPro-Regular.woff
+      - template-techy/fonts/SourceSansPro-Regular.woff2

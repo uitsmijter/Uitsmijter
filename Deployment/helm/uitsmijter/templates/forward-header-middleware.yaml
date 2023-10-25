@@ -1,0 +1,14 @@
+---
+# Forward authentication to Uitsmijter Public
+# usage:
+#   traefik.ingress.kubernetes.io/router.middlewares: sso-forward-header@kubernetescrd
+
+apiVersion: traefik.containo.us/v1alpha1
+kind: Middleware
+metadata:
+  namespace: {{ include "uitsmijter.namespace" . }}
+  name: forward-header
+spec:
+  headers:
+    customRequestHeaders:
+      "X-Uitsmijter-Mode": "interceptor"

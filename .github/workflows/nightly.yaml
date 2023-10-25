@@ -1,0 +1,131 @@
+name: Nightly
+on:
+  push:
+    branches:
+      - main
+
+env:
+  STORE_ARTEFACTS: true
+  RUN_LINTER: true
+  RUN_UNITTESTS: true
+  RUN_BUILD: true
+  RUN_E2ETESTS: true
+
+jobs:
+  # Run on a clean cache
+  cleancache:
+    name: Clean Cache
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out the repo
+        uses: actions/checkout@v3
+        with:
+          lfs: true
+      - uses: ./.github/actions/step-clear-cache
+        with:
+          volume: uitsmijter_build
+      - uses: ./.github/actions/step-clear-cache
+        with:
+          volume: uitsmijter_node_modules
+
+  # Lint
+  lint:
+    name: Run Linter checks
+    needs:
+      - cleancache
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out the repo
+        uses: actions/checkout@v3
+        with:
+          lfs: true
+      - uses: ./.github/actions/step-lint
+        if: ${{ env.RUN_LINTER != 'false' }}
+
+  unittest:
+    name: Run UnitTest
+    needs:
+      - cleancache
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out the repo
+        uses: actions/checkout@v3
+        with:
+          lfs: true
+      - uses: ./.github/actions/step-unittest
+        if: ${{ env.RUN_UNITTESTS != 'false' }}
+
+  # Build Binary
+  build:
+    name: Build Uitsmijter
+    runs-on: ubuntu-latest
+    needs:
+      - lint
+      - unittest
+    steps:
+      - name: Check out the repo
+        uses: actions/checkout@v3
+        with:
+          lfs: true
+      - uses: ./.github/actions/step-build
+        if: ${{ env.RUN_BUILD != 'false' }}
+        with:
+          release: true
+
+  # End-2-End
+  e2etest:
+    name: Run E2E-Tests
+    runs-on: ubuntu-latest
+    needs:
+      - build
+    steps:
+      - name: Check out the repo
+        uses: actions/checkout@v3
+        with:
+          lfs: true
+
+      - uses: ./.github/actions/step-e2e
+        if: ${{ env.RUN_E2ETESTS != 'false' }}
+        with:
+          dirty: false
+          fast: false
+
+  publish:
+    name: Publish
+    runs-on: ubuntu-latest
+    needs:
+      - e2etest
+    steps:
+      - uses: ./.github/actions/step-publish
+        with:
+          tag: nightly
+
+  # Notify
+  notify_mattermost:
+    name: Notify Mattermost
+    permissions:
+      contents: read
+      statuses: read
+      actions: read
+      repository-projects: read
+    needs:
+      - e2etest
+    if: always()
+    uses: uitsmijter/workflows/.github/workflows/builds-mattermost.yaml@main
+    secrets:
+      WEBHOOK: ${{ secrets.MATTERMOST_WEBHOOK_BUILD }}
+
+  notify_mastodon:
+    name: Notify Mastodon
+    permissions:
+      contents: read
+      statuses: read
+      actions: read
+      repository-projects: read
+    needs:
+      - e2etest
+    if: always()
+    uses: uitsmijter/workflows/.github/workflows/builds-mastodon.yaml@main
+    secrets:
+      MASTODON_URL: ${{ secrets.MASTODON_BUILDS_URL }}
+      MASTODON_ACCESS_TOKEN: ${{ secrets.MASTODON_BUILDS_TOKEN }}

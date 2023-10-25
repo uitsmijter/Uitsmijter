@@ -1,0 +1,18 @@
+name: Issues
+on:
+  issues:
+    types:
+      - opened
+      - edited
+      - closed
+      - reopened
+  issue_comment:
+    types:
+      - created
+      - edited
+
+jobs:
+  Notify:
+    uses: uitsmijter/workflows/.github/workflows/issues-mattermost.yaml@main
+    secrets:
+      WEBHOOK: ${{ secrets.MATTERMOST_WEBHOOK }}

@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>#(title)</title>
+    <link rel="stylesheet" href="css/uitsmijter.css">
+    <script type="application/javascript" src="js/uitsmijter.js"></script>
+    <meta http-equiv="refresh" content="2;URL=/logout/finalize?location=#(requestUri)"/>
+</head>
+<body class="background logout-effect">
+<header>
+    <ul class="navigation">
+        <li><a href="#" id="clock">
+            <script type="application/javascript">
+                let clock = new SimpleClock("clock")
+                document.write(clock.currentTime)
+            </script>
+        </a></li>
+    </ul>
+</header>
+<main>
+    <div class="logo-box">
+        <img src="images/uitsmijter.svg">
+    </div>
+    <div class="login-box">
+        <div class="logout">
+            <p>
+                <a class="logout-link" href="/logout/finalize?location=#(requestUri)">#t("LOGOUT.UI.LOGOUT")</a>
+                #t("LOGOUT.UI.IN_PROGRESS")
+            </p>
+        </div>
+    </div>
+</main>
+
+#if(tenant != nil && tenant.config.informations != nil):
+<footer>
+    <ul class="footer-item">
+        #if(tenant.config.informations.imprint_url != nil):
+        <li><a href="#(tenant.config.informations.imprint_url)" data-type="imprint">Impressum</a></li>
+        #endif
+        #if(tenant.config.informations.privacy_url != nil):
+        <li><a href="#(tenant.config.informations.privacy_url)" data-type="privacy">Datenschutz</a></li>
+        #endif
+        #if(tenant.config.informations.register_url != nil):
+        <li><a href="#(tenant.config.informations.register_url)" data-type="register">Registrieren</a></li>
+        #endif
+    </ul>
+</footer>
+#endif
+
+</body>
+</html>

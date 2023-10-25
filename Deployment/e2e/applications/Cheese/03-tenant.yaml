@@ -1,0 +1,51 @@
+---
+apiVersion: "uitsmijter.io/v1"
+kind: Tenant
+metadata:
+  name: cheese
+  namespace: cheese
+spec:
+  hosts:
+    - id.example.com
+    - cookbooks.example.com
+    - goat.example.com
+    - toast.example.com
+    - spa.example.net
+    - api.example.com
+  informations:
+    imprint_url: https://example.com/imprint
+    privacy_url: https://example.com/privacy
+    register_url: https://example.com/register
+  interceptor:
+    enabled: true
+    domain: login.example.com
+    cookie: .example.com
+  providers:
+    # Allows all @example.com emails
+    - |
+      class UserLoginProvider {
+        auth = false;
+        constructor(credentials) { 
+          this.auth = credentials.username.endsWith("@example.com");
+          if(credentials.username.startsWith("delayed-login@")){
+            let d = new Date();
+            while(d.getTime() + 5000 > new Date().getTime()){ /* wait 5s */ }
+            commit(true);
+          } else {
+            commit(true);
+          }
+        }
+        get canLogin() { return this.auth; }
+        get userProfile() { return { name: "Test User" }; }
+        get role() { return "user"; }
+      }
+    - |
+      class UserValidationProvider {
+        valid = false;
+        constructor(args) { 
+          this.valid = args.username.endsWith("@example.com") == true 
+            && args.username.startsWith("nosecondtime@") == false; 
+          commit(true); 
+        }
+        get isValid() { return this.valid; }
+      }

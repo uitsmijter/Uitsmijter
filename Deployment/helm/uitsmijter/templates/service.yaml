@@ -1,0 +1,14 @@
+---
+kind: Service
+apiVersion: v1
+metadata:
+  namespace: {{ include "uitsmijter.namespace" . }}
+  name: {{ include "uitsmijter.serviceName" . }}
+spec:
+  selector:
+    app: uitsmijter
+    component: authserver
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 8080

@@ -1,0 +1,14 @@
+---
+name: Localclient
+config:
+  ident: 66CC4B67-7BED-48E8-AE2E-8A6DBE07B879
+  tenantname: Uitsmijter
+  redirect_urls:
+    - http://localhost/.*
+    - http://localhost:8080/.*
+  scopes:
+    - list
+  referrers:
+    - http://localhost/login
+    - http://localhost:8080/login
+  isPkceOnly: false

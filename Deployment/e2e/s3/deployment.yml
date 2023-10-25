@@ -1,0 +1,104 @@
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: s3data
+spec:
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: standard
+  resources:
+    requests:
+      storage: 100Mi
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: s3server
+spec:
+  replicas: 1
+  minReadySeconds: 5
+  selector:
+    matchLabels:
+      app: s3server
+  strategy:
+    type: RollingUpdate
+
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 1
+  template:
+    metadata:
+      labels:
+        app: s3server
+    spec:
+      containers:
+      - name: s3server
+        image: chrislusf/seaweedfs:latest
+        # Execute weed server -h for a complete list
+        # Volumes docs: https://github.com/seaweedfs/seaweedfs/wiki/FAQ#how-many-volumes-do-i-need
+        command: [ '/usr/bin/weed' ]
+        args:
+          - -logtostderr=true
+          - server
+          - -dir=/data
+          - -volume.max=0
+          - -volume.minFreeSpace=10MB
+          - -master.electionTimeout=0
+          #- -master.volumePreallocate
+          - -master.volumeSizeLimitMB=200
+          - -s3
+          - -s3.config=/config.json
+          - -s3.domainName=s3.ham.test
+        ports:
+          - name: cluster
+            containerPort: 9333
+          - name: files
+            containerPort: 8888
+          - name: s3
+            containerPort: 8333
+        volumeMounts:
+        - mountPath: /data
+          name: s3data
+        - mountPath: /config.json
+          name: s3config
+          subPath: config.json
+        readinessProbe:
+          httpGet:
+            path: /
+            port: 8333
+      volumes:
+        - name: s3data
+          persistentVolumeClaim:
+            claimName: s3data
+        - name: s3config
+          configMap:
+            name: s3config
+
+---
+kind: Service
+apiVersion: v1
+metadata:
+  name: s3server
+  labels:
+    app: s3server
+spec:
+  selector:
+    app: s3server
+  ports:
+    # Cluster overview
+    - name: cluster
+      protocol: TCP
+      port: 9333
+      targetPort: 9333
+    # File viewer
+    - name: files
+      protocol: TCP
+      port: 8888
+      targetPort: 8888
+    # S3
+    - name: s3
+      protocol: TCP
+      port: 8333
+      targetPort: 8333

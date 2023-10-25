@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>#(title)</title>
+    <link rel="stylesheet" href="css/uitsmijter.css">
+    <script type="application/javascript" src="js/uitsmijter.js"></script>
+</head>
+<body class="background">
+<header>
+    <ul class="navigation">
+        <li><a href="#" id="clock">
+            <script type="application/javascript">
+                let clock = new SimpleClock("clock")
+                document.write(clock.currentTime)
+            </script>
+        </a></li>
+    </ul>
+</header>
+<main>
+    <div class="logo-box">
+        <img src="images/uitsmijter.svg">
+    </div>
+    <div class='login-box #isnotempty(error, "error")'>
+        <form action="#(serviceUrl)/login" method="post">
+            <input type="hidden" name="location" value="#(requestUri)"/>
+            <input type="hidden" name="mode" value="#(mode)"/>
+            <div class="field">
+                <input type="text" id="username" name="username" placeholder='#t("LOGIN.UI.NAME")'>
+            </div>
+            <div class="field">
+                <input type="password" id="password" name="password" placeholder='#t("LOGIN.UI.PASSWORD")'>
+            </div>
+            #if(error != nil):
+            <div class="error" data-error="#(error)">#t(error)</div>
+            #endif
+            #if(requestInfo != nil):
+            <div class="message">#(requestInfo.description)</div>
+            #endif
+
+            <button id="loginButton" type="submit" class="button-big" name="login-button">
+                <span>#t("LOGIN.UI.LOGIN")</span>
+                <svg id="loginSpinner" class="login-spinner login-spinner-invisible" width="16" height="16"
+                     viewBox="0 0 16 16"
+                     xmlns="http://www.w3.org/2000/svg">
+                    <circle cx="8" cy="8" r="8"/>
+                </svg>
+            </button>
+        </form>
+    </div>
+</main>
+
+#if(tenant != nil && tenant.config.informations != nil):
+<footer>
+    <ul class="footer-item">
+        #if(tenant.config.informations.imprint_url != nil):
+        <li><a href="#(tenant.config.informations.imprint_url)" data-type="imprint">Impressum</a></li>
+        #endif
+        #if(tenant.config.informations.privacy_url != nil):
+        <li><a href="#(tenant.config.informations.privacy_url)" data-type="privacy">Datenschutz</a></li>
+        #endif
+        #if(tenant.config.informations.register_url != nil):
+        <li><a href="#(tenant.config.informations.register_url)" data-type="register">Registrieren</a></li>
+        #endif
+    </ul>
+</footer>
+#endif
+
+</body>
+</html>

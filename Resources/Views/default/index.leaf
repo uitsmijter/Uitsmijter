@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>#(title)</title>
+    <link rel="stylesheet" href="css/uitsmijter.css">
+    <script type="application/javascript" src="js/uitsmijter.js"></script>
+    #if(payload == nil):
+    <meta http-equiv="refresh" content="0; url=login?for=#(serviceUrl)">
+    #endif
+</head>
+
+<body>
+Payload: #(payload)
+</body>
+</html>

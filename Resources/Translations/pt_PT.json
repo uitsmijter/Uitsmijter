@@ -1,0 +1,26 @@
+{
+  "LOGIN": {
+    "UI": {
+      "LOGIN": "Iniciar sessão",
+      "NAME": "Nome de usuário",
+      "PASSWORD": "Palavra-chave"
+    },
+    "ERRORS": {
+      "FORM_NOT_PARSEABLE": "Ocorreram alguns erros. Por favor, preencha correctamente o formulário e tente novamente.",
+      "CONSTRUCT_DATE_ERROR": "Não foi possível calcular uma data válida. Por favor contacte-nos.",
+      "MISSING_LOCATION": "Falta o local do pedido.",
+      "NO_TENANT": "O mandante responsável pelo pedido não pôde ser encontrado.",
+      "NO_CLIENT": "O cliente com o qual o pedido foi feito não pôde ser encontrado.",
+      "WRONG_CREDENTIALS": "Infelizmente, o registo falhou devido a dados de login incorrectos."
+    }
+  },
+  "LOGOUT": {
+    "UI": {
+      "LOGOUT": "Cancelamento",
+      "IN_PROGRESS": "em curso."
+    },
+    "ERRORS": {
+      "NO_TENANT": "O mandante responsável pelo pedido não pôde ser encontrado."
+    }
+  }
+}

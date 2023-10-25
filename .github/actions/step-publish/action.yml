@@ -1,0 +1,49 @@
+name: "Publish"
+description: "Publish the project to a registry"
+author: "aus der Technik | Uitsmijter"
+
+inputs:
+  tag:
+    description: "The docker tag to publish"
+    required: true
+    default: ""
+
+runs:
+  using: composite
+  steps:
+    - name: Download release image
+      uses: actions/download-artifact@v3
+      with:
+        name: docker-image
+        path: ./Deployment/Release/
+
+    - name: Load docker image
+      shell: bash
+      run: |
+        source ./Deployment/tooling/includes/git.var.sh 
+        docker load --input ./Deployment/Release/uitsmijter-${GIT_BRANCH}-${GIT_HASH}.tar
+
+    - name: Login to GitHub Container Registry
+      uses: docker/login-action@v1
+      with:
+        registry: ghcr.io
+        username: ${{ github.repository_owner }}
+        password: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: Extract metadata for the Docker image
+      id: meta
+      uses: docker/metadata-action@98669ae865ea3cffbcbaa878cf57c20bbf1c6c38
+      with:
+        images: ghcr.io/${{ github.repository }}:${{ input.tag }}
+
+    - name: Tag docker image as nightly
+      shell: bash
+      env:
+        INPUT_TAG: ${{ input.tag }}
+      run: |
+        source ./Deployment/tooling/includes/git.var.sh 
+        docker tag "adt/uitsmijter:${GIT_BRANCH}-${GIT_HASH}" ghcr.io/${{ github.repository }}:${INPUT_TAG}
+
+    - name: Push to registry
+      shell: bash
+      run: docker push ghcr.io/${{ github.repository }}:${{ input.tag }}

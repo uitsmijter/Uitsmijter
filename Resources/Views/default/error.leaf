@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Error | #(status)</title>
+    <link rel="stylesheet" href="/css/uitsmijter.css">
+</head>
+<body>
+<header>
+    <div class="error-logo-box">
+        <img src="/images/uitsmijter.svg">
+    </div>
+</header>
+<main class="error-main">
+    <div class="error-headline">
+        <h1>#t("ERROR.TITLE")</h1>
+    </div>
+    <div class="error-img-box">
+        <img class="error-img" src="/images/eierpaar-mit-augen.png">
+    </div>
+    <div class="error-text-box">
+        <p>#t("ERROR.STATUS", status) <i>(#(reason))</i></p>
+        #if(requestInfo != nil):
+        <p>#(requestInfo.description)</p>
+        #endif
+
+    </div>
+    <div class="error-options">
+        <button onclick="javascript:history.back()" class="button-small" name="button">#t("ERROR.BACK")</button>
+    </div>
+</main>
+</body>
+</html>

@@ -1,0 +1,32 @@
+---
+apiVersion: "uitsmijter.io/v1"
+kind: Tenant
+metadata:
+  name: bnbc
+  namespace: bnbc
+spec:
+  silent_login: true
+  hosts:
+    - blog.bnbc.example
+    - shop.bnbc.example
+    - api1.bnbc.example
+    - api2.bnbc.example
+  interceptor:
+    enabled: true
+    domain: login.bnbc.example
+    cookie: .bnbc.example
+  providers:
+    - |
+      class UserLoginProvider {
+        auth = false;
+        constructor(credentials) { this.auth = credentials.username.endsWith("@example.com"); commit(true); }
+        get canLogin() { return this.auth; }
+        get userProfile() { return { name: "Test User" }; }
+        get role() { return "user"; }
+      }
+    - |
+      class UserValidationProvider {
+        valid = false;
+        constructor(args) { this.valid = args.username.endsWith("@example.com"); commit(true); }
+        get isValid() { return this.valid; }
+      }

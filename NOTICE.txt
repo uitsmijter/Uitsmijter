@@ -1,0 +1,30 @@
+//===----------------------------------------------------------------------===//
+//
+// This source file is part of the Uitsmijter open source project
+//
+// Copyright (c) 2022-2023 Uitsmijter contributor (aus der Technik Simon & Sinon Gbr)
+// Licensed under Apache 2.0
+//
+// See LICENSE for license information
+//
+// SPDX-License-Identifier: Apache-2.0
+//
+//===----------------------------------------------------------------------===//
+
+This product contains open source libraries or a derivation from them:
+
+- https://github.com/Olipro/Coverify
+  Convert LLVM code coverage to cobertura
+- https://vapor.codes
+  Server Framework we love and used for this project
+- https://github.com/swift-server-community//SwiftPrometheus.git
+  Prometheus exporter for custom metrics
+- https://github.com/jectivex/JXKit
+  Inspiration for the JavaScript bridge to work on linux
+- https://github.com/krzyzanowskim/CryptoSwift.git
+  Crypto related functions and helpers for Swift
+- https://github.com/jpsim/Yams.git
+  A sweet and swifty YAML parser built on LibYAML.
+- https://github.com/swiftkube/client
+  Inspiration for a Swift client for talking to a Kubernetes cluster
+

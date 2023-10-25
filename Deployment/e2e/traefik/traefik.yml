@@ -1,0 +1,83 @@
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: traefik-ingress-controller
+
+---
+kind: Deployment
+apiVersion: apps/v1
+metadata:
+  name: traefik
+  labels:
+    app: traefik
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: traefik
+  template:
+    metadata:
+      labels:
+        app: traefik
+    spec:
+      serviceAccountName: traefik-ingress-controller
+      containers:
+        - name: traefik
+          image: traefik:v2.9
+          args:
+            - --global.sendanonymoususage=false
+            - --api.insecure
+            - --api.dashboard
+            - --providers.kubernetesingress
+            - --providers.kubernetesingress.allowExternalNameServices=true
+            - --providers.kubernetescrd
+            - --entryPoints.web.address=:80
+            - --entryPoints.websecure.address=:443
+          ports:
+            - name: web
+              containerPort: 80
+            - name: websecure
+              containerPort: 443
+            - name: dashboard
+              containerPort: 8080
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: traefik-dashboard-service
+spec:
+  type: LoadBalancer
+  ports:
+    - port: 8080
+      nodePort: 30088
+      targetPort: dashboard
+  selector:
+    app: traefik
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: traefik-web-service
+spec:
+  type: LoadBalancer
+  ports:
+    - targetPort: web
+      port: 80
+      nodePort: 30080
+  selector:
+    app: traefik
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: traefik-websecure-service
+spec:
+  type: LoadBalancer
+  ports:
+    - targetPort: websecure
+      port: 443
+      nodePort: 30443
+  selector:
+    app: traefik

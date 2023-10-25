@@ -1,0 +1,14 @@
+---
+name: StubClient
+config:
+  ident: aaa1d2e3-8e92-410f-ae95-94bd5f03678b
+  tenantname: StubTenant
+  redirect_urls:
+    - http://localhost/.*
+    - http://example.com/.*
+  scopes:
+    - list
+  referrers:
+    - http://localhost/login
+    - http://example.com/login
+  isPkceOnly: false

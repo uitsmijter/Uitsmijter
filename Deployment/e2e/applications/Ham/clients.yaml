@@ -1,0 +1,13 @@
+---
+apiVersion: "uitsmijter.io/v1"
+kind: Client
+metadata:
+  name: ham
+  namespace: ham
+spec:
+  ident: cd7a444a-7aa9-4f27-9305-9e2a9c4d47ee
+  tenantname: ham/ham
+  redirect_urls:
+    - 'https?://(.*\.)?ham\.test(:8080)?/.*'
+  grant_types:
+    - authorization_code

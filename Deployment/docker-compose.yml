@@ -1,0 +1,128 @@
+version: '3.7'
+
+x-shared_environment: &shared_environment
+  LOG_LEVEL: ${LOG_LEVEL:-info}
+  LOG_FORMAT: ${LOG_FORMAT:-console}
+  BASEIMAGE: ${BASEIMAGE}
+  BUILDBOX: ${BUILDBOX}
+  TAG: ${TAG:-latest}
+  RUNTIME_IMAGE: "${IMAGENAME}-runtime:latest"
+
+x-shared_job: &shared_job
+  image: "${BUILDBOX}"
+  environment:
+    <<: *shared_environment
+  volumes:
+    - ../:/build
+    - build_data:/build/.build
+
+services:
+
+  redis:
+    image: 'bitnami/redis:latest'
+    ports:
+      - "6379:6379"
+    environment:
+      - ALLOW_EMPTY_PASSWORD=yes
+
+  imagetool:
+    image: ghcr.io/uitsmijter/image-processor:1.1.0
+    volumes:
+      - ../Graphics/Backgrounds:/build/source
+      - ../Public/images/generated:/build/target
+    command:
+      - -i
+      - /build/source
+      - -o
+      - /build/target
+      - -s
+      - "3840 1920 1280 640"
+
+  build:
+    <<: *shared_job
+    command:
+      - /bin/bash
+      - -c
+      - |
+        set -e
+        swift package resolve
+        swift build -c release --manifest-cache shared -Xcc -I/usr/include/webkitgtk-4.0 -Xcc -I/usr/include/webkitgtk-4.0/JavaScriptCore
+        mkdir -p Deployment/Release/Linux
+        cp "$$(swift build --package-path /build -c release --show-bin-path)/Uitsmijter" Deployment/Release/Linux/
+
+  test:
+    <<: *shared_job
+    command:
+      - /bin/bash
+      - -c
+      - |
+        set -e
+        ./Deployment/pipeline/test.sh
+        mkdir -p Deployment/Release/Coverage
+        cp -r .build/testresults/* Deployment/Release/Coverage
+
+  e2e:
+    image: ${IMAGENAME}-e2e:latest
+    build:
+      context: ..
+      dockerfile: Deployment/e2e.Dockerfile
+    network_mode: host
+    environment:
+      <<: *shared_environment
+      KUBECONFIG: /build/kubeconfig
+      ARGUMENTS: $ARGUMENTS
+    volumes:
+      - ../.build:/build
+      - ../Tests/e2e/:/tests
+      - ../Deployment/helm:/helm
+      - ../Deployment/tooling:/tools
+      - node_modules:/tests/playwright/node_modules
+    user: root
+    command:
+      - /bin/bash
+      - -c
+      - |
+        . /tools/includes/test.var.sh
+        for host in $${TEST_HOSTS}; do
+          echo "127.0.0.1 $$host" >> /etc/hosts
+        done
+
+        for test_file in /tests/*.task.sh; do
+          name=`basename "$${test_file}"`
+          echo "Test $${name}:"
+          KUBECONFIG=/build/kubeconfig "$${test_file}" run ${ARGUMENTS} && echo '  Ok' || exit 1
+          echo
+        done
+
+  run:
+    image: ${RUNTIME_IMAGE}
+    depends_on:
+      - redis
+    build:
+      context: ..
+      dockerfile: Deployment/Runtime.Dockerfile
+      args:
+        <<: *shared_environment
+    environment:
+      <<: *shared_environment
+      REDIS_HOST: redis
+    volumes:
+      - ../Deployment/Release/Linux:/app/bin
+      - ../Resources:/app/Resources
+      - ../Public:/app/Public
+    ports:
+      - "8080:8080"
+    command:
+      - /bin/bash
+      - -c
+      - |
+        export DIRECTORY=/app
+        LOG_LEVEL=error /app/bin/Uitsmijter routes
+        echo "Starting Uitsmijter..."
+        /app/bin/Uitsmijter serve --env production --hostname 0.0.0.0 --port 8080
+
+volumes:
+  build_data:
+    name: ${PROJECT}_build
+  node_modules:
+    name: ${PROJECT}_node_modules

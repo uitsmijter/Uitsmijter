@@ -1,0 +1,79 @@
+---
+apiVersion: "uitsmijter.io/v1"
+kind: Tenant
+metadata:
+  name: uitsmijter-tenant
+spec:
+  hosts:
+    - test.localhost
+    - uitsmijter.localhost
+  interceptor:
+    enabled: true
+    domain: uitsmijter.localhost
+    cookie: .localhost
+  informations:
+    imprint_url: https://test.localhost/imprint
+    privacy_url: https://test.localhost/privacy
+    register_url: https://test.localhost/register
+  providers:
+    - class UserLoginProvider {
+      constructor(credentials) { commit(true); }
+      get canLogin() { return true; }
+      get userProfile() { return { name:"Test User" }; }
+      get role() { return "normal"; }
+      }
+
+
+---
+apiVersion: "uitsmijter.io/v1"
+kind: Tenant
+metadata:
+  name: bnbc
+spec:
+  hosts:
+    - login.bnbc.example
+  providers:
+    # Allows all users
+    - |
+      class UserLoginProvider {
+        constructor(credentials) { commit(true); }
+        get canLogin() { return true; }
+        get userProfile() { return { name: "Buttered User" }; }
+        get role() { return "normal"; }
+      }
+
+---
+apiVersion: "uitsmijter.io/v1"
+kind: Tenant
+metadata:
+  name: ham
+spec:
+  hosts:
+    - login.ham.test
+  silent_login: false
+  providers:
+    # Calls a backend
+    - |
+      class UserLoginProvider {
+        isLoggedIn = false;
+        profile = {};
+        role = null;
+        constructor(credentials) {
+          fetch(`http://checkcredentials.checkcredentials.svc.cluster.local/validate-login`, {
+            method: "post",
+            body: { username: credentials.username, passwordHash: sha256(credentials.password) }
+          }).then((result) => {
+            var subject = {};
+            profile = JSON.parse(result.body);
+            if (result.code == 200) {
+              this.isLoggedIn = true;
+              this.role = profile.role;
+              subject = { subject: profile.userId };
+            }
+            commit(result.code, subject);
+          });
+        }
+        get canLogin() { return this.isLoggedIn; }
+        get userProfile() { return this.profile; }
+        get role() { return this.role; }
+      }

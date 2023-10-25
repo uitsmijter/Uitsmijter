@@ -1,0 +1,22 @@
+---
+# Forward authentication to Uitsmijter Public
+# usage:
+#   traefik.ingress.kubernetes.io/router.middlewares: sso-forward-auth@kubernetescrd
+
+apiVersion: traefik.containo.us/v1alpha1
+kind: Middleware
+metadata:
+  namespace: {{ include "uitsmijter.namespace" . }}
+  name: forward-auth
+spec:
+  forwardAuth:
+    address: http://{{ include "uitsmijter.serviceName" . }}.{{ include "uitsmijter.namespace" . }}/interceptor
+
+    # Set the trustForwardHeader option to true to trust all X-Forwarded-* headers.
+    trustForwardHeader: true
+
+    # The authResponseHeaders option is the list of headers to copy from the authentication server response and set on
+    # forwarded request, replacing any existing conflicting headers.
+    authResponseHeaders:
+      - Authorization
+      - X-User-Ident

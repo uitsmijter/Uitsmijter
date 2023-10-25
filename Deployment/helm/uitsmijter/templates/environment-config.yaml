@@ -1,0 +1,12 @@
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  namespace: {{ include "uitsmijter.namespace" . }}
+  name: environment-config
+data:
+  {{- with (first .Values.domains) }}
+  PUBLIC_DOMAIN: {{ .domain | quote }}
+  SECURE: "true"
+  ENVIRONMENT: "production"
+  {{- end }}

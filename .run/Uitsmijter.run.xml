@@ -1,0 +1,13 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="Uitsmijter" type="SwiftPackageManagerRunConfiguration" factoryName="Swift Package Run" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" WORKING_DIR="file://$PROJECT_DIR$" PASS_PARENT_ENVS_2="true" PROJECT_NAME="uitsmijter" TARGET_NAME="Uitsmijter" CONFIG_NAME="Uitsmijter" RUN_TARGET_PROJECT_NAME="uitsmijter" RUN_TARGET_NAME="Uitsmijter" WAS_MODIFIED="">
+    <envs>
+      <env name="DIRECTORY" value="$PROJECT_DIR$" />
+      <env name="JWT_SECRET" value="djgdsf" />
+      <env name="LOG_LEVEL" value="trace" />
+      <env name="SUPPORT_KUBERNETES_CRD" value="true" />
+    </envs>
+    <method v="2">
+      <option name="SPM.BUILD_TASK_PROVIDER" enabled="true" />
+    </method>
+  </configuration>
+</component>

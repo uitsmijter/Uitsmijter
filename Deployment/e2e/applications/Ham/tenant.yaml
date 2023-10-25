@@ -1,0 +1,39 @@
+---
+apiVersion: "uitsmijter.io/v1"
+kind: Tenant
+metadata:
+  name: ham
+  namespace: ham
+spec:
+  silent_login: false
+  hosts:
+    - page.ham.test
+    - shop.ham.test
+    - api1.ham.test
+    - api2.ham.test
+  interceptor:
+    enabled: true
+    domain: id.ham.test
+    cookie: .ham.test
+  templates:
+    access_key_id: test
+    secret_access_key: testsecret
+    bucket: bucketname
+    host: http://s3server.uitsmijter-s3:8333 # target of http://s3.ham.test
+    path: test
+  providers:
+    # TODO: http://checkcredentials.checkcredentials.svc.cluster.local/validate-login
+    - |
+      class UserLoginProvider {
+        auth = false;
+        constructor(credentials) { this.auth = credentials.username.endsWith("@example.com"); commit(true); }
+        get canLogin() { return this.auth; }
+        get userProfile() { return { name: "Test User" }; }
+        get role() { return "user"; }
+      }
+    - |
+      class UserValidationProvider {
+        valid = false;
+        constructor(args) { this.valid = args.username.endsWith("@example.com"); commit(true); }
+        get isValid() { return this.valid; }
+      }

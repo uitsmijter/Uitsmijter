@@ -1,0 +1,40 @@
+---
+kind: Service
+apiVersion: v1
+metadata:
+  name: uitsmijter-proxy
+  namespace: ham
+spec:
+  type: ExternalName
+  externalName: uitsmijter-authserver.uitsmijter.svc.cluster.local
+  ports:
+    - port: 80
+
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+
+metadata:
+  name: uitsmijter
+  namespace: ham
+  annotations:
+    traefik.ingress.kubernetes.io/router.entrypoints: websecure
+    traefik.ingress.kubernetes.io/router.tls: "true"
+    traefik.ingress.kubernetes.io/router.middlewares: uitsmijter-forward-header@kubernetescrd
+
+spec:
+  tls:
+    - secretName: ham.test
+
+  rules:
+    - host: id.ham.test
+      http:
+        paths:
+          - path: "/"
+            pathType: Prefix
+            backend:
+              service:
+                name: uitsmijter-proxy
+                port:
+                  number: 80
+

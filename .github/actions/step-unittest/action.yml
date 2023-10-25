@@ -1,0 +1,32 @@
+name: "UnitTest"
+description: "Test Code"
+author: "aus der Technik | Uitsmijter"
+
+runs:
+  using: composite
+  steps:
+    - name: Create directories
+      shell: sh
+      run: mkdir -p Deployment/Release/Coverage
+    - name: Cache Volumes Read
+      uses: ./.github/actions/docker-volume-cache/read
+      with:
+        volume: uitsmijter_build
+
+    - name: Run unit tests
+      shell: bash
+      run: ./tooling.sh test
+
+    - name: Archive artifacts
+      uses: actions/upload-artifact@v3
+      if: ${{ always() && env.STORE_ARTEFACTS != 'false' }}
+      with:
+        name: UnitTest
+        retention-days: 2
+        path: |
+          ./Deployment/Release/Coverage
+
+    - name: Cache Volumes Write
+      uses: ./.github/actions/docker-volume-cache/write
+      with:
+        volume: uitsmijter_build

@@ -1,0 +1,23 @@
+name: "Imports an artefact as a docker image"
+description: "Load docker images from artefact"
+author: "aus der Technik | Uitsmijter"
+
+inputs:
+  artefact:
+    description: 'Artefact name'
+    required: true
+
+runs:
+  using: composite
+  steps:
+    - name: Download release image
+      uses: actions/download-artifact@v3
+      with:
+        name: ${{ inputs.artefact }}
+        path: ./Deployment/Release/
+
+    - name: Load docker image
+      shell: bash
+      run: |
+        source ./Deployment/tooling/includes/git.var.sh
+        docker load --input ./Deployment/Release/uitsmijter-${GIT_BRANCH}-${GIT_HASH}.tar

@@ -1,0 +1,93 @@
+---
+apiVersion: "uitsmijter.io/v1"
+kind: Client
+metadata:
+  name: cheese-website
+  namespace: cheese
+spec:
+  ident: e92b4a0b-d1d7-4d55-b2e3-dc570faca745
+  tenantname: cheese/cheese
+  redirect_urls:
+    - 'https?://(.*\.)?example\.com(:8080)?/.*'
+  grant_types:
+    - password
+    - authorization_code
+    - refresh_token
+  scopes:
+    - access
+  secret: luaTha1qu019ohc13qu3ze1yuo5MumEl0hQuoE9bon
+
+---
+apiVersion: "uitsmijter.io/v1"
+kind: Client
+metadata:
+  name: cheese-cookbooks
+  namespace: cheese
+spec:
+  ident: 1a4b166f-1047-4ede-9a64-4c72078a9614
+  tenantname: cheese/cheese
+  redirect_urls:
+    - 'https?://(.*\.)?example\.com(:8080)?/.*'
+
+---
+apiVersion: "uitsmijter.io/v1"
+kind: Client
+metadata:
+  name: cheese-api
+  namespace: cheese
+spec:
+  ident: d9c48a1b-46bd-49d8-9305-08b8e380a69e
+  tenantname: cheese/cheese
+  redirect_urls:
+    - 'https?://api\.example\.com(:8080)?/.*'
+  secret: luaTha1qu019ohc13qu3ze1yuo5MumEl0hQuoE9bon
+  # Uses default grant type and thus should not allow password
+
+---
+apiVersion: "uitsmijter.io/v1"
+kind: Client
+metadata:
+  name: cheese-api-pkce
+  namespace: cheese
+spec:
+  ident: b88d44ed-4e8f-4f50-817b-58b86297ccab
+  tenantname: cheese/cheese
+  redirect_urls:
+    - 'https?://api\.example\.com(:8080)?/?(.+)?'
+  isPkceOnly: true
+
+---
+apiVersion: "uitsmijter.io/v1"
+kind: Client
+metadata:
+  name: cheese-api-insecure
+  namespace: cheese
+spec:
+  ident: 143A3135-5DE2-46D4-828F-DDCF20C72060
+  tenantname: cheese/cheese
+  redirect_urls:
+    - 'https?://api\.example\.com(:8080)?/?(.+)?'
+  grant_types:
+    - password
+    - authorization_code
+    - refresh_token
+  scopes:
+    - access
+    - update
+    - delete
+
+---
+apiVersion: "uitsmijter.io/v1"
+kind: Client
+metadata:
+  name: cheese-spa
+  namespace: cheese
+spec:
+  ident: 5cb5b72f-b223-4c59-a4cf-a0ac96234de7
+  tenantname: cheese/cheese
+  redirect_urls:
+    - 'https?://(.*\.)?example\.net(:8080)?/.*'
+  grant_types:
+    - authorization_code
+  referrers:
+    - https://spa.example.net/.*

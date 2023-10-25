@@ -1,0 +1,21 @@
+name: "Lint"
+description: "Lint Code"
+author: "aus der Technik | Uitsmijter"
+
+runs:
+  using: composite
+  steps:
+    - name: Create directories
+      shell: sh
+      run: mkdir -p Deployment/Release/Coverage
+    - name: Check code style
+      shell: 'script -q -e -c "bash --noprofile --norc -eo pipefail {0}"'
+      run: ./tooling.sh lint | tee Deployment/Release/Coverage/lint.log
+    - name: Archive artifacts
+      uses: actions/upload-artifact@v3
+      if: ${{ always() && env.STORE_ARTEFACTS != 'false' }}
+      with:
+        name: Lint
+        retention-days: 2
+        path: |
+          Deployment/Release/Coverage

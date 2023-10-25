@@ -1,0 +1,55 @@
+{
+  "LOGIN": {
+    "UI": {
+      "LOGIN": "Anmelden",
+      "NAME": "Benutzername",
+      "PASSWORD": "Passwort"
+    },
+    "ERRORS": {
+      "FORM_NOT_PARSEABLE": "Es sind einige Fehler aufgetreten. Bitte füllen Sie das Formular korrekt aus und versuchen Sie es erneut.",
+      "CONSTRUCT_DATE_ERROR": "Wir konnten kein gültiges Datum berechnen. Bitte nehmen Sie Kontakt mit uns auf.",
+      "MISSING_LOCATION": "Die Ortsangabe fehlt in der Anfrage.",
+      "NO_TENANT": "Der zuständige Mandant für die Anfrage konnte nicht gefunden werden.",
+      "NO_CODE_CHALLENGE": "Der Antrage fehlt eine Code Challenge.",
+      "TENANT_NOT_ALLOWED": "Der zuständige Mandant ist nicht erlaubt für diese Anfrage",
+      "TENANT_MISMATCH": "Der zuständige Mandant passt nicht zur Anfrage",
+      "NO_CLIENT": "Der Client mit dem die Anfrage gestellt wurde konnte nicht gefunden werden.",
+      "WRONG_CREDENTIALS": "Die Anmeldung ist leider aufgrund falscher Anmeldedaten fehlgeschlagen.",
+      "WRONG_REFERER": "Die Anfrage wurde auf Grund eines falschen Referers abgelehnt.",
+      "EXPECTED_VALUE_UNSET": "Ein erwarteter Wert wurde nicht gesetzt.",
+      "CODE_CHALLENGE_METHOD_NOT_IMPLEMENTED": "Die angeforderte code_challenge_method ist nicht implementiert.",
+      "CODE_CHALLENGE_METHOD_MISMATCH": "Die angeforderte code_challenge_method darf nicht verwendet werden.",
+      "GRANT_TYPE_NOT_IMPLEMENTED": "Die beantragte Grant Type wird nicht unterstützt.",
+      "CLIENT_ONLY_SUPPORTS_PKCE": "Der Client darf nur PKCE verwenden.",
+      "REDIRECT_MISMATCH": "Der angeforderte redirect darf nicht angesprochen werden.",
+      "REDIRECT_NOT_URL": "Die angeforderte Umleitung ist keine gültige Url.",
+      "CODE_STORAGE_AVAILABILITY": "Eine Code-Speicherung ist nicht möglich.",
+      "INVALID_CODE": "Der vorgetragene Code ist nicht gültig.",
+      "INVALID_TOKEN": "Der vorgetragene Token ist nicht gültig.",
+      "INVALID_PROVIDER": "Der Provider ist ungültig.",
+      "EXPIRED_TOKEN": "Der vorgetragene Token ist nicht mehr gültig.",
+      "ENCODE_PAYLAOD_ERROR": "Die Payload konnte nicht gelesen werden, oder ist nicht gültig.",
+      "NOT_ACCEPTABLE_REQUEST": "Es ist leider nicht erlaubt auf diese Weise auf den Endpunkt zuzugreifen.",
+      "INVALIDATE": "Der Benutzer wurde invalidiert."
+    }
+  },
+  "LOGOUT": {
+    "UI": {
+      "LOGOUT": "Abmeldung",
+      "IN_PROGRESS": "wird ausgeführt."
+    },
+    "ERRORS": {
+      "NO_TENANT": "Der zuständige Mandant für die Anfrage konnte nicht gefunden werden."
+    }
+  },
+  "ERROR": {
+    "BACK": "Zurück",
+    "TITLE": "Uups, hier ist etwas schief gegangen :-(",
+    "STATUS": {
+      "400": "Der Server konnte die Anfrage wegen einer ungültigen Syntax in der Anfrage nicht verstehen.",
+      "401": "Die Anfrage wurde nicht bearbeitet, da der Service eine Benutzerauthentifizierung erfordert.",
+      "402": "Eine Zahlung ist erforderlich.",
+      "403": "Die Anfrage wurde abgelehnt, weil der Client keine Rechte für den Zugriff auf den Inhalt hat."
+    }
+  }
+}

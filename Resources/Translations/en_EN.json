@@ -1,0 +1,55 @@
+{
+  "LOGIN": {
+    "UI": {
+      "LOGIN": "Log In",
+      "NAME": "Username",
+      "PASSWORD": "Password"
+    },
+    "ERRORS": {
+      "FORM_NOT_PARSEABLE": "Some errors have occurred. Please fill in the form correctly and try again.",
+      "CONSTRUCT_DATE_ERROR": "We could not calculate a valid date. Please contact us.",
+      "MISSING_LOCATION": "The location is missing in the request.",
+      "NO_TENANT": "Could not find the tenant for the request.",
+      "NO_CODE_CHALLENGE": "Request is missing a challenge.",
+      "TENANT_NOT_ALLOWED": "The responsible tenant is not allowed for this request",
+      "TENANT_MISMATCH": "The responsible tenant does not match the request",
+      "NO_CLIENT": "The client with which the request was made could not be found.",
+      "WRONG_CREDENTIALS": "Sorry, the registration has failed due to incorrect credentials.",
+      "WRONG_REFERER": "Sorry, the referer is not correct.",
+      "EXPECTED_VALUE_UNSET": "An expected value was not set.",
+      "CODE_CHALLENGE_METHOD_NOT_IMPLEMENTED": "The requested code_challenge_method is not implemented.",
+      "CODE_CHALLENGE_METHOD_MISMATCH": "The requested code_challenge_method is not allowed to be used.",
+      "GRANT_TYPE_NOT_IMPLEMENTED": "The requested grant type is not implemented.",
+      "CLIENT_ONLY_SUPPORTS_PKCE": "The client is allowed to use PKCE only.",
+      "REDIRECT_MISMATCH": "The requested redirect is not allowed to be addressed.",
+      "REDIRECT_NOT_URL": "The requested redirect is not a valid url.",
+      "CODE_STORAGE_AVAILABILITY": "Code storage is not available.",
+      "INVALID_CODE": "The code presented is not valid.",
+      "INVALID_TOKEN": "Der token presented is not valid.",
+      "INVALID_PROVIDER": "The provider is invalid.",
+      "ENCODE_PAYLOAD_ERROR": "The payload could not be read or is not valid.",
+      "NOT_ACCEPTABLE_REQUEST": "Unfortunately, it is not allowed to access the endpoint.",
+      "INVALIDATE": "The user gets invalidated."
+    }
+  },
+  "LOGOUT": {
+    "UI": {
+      "LOGOUT": "Logout",
+      "IN_PROGRESS": "in progress."
+    },
+    "ERRORS": {
+      "NO_TENANT": "Could not find the tenant for the request."
+    }
+  },
+  "ERROR": {
+    "BACK": "Back",
+    "TITLE": "Oops, something went wrong :-(",
+    "PAGE_NOT_FOUND": "Page not found",
+    "STATUS": {
+      "400": "The server could not understand the request because of invalid syntax.",
+      "401": "The request has not been applied because the server requires user authentication.",
+      "402": "Payment is required.",
+      "403": "The client request has been rejected because the client does not have rights to access the content."
+    }
+  }
+}

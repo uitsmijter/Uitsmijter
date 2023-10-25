@@ -1,0 +1,40 @@
+---
+kind: Service
+apiVersion: v1
+metadata:
+  name: uitsmijter-proxy
+  namespace: bnbc
+spec:
+  type: ExternalName
+  externalName: uitsmijter-authserver.uitsmijter.svc.cluster.local
+  ports:
+    - port: 80
+
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+
+metadata:
+  name: uitsmijter
+  namespace: bnbc
+  annotations:
+    traefik.ingress.kubernetes.io/router.entrypoints: websecure
+    traefik.ingress.kubernetes.io/router.tls: "true"
+    traefik.ingress.kubernetes.io/router.middlewares: uitsmijter-forward-header@kubernetescrd
+
+spec:
+  tls:
+    - secretName: bnbc.example
+
+  rules:
+    - host: login.bnbc.example
+      http:
+        paths:
+          - path: "/"
+            pathType: Prefix
+            backend:
+              service:
+                name: uitsmijter-proxy
+                port:
+                  number: 80
+

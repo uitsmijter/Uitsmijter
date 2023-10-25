@@ -1,0 +1,91 @@
+name: "End-To-End Tests"
+description: "Test Project with end-to-end-tests"
+author: "aus der Technik | Uitsmijter"
+
+inputs:
+  dirty:
+    description: "set to 'true' to use dirty build, instead of the production image"
+    required: false
+    default: "false"
+  fast:
+    description: "Limit the execution to one virtual browser"
+    required: false
+    default: "false"
+
+runs:
+  using: composite
+  steps:
+    - name: Cache Volumes Read .build
+      uses: ./.github/actions/docker-volume-cache/read
+      with:
+        volume: uitsmijter_build
+    - name: Cache Volumes Read npm
+      uses: ./.github/actions/docker-volume-cache/read
+      with:
+        volume: uitsmijter_node_modules
+    - name: Cache Images
+      uses: actions/cache@v3
+      with:
+        path: Public/images/generated
+        key: generated-images-${{ github.run_id }}
+        restore-keys: |
+          generated-images
+
+    - uses: ./.github/actions/import-docker-artefact
+      if: "${{ inputs.dirty != 'true' }}"
+      with:
+        artefact: docker-image
+
+    - name: Install Packages
+      shell: bash
+      run: |
+        sudo apt update
+        sudo apt install -y s3cmd
+    - name: Fix permission
+      shell: bash
+      run: |
+        mkdir .build
+        sudo chmod 777 .build
+
+    - name: Run e2e tests
+      shell: bash
+      env:
+        DIRTY_FLAG: ${{ inputs.dirty }}
+        FAST_FLAG: ${{ inputs.fast }}
+      run: |
+        DIRTY=""
+        FAST=""
+        if [ "${DIRTY_FLAG}" == "true" ]; then
+          DIRTY="--dirty"
+        fi
+        if [ "${FAST_FLAG}" == "true" ]; then
+          FAST="--fast"
+        fi
+        ./tooling.sh e2e ${DIRTY} ${FAST}
+
+    - name: Archive artifacts
+      uses: actions/upload-artifact@v3
+      if: ${{ always() && env.STORE_ARTEFACTS != 'false' }}
+      with:
+        name: Test-Results
+        retention-days: 4
+        path: |
+          ./Tests/e2e/playwright/test-results
+
+    - name: Archive artifacts
+      uses: actions/upload-artifact@v3
+      if: ${{ always() && env.STORE_ARTEFACTS != 'false' }}
+      with:
+        name: Test-Logs
+        retention-days: 4
+        path: |
+          ./.build/kind/logs
+
+    - name: Cache Volumes Write .build
+      uses: ./.github/actions/docker-volume-cache/write
+      with:
+        volume: uitsmijter_build
+    - name: Cache Volumes Write npm
+      uses: ./.github/actions/docker-volume-cache/write
+      with:
+        volume: uitsmijter_node_modules

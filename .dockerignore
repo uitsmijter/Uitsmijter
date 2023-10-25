@@ -1,0 +1,11 @@
+.build/
+.run/
+README.md
+Deployment/demopage
+Deployment/e2e
+Deployment/grafana-dashboard
+Deployment/helm
+Deployment/Release
+Deployment/tooling
+Deployment/docker-compose.yml
+Deployment/*Dockerfile

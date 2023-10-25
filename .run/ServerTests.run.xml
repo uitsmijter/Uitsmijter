@@ -1,0 +1,13 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="ServerTests" type="SwiftPackageManagerTestRunConfiguration" factoryName="Swift Package Test" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" PASS_PARENT_ENVS_2="true" PROJECT_NAME="uitsmijter" TARGET_NAME="ServerTests" CONFIG_NAME="ServerTests" RUN_TARGET_PROJECT_NAME="uitsmijter" RUN_TARGET_NAME="ServerTests" WAS_MODIFIED="" TEST_MODE="SUITE_TEST">
+    <envs>
+      <env name="DIRECTORY" value="$PROJECT_DIR$" />
+      <env name="JWT_SECRET" value="djgdsf" />
+      <env name="LOG_LEVEL" value="trace" />
+    </envs>
+    <method v="2">
+      <option name="SPM.BUILD_TASK_PROVIDER" enabled="true" />
+      <option name="BeforeTestRunTask" enabled="true" />
+    </method>
+  </configuration>
+</component>

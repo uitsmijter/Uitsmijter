@@ -1,0 +1,20 @@
+---
+name: Uitsmijter
+config:
+  hosts:
+    - localhost
+  interceptor:
+    enabled: true
+    domain: login.localhost
+    cookie: .localhost
+  providers:
+    - class UserLoginProvider {
+      constructor(credentials) { commit(true); }
+      get canLogin() { return true; }
+      get userProfile() { return {name:"Local Admin"}; }
+      get role() { return "normal"; }
+      }
+    - class UserValidationProvider {
+      constructor(args) { commit(true); }
+      get isValid() { return true; }
+      }

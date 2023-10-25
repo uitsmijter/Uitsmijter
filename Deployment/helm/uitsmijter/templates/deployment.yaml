@@ -1,0 +1,82 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  namespace: {{ include "uitsmijter.namespace" . }}
+  name: {{ include "uitsmijter.deploymentName" . }}
+
+spec:
+  selector:
+    matchLabels:
+      app: uitsmijter
+      component: authserver
+
+  replicas: 1
+
+  strategy:
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 50%
+    type: RollingUpdate
+
+  template:
+    metadata:
+      labels:
+        app: uitsmijter
+        component: authserver
+      annotations:
+        prometheus.io/port: "8080"
+        prometheus.io/scrape: "true"
+
+    spec:
+      serviceAccountName: uitsmijter
+      containers:
+        - image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: "{{ .Values.image.pullPolicy }}"
+          name: uitsmijter
+
+          envFrom:
+            - configMapRef:
+                name: uitsmijter-config
+            - configMapRef:
+                name: environment-config
+            - secretRef:
+                name: jwt-secret
+
+          env:
+            - name: REDIS_HOST
+              value: "redis-master"
+            - name: REDIS_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: redis
+                  key: 'redis-password'
+
+
+          resources:
+            requests:
+              memory: "256Mi"
+              cpu: "500m"
+            limits:
+              memory: "512Mi"
+              cpu: "1000m"
+
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 8080
+          readinessProbe:
+            httpGet:
+              path: /health/ready
+              port: 8080
+          startupProbe:
+            failureThreshold: 60
+            periodSeconds: 5
+            tcpSocket:
+              port: 8080
+
+      restartPolicy: Always
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}

@@ -1,0 +1,29 @@
+---
+name: StubTenant
+config:
+  hosts:
+    - localhost
+    - example.com
+  interceptor:
+    enabled: true
+    domain: login.localhost
+    cookie: .localhost
+  informations:
+    imprint_url: https://page.localhost/imprint
+    privacy_url: https://page.localhost/privacy
+    register_url: https://page.localhost/register
+  templates:
+    access_key_id: someS3Id
+    secret_access_key: superSecretK3y
+    bucket: stub
+    host: s3.localhost
+    path: templates
+    region: stubby-1
+  providers:
+    - class UserLoginProvider {
+      constructor(credentials) { commit(true); }
+      get canLogin() { return true; }
+      get userProfile() { return {name:"Local Admin"}; }
+      get role() { return "normal"; }
+      }
+  silent_login: false

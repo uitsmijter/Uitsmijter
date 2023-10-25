@@ -1,0 +1,48 @@
+name: "Build"
+description: "Build Binary"
+author: "aus der Technik | Uitsmijter"
+
+inputs:
+  release:
+    description: "Build a full release"
+    required: false
+    default: "false"
+
+runs:
+  using: composite
+  steps:
+    - name: Cache Volumes Read
+      uses: ./.github/actions/docker-volume-cache/read
+      with:
+        volume: uitsmijter_build
+        path: ".volumes"
+
+    - name: Cache Images
+      uses: actions/cache@v3
+      with:
+        path: ./Public/images/generated
+        key: generated-images-${{ github.run_id }}
+        restore-keys: |
+          generated-images
+
+    - name: Build project
+      shell: bash
+      if: "${{ inputs.release == 'false' }}"
+      run: ./tooling.sh build
+    - name: Build project
+      shell: bash
+      if: "${{ inputs.release == 'true' }}"
+      run: ./tooling.sh release
+    - name: Store release image
+      uses: actions/upload-artifact@v3
+      if: "${{ inputs.release == 'true' }}"
+      with:
+        name: docker-image
+        path: |
+          ./Deployment/Release/uitsmijter-*.tar      
+
+    - name: Cache Volumes Write
+      uses: ./.github/actions/docker-volume-cache/write
+      with:
+        volume: uitsmijter_build
+        path: ".volumes"

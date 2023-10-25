@@ -1,0 +1,336 @@
+stages:
+  - Check
+  - Build
+  - Integration-Tests
+  - Publish
+  - Deploy
+  - Stop
+
+default:
+  image:
+    name: gcr.io/kaniko-project/executor:debug
+    entrypoint: [ "" ]
+
+variables:
+  KUBE_CONTEXT: "uitsmijter/shared-agent:pawpatrol"
+  CONTAINER_IMAGE_TAG: ${CI_COMMIT_REF_SLUG}-${CI_COMMIT_SHORT_SHA}
+  CONTAINER_IMAGE: ${CI_REGISTRY_IMAGE}:${CONTAINER_IMAGE_TAG}
+  KANIKO_REGISTRY_MIRROR: "registry.registry.svc.cluster.local:80"
+  BASEIMAGE: "swift:5.7.0-jammy"
+  BUILDBOX: "ghcr.io/uitsmijter/buildbox:1.0.0"
+
+
+.use_context: &use_context
+  - kubectl config get-contexts
+  - kubectl config use-context "$KUBE_CONTEXT"
+
+# ------------------------------------------------------------
+# CHECK
+# ------------------------------------------------------------
+Lint:
+  stage: Check
+  image: ghcr.io/realm/swiftlint:0.49.1
+  before_script:
+    - mkdir -p .build/testresults
+  script:
+    - swiftlint --config .swiftlint.yml > .build/testresults/codequality.json
+  artifacts:
+    reports:
+      codequality: .build/testresults/codequality.json
+    expire_in: 7 days
+
+Test:
+  stage: Check
+  image: "${BUILDBOX}"
+  before_script:
+    - eval $(ssh-agent -s)
+    - echo "$SSH_PRIVATE_KEY" | tr -d '\r' | ssh-add -
+  script:
+    - ./Deployment/pipeline/test.sh
+  artifacts:
+    reports:
+      junit: .build/testresults/xunit.xml
+      coverage_report:
+        path: .build/testresults/coverage.xml
+        coverage_format: cobertura
+    expire_in: 7 days
+
+# ------------------------------------------------------------
+# BUILD
+# ------------------------------------------------------------
+ResizeImages:
+  stage: Build
+  needs: [ ]
+  image:
+    name: ghcr.io/uitsmijter/image-processor:1.1.0
+    entrypoint: [ "" ]
+  script:
+    - /entrypoint.sh -i ./Graphics/Backgrounds -o ./Public/images/generated -s "3840 1920 1280 640"
+  artifacts:
+    name: resized-images
+    paths:
+      - ./Public/images/generated
+    when: on_success
+    expire_in: 2 hours
+
+Server:
+  stage: Build
+  needs:
+    - Lint
+    - Test
+    - ResizeImages
+  before_script:
+    - PUSH=--no-push
+    - if [[ -n ${CI_COMMIT_TAG} ]] || [[ "${CI_COMMIT_REF_NAME}" = "main" ]]; then
+      PUSH="--tarPath uitsmijter-image.tar --destination=${CONTAINER_IMAGE} --no-push";
+      fi
+    - if [[ "${CI_COMMIT_BRANCH}" != "${CI_DEFAULT_BRANCH}" ]]; then
+      SKIPTESTS=true;
+      fi
+    - echo "Building >>> ${CONTAINER_IMAGE}"
+    - echo "Pushing >>> ${PUSH}"
+  script:
+    - mkdir -p /kaniko/.docker
+    - /kaniko/executor
+      --insecure-registry "${KANIKO_REGISTRY_MIRROR}"
+      --insecure-pull
+      --context "${CI_PROJECT_DIR}"
+      --dockerfile "${CI_PROJECT_DIR}/Deployment/Uitsmijter.Dockerfile"
+      --build-arg BASEIMAGE=${BASEIMAGE}
+      --build-arg BUILDBOX=${BUILDBOX}
+      --build-arg SKIPTESTS=${SKIPTESTS}
+      ${PUSH}
+  artifacts:
+    name: server-docker-image
+    paths:
+      - uitsmijter-image.tar
+    when: on_success
+    expire_in: 2 hours
+
+# ------------------------------------------------------------
+# Integration Tests
+# ------------------------------------------------------------
+End-2-End:
+  stage: Integration-Tests
+  image: docker:20
+  tags: [ dind ]
+  needs:
+    - Server
+  dependencies:
+    - Server
+  services:
+    - name: docker:20-dind
+      alias: uitsmijter-control-plane
+  before_script:
+    - apk add bash docker-compose curl git helm jq kind s3cmd openssl
+    - curl -sL "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl" -o /bin/kubectl && chmod +x /bin/kubectl
+    - . .env && . Deployment/tooling/includes/git.var.sh
+    - docker info
+    - docker load < uitsmijter-image.tar
+    - docker tag "${CONTAINER_IMAGE}" "${IMAGENAME}:${GIT_BRANCH}-${GIT_HASH}"
+    - docker ps | grep $(hostname)
+    - repoDir=$(docker inspect $(docker ps | grep $(hostname) | grep k8s_build | cut -d ' ' -f 1 | head -n1) | jq -r '.[].Mounts|..|objects|select(.Destination=="/builds").Source' | head -n1)
+    - sed -i "s|- ../|- ${repoDir}/${CI_PROJECT_PATH}/|" Deployment/docker-compose.yml
+    - export KIND_CLUSTER_NAME=uitsmijter-${CI_PIPELINE_ID}
+  script:
+    - ./tooling.sh e2e --debug --rebuild
+  after_script:
+    - danglingContainer=$(docker ps --format '{{json .}}' | grep uitsmijter-${CI_PIPELINE_ID} || true)
+    - if [[ -n "${danglingContainer}" ]]; then
+      containerName=$(echo "${danglingContainer}" | jq -r .Names);
+      echo "Yeeting old container ${containerName}"
+      docker rm -f "${containerName}";
+      fi
+  artifacts:
+    expose_as: e2e-test-results
+    name: e2e-test-results
+    when: always
+    paths:
+      - Tests/e2e/playwright/test-result
+      - .build/kind/logs
+    expire_in: 7 days
+
+# ------------------------------------------------------------
+# Publish
+# ------------------------------------------------------------
+Publish-Prerelease:
+  stage: Publish
+  dependencies:
+    - Server
+  needs:
+    - Server
+    - End-2-End
+  rules:
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+    - if: $CI_COMMIT_BRANCH =~ /^feature\/.*$/
+  image:
+    name: gcr.io/go-containerregistry/crane:debug
+    entrypoint: [ "" ]
+  script:
+    - crane auth login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
+    - crane push uitsmijter-image.tar ${CONTAINER_IMAGE}
+
+Publish-Release:
+  stage: Publish
+  dependencies:
+    - Server
+  needs:
+    - Server
+    - End-2-End
+  rules:
+    - if: $CI_COMMIT_TAG
+  image:
+    name: gcr.io/go-containerregistry/crane:debug
+    entrypoint: [ "" ]
+  script:
+    - crane auth login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
+    - crane push uitsmijter-image.tar ${CI_REGISTRY_IMAGE}:${CI_COMMIT_TAG}
+
+Helm:
+  stage: Publish
+  image: alpine:latest
+  needs:
+    - Server
+    - End-2-End
+  rules:
+    - if: $CI_COMMIT_BRANCH =~ /^release\/.*$/
+    - if: $CI_COMMIT_TAG
+  before_script:
+    - apk add git helm bash curl
+    - git fetch --unshallow
+  script:
+    - ./tooling.sh helm
+    - |
+      for package in Deployment/Release/*-*.tgz; do
+        echo "Pushing ${package}"
+        curl --request POST \
+          --form "chart=@${package}" \
+          --user "gitlab-ci-token:${CI_JOB_TOKEN}" \
+          "${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/packages/helm/api/stable/charts"
+      done
+  artifacts:
+    name: helm-packages
+    paths:
+      - 'Deployment/Release/*-*.tgz'
+    when: on_success
+    expire_in: 1 day
+
+# ------------------------------------------------------------
+# DEPLOY
+# ------------------------------------------------------------
+.deploy-shared: &deploy-shared
+  stage: Deploy
+  image:
+    name: ausdertechnik/buildbot-margarete@sha256:9127b6b2a5cd54400727be4c54f41c9fcee312488315fe7327e8aa725589bdb4
+    entrypoint: [ "" ]
+
+.deploy-shared-stop: &deploy-shared-stop
+  <<: *deploy-shared
+  stage: Stop
+  when: manual
+  dependencies: [ ]
+  variables:
+    GIT_STRATEGY: none
+  before_script:
+    - *use_context
+
+Deploy-Nightly:
+  <<: *deploy-shared
+  needs:
+    - Publish-Prerelease
+  rules:
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+  environment:
+    name: nightly
+    url: https://nightly.uitsmijter.io
+    deployment_tier: production
+    on_stop: Deploy-Nightly-Stop
+  script:
+    - *use_context
+    - kubectl create ns "uitsmijter-nightly" || true
+    - kubectl label --overwrite namespace uitsmijter-nightly uitsmijter.io/cert-sync=true
+    - kubectl apply -n "uitsmijter-nightly" -f ${PAWPATROL_PULLSECRET}
+    - helm upgrade --install uitsmijter ./Deployment/helm/uitsmijter --set image.tag=${CONTAINER_IMAGE_TAG} --namespace="uitsmijter-nightly"
+
+Deploy-Nightly-Stop:
+  <<: *deploy-shared-stop
+  needs: [ Deploy-Nightly ]
+  rules:
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+  environment:
+    name: nightly
+    action: stop
+  script:
+    - kubectl delete ns uitsmijter-nightly
+
+Deploy-Feature:
+  <<: *deploy-shared
+  stage: Deploy
+  needs:
+    - Publish-Prerelease
+  rules:
+    - if: $CI_COMMIT_BRANCH =~ /^feature\/.*$/
+  environment:
+    name: uitsmijter/${CI_COMMIT_REF_SLUG}
+    url: https://${CI_COMMIT_REF_SLUG}.uitsmijter.io
+    deployment_tier: staging
+    auto_stop_in: 1 week
+    on_stop: Deploy-Feature-Stop
+  script:
+    - *use_context
+    - kubectl create ns "uitsmijter-${CI_COMMIT_REF_SLUG}" || true
+    - kubectl apply -n "uitsmijter-${CI_COMMIT_REF_SLUG}" -f ${PAWPATROL_PULLSECRET}
+    - kubectl label --overwrite namespace uitsmijter-${CI_COMMIT_REF_SLUG} feature.uitsmijter.io/cert-sync=true
+    - kubectl label --overwrite namespace uitsmijter-${CI_COMMIT_REF_SLUG} putzerfisch/ttl=259200
+    - helm upgrade
+      --install uitsmijter ./Deployment/helm/uitsmijter
+      --set image.tag=${CONTAINER_IMAGE_TAG}
+      --set "domains[0].domain=${CI_COMMIT_REF_SLUG}.uitsmijter.io"
+      --set "domains[0].tlsSecretName=uitsmijter.io"
+      --set "installCRD=false"
+      --set "config.logLevel=debug"
+      --namespace="uitsmijter-${CI_COMMIT_REF_SLUG}"
+
+Deploy-Feature-Stop:
+  <<: *deploy-shared-stop
+  needs: [ Deploy-Feature ]
+  rules:
+    - if: $CI_COMMIT_BRANCH =~ /^feature\/.*$/
+  environment:
+    name: uitsmijter/${CI_COMMIT_REF_SLUG}
+    action: stop
+  script:
+    - kubectl delete ns "uitsmijter-${CI_COMMIT_REF_SLUG}"
+
+# ------------------------------------------------------------
+# CREATE RELEASE
+# ------------------------------------------------------------
+Release-GitLab:
+  needs:
+    - Publish-Release
+    - Helm
+  stage: Deploy
+  image: registry.gitlab.com/gitlab-org/release-cli:latest
+  rules:
+    - if: $CI_COMMIT_TAG =~ /^ee-/i
+  script:
+    - echo "Creating release"
+  after_script:
+    - |
+      curl -v https://social.uitsmijter.io/api/v1/statuses \
+        -H "Authorization: Bearer ${SOCIAL_RELEASE_TOKEN}" \
+        -H "Content-Type: application/json" \
+        -d "{\"status\": \"$(echo ${CI_RELEASE_DESCRIPTION} | sed ':a;N;$!ba;s/\n/\\n/g')\"}"
+  release:
+    tag_name: '$CI_COMMIT_TAG'
+    description: '$CI_COMMIT_TAG_MESSAGE#'
+
+# ------------------------------------------------------------
+# DEPLOY EXTRAS
+# ------------------------------------------------------------
+# Trigger Downstream here!
+downstream-demopage:
+  stage: Deploy
+  variables:
+    REF_SLUG: ${CI_COMMIT_REF_SLUG}
+  trigger: uitsmijter/examples/demopage

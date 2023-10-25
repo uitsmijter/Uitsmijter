@@ -1,0 +1,16 @@
+name: "Lint"
+description: "Lint Code"
+author: "aus der Technik | Uitsmijter"
+
+runs:
+  using: composite
+  steps:
+    - name: Build helm release
+      shell: bash
+      run: ./tooling.sh helm
+    - name: Store helm release package
+      uses: actions/upload-artifact@v3
+      with:
+        name: helm-package
+        path: |
+          ./Deployment/Release/**-**.tgz

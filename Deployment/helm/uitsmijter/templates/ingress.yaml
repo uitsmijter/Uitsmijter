@@ -1,0 +1,52 @@
+{{- range .Values.domains }}
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+
+metadata:
+  namespace: {{ include "uitsmijter.namespace" $ }}
+  name: {{ .domain | trunc 63 | trimSuffix "-" | trimSuffix "." }}
+  annotations:
+    traefik.ingress.kubernetes.io/router.entrypoints: websecure
+    traefik.ingress.kubernetes.io/router.tls: "true"
+
+spec:
+  tls:
+    - secretName: {{ .tlsSecretName | quote }}
+  rules:
+    - host: {{ .domain | quote }}
+      http:
+        paths:
+          - path: "/"
+            pathType: Prefix
+            backend:
+              service:
+                name: {{ include "uitsmijter.serviceName" $ }}
+                port:
+                  number: 80
+
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+
+metadata:
+  name: {{ .domain | trunc 54 | trimSuffix "-" | trimSuffix "." }}-redirect
+  annotations:
+    traefik.ingress.kubernetes.io/router.entrypoints: web
+    traefik.ingress.kubernetes.io/router.middlewares: "traefik-redirect-to-https@kubernetescrd"
+
+spec:
+  tls:
+    - secretName: {{ .tlsSecretName | quote }}
+  rules:
+    - host: {{ .domain | quote }}
+      http:
+        paths:
+          - path: "/"
+            pathType: Prefix
+            backend:
+              service:
+                name: {{ include "uitsmijter.serviceName" $ }}
+                port:
+                  number: 80
+{{- end }}
