@@ -68,17 +68,10 @@ runs:
       if: ${{ always() && env.STORE_ARTEFACTS != 'false' }}
       with:
         name: Test-Results
+        if-no-files-found: ignore
         retention-days: 4
         path: |
           ./Tests/e2e/playwright/test-results
-
-    - name: Archive artifacts
-      uses: actions/upload-artifact@v3
-      if: ${{ always() && env.STORE_ARTEFACTS != 'false' }}
-      with:
-        name: Test-Logs
-        retention-days: 4
-        path: |
           ./.build/kind/logs
 
     - name: Cache Volumes Write .build
