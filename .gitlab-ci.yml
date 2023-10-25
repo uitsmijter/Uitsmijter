@@ -17,7 +17,7 @@ variables:
   CONTAINER_IMAGE: ${CI_REGISTRY_IMAGE}:${CONTAINER_IMAGE_TAG}
   KANIKO_REGISTRY_MIRROR: "registry.registry.svc.cluster.local:80"
   BASEIMAGE: "swift:5.9.1-jammy"
-  BUILDBOX: "ghcr.io/uitsmijter/buildbox:1.1.0"
+  BUILDBOX: "ghcr.io/uitsmijter/buildbox:1.1.1"
 
 
 .use_context: &use_context
