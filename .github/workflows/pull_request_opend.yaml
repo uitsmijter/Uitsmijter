@@ -1,14 +1,10 @@
-name: Pull request
+name: Open PR
 on:
   pull_request:
     types:
       - opened
 
-
 jobs:
-  # Lint
-
-
   notify_mattermost:
     name: Notify Mattermost
     permissions:
@@ -16,8 +12,7 @@ jobs:
       statuses: read
       actions: read
       repository-projects: read
-    needs:
-      - e2etest
+
     if: always()
     uses: uitsmijter/workflows/.github/workflows/pullrequest-mattermost.yaml@main
     secrets:

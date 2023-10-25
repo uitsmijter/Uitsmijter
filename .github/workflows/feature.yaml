@@ -8,7 +8,7 @@ env:
   STORE_ARTEFACTS: true
   RUN_LINTER: true
   RUN_UNITTESTS: true
-  RUN_BUILD: true
+  RUN_BUILD: false
   RUN_E2ETESTS: true
 
 jobs:

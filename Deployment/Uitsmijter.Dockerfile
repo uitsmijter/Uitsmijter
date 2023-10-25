@@ -2,8 +2,8 @@
 # ----------------------------------------------------------------------------------------
 # BUILD STAGE
 # ----------------------------------------------------------------------------------------
-ARG BASEIMAGE=swift:5.7.0-jammy
-ARG BUILDBOX=ghcr.io/uitsmijter/buildbox:1.0.0
+ARG BASEIMAGE=swift:5.9.1-jammy
+ARG BUILDBOX=ghcr.io/uitsmijter/buildbox:1.1.1
 FROM ${BUILDBOX} as build
 
 # Add SSH KEY For GIT

@@ -5,6 +5,7 @@ on:
       - opened
       - reopened
       - ready_for_review
+
 env:
   STORE_ARTEFACTS: true
   RUN_LINTER: true
