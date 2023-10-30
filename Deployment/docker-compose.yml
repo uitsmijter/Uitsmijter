@@ -62,10 +62,7 @@ services:
         cp -r .build/testresults/* Deployment/Release/Coverage
 
   e2e:
-    image: ${IMAGENAME}-e2e:latest
-    build:
-      context: ..
-      dockerfile: Deployment/e2e.Dockerfile
+    image: ghcr.io/uitsmijter/e2e-runner:2.0.0
     network_mode: host
     environment:
       <<: *shared_environment

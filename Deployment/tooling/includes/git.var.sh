@@ -12,5 +12,5 @@ fi
 
 ## reformat branch
 GIT_BRANCH=${GIT_BRANCH/remotes\/origin\//}
-GIT_BRANCH=${GIT_BRANCH/\//-}
-GIT_BRANCH=${GIT_BRANCH/^/-}
+GIT_BRANCH=${GIT_BRANCH//\//-}
+GIT_BRANCH=${GIT_BRANCH//^/-}
