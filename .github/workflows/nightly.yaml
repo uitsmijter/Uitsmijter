@@ -19,8 +19,6 @@ jobs:
     steps:
       - name: Check out the repo
         uses: actions/checkout@v3
-        with:
-          lfs: true
       - uses: ./.github/actions/step-clear-cache
         with:
           volume: uitsmijter_build
@@ -37,8 +35,6 @@ jobs:
     steps:
       - name: Check out the repo
         uses: actions/checkout@v3
-        with:
-          lfs: true
       - uses: ./.github/actions/step-lint
         if: ${{ env.RUN_LINTER != 'false' }}
 
@@ -96,6 +92,8 @@ jobs:
     needs:
       - e2etest
     steps:
+      - name: Check out the repo
+        uses: actions/checkout@v3
       - uses: ./.github/actions/step-publish
         with:
           tag: nightly
@@ -109,7 +107,7 @@ jobs:
       actions: read
       repository-projects: read
     needs:
-      - e2etest
+      - publish
     if: always()
     uses: uitsmijter/workflows/.github/workflows/builds-mattermost.yaml@main
     secrets:
@@ -123,7 +121,7 @@ jobs:
       actions: read
       repository-projects: read
     needs:
-      - e2etest
+      - publish
     if: always()
     uses: uitsmijter/workflows/.github/workflows/builds-mastodon.yaml@main
     secrets:

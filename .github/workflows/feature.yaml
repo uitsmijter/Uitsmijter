@@ -8,7 +8,7 @@ env:
   STORE_ARTEFACTS: true
   RUN_LINTER: true
   RUN_UNITTESTS: true
-  RUN_BUILD: false
+  RUN_BUILD: true
   RUN_E2ETESTS: true
 
 jobs:
@@ -19,8 +19,6 @@ jobs:
     steps:
       - name: Check out the repo
         uses: actions/checkout@v3
-        with:
-          lfs: true
       - uses: ./.github/actions/step-lint
         if: ${{ env.RUN_LINTER != 'false' }}
 

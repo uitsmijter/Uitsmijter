@@ -62,15 +62,13 @@ services:
         cp -r .build/testresults/* Deployment/Release/Coverage
 
   e2e:
-    image: ${IMAGENAME}-e2e:latest
-    build:
-      context: ..
-      dockerfile: Deployment/e2e.Dockerfile
+    image: ghcr.io/uitsmijter/e2e-runner:2.1.0
     network_mode: host
     environment:
       <<: *shared_environment
       KUBECONFIG: /build/kubeconfig
       ARGUMENTS: $ARGUMENTS
+      GITHUB_ACTION: $GITHUB_ACTION
     volumes:
       - ../.build:/build
       - ../Tests/e2e/:/tests

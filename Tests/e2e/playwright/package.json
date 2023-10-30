@@ -1,17 +1,17 @@
 {
-  "name": "e2e",
+  "name": "Uitsmijter-e2e",
   "version": "1.0.0",
   "main": "index.js",
   "license": "Apache-2.0",
   "homepage": "https://uitsmijter.io",
   "scripts": {
     "postinstall": "npx playwright install",
-    "start": "yarn playwright test"
+    "start": "npx playwright test"
   },
   "dependencies": {
     "jsonwebtoken": "^9.0.2"
   },
   "devDependencies": {
-    "@playwright/test": "^1.38.1"
+    "@playwright/test": "^1.39.0"
   }
 }
