@@ -7,7 +7,7 @@ image:
   pullPolicy: Always
 
 imagePullSecrets:
-  - name: gitlab-auth
+  - name: auth-pullsecret
 jwtSecret: "vosai0za6iex8AelahGemaeBooph6pah6Saezae0oojahfa7Re6leibeeshiu8ie"
 redisPassword: "Shohmaz1"
 storageClassName: "default-ext4"

@@ -19,10 +19,10 @@ runs:
       uses: ./.github/actions/docker-volume-cache/read
       with:
         volume: uitsmijter_build
-    - name: Cache Volumes Read npm
-      uses: ./.github/actions/docker-volume-cache/read
-      with:
-        volume: uitsmijter_node_modules
+#    - name: Cache Volumes Read npm
+#      uses: ./.github/actions/docker-volume-cache/read
+#      with:
+#        volume: uitsmijter_node_modules
     - name: Cache Images
       uses: actions/cache@v3
       with:
@@ -78,7 +78,7 @@ runs:
       uses: ./.github/actions/docker-volume-cache/write
       with:
         volume: uitsmijter_build
-    - name: Cache Volumes Write npm
-      uses: ./.github/actions/docker-volume-cache/write
-      with:
-        volume: uitsmijter_node_modules
+#    - name: Cache Volumes Write npm
+#      uses: ./.github/actions/docker-volume-cache/write
+#      with:
+#        volume: uitsmijter_node_modules

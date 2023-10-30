@@ -6,11 +6,11 @@ image:
   tag: ""
   pullPolicy: Always
 
-imagePullSecrets:
-  - name: gitlab-auth
+imagePullSecrets: []
+
 jwtSecret: "vosai0za6iex8AelahGemaeBooph6pah6Saezae0oojahfa7Re6leibeeshiu8ie"
 redisPassword: "Shohmaz1"
-storageClassName: "default-ext4"
+storageClassName: ""
 installCRD: true
 installSA: true
 
@@ -27,6 +27,4 @@ config:
 
 domains:
   - domain: "nightly.uitsmijter.io"
-    tlsSecretName: "uitsmijter.io"
-  - domain: "nightly2.uitsmijter.io"
     tlsSecretName: "uitsmijter.io"

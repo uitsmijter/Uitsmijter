@@ -6,7 +6,7 @@
 
 ## Description
 
-Pluggable SSO implementation for your existing project and the best starting point for new projects.
+Pluggable SSO implementation for your existing projects and the best starting point for new projects.
 
 [Providers](https://docs.uitsmijter.io/providers/) connect Uitsmijter with an existing user database.
 
@@ -61,6 +61,19 @@ the [documentation page](https://docs.uitsmijter.io/configuration/helm/)
 
 ## Quickstart for developers
 Checkout the project and get familiar with the [tooling](https://docs.uitsmijter.io/contribution/tooling/).
+
+To run Uitsmijter locally in a test environment just build and run it: 
+```shell
+$ ./tooling.sh run-cluster --dirty
+```
+Follow the instructions in the terminal to access the test cluster.
+
+To run the current source in docker as a standalone application without kubernetes: 
+```shell
+$ ./tooling.sh run
+```
+Go to the standard login page at http://localhost:8080
+
 
 ## Community
 Coming soon. 

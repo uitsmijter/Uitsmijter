@@ -9,7 +9,7 @@ x-shared_environment: &shared_environment
   RUNTIME_IMAGE: "${IMAGENAME}-runtime:latest"
 
 x-shared_job: &shared_job
-  image: "${BUILDBOX}"
+  image: ghcr.io/uitsmijter/buildbox:${BUILDBOX}
   environment:
     <<: *shared_environment
   volumes:
@@ -62,15 +62,13 @@ services:
         cp -r .build/testresults/* Deployment/Release/Coverage
 
   e2e:
-    image: ${IMAGENAME}-e2e:latest
-    build:
-      context: ..
-      dockerfile: Deployment/e2e.Dockerfile
+    image: ghcr.io/uitsmijter/e2e-runner:${BUILDBOX}
     network_mode: host
     environment:
       <<: *shared_environment
       KUBECONFIG: /build/kubeconfig
       ARGUMENTS: $ARGUMENTS
+      GITHUB_ACTION: $GITHUB_ACTION
     volumes:
       - ../.build:/build
       - ../Tests/e2e/:/tests

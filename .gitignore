@@ -16,3 +16,5 @@ db.sqlite
 /Tests/e2e/helm/results
 Public/images/generated/**/*
 Deployment/Release/uitsmijter-*.tar
+/Deployment/Runtime/dirty
+/charts

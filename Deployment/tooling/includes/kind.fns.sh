@@ -102,7 +102,7 @@ function kindWaitForRunningClusters() {
   	countdown=30
   	while [ $countdown -gt 0 ]; do
   		containerStartTime=$(docker container inspect --format='{{.State.StartedAt}}' "${runningControlPlaneId}" | cut -d'.' -f 1)
-  		runningSeconds=$(expr "$(${ownDate} +%s)" - "$(${ownDate} +%s -d "${containerStartTime}" -D "%Y-%m-%dT%H:%M:%S")")
+  		runningSeconds=$(expr "$(${ownDate} +%s)" - "$(${ownDate} +%s -d "${containerStartTime}")")
   		if [[ $runningSeconds -gt $((30 * 60)) ]]; then
   			echo "but it is older than 30min and will be removed!"
   			docker rm -f "${runningControlPlaneId}"
