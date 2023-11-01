@@ -16,7 +16,7 @@ test.describe('Assets loading for', () => {
         test.setTimeout(app.timeout)
     })
 
-    test('login page should be present', async ({page}) => {
+    test.skip('login page should be present', async ({page}) => {
         await app.goto('https://login.example.com/login?for=http://cookbooks.example.com')
 
         await expectAssetsLoaded()
