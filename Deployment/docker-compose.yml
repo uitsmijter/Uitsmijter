@@ -68,6 +68,7 @@ services:
       <<: *shared_environment
       KUBECONFIG: /build/kubeconfig
       ARGUMENTS: $ARGUMENTS
+      GITHUB_ACTION: $GITHUB_ACTION
     volumes:
       - ../.build:/build
       - ../Tests/e2e/:/tests
