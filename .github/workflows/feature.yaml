@@ -6,9 +6,9 @@ on:
 
 env:
   STORE_ARTEFACTS: true
-  RUN_LINTER: false
-  RUN_UNITTESTS: false
-  RUN_BUILD: false
+  RUN_LINTER: true
+  RUN_UNITTESTS: true
+  RUN_BUILD: true
   RUN_E2ETESTS: true
 
 jobs:

@@ -191,7 +191,7 @@ fi
 if [[ "${MODE}" == *"e2e"* ]]; then
   EXTRAS=""
   if [  -n "${USE_FAST}" ]; then
-    EXTRAS="--browser chromium"
+    EXTRAS="--browser webkit"
   fi
   e2eTests "${dockerComposeBuildParameter}" "${EXTRAS}" "${TAG}"
 fi

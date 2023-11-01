@@ -52,13 +52,13 @@ export default defineConfig({
                 viewport: defaultViewportDesktop
             },
         },
-        {
-            name: 'firefox',
-            use: {
-                ...devices['Desktop Firefox'],
-                viewport: defaultViewportDesktop
-            },
-        },
+        // {
+        //     name: 'firefox',
+        //     use: {
+        //         ...devices['Desktop Firefox'],
+        //         viewport: defaultViewportDesktop
+        //     },
+        // },
         {
             name: 'webkit',
             use: {
