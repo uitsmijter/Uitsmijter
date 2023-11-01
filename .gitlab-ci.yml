@@ -250,7 +250,7 @@ Deploy-Nightly:
     - kubectl create ns "uitsmijter-nightly" || true
     - kubectl label --overwrite namespace uitsmijter-nightly uitsmijter.io/cert-sync=true
     - kubectl apply -n "uitsmijter-nightly" -f ${PAWPATROL_PULLSECRET}
-    - helm upgrade --install uitsmijter ./Deployment/helm/uitsmijter --set image.tag=${CONTAINER_IMAGE_TAG} --namespace="uitsmijter-nightly"
+    - helm upgrade --install uitsmijter ./Deployment/helm/uitsmijter --set image.tag=${CONTAINER_IMAGE_TAG} --set imagePullSecrets[0].name=gitlab-auth --set storageClassName=default-ext4 --namespace="uitsmijter-nightly"
 
 Deploy-Nightly-Stop:
   <<: *deploy-shared-stop

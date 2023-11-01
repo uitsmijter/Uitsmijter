@@ -7,8 +7,18 @@ import {defineConfig, devices} from '@playwright/test';
 // require('dotenv').config();
 
 let defaultViewportDesktop = {width: 1920, height: 1080}
-let defaultViewportiOS = {width: 2532, height: 1170}
-let defaultViewportPixel = {width: 1080, height: 2400}
+
+let projectsExtras = [];
+// Extras when not in a GitHub-Workflow
+if( ! process.env.GITHUB_ACTION ){
+    projectsExtras = [{
+             name: 'firefox',
+             use: {
+                 ...devices['Desktop Firefox'],
+                 viewport: defaultViewportDesktop
+             },
+    }]
+}
 
 /**
  * See https://playwright.dev/docs/test-configuration.
@@ -44,18 +54,12 @@ export default defineConfig({
     },
     /* Configure projects for major browsers */
     projects: [
+        ...projectsExtras,
         // Desktop
         {
             name: 'chromium',
             use: {
                 ...devices['Desktop Chrome'],
-                viewport: defaultViewportDesktop
-            },
-        },
-        {
-            name: 'firefox',
-            use: {
-                ...devices['Desktop Firefox'],
                 viewport: defaultViewportDesktop
             },
         },
@@ -79,26 +83,6 @@ export default defineConfig({
                 ...devices['iPhone 12']
             },
         },
-
-        /* Test against mobile viewports. */
-        // {
-        //     name: 'Mobile Chrome',
-        //     use: {...devices['Pixel 5']},
-        // },
-        // {
-        //     name: 'Mobile Safari',
-        //     use: {...devices['iPhone 12']},
-        // },
-
-        /* Test against branded browsers. */
-        // {
-        //   name: 'Microsoft Edge',
-        //   use: { ...devices['Desktop Edge'], channel: 'msedge' },
-        // },
-        // {
-        //   name: 'Google Chrome',
-        //   use: { ..devices['Desktop Chrome'], channel: 'chrome' },
-        // },
     ],
 
     /* Run your local dev server before starting the tests */

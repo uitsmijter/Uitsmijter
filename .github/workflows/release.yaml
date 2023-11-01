@@ -12,8 +12,6 @@ jobs:
     steps:
       - name: Check out the repo
         uses: actions/checkout@v3
-        with:
-          lfs: true
       - uses: ./.github/actions/step-lint
         if: ${{ env.RUN_LINTER != 'false' }}
 
@@ -69,8 +67,6 @@ jobs:
     steps:
       - name: Check out the repo
         uses: actions/checkout@v3
-        with:
-          lfs: true
       - uses: ./.github/actions/step-helm
 
   publish:
