@@ -62,7 +62,7 @@ services:
         cp -r .build/testresults/* Deployment/Release/Coverage
 
   e2e:
-    image: ghcr.io/uitsmijter/e2e-runner:2.1.0
+    image: ghcr.io/uitsmijter/e2e-runner:2.1.1
     network_mode: host
     environment:
       <<: *shared_environment

@@ -5,13 +5,11 @@
   "license": "Apache-2.0",
   "homepage": "https://uitsmijter.io",
   "scripts": {
-    "postinstall": "npx playwright install",
+    "postinstall": "yarn playwright install",
     "start": "npx playwright test"
   },
   "dependencies": {
-    "jsonwebtoken": "^9.0.2"
-  },
-  "devDependencies": {
-    "@playwright/test": "^1.39.0"
+    "jsonwebtoken": "^9.0.2",
+    "@playwright/test": "1.39.0"
   }
 }
