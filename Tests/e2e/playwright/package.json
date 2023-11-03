@@ -5,7 +5,7 @@
   "license": "Apache-2.0",
   "homepage": "https://uitsmijter.io",
   "scripts": {
-    "postinstall": "yarn playwright install",
+    "postinstall": "npx playwright install",
     "start": "npx playwright test"
   },
   "dependencies": {
