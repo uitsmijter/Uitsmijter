@@ -89,6 +89,9 @@ jobs:
     needs:
       - build-helm
     steps:
+      - name: Check out the repo
+        uses: actions/checkout@v3
+        if: ${{ env.RUN_PUBLISH != 'false' }}
       - uses: ./.github/actions/step-publish
         if: ${{ env.RUN_PUBLISH != 'false' }}
         with:
