@@ -1,8 +1,9 @@
-name: Release
+name: Release Candidate
 on:
-  release:
-    types:
-      - published
+  push:
+    branches:
+      - release/*
+
 
 env:
   STORE_ARTEFACTS: true
@@ -65,7 +66,7 @@ jobs:
         if: ${{ env.RUN_E2ETESTS != 'false' }}
         with:
           dirty: false
-          fast: false
+          fast: true
 
   build-helm:
     runs-on: ubuntu-latest

@@ -11,7 +11,7 @@ inputs:
 runs:
   using: composite
   steps:
-    - name: Cache Volumes Read .build
+    - name: Cache Volumes Read
       uses: ./.github/actions/docker-volume-cache/read
       with:
         volume: ${{ inputs.volume }}
@@ -23,10 +23,11 @@ runs:
       run: |
         docker run --rm -ti -v ${VOLUME}:/data ubuntu bash -c 'rm -rf /data/*' 
 
-    - name: Cache Volumes Write .build
+    - name: Cache Volumes Write
       uses: ./.github/actions/docker-volume-cache/write
       with:
         volume: uitsmijter_build
+
     - name: Cache Volumes Write npm
       uses: ./.github/actions/docker-volume-cache/write
       with:

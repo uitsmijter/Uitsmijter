@@ -1,7 +1,3 @@
-//
-// aus der Technik, 2022
-//
-
 import Foundation
 import Vapor
 

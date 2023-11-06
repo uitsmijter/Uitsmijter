@@ -1,5 +1,5 @@
-name: "Lint"
-description: "Lint Code"
+name: "Helm"
+description: "Build helm packages"
 author: "aus der Technik | Uitsmijter"
 
 runs:
