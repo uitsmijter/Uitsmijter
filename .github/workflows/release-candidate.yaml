@@ -88,7 +88,7 @@ jobs:
       packages: write
       contents: read
     needs:
-      - e2etest
+      - build-helm
     steps:
       - uses: ./.github/actions/step-publish
         if: ${{ env.RUN_PUBLISH != 'false' }}
@@ -104,7 +104,7 @@ jobs:
       actions: read
       repository-projects: read
     needs:
-      - e2etest
+      - publish
     if: always()
     uses: uitsmijter/workflows/.github/workflows/builds-mattermost.yaml@main
     secrets:
@@ -118,7 +118,7 @@ jobs:
       actions: read
       repository-projects: read
     needs:
-      - e2etest
+      - publish
     if: always()
     uses: uitsmijter/workflows/.github/workflows/builds-mastodon.yaml@main
     secrets:
@@ -133,7 +133,7 @@ jobs:
       actions: read
       repository-projects: read
     needs:
-      - e2etest
+      - publish
     uses: uitsmijter/workflows/.github/workflows/release-mastodon.yaml@main
     secrets:
       MASTODON_URL: ${{ secrets.MASTODON_RELEASE_URL }}
