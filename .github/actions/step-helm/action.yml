@@ -32,8 +32,8 @@ runs:
       with:
         source-directory: charts/
         target-directory: charts
-        destination-github-username: $GITHUB_ACTOR
-        destination-repository-name: https://github.com/uitsmijter/charts
+        destination-github-username: uitsmijter
+        destination-repository-name: charts
         user-email: "$GITHUB_ACTOR@users.noreply.github.com"
         target-branch: "main"
         commit-message: "${{ github.ref_name }}"
