@@ -2,6 +2,12 @@ name: "Helm"
 description: "Build helm packages"
 author: "aus der Technik | Uitsmijter"
 
+
+inputs:
+  deploy_key:
+    description: "Deploy key for the charts repository"
+    required: true
+
 runs:
   using: composite
   steps:
@@ -22,7 +28,7 @@ runs:
     - name: Deploy to external repository
       uses: cpina/github-action-push-to-another-repository@main
       env:
-        SSH_DEPLOY_KEY: ${{ secrets.CHARTS_DEPLOY_KEY }}
+        SSH_DEPLOY_KEY: ${{ inputs.deploy_key }}
       with:
         source-directory: charts/
         destination-github-username: $GITHUB_ACTOR
