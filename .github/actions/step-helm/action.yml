@@ -18,7 +18,7 @@ runs:
       shell: bash
       run: |
         mkdir ./charts
-        tar -xvf ./Deployment/Release/uitsmijter-**.tgz -C ./charts
+        tar -xvf ./Deployment/Release/uitsmijter-**.tgz -C ./charts --strip-components 1
     - name: Configure Git
       shell: bash
       run: |
@@ -27,6 +27,6 @@ runs:
     - name: Run chart-releaser
       uses: helm/chart-releaser-action@v1.5.0
       with:
-        charts_dir: charts/uitsmijter
+        charts_dir: charts
       env:
         CR_TOKEN: ${{ github.token }}
