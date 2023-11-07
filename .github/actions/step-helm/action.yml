@@ -30,3 +30,4 @@ runs:
         user-email: "$GITHUB_ACTOR@users.noreply.github.com"
         target-branch: "main"
         commit-message: "${{ github.ref_name }}"
+        create-target-branch-if-needed: true
