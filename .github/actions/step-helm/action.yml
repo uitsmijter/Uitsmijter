@@ -31,8 +31,9 @@ runs:
         SSH_DEPLOY_KEY: ${{ inputs.deploy_key }}
       with:
         source-directory: charts/
+        target-directory: charts
         destination-github-username: $GITHUB_ACTOR
-        destination-repository-name: uitsmijter/charts
+        destination-repository-name: https://github.com/uitsmijter/charts
         user-email: "$GITHUB_ACTOR@users.noreply.github.com"
         target-branch: "main"
         commit-message: "${{ github.ref_name }}"
