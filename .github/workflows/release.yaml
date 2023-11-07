@@ -87,8 +87,11 @@ jobs:
       packages: write
       contents: read
     needs:
-      - e2etest
+      - build-helm
     steps:
+      - name: Check out the repo
+        uses: actions/checkout@v3
+        if: ${{ env.RUN_PUBLISH != 'false' }}
       - uses: ./.github/actions/step-publish
         if: ${{ env.RUN_PUBLISH != 'false' }}
         with:
@@ -103,7 +106,7 @@ jobs:
       actions: read
       repository-projects: read
     needs:
-      - e2etest
+      - publish
     if: always()
     uses: uitsmijter/workflows/.github/workflows/builds-mattermost.yaml@main
     secrets:
@@ -117,7 +120,7 @@ jobs:
       actions: read
       repository-projects: read
     needs:
-      - e2etest
+      - publish
     if: always()
     uses: uitsmijter/workflows/.github/workflows/builds-mastodon.yaml@main
     secrets:

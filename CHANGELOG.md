@@ -1,3 +1,11 @@
+# 0.9.5
+
+Released at 10.11.2023
+
+- Public availability on GitHUb
+- GitHub Actions
+- Public Helm Chats
+
 # 0.9.4
 
 Released at 03.10.2023

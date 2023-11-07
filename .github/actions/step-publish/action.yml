@@ -41,12 +41,18 @@ runs:
       env:
         INPUT_TAG: ${{ inputs.tag }}
       run: |
+        TAG=${INPUT_TAG//release\//rc-}
+        TAG=${TAG//\//-}
         source ./Deployment/tooling/includes/git.var.sh
         REPOSITORY=$(echo "${{ github.repository }}" | tr '[:upper:]' '[:lower:]')
-        docker tag "adt/uitsmijter:${GIT_BRANCH}-${GIT_HASH}" ghcr.io/${REPOSITORY}:${INPUT_TAG}
+        docker tag "adt/uitsmijter:${GIT_BRANCH}-${GIT_HASH}" ghcr.io/${REPOSITORY}:${TAG}
 
     - name: Push to registry
       shell: bash
+      env:
+        INPUT_TAG: ${{ inputs.tag }}
       run: |
+        TAG=${INPUT_TAG//release\//rc-}
+        TAG=${TAG//\//-}
         REPOSITORY=$(echo "${{ github.repository }}" | tr '[:upper:]' '[:lower:]')
-        docker push ghcr.io/${REPOSITORY}:${{ inputs.tag }}
+        docker push ghcr.io/${REPOSITORY}:${TAG}
