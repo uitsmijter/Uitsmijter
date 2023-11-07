@@ -14,6 +14,8 @@ runs:
     - name: Build helm release
       shell: bash
       run: ./tooling.sh helm
+      env:
+        BUILD_NUMBER: ${{ github.run_number }}
     - name: Store helm release package
       uses: actions/upload-artifact@v3
       with:
