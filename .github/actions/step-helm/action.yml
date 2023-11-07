@@ -26,5 +26,7 @@ runs:
         git config user.email "$GITHUB_ACTOR@users.noreply.github.com"
     - name: Run chart-releaser
       uses: helm/chart-releaser-action@v1.5.0
+      with:
+        charts_dir: charts/uitsmijter
       env:
         CR_TOKEN: ${{ github.token }}

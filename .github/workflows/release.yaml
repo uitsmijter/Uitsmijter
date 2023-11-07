@@ -135,7 +135,7 @@ jobs:
       actions: read
       repository-projects: read
     needs:
-      - e2etest
+      - publish
     uses: uitsmijter/workflows/.github/workflows/release-mastodon.yaml@main
     secrets:
       MASTODON_URL: ${{ secrets.MASTODON_RELEASE_URL }}
