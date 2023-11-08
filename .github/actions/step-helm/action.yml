@@ -2,7 +2,6 @@ name: "Helm"
 description: "Build helm packages"
 author: "aus der Technik | Uitsmijter"
 
-
 inputs:
   deploy_key:
     description: "Deploy key for the charts repository"
@@ -16,17 +15,20 @@ runs:
       run: ./tooling.sh helm
       env:
         BUILD_NUMBER: ${{ github.run_number }}
+
     - name: Store helm release package
       uses: actions/upload-artifact@v3
       with:
         name: helm-package
         path: |
           ./Deployment/Release/**-**.tgz
+
     - name: Create charts dir
       shell: bash
       run: |
         mkdir ./charts
         tar -xvf ./Deployment/Release/uitsmijter-**.tgz -C ./charts --strip-components 1
+
     - name: Deploy to external repository
       uses: cpina/github-action-push-to-another-repository@main
       env:
