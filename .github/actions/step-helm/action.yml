@@ -27,7 +27,7 @@ runs:
       shell: bash
       run: |
         mkdir ./charts
-        tar -xvf ./Deployment/Release/uitsmijter-**.tgz -C ./charts --strip-components 1
+        tar -xvf ./Deployment/Release/uitsmijter-**.tgz -C ./charts
 
     - name: Deploy to external repository
       uses: cpina/github-action-push-to-another-repository@main
