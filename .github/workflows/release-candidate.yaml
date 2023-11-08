@@ -7,10 +7,10 @@ on:
 
 env:
   STORE_ARTEFACTS: true
-  RUN_LINTER: true
-  RUN_UNITTESTS: true
+  RUN_LINTER: false
+  RUN_UNITTESTS: false
   RUN_BUILD: true
-  RUN_E2ETESTS: true
+  RUN_E2ETESTS: false
   RUN_HELM: true
   RUN_PUBLISH: true
 

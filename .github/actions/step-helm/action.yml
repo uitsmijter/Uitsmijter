@@ -42,3 +42,4 @@ runs:
         target-branch: "main"
         commit-message: "${{ github.ref_name }}"
         create-target-branch-if-needed: true
+
