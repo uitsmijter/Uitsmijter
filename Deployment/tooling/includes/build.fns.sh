@@ -65,9 +65,18 @@ function buildReleaseIfNotPresent() {
 function buildHelm() {
   h2 "Build helm packages"
   local version=${GIT_TAG}
+  if [ -z "${version}" ]; then
+    version=${GIT_BRANCH}
+    version=${version/release-/rc-}
+  fi
   local appversion=${version}
   version=${version/ce-/}
   version=${version/ee-/}
+  if [[ "${version}" == rc-* ]]; then
+    version=${version/rc-/}
+    version=${version}-rc${BUILD_NUMBER:-0}
+  fi
+
   echo "build version ${version}"
   if ls "${PROJECT_DIR}/Deployment/Release/"*.tgz >/dev/null 2>&1; then
     rm "${PROJECT_DIR}/Deployment/Release/"*.tgz

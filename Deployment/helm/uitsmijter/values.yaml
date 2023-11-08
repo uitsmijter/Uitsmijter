@@ -1,7 +1,7 @@
 namespaceOverride: ""
 
 image:
-  repository: docker.ausdertechnik.de/uitsmijter/uitsmijter
+  repository: ghcr.io/uitsmijter/uitsmijter
   # Overrides the image tag whose default is the chart appVersion.
   tag: ""
   pullPolicy: Always
@@ -27,4 +27,4 @@ config:
 
 domains:
   - domain: "nightly.uitsmijter.io"
-    tlsSecretName: "uitsmijter.io"
+    tlsSecretName: "nightly.uitsmijter.io"

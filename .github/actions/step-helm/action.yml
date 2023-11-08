@@ -2,29 +2,44 @@ name: "Helm"
 description: "Build helm packages"
 author: "aus der Technik | Uitsmijter"
 
+inputs:
+  deploy_key:
+    description: "Deploy key for the charts repository"
+    required: true
+
 runs:
   using: composite
   steps:
     - name: Build helm release
       shell: bash
       run: ./tooling.sh helm
+      env:
+        BUILD_NUMBER: ${{ github.run_number }}
+
     - name: Store helm release package
       uses: actions/upload-artifact@v3
       with:
         name: helm-package
         path: |
           ./Deployment/Release/**-**.tgz
+
     - name: Create charts dir
       shell: bash
       run: |
         mkdir ./charts
         tar -xvf ./Deployment/Release/uitsmijter-**.tgz -C ./charts
-    - name: Configure Git
-      shell: bash
-      run: |
-        git config user.name "$GITHUB_ACTOR"
-        git config user.email "$GITHUB_ACTOR@users.noreply.github.com"
-    - name: Run chart-releaser
-      uses: helm/chart-releaser-action@v1.5.0
+
+    - name: Deploy to external repository
+      uses: cpina/github-action-push-to-another-repository@main
       env:
-        CR_TOKEN: ${{ github.token }}
+        SSH_DEPLOY_KEY: ${{ inputs.deploy_key }}
+      with:
+        source-directory: charts/
+        target-directory: charts
+        destination-github-username: uitsmijter
+        destination-repository-name: charts
+        user-email: "$GITHUB_ACTOR@users.noreply.github.com"
+        target-branch: "main"
+        commit-message: "${{ github.ref_name }}"
+        create-target-branch-if-needed: true
+
