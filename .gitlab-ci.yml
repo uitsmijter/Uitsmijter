@@ -248,7 +248,7 @@ Deploy-Nightly:
   script:
     - *use_context
     - kubectl create ns "uitsmijter-nightly" || true
-    - kubectl label --overwrite namespace uitsmijter-nightly uitsmijter.io/cert-sync=true
+    - kubectl label --overwrite namespace uitsmijter-nightly nightly.uitsmijter.io/cert-sync=true
     - kubectl apply -n "uitsmijter-nightly" -f ${PAWPATROL_PULLSECRET}
     - helm upgrade --install uitsmijter ./Deployment/helm/uitsmijter --set image.tag=${CONTAINER_IMAGE_TAG} --set imagePullSecrets[0].name=gitlab-auth --set storageClassName=default-ext4 --namespace="uitsmijter-nightly"
 
@@ -286,7 +286,7 @@ Deploy-Feature:
       --install uitsmijter ./Deployment/helm/uitsmijter
       --set image.tag=${CONTAINER_IMAGE_TAG}
       --set "domains[0].domain=${CI_COMMIT_REF_SLUG}.uitsmijter.io"
-      --set "domains[0].tlsSecretName=uitsmijter.io"
+      --set "domains[0].tlsSecretName=feature.uitsmijter.io"
       --set "installCRD=false"
       --set "config.logLevel=debug"
       --namespace="uitsmijter-${CI_COMMIT_REF_SLUG}"
