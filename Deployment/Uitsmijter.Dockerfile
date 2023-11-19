@@ -1,4 +1,3 @@
-# syntax=docker/dockerfile:experimental
 # ----------------------------------------------------------------------------------------
 # BUILD STAGE
 # ----------------------------------------------------------------------------------------
@@ -6,26 +5,12 @@ ARG BASEIMAGE=swift:5.9.1-jammy
 ARG BUILDBOX=2.1.1
 FROM ghcr.io/uitsmijter/buildbox:${BUILDBOX} as build
 
-# Add SSH KEY For GIT
-ARG SSH_KEY
-RUN if [ ! -z "${SSH_KEY}" ]; then \
-  mkdir -p -m 0700 ~/.ssh; \
-  ssh-keyscan git.ausdertechnik.de >> ~/.ssh/known_hosts; \
-  ssh-keyscan github.com >> ~/.ssh/known_hosts; \
-  cat ~/.ssh/known_hosts; \
-  else echo "no ssh provided."; fi;
-
-RUN --mount=type=ssh if [ ! -z "${SSH_KEY}" ]; then \
-  ssh -o StrictHostKeyChecking=no -q -T git@git.ausdertechnik.de; \
-  else echo "no ssh provided."; fi;
-
-
-# First just resolve dependencies.
+# First resolve dependencies only.
 # This creates a cached layer that can be reused
 # as long as your Package.swift/Package.resolved
 # files do not change.
 COPY ./Package.* ./
-RUN --mount=type=ssh swift package resolve
+RUN swift package resolve
 
 # Copy entire repo into container
 COPY . .
@@ -62,8 +47,6 @@ RUN [ -d /build/Resources ] && { mv /build/Resources ./Resources && chmod -R a+w
 # ----------------------------------------------------------------------------------------
 # APPLICATION STAGE
 # ----------------------------------------------------------------------------------------
-
-# This should be kept in sync with Uitsmijter-dev-release.Dockerfile
 
 ARG BASEIMAGE
 FROM ${BASEIMAGE}-slim as runtime
