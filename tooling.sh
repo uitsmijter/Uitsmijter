@@ -22,6 +22,7 @@ help() {
   echo "        -s    | --release         | release       Build a release version, can have an optional added image "
   echo "                                                  name (with optional tag)"
   echo "        -p    | --helm            | helm          Build the helm package"
+  echo "              | --code            | code          Open a code editor"
   echo "        -h    | --help            | help          Show this help message"
   echo ""
   echo "Additional Parameters: "
@@ -96,6 +97,10 @@ while (("$#")); do
     ;;
   -p | --helm | helm)
     MODE+="|helm"
+    shift 1
+    ;;
+  --code | code)
+    MODE+="|code"
     shift 1
     ;;
   # Extra Parameter
@@ -178,6 +183,10 @@ fi
 
 if [[ "${MODE}" == *'release'* ]]; then
   buildRelease "${TAG}"
+fi
+
+if [[ "${MODE}" == *"code"* ]]; then
+  openCode
 fi
 
 if [[ "${MODE}" == *"helm"* ]]; then

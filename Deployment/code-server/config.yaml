@@ -1,0 +1,4 @@
+bind-addr: 0.0.0.0:31546
+auth: none
+password:
+cert: false

@@ -5,6 +5,7 @@ x-shared_environment: &shared_environment
   LOG_FORMAT: ${LOG_FORMAT:-console}
   BASEIMAGE: ${BASEIMAGE}
   BUILDBOX: ${BUILDBOX}
+  SWIFT_VERSION: ${SWIFT_VERSION}
   TAG: ${TAG:-latest}
   RUNTIME_IMAGE: "${IMAGENAME}-runtime:latest"
 
@@ -118,6 +119,22 @@ services:
         LOG_LEVEL=error /app/bin/Uitsmijter routes
         echo "Starting Uitsmijter..."
         /app/bin/Uitsmijter serve --env production --hostname 0.0.0.0 --port 8080
+
+  code:
+    image: ${IMAGENAME}-codeserver:latest
+    build:
+      context: ..
+      dockerfile: Deployment/Code-Server.Dockerfile
+      args:
+        <<: *shared_environment
+    environment:
+      <<: *shared_environment
+    ports:
+      - "31546:31546"
+    volumes:
+      - ..:/Project
+      - build_data:/Project/.build
+
 
 volumes:
   build_data:
