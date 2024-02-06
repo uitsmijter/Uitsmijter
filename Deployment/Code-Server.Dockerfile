@@ -2,8 +2,6 @@
 # BUILD STAGE
 # ----------------------------------------------------------------------------------------
 ARG BASEIMAGE_CODE=ubuntu:22.04
-ARG SWIFT_VERSION
-
 FROM ${BASEIMAGE_CODE}
 LABEL maintainer="aus der Technik"
 LABEL Description="UItsmijter - Code-Server"
@@ -32,6 +30,7 @@ COPY Deployment/code-server/entrypoint.sh /entrypoint.sh
 
 # Install Swift
 # ----------------------------------------------------------------------------------------
+ARG SWIFT_VERSION
 WORKDIR /build
 RUN echo "install..."; \
   if [ "$(arch)" = "aarch64" ]; then \
@@ -39,7 +38,10 @@ RUN echo "install..."; \
   fi; \
   echo "Arch: ${ADD_ARCH}"; \
   echo "Version: ${SWIFT_VERSION}"; \
-  exit 1; \
+  if [ -z ${SWIFT_VERSION+x} ]; then \
+    echo "Swift version is unset."; \
+    exit 1; \
+  fi; \
   SWIFT_URL="https://download.swift.org/swift-${SWIFT_VERSION}-release/ubuntu2204${ADD_ARCH}/swift-${SWIFT_VERSION}-RELEASE/swift-${SWIFT_VERSION}-RELEASE-ubuntu22.04${ADD_ARCH}.tar.gz"; \
   echo "Swift download from: ${SWIFT_URL}" > /swift_download.txt; \
   wget ${SWIFT_URL}; \

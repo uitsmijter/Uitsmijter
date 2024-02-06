@@ -5,7 +5,7 @@ x-shared_environment: &shared_environment
   LOG_FORMAT: ${LOG_FORMAT:-console}
   BASEIMAGE: ${BASEIMAGE}
   BUILDBOX: ${BUILDBOX}
-  SWIFT_VERSION: ${SWIFT_VERSION}
+  SWIFT_VERSION: "${SWIFT_VERSION}"
   TAG: ${TAG:-latest}
   RUNTIME_IMAGE: "${IMAGENAME}-runtime:latest"
 
@@ -133,6 +133,7 @@ services:
       - "31546:31546"
     volumes:
       - ..:/Project
+      - ./code-server/settings.json:/root/.local/share/code-server/User/settings.json
       - build_data:/Project/.build
 
 
