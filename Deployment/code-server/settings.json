@@ -2,5 +2,7 @@
     "workbench.tree.indent": 10,
     "terminal.integrated.automationProfile.osx": {
         
-    }
+    },
+    "lldb.library": "/usr/lib/liblldb.so",
+    "lldb.launch.expressions": "native"
 }
