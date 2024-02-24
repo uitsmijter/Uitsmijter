@@ -124,7 +124,7 @@ services:
         /app/bin/Uitsmijter serve --env production --hostname 0.0.0.0 --port 8080
 
   code:
-    image: ghcr.io/uitsmijter/swift-codeserver:latest
+    image: ghcr.io/uitsmijter/swift-codeserver:1.0.0
     environment:
       <<: *shared_environment
     ports:
