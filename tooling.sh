@@ -14,6 +14,7 @@ echo ""
 help() {
   echo "Choose one or more commands: "
   echo ""
+  echo "        -rm   | --remove          | remove        Remove docker volumes, images and build directory"
   echo "        -b    | --build           | build         Build the project"
   echo "        -l    | --lint            | lint          Check code quality"
   echo "        -t    | --test            | test          Run all UnitTests"
@@ -62,6 +63,10 @@ while (("$#")); do
     help
     shift 1
     exit 0
+    ;;
+  -rm | --remove | remove)
+    MODE+="|remove"
+    shift 1
     ;;
   -b | --build | build)
     MODE+="|build"
@@ -126,7 +131,7 @@ while (("$#")); do
     ;;
   --* | -*=) # unsupported flags
     echo "Error: Unsupported flag $1" >&2
-    echo "Possible options are: --build --lint --test --e2e --run --run-cluster --release --helm and --help"
+    echo "Possible options are: --remove --build --lint --test --e2e --run --run-cluster --release --helm and --help"
     echo "Possible flags: --rebuild --debug"
     exit 1
     ;;
@@ -161,6 +166,13 @@ fi
 shouldDebug "${DEBUG}"
 
 # Execute pipeline
+if [[ "${MODE}" == *"remove"* ]]; then
+  removeContainer
+  removeImages
+  removeVolumes
+  removeBuild
+fi
+
 if [[ "${MODE}" == *"imagetool"* ]]; then
   buildImages
 fi

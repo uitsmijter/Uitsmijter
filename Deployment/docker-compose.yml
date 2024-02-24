@@ -46,10 +46,13 @@ services:
       - -c
       - |
         set -e
+        echo "Resolve...."
         swift package resolve
+        echo "Build...."
         swift build -c release --manifest-cache shared -Xcc -I/usr/include/webkitgtk-4.0 -Xcc -I/usr/include/webkitgtk-4.0/JavaScriptCore
-        mkdir -p Deployment/Release/Linux
-        cp "$$(swift build --package-path /build -c release --show-bin-path)/Uitsmijter" Deployment/Release/Linux/
+        echo "Copy release"
+        #mkdir -p Deployment/Release/Linux
+        #cp "$$(swift build --package-path /build -c release --show-bin-path)/Uitsmijter" Deployment/Release/Linux/
 
   test:
     <<: *shared_job
