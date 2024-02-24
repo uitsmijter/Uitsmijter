@@ -4,6 +4,7 @@ import Redis
 @testable import Server
 
 final class AuthCodeStorageRedisTest: XCTestCase {
+
     class RedisMock: RedisClient {
         private(set) var eventLoop: NIOCore.EventLoop
         private let storage = MemoryAuthCodeStorage()
@@ -38,10 +39,19 @@ final class AuthCodeStorageRedisTest: XCTestCase {
         // swiftlint:enable unavailable_function
     }
 
+    // init application for global settings
+    var app: Application!
+    let temporaryDirectory: URL = FileManager.default.temporaryDirectory
+            .appendingPathComponent(String.random(length: 10))
+
     let mock = RedisMock()
     var storage: AuthCodeStorage?
 
     override func setUp() {
+        app = Application(.testing)
+        app.directory.resourcesDirectory = temporaryDirectory.absoluteString
+        try? configure(app)
+
         storage = AuthCodeStorage(use: .redis(client: mock))
 
         let session_1 = AuthSession(
@@ -72,20 +82,21 @@ final class AuthCodeStorageRedisTest: XCTestCase {
                 ttl: 1
         )
         do {
-            guard let storage else {
-                XCTFail("No storage")
-                return
-            }
-            try storage.set(authSession: session_1)
-            XCTAssertEqual(mock.commandStack.count, 3)
-            try storage.set(authSession: session_2)
-            XCTAssertEqual(mock.commandStack.count, 6)
-            try storage.set(authSession: session_TTL)
-            XCTAssertEqual(mock.commandStack.count, 9)
+             guard let storage else {
+                 XCTFail("No storage")
+                 return
+             }
+             
+             try storage.set(authSession: session_1)
+             XCTAssertEqual(mock.commandStack.count, 3)
+             try storage.set(authSession: session_2)
+             XCTAssertEqual(mock.commandStack.count, 6)
+             try storage.set(authSession: session_TTL)
+             XCTAssertEqual(mock.commandStack.count, 9)
         } catch {
             XCTFail("Error: \(error.localizedDescription)")
         }
-        mock.commandStack = []
+         mock.commandStack = []
     }
 
     func testStoreSessionsInRedisNil() async throws {
