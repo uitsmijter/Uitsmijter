@@ -6,5 +6,10 @@
     "lldb.library": "/usr/lib/liblldb.so",
     "lldb.launch.expressions": "native",
     "telemetry.telemetryLevel": "off",
-    "swift.searchSubfoldersForPackages": true
+    "swift.searchSubfoldersForPackages": true,
+    "vs-kubernetes": {
+        "vscode-kubernetes.helm-path-linux": "/root/.local/state/vs-kubernetes/tools/helm/linux-arm64/helm",
+        "vscode-kubernetes.kubectl-path-linux": "/root/.local/state/vs-kubernetes/tools/kubectl/kubectl",
+        "vscode-kubernetes.minikube-path-linux": "/root/.local/state/vs-kubernetes/tools/minikube/linux-arm64/minikube"
+    }
 }
