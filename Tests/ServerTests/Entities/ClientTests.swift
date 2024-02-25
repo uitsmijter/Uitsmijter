@@ -111,7 +111,7 @@ final class ClientTests: XCTestCase {
         entities.addEntity(entity: client)
 
         // wait for hook
-        wait(for: [expectation], timeout: 10)
+        wait(for: [expectation], timeout: TestDefaults.waitTimeout)
         entities.storage.hook = nil
 
         XCTAssertEqual(entities.storage.clients.count, 1)
@@ -153,7 +153,7 @@ final class ClientTests: XCTestCase {
         entities.removeEntity(entity: client)
 
         // wait for hook
-        wait(for: [expectation], timeout: 10)
+        wait(for: [expectation], timeout: TestDefaults.waitTimeout)
         entities.storage.hook = nil
         XCTAssertEqual(entities.storage.clients.count, 0)
 

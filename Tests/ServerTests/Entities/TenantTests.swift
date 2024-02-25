@@ -128,7 +128,7 @@ final class TenantTests: XCTestCase {
         entities.addEntity(entity: tenant)
 
         // wait for hook
-        wait(for: [expectation], timeout: 10)
+        wait(for: [expectation], timeout: TestDefaults.waitTimeout)
         entities.storage.hook = nil
 
         XCTAssertEqual(entities.storage.tenants.count, 1)
@@ -176,7 +176,7 @@ final class TenantTests: XCTestCase {
         // entities.storage.hook = nil
 
         // wait for hook
-        wait(for: [expectation], timeout: 10)
+        wait(for: [expectation], timeout: TestDefaults.waitTimeout)
         entities.storage.hook = nil
 
         XCTAssertEqual(entities.storage.tenants.count, 0)

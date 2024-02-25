@@ -4,5 +4,7 @@
         
     },
     "lldb.library": "/usr/lib/liblldb.so",
-    "lldb.launch.expressions": "native"
+    "lldb.launch.expressions": "native",
+    "telemetry.telemetryLevel": "off",
+    "swift.searchSubfoldersForPackages": true
 }

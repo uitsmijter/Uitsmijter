@@ -62,7 +62,7 @@ final class UserLoginProviderTests: XCTestCase {
                 }
             }
         }
-        wait(for: [expect], timeout: 10)
+        wait(for: [expect], timeout: TestDefaults.waitTimeout)
     }
 
     func testGetExampleAsync() async throws {

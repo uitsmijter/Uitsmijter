@@ -50,7 +50,7 @@ final class UserValidationProviderTests: XCTestCase {
                 }
             }
         }
-        wait(for: [expect], timeout: 10)
+        wait(for: [expect], timeout: TestDefaults.waitTimeout)
     }
 
     func testIsValid() async throws {
