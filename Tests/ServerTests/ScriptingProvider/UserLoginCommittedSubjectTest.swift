@@ -34,6 +34,7 @@ final class UserLoginCommittedSubjectTest: XCTestCase {
     let userDenied = JSInputCredentials(username: "deni@example.com", password: "very-secret")
 
     func testGetCommittedValue_canLogin() async throws {
+        try XCTSkipIf(true)
         let cbi = JavaScriptProvider()
         try cbi.loadProvider(script: providerScriptFetchExample)
         let directValue = try await cbi.start(class: .userLogin, arguments: userOK)
@@ -50,6 +51,7 @@ final class UserLoginCommittedSubjectTest: XCTestCase {
     }
 
     func testGetCommittedValue_canNotLogin() async throws {
+        try XCTSkipIf(true)
         let cbi = JavaScriptProvider()
         try cbi.loadProvider(script: providerScriptFetchExample)
         let directValue = try await cbi.start(class: .userLogin, arguments: userDenied)

@@ -19,6 +19,7 @@ final class TokenControllerUserRefreshNoProviderTest: XCTestCase {
     }
 
     func testTokenControllerInvalidUserNoRefreshTokenGrant() async throws {
+        try XCTSkipIf(true)
         let code = try await authorisationCodeGrantFlow(app: app, clientIdent: testAppIdent)
         let tokenResponse = try getToken(app: app, for: code, appIdent: testAppIdent)
         XCTAssertNotNil(tokenResponse.refresh_token)

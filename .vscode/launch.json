@@ -1,23 +1,51 @@
 {
-    "version": "0.2.0",
     "configurations": [
         {
             "type": "lldb",
             "request": "launch",
-            "name": "Run Uitsmijter",
-            "program": "${workspaceFolder}/.build/debug/Uitsmijter",
+            "sourceLanguages": [
+                "swift"
+            ],
             "args": [],
-            "cwd": "${workspaceFolder}",
+            "cwd": "${workspaceFolder:Project}",
+            "name": "Run Uitsmijter",
+            "program": "${workspaceFolder:Project}/.build/debug/Uitsmijter",
             "preLaunchTask": "swift-build"
         },
         {
             "type": "lldb",
             "request": "launch",
+            "sourceLanguages": [
+                "swift"
+            ],
             "name": "Test Uitsmijter",
             "program": "${workspaceFolder}/.build/debug/UitsmijterPackageTests.xctest",
             "args": [],
             "cwd": "${workspaceFolder}",
             "preLaunchTask": "swift-build-tests"
+        },
+        {
+            "type": "lldb",
+            "request": "launch",
+            "sourceLanguages": [
+                "swift"
+            ],
+            "name": "Parallel Test Uitsmijter",
+            "program": "swift-test",
+            "args": [
+                "--scratch-path",
+                "${workspaceFolder}/.build",
+                "--num-workers",
+                "4",
+                "--parallel",
+                "--xunit-output",
+                ".build/testresults/xunit.xml",
+                "-Xcc",
+                "-I/usr/include/webkitgtk-4.0",
+                "-Xcc",
+                "-I/usr/include/webkitgtk-4.0/JavaScriptCore"
+            ],
+            "cwd": "${workspaceFolder}"
         },
         {
             "type": "lldb",

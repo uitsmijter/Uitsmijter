@@ -4,7 +4,13 @@
     {
       "label": "swift-build",
       "type": "shell",
-      "command": "swift build"
+      "command": "swift",
+      "args": [
+        "build",
+        "--manifest-cache",  "shared",
+        "-Xcc", "-I/usr/include/webkitgtk-4.0",
+        "-Xcc", "-I/usr/include/webkitgtk-4.0/JavaScriptCore"
+      ]
     },
     {
       "label": "swift-build-tests",
@@ -13,7 +19,20 @@
       "group": "build",
       "args": [
         "build",
-        "--build-tests"
+        "--build-tests",
+        "--manifest-cache",  "shared", 
+        "-Xcc", "-I/usr/include/webkitgtk-4.0",
+        "-Xcc", "-I/usr/include/webkitgtk-4.0/JavaScriptCore"
+      ]
+    },
+    {
+      "label": "prepare-folders",
+      "type": "process",
+      "command": "mkdir",
+      "group": "build",
+      "args": [
+        "-p",
+        ".build/testresults/",
       ]
     }
   ]
