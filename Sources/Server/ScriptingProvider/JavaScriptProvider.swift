@@ -25,6 +25,7 @@ class JavaScriptProvider: JSFunctionsDelegate {
     /// - See: committedResults
     ///
     private let group = DispatchGroup()
+    private let queue = DispatchQueue(label: "js_evaluate", qos: .default, attributes: .concurrent)
 
     /// The execution inside the javascript can not be monitored from outside the script itself. To get track of the
     /// state of the javascript, it has to `commit` its final results back into the caller stack once. A `DispatchGroup`
@@ -163,9 +164,14 @@ class JavaScriptProvider: JSFunctionsDelegate {
             class classToRun: ScriptClassExecution,
             arguments args: JSInputParameterProtocol?
     ) async throws -> [String?] {
-        try await withCheckedThrowingContinuation { continuation in
+        Log.info("1")
+        let m = try await withCheckedThrowingContinuation { continuation in
+            Log.info("2")
             start(class: classToRun, arguments: args, completion: continuation.resume(with:))
+            Log.info("3")
         }
+        Log.info("4")
+        return m
     }
 
     /// Callback method to execute a specific function in the javascript context
@@ -184,7 +190,6 @@ class JavaScriptProvider: JSFunctionsDelegate {
             ) -> Void) {
         // enter the DispatchGroup to wait for a commit from within the javascript
         group.enter()
-
         do {
             // evaluate the script and get the result back. The result will be logged only, because the
             // script should run until the `commit` function is called.
@@ -200,28 +205,39 @@ class JavaScriptProvider: JSFunctionsDelegate {
                     Log.info("Provider script omitted result: \(stringValue)")
                 }
             }
+            if result.isBoolean {
+                let boolValue = result.booleanValue 
+                Log.info("Provider script omitted boolean result: \(boolValue)")
+            }
         } catch {
             // toJSON is the only function that can throw an exception. No need to switch/case between error causes
             completion(.failure(.parserError(error.localizedDescription)))
             return
         }
-
         // wait that the DispatchGroup did notified and take the committed result
-        group.notify(queue: DispatchQueue.global(qos: .background)) { [self] in
+        
+        group.notify(queue: queue) { [self] in
+            Log.info("-- Notyfy")
             if let committedResults = committedResults {
                 completion(.success(committedResults))
+                Log.info("-r:2")
                 return
             }
             // Fallthrough
             completion(.failure(.noResults))
+            Log.info("-r:3")
             return
         }
 
         // Wait until timeout for the script to evaluate till commit is called
+        Log.info("-c")
         _ = group.wait(timeout: DispatchTime.now() + DispatchTimeInterval.seconds(Constants.PROVIDER.SCRIPT_TIMEOUT))
+        
+        Log.info("-d")
         if committedResults == nil {
-            completion(.failure(.timeout))
+             completion(.failure(.timeout))
         }
+        group.suspend()
     }
 
     /// Returns the property value from an initialized class as a Double

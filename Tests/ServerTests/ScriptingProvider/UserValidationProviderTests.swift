@@ -26,7 +26,6 @@ final class UserValidationProviderTests: XCTestCase {
     let userDenied = JSInputUsername(username: "deni@example.com")
 
     func testGetExampleCallback() async throws {
-        try XCTSkipIf(true)
         let cbi = JavaScriptProvider()
         try cbi.loadProvider(script: providerScript)
         let expect = expectation(description: "userValidate response")
@@ -55,7 +54,6 @@ final class UserValidationProviderTests: XCTestCase {
     }
 
     func testIsValid() async throws {
-        try XCTSkipIf(true)
         let cbi = JavaScriptProvider()
         try cbi.loadProvider(script: providerScript)
         _ = try await cbi.start(class: .userValidate, arguments: userOK)
@@ -65,11 +63,9 @@ final class UserValidationProviderTests: XCTestCase {
     }
 
     func testIsInvalid() async throws {
-        try XCTSkipIf(true)
         let cbi = JavaScriptProvider()
         try cbi.loadProvider(script: providerScript)
         _ = try await cbi.start(class: .userValidate, arguments: userDenied)
-
         let isValid: Bool = try cbi.getValue(class: .userValidate, property: "isValid")
         XCTAssertFalse(isValid)
     }

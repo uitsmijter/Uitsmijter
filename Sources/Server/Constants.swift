@@ -48,6 +48,7 @@ struct Constants {
 
     /// Settings for script providers
     struct PROVIDER {
+        static let FETCH_TIMEOUT = 15
         static let SCRIPT_TIMEOUT = 30
     }
 

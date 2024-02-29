@@ -37,11 +37,22 @@ final class UserLoginProviderTests: XCTestCase {
     let userOK = JSInputCredentials(username: "ok@example.com", password: "very-secret")
     let userDenied = JSInputCredentials(username: "deni@example.com", password: "very-secret")
 
+    let app = Application(.testing)
+
+    override func setUp() {
+        super.setUp()
+        try? configure(app)
+    }
+
+    override func tearDown() {
+        app.shutdown()
+    }
+
     func testGetExampleCallback() async throws {
-        try XCTSkipIf(true)
         let cbi = JavaScriptProvider()
         try cbi.loadProvider(script: providerScriptFetchExample)
         let expect = expectation(description: "userValidate response")
+
         cbi.start(class: .userLogin, arguments: userOK) { result in
             do {
                 let bodies = try result.get()

@@ -22,7 +22,8 @@ let package = Package(
             .package(url: "https://github.com/soto-project/soto.git", from: "6.0.0"),
             .package(url: "https://github.com/swiftkube/client.git", from: "0.15.0"),
             .package(url: "https://github.com/aus-der-Technik/FileMonitor.git", from: "1.1.0"),
-            .package(url: "https://github.com/DimaRU/PackageBuildInfo", from: "1.0.1")
+            .package(url: "https://github.com/DimaRU/PackageBuildInfo", from: "1.0.1"),
+            .package(url: "https://github.com/swift-server/async-http-client.git", from: "1.9.0")
         ],
 
         targets: [
@@ -39,7 +40,8 @@ let package = Package(
                         "CryptoSwift",
                         "Yams",
                         .product(name: "SwiftkubeClient", package: "client"),
-                        .product(name: "FileMonitor", package: "FileMonitor")
+                        .product(name: "FileMonitor", package: "FileMonitor"),
+                        .product(name: "AsyncHTTPClient", package: "async-http-client"),
                     ],
                     swiftSettings: [
                         // Enable better optimizations when building in Release configuration. Despite the use of
