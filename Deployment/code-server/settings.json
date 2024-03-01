@@ -7,5 +7,6 @@
     "lldb.launch.expressions": "native",
     "telemetry.telemetryLevel": "off",
     "swift.searchSubfoldersForPackages": true,
-    "workbench.startupEditor": "none"
+    "workbench.startupEditor": "none",
+    "swift.backgroundCompilation": true
 }

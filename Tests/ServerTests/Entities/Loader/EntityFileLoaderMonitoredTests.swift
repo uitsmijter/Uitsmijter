@@ -50,13 +50,11 @@ final class EntityFileLoaderMonitoredTests: XCTestCase {
 extension EntityFileLoaderMonitoredTests {
 
     func testEmptyTenants() async throws {
-        try XCTSkipIf(true)
         XCTAssertEqual(EntityStorage.shared.tenants.count, 0)
         XCTAssertEqual(EntityStorage.shared.clients.count, 0)
     }
 
     func testAddTenant() async throws {
-        try XCTSkipIf(true)
         let tenantUrl = temporaryDirectory
                 .appendingPathComponent("Configurations")
                 .appendingPathComponent("Tenants")
@@ -83,7 +81,6 @@ extension EntityFileLoaderMonitoredTests {
     }
 
     func testChangeTenant() async throws {
-        try XCTSkipIf(true)
         let tenantUrl = temporaryDirectory
                 .appendingPathComponent("Configurations")
                 .appendingPathComponent("Tenants")
@@ -136,7 +133,6 @@ extension EntityFileLoaderMonitoredTests {
     }
 
     func testDeleteTenant() async throws {
-        try XCTSkipIf(true)
         let tenantUrl = temporaryDirectory
                 .appendingPathComponent("Configurations")
                 .appendingPathComponent("Tenants")
@@ -191,7 +187,6 @@ extension EntityFileLoaderMonitoredTests {
 extension EntityFileLoaderMonitoredTests {
 
     func testAddClient() async throws {
-        try XCTSkipIf(true)
         let tenantUrl = temporaryDirectory
                 .appendingPathComponent("Configurations")
                 .appendingPathComponent("Tenants")
@@ -233,7 +228,6 @@ extension EntityFileLoaderMonitoredTests {
     }
 
     func testChangeClient() async throws {
-        try XCTSkipIf(true)
         let clientUrl = temporaryDirectory
                 .appendingPathComponent("Configurations")
                 .appendingPathComponent("Clients")
@@ -283,7 +277,6 @@ extension EntityFileLoaderMonitoredTests {
     }
 
     func testChangeClientOtherIndent() async throws {
-        try XCTSkipIf(true)
         let clientUrl = temporaryDirectory
                 .appendingPathComponent("Configurations")
                 .appendingPathComponent("Clients")
@@ -333,7 +326,6 @@ extension EntityFileLoaderMonitoredTests {
     }
 
     func testDeleteClient() async throws {
-        try XCTSkipIf(true)
         let clientUrl = temporaryDirectory
                 .appendingPathComponent("Configurations")
                 .appendingPathComponent("Clients")

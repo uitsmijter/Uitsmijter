@@ -164,14 +164,9 @@ class JavaScriptProvider: JSFunctionsDelegate {
             class classToRun: ScriptClassExecution,
             arguments args: JSInputParameterProtocol?
     ) async throws -> [String?] {
-        Log.info("1")
-        let m = try await withCheckedThrowingContinuation { continuation in
-            Log.info("2")
+        return try await withCheckedThrowingContinuation { continuation in
             start(class: classToRun, arguments: args, completion: continuation.resume(with:))
-            Log.info("3")
         }
-        Log.info("4")
-        return m
     }
 
     /// Callback method to execute a specific function in the javascript context
@@ -217,23 +212,18 @@ class JavaScriptProvider: JSFunctionsDelegate {
         // wait that the DispatchGroup did notified and take the committed result
         
         group.notify(queue: queue) { [self] in
-            Log.info("-- Notyfy")
             if let committedResults = committedResults {
                 completion(.success(committedResults))
-                Log.info("-r:2")
                 return
             }
             // Fallthrough
             completion(.failure(.noResults))
-            Log.info("-r:3")
             return
         }
 
         // Wait until timeout for the script to evaluate till commit is called
-        Log.info("-c")
         _ = group.wait(timeout: DispatchTime.now() + DispatchTimeInterval.seconds(Constants.PROVIDER.SCRIPT_TIMEOUT))
         
-        Log.info("-d")
         if committedResults == nil {
              completion(.failure(.timeout))
         }

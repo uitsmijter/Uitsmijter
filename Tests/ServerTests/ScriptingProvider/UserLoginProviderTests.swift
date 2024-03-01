@@ -78,7 +78,6 @@ final class UserLoginProviderTests: XCTestCase {
     }
 
     func testGetExampleAsync() async throws {
-        try XCTSkipIf(true)
         let cbi = JavaScriptProvider()
         try cbi.loadProvider(script: providerScriptFetchExample)
         let bodies = try await cbi.start(class: .userLogin, arguments: userOK)
@@ -87,7 +86,6 @@ final class UserLoginProviderTests: XCTestCase {
     }
 
     func testGetExample_canLogin() async throws {
-        try XCTSkipIf(true)
         let cbi = JavaScriptProvider()
         try cbi.loadProvider(script: providerScriptFetchExample)
         _ = try await cbi.start(class: .userLogin, arguments: userOK)
@@ -97,7 +95,6 @@ final class UserLoginProviderTests: XCTestCase {
     }
 
     func testGetExample_canNotLogin() async throws {
-        try XCTSkipIf(true)
         let cbi = JavaScriptProvider()
         try cbi.loadProvider(script: providerScriptFetchExample)
         _ = try await cbi.start(class: .userLogin, arguments: userDenied)
@@ -107,7 +104,6 @@ final class UserLoginProviderTests: XCTestCase {
     }
 
     func testGetExample_ProfileString() async throws {
-        try XCTSkipIf(true)
         let cbi = JavaScriptProvider()
         try cbi.loadProvider(script: providerScriptFetchExample)
         _ = try await cbi.start(class: .userLogin, arguments: userOK)
@@ -128,7 +124,6 @@ final class UserLoginProviderTests: XCTestCase {
                                     """
 
     func testGetScriptThatDoesNotHaveUserProfileProperty() async throws {
-        try XCTSkipIf(true)
         let cbi = JavaScriptProvider()
         try XCTAssertThrowsError(cbi.loadProvider(script: providerScriptSyntaxError))
     }
