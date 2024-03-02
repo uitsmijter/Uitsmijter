@@ -2,7 +2,7 @@ import Foundation
 
 import XCTVapor
 @testable import Server
- 
+
 final class InterceptorControllerDifferentTenantsTest: XCTestCase {
     let testAppIdent1 = UUID()
     let testAppIdent2 = UUID()

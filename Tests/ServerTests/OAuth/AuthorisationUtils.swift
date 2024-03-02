@@ -400,14 +400,7 @@ func getCode(
 
     // check code requirements
     XCTAssertEqual(codeValue.count, 16)
-
-    // check cookie
-//    let cookie = response.headers["set-cookie"].first
-//    XCTAssertContains(cookie, "uitsmijter=")
-//    XCTAssertContains(cookie, "Max-Age=")
-//    XCTAssertContains(cookie, "Path=/")
-//    XCTAssertContains(cookie, "SameSite=Strict")
-
+    
     return codeValue
 }
 

@@ -86,7 +86,7 @@ final class AuthCodeStorageRedisTest: XCTestCase {
                  XCTFail("No storage")
                  return
              }
-             
+
              try storage.set(authSession: session_1)
              XCTAssertEqual(mock.commandStack.count, 3)
              try storage.set(authSession: session_2)

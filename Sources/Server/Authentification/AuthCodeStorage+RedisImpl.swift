@@ -17,7 +17,7 @@ class RedisAuthCodeStorage: AuthCodeStorageProtocol {
         }
 
         let sessionData = try JSONEncoder.main.encode(session)
-        try redis.set(key, to: String(data: sessionData, encoding: .utf8)).wait()        
+        try redis.set(key, to: String(data: sessionData, encoding: .utf8)).wait()
 
         if let ttl = session.ttl {
             _ = redis.expire(key, after: TimeAmount.seconds(ttl))

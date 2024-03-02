@@ -2,7 +2,7 @@ import Foundation
 
 import XCTVapor
 @testable import Server
- 
+
 final class InterceptorControllerNotConfiguredInClientTest: XCTestCase {
     let testAppIdent = UUID()
     let app = Application(.testing)
