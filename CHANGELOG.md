@@ -3,6 +3,8 @@
 - Feature: Add tooling: `remove` - to clear out all docker resources and clean up build folder
 - Feature: Add tooling: `code` - starts vscode in docker in brower
 
+- Change: Scripting Provider `fetch` method uses AsnHTTPClient instead of FoundationNetwork's URLSession
+
 - Update: to Swift 5.9.2
 
 
