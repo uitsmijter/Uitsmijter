@@ -1,4 +1,4 @@
-import Foundation 
+import Foundation
 import JXKit
 import AsyncHTTPClient
 import NIO
@@ -29,38 +29,48 @@ extension JSFunctions {
             eventLoopGroupProvider: .singleton,
             configuration: clientConfiguration
         )
-        
 
         func doDefer() {
-            try! httpClient.syncShutdown()
+            do {
+                try httpClient.syncShutdown()
+            } catch {
+                Log.error("Can't shutdown http client. \(error.localizedDescription)")
+            }
         }
 
         // swiftlint:disable:next closure_body_length
         return JXValue(newFunctionIn: ctx) { context, _, arguments in
             // swiftlint:disable:next closure_body_length
             JXValue(newPromiseIn: context) { _, resolve, reject in
+                /// Internal function that rejects thre request, because of any error.
+                /// Parameter: 
+                /// - error, String that describes the error
+                func requestFailed(error: String) {
+                    Log.error("Request failed: \(error)")
+                    reject.call(withArguments: [
+                        JXValue(newErrorFromMessage: error, in: context)
+                    ])
+                }
+
                 guard let urlArgument = arguments.first?.stringValue else {
-                    let err = "Can not fetch without url"
-                    Log.error("\(err)")
-                    reject.call(withArguments: [JXValue(newErrorFromMessage: err, in: ctx)])
+                    requestFailed(error: "Can not fetch without url")
                     return
                 }
                 guard let url = URL(string: urlArgument) else {
-                    let err = "Can not fetch, because url is not valid"
-                    Log.error("\(err)")
-                    reject.call(withArguments: [JXValue(newErrorFromMessage: err, in: ctx)])
+                    requestFailed(error: "Can not fetch, because url is not valid")
                     return
                 }
 
                 let settingsArgument: JXValue? = arguments.count > 1 ? arguments[1] : nil
                 let method: String = settingsArgument?["method"].stringValue ?? "get"
                 Log.info("Fetch \(method): \(url)")
-            
-                guard var request = try? HTTPClient.Request(url: url.absoluteString, method: .RAW(value: method.uppercased() )) else {
-                    reject.call(withArguments: [
-                        JXValue(newErrorFromMessage: "Can not construct a request to \(url.absoluteString)", in: context)
-                    ])
-                    return
+
+                guard var request = try? HTTPClient.Request(
+                    url: url.absoluteString,
+                    method: .RAW(value: method.uppercased() )
+                    ) else {
+                        requestFailed(error: "Can not construct a request to \(url.absoluteString)")
+                        return
                 }
 
                 if let headers = settingsArgument?["headers"].dictionary {
@@ -72,51 +82,46 @@ extension JSFunctions {
                 if let body = settingsArgument?["body"].stringValue, body != "undefined" {
                     request.body = .string(body)
                 }
-                
+
                 httpClient.execute(request: request).whenComplete { result in
                     switch result {
                         case .failure(let error):
-                            Log.error("Request failed: \(error.localizedDescription)")
-                            dump(error)
-                            reject.call(withArguments: [
-                                JXValue(newErrorFromMessage: error.localizedDescription, in: context)
-                            ])
+                            requestFailed(error: error.localizedDescription)
                         case .success(let response):
-                            switch response.status.code {
-                                case (200...299):
-                                    let code = response.status.code
-                                    let body = String(buffer: response.body ?? ByteBuffer(string: "String"))
-                                    Log.info(
-                                            "Response from \(urlArgument) with status code \(code): \(code != 200 ? body : "length: \(body.count)")"
-                                    )
+                        switch response.status.code {
+                        case (200...299):
+                            let code = response.status.code
+                            let body = String(buffer: response.body ?? ByteBuffer(string: "String"))
+                            Log.info("""
+                                        Response from \(urlArgument) 
+                                        with status code \(code): \(code != 200 ? body : "length: \(body.count)")
+                                        """)
 
-                                    let fetchResponse = FetchResponse(code: code, body: body)
-                                    let jsonResponse = try? encoder.encode(fetchResponse)
+                            let fetchResponse = FetchResponse(code: code, body: body)
+                            let jsonResponse = try? encoder.encode(fetchResponse)
 
-                                    if let jsonResponseData = jsonResponse,
-                                    let jsonResponseString = String(data: jsonResponseData, encoding: .utf8) {
-                                        if let argument = JXValue(json: jsonResponseString, in: context) {
-                                            Log.info("Resolve \(context.ident)")
-                                            resolve.call(withArguments: [
-                                                argument
-                                            ])
-                                        } else {
-                                            Log.info("Reject \(context.ident)")
-                                            resolve.call()
-                                        }
-                                    } else {
-                                        Log.error("Reject \(context.ident) - Can not encode response")
-                                        reject.call(withArguments: [
-                                            JXValue(newErrorFromMessage: "Can not encode response", in: ctx)
-                                        ])
-                                    }
-                                default:
-                                    let err = "Call to \(urlArgument) failed. Error status code \(response.status.code)."
-                                    Log.error("Request failed: \(err)")
-                                    reject.call(withArguments: [
-                                        JXValue(newErrorFromMessage: err, in: context)
+                            if let jsonResponseData = jsonResponse,
+                            let jsonResponseString = String(data: jsonResponseData, encoding: .utf8) {
+                                if let argument = JXValue(json: jsonResponseString, in: context) {
+                                    Log.info("Resolve \(context.ident)")
+                                    resolve.call(withArguments: [
+                                        argument
                                     ])
+                                } else {
+                                    Log.info("Reject \(context.ident)")
+                                    resolve.call()
+                                }
+                            } else {
+                                Log.error("Reject \(context.ident) - Can not encode response")
+                                reject.call(withArguments: [
+                                    JXValue(newErrorFromMessage: "Can not encode response", in: ctx)
+                                ])
                             }
+                        default:
+                            requestFailed(
+                                error: "Call to \(urlArgument) failed. Error status code \(response.status.code)."
+                            )
+                        }
                     }
                 }
             } ?? JXValue(nullIn: context)

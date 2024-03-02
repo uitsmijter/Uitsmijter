@@ -67,7 +67,7 @@ public func configure(_ app: Application) throws {
     encoder.dateEncodingStrategy = .iso8601
     // Main Encoder & Decoder
     JSONEncoder.configureMainEncoder { encoder in
-        encoder.dateEncodingStrategy = .deferredToDate //.iso8601
+        encoder.dateEncodingStrategy = .deferredToDate
     }
     JSONDecoder.configureMainDecoder { decoder in
         decoder.dateDecodingStrategy = .iso8601

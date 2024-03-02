@@ -167,6 +167,7 @@ class JavaScriptProvider: JSFunctionsDelegate {
         return try await withCheckedThrowingContinuation { continuation in
             start(class: classToRun, arguments: args, completion: continuation.resume(with:))
         }
+
     }
 
     /// Callback method to execute a specific function in the javascript context
@@ -201,7 +202,7 @@ class JavaScriptProvider: JSFunctionsDelegate {
                 }
             }
             if result.isBoolean {
-                let boolValue = result.booleanValue 
+                let boolValue = result.booleanValue
                 Log.info("Provider script omitted boolean result: \(boolValue)")
             }
         } catch {
@@ -210,7 +211,7 @@ class JavaScriptProvider: JSFunctionsDelegate {
             return
         }
         // wait that the DispatchGroup did notified and take the committed result
-        
+
         group.notify(queue: queue) { [self] in
             if let committedResults = committedResults {
                 completion(.success(committedResults))
@@ -223,7 +224,7 @@ class JavaScriptProvider: JSFunctionsDelegate {
 
         // Wait until timeout for the script to evaluate till commit is called
         _ = group.wait(timeout: DispatchTime.now() + DispatchTimeInterval.seconds(Constants.PROVIDER.SCRIPT_TIMEOUT))
-        
+
         if committedResults == nil {
              completion(.failure(.timeout))
         }
