@@ -23,53 +23,6 @@
             "args": [],
             "cwd": "${workspaceFolder}",
             "preLaunchTask": "swift-build-tests"
-        },
-        {
-            "type": "lldb",
-            "request": "launch",
-            "sourceLanguages": [
-                "swift"
-            ],
-            "name": "Parallel Test Uitsmijter",
-            "program": "swift-test",
-            "args": [
-                "--scratch-path",
-                "${workspaceFolder}/.build",
-                "--num-workers",
-                "4",
-                "--parallel",
-                "--xunit-output",
-                ".build/testresults/xunit.xml",
-                "-Xcc",
-                "-I/usr/include/webkitgtk-4.0",
-                "-Xcc",
-                "-I/usr/include/webkitgtk-4.0/JavaScriptCore"
-            ],
-            "cwd": "${workspaceFolder}"
-        },
-        {
-            "type": "lldb",
-            "request": "launch",
-            "sourceLanguages": [
-                "swift"
-            ],
-            "args": [],
-            "cwd": "${workspaceFolder:Project}",
-            "name": "Debug Uitsmijter",
-            "program": "${workspaceFolder:Project}/.build/debug/Uitsmijter",
-            "preLaunchTask": "swift: Build Debug Uitsmijter"
-        },
-        {
-            "type": "lldb",
-            "request": "launch",
-            "sourceLanguages": [
-                "swift"
-            ],
-            "args": [],
-            "cwd": "${workspaceFolder:Project}",
-            "name": "Release Uitsmijter",
-            "program": "${workspaceFolder:Project}/.build/release/Uitsmijter",
-            "preLaunchTask": "swift: Build Release Uitsmijter"
         }
     ]
 }

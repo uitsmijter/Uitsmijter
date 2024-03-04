@@ -8,5 +8,6 @@
     "telemetry.telemetryLevel": "off",
     "swift.searchSubfoldersForPackages": true,
     "workbench.startupEditor": "none",
-    "swift.backgroundCompilation": true
+    "swift.backgroundCompilation": true,
+    "swift.autoGenerateLaunchConfigurations": false
 }
