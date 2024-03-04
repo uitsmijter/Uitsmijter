@@ -36,7 +36,6 @@ final class TokenControllerPasswordGrantTest: XCTestCase {
     }
 
     func testTokenControllerPasswordGrantWrongUser() async throws {
-        try XCTSkipIf(true)
         let response = try app.sendRequest(.POST, "/token", beforeRequest: { req in
             let tokenRequest = PasswordTokenRequest(
                     grant_type: .password,
