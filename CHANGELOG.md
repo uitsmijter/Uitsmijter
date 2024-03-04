@@ -1,3 +1,15 @@
+# 0.9.6
+
+- Feature: Add tooling: `remove` - to clear out all docker resources and clean up build folder
+- Feature: Add tooling: `code` - starts vscode in docker in brower
+
+- Fix: Change encoding date from `.iso8601` to `.deferredToDate` 
+
+- Change: Scripting Provider `fetch` method uses AsnHTTPClient instead of FoundationNetwork's URLSession
+
+- Update: to Swift 5.9.2
+
+
 # 0.9.5
 
 Released at 10.11.2023

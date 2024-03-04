@@ -238,7 +238,6 @@ func generateTestClientWithSecret(
 ) {
     EntityStorage.shared.tenants.removeAll()
     EntityStorage.shared.clients.removeAll()
-
     let tenant = createTenant(
             script: script ?? .frodoBaker,
             interceptor: .init(
@@ -322,7 +321,6 @@ func validAuthorisation(
         XCTFail("expirationDate can not be set")
         throw "Date failed"
     }
-
     let payload = Payload(
             subject: "test",
             expiration: .init(value: expirationDate),
@@ -400,14 +398,6 @@ func getCode(
 
     // check code requirements
     XCTAssertEqual(codeValue.count, 16)
-
-    // check cookie
-//    let cookie = response.headers["set-cookie"].first
-//    XCTAssertContains(cookie, "uitsmijter=")
-//    XCTAssertContains(cookie, "Max-Age=")
-//    XCTAssertContains(cookie, "Path=/")
-//    XCTAssertContains(cookie, "SameSite=Strict")
-
     return codeValue
 }
 

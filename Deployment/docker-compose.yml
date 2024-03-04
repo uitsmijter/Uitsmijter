@@ -5,6 +5,7 @@ x-shared_environment: &shared_environment
   LOG_FORMAT: ${LOG_FORMAT:-console}
   BASEIMAGE: ${BASEIMAGE}
   BUILDBOX: ${BUILDBOX}
+  SWIFT_VERSION: "${SWIFT_VERSION}"
   TAG: ${TAG:-latest}
   RUNTIME_IMAGE: "${IMAGENAME}-runtime:latest"
 
@@ -45,8 +46,11 @@ services:
       - -c
       - |
         set -e
+        echo "Resolve...."
         swift package resolve
+        echo "Build...."
         swift build -c release --manifest-cache shared -Xcc -I/usr/include/webkitgtk-4.0 -Xcc -I/usr/include/webkitgtk-4.0/JavaScriptCore
+        echo "Copy release"
         mkdir -p Deployment/Release/Linux
         cp "$$(swift build --package-path /build -c release --show-bin-path)/Uitsmijter" Deployment/Release/Linux/
 
@@ -118,6 +122,20 @@ services:
         LOG_LEVEL=error /app/bin/Uitsmijter routes
         echo "Starting Uitsmijter..."
         /app/bin/Uitsmijter serve --env production --hostname 0.0.0.0 --port 8080
+
+  code:
+    image: ghcr.io/uitsmijter/swift-codeserver:1.0.1
+    environment:
+      <<: *shared_environment
+    ports:
+      - "31546:31546"
+    volumes:
+      - ..:/Project
+      - ./code-server/settings.json:/root/.local/share/code-server/User/settings.json
+      - build_data:/Project/.build
+    privileged: true
+    pid: "host"
+
 
 volumes:
   build_data:

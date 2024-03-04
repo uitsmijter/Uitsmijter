@@ -10,8 +10,8 @@ actor TenantTemplateLoader {
 
     let fileManager = FileManager.default
 
-    func operate(operation op: TenantTemplateLoaderOperations) async {
-        switch op {
+    func operate(operation: TenantTemplateLoaderOperations) async {
+        switch operation {
         case .create(let tenant):
             await create(tenant: tenant)
         case .remove(let tenant):

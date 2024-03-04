@@ -2,7 +2,6 @@ import Foundation
 import Vapor
 import CryptoSwift
 
-
 final class RequestClientMiddleware: AsyncMiddleware {
 
     enum RequestClientMiddlewareError: Error {

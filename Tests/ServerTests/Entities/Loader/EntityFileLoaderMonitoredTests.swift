@@ -75,7 +75,7 @@ extension EntityFileLoaderMonitoredTests {
 
         try createTenant(tenantUrl: tenantUrl)
 
-        wait(for: [expectation], timeout: 10)
+        wait(for: [expectation], timeout: TestDefaults.waitTimeout )
         try await Task.sleep(nanoseconds: sleepTime)
         XCTAssertEqual(EntityStorage.shared.tenants.count, 1)
     }
@@ -123,7 +123,7 @@ extension EntityFileLoaderMonitoredTests {
               silent_login: false
             """.write(to: tenantUrl, atomically: false, encoding: .utf8)
 
-        wait(for: [expectation], timeout: 10)
+        wait(for: [expectation], timeout: TestDefaults.waitTimeout)
         try await Task.sleep(nanoseconds: sleepTime)
 
         XCTAssertEqual(EntityStorage.shared.tenants.count, 1)
@@ -154,7 +154,7 @@ extension EntityFileLoaderMonitoredTests {
         }
 
         try FileManager.default.removeItem(at: tenantUrl)
-        wait(for: [expectation], timeout: 10)
+        wait(for: [expectation], timeout: TestDefaults.waitTimeout)
 
         try await Task.sleep(nanoseconds: sleepTime)
         XCTAssertEqual(EntityStorage.shared.tenants.count, 0)
@@ -218,10 +218,10 @@ extension EntityFileLoaderMonitoredTests {
         let lastCount = EntityStorage.shared.clients.count
 
         try createTenant(tenantUrl: tenantUrl)
-        wait(for: [tenantExpectation], timeout: 10)
+        wait(for: [tenantExpectation], timeout: TestDefaults.waitTimeout)
 
         try createClient(clientUrl: clientUrl)
-        wait(for: [clientExpectation], timeout: 10)
+        wait(for: [clientExpectation], timeout: TestDefaults.waitTimeout)
 
         try await Task.sleep(nanoseconds: sleepTime)
         XCTAssertEqual(EntityStorage.shared.clients.count, lastCount + 1)
@@ -267,7 +267,7 @@ extension EntityFileLoaderMonitoredTests {
               isPkceOnly: false
             """.write(to: clientUrl, atomically: false, encoding: .utf8)
 
-        wait(for: [expectation], timeout: 10)
+        wait(for: [expectation], timeout: TestDefaults.waitTimeout)
 
         try await Task.sleep(nanoseconds: sleepTime)
         XCTAssertEqual(EntityStorage.shared.clients.count, 1)
@@ -316,7 +316,7 @@ extension EntityFileLoaderMonitoredTests {
                 isPkceOnly: false
             """.write(to: clientUrl, atomically: false, encoding: .utf8)
 
-        wait(for: [expectation], timeout: 10)
+        wait(for: [expectation], timeout: TestDefaults.waitTimeout)
 
         try await Task.sleep(nanoseconds: sleepTime)
         XCTAssertEqual(EntityStorage.shared.clients.count, 1)
@@ -345,7 +345,7 @@ extension EntityFileLoaderMonitoredTests {
         }
 
         try FileManager.default.removeItem(at: clientUrl)
-        wait(for: [expectation], timeout: 10)
+        wait(for: [expectation], timeout: TestDefaults.waitTimeout)
 
         try await Task.sleep(nanoseconds: sleepTime)
         XCTAssertEqual(EntityStorage.shared.clients.count, 0)

@@ -1,0 +1,13 @@
+{
+    "workbench.tree.indent": 10,
+    "terminal.integrated.automationProfile.osx": {
+        
+    },
+    "lldb.library": "/usr/lib/liblldb.so",
+    "lldb.launch.expressions": "native",
+    "telemetry.telemetryLevel": "off",
+    "swift.searchSubfoldersForPackages": true,
+    "workbench.startupEditor": "none",
+    "swift.backgroundCompilation": true,
+    "swift.autoGenerateLaunchConfigurations": false
+}

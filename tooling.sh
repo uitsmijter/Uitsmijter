@@ -14,6 +14,7 @@ echo ""
 help() {
   echo "Choose one or more commands: "
   echo ""
+  echo "        -rm   | --remove          | remove        Remove docker volumes, images and build directory"
   echo "        -b    | --build           | build         Build the project"
   echo "        -l    | --lint            | lint          Check code quality"
   echo "        -t    | --test            | test          Run all UnitTests"
@@ -22,6 +23,7 @@ help() {
   echo "        -s    | --release         | release       Build a release version, can have an optional added image "
   echo "                                                  name (with optional tag)"
   echo "        -p    | --helm            | helm          Build the helm package"
+  echo "              | --code            | code          Open a code editor"
   echo "        -h    | --help            | help          Show this help message"
   echo ""
   echo "Additional Parameters: "
@@ -62,6 +64,10 @@ while (("$#")); do
     shift 1
     exit 0
     ;;
+  -rm | --remove | remove)
+    MODE+="|remove"
+    shift 1
+    ;;
   -b | --build | build)
     MODE+="|build"
     shift 1
@@ -98,6 +104,10 @@ while (("$#")); do
     MODE+="|helm"
     shift 1
     ;;
+  --code | code)
+    MODE+="|code"
+    shift 1
+    ;;
   # Extra Parameter
   --rebuild)
     dockerComposeBuildParameter="--build"
@@ -121,7 +131,7 @@ while (("$#")); do
     ;;
   --* | -*=) # unsupported flags
     echo "Error: Unsupported flag $1" >&2
-    echo "Possible options are: --build --lint --test --e2e --run --run-cluster --release --helm and --help"
+    echo "Possible options are: --remove --build --lint --test --e2e --run --run-cluster --release --helm and --help"
     echo "Possible flags: --rebuild --debug"
     exit 1
     ;;
@@ -156,6 +166,13 @@ fi
 shouldDebug "${DEBUG}"
 
 # Execute pipeline
+if [[ "${MODE}" == *"remove"* ]]; then
+  removeContainer
+  removeImages
+  removeVolumes
+  removeBuild
+fi
+
 if [[ "${MODE}" == *"imagetool"* ]]; then
   buildImages
 fi
@@ -178,6 +195,10 @@ fi
 
 if [[ "${MODE}" == *'release'* ]]; then
   buildRelease "${TAG}"
+fi
+
+if [[ "${MODE}" == *"code"* ]]; then
+  openCode
 fi
 
 if [[ "${MODE}" == *"helm"* ]]; then

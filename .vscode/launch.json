@@ -1,0 +1,28 @@
+{
+    "configurations": [
+        {
+            "type": "lldb",
+            "request": "launch",
+            "sourceLanguages": [
+                "swift"
+            ],
+            "args": [],
+            "cwd": "${workspaceFolder:Project}",
+            "name": "Run Uitsmijter",
+            "program": "${workspaceFolder:Project}/.build/debug/Uitsmijter",
+            "preLaunchTask": "swift-build"
+        },
+        {
+            "type": "lldb",
+            "request": "launch",
+            "sourceLanguages": [
+                "swift"
+            ],
+            "name": "Test Uitsmijter",
+            "program": "${workspaceFolder}/.build/debug/UitsmijterPackageTests.xctest",
+            "args": [],
+            "cwd": "${workspaceFolder}",
+            "preLaunchTask": "swift-build-tests"
+        }
+    ]
+}

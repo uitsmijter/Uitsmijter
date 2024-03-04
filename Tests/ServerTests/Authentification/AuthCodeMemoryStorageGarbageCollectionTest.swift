@@ -63,7 +63,7 @@ final class AuthCodeMemoryStorageGarbageCollectionTest: XCTestCase {
             expectation_3.fulfill()
         }
 
-        wait(for: [expectation_1, expectation_2, expectation_3], timeout: 10)
+        wait(for: [expectation_1, expectation_2, expectation_3], timeout: TestDefaults.waitTimeout)
 
         // all gone?
         XCTAssertEqual(storage.count, 0)

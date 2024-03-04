@@ -50,7 +50,7 @@ final class UserValidationProviderTests: XCTestCase {
                 }
             }
         }
-        wait(for: [expect], timeout: 10)
+        wait(for: [expect], timeout: TestDefaults.waitTimeout)
     }
 
     func testIsValid() async throws {
@@ -66,7 +66,6 @@ final class UserValidationProviderTests: XCTestCase {
         let cbi = JavaScriptProvider()
         try cbi.loadProvider(script: providerScript)
         _ = try await cbi.start(class: .userValidate, arguments: userDenied)
-
         let isValid: Bool = try cbi.getValue(class: .userValidate, property: "isValid")
         XCTAssertFalse(isValid)
     }

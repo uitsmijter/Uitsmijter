@@ -1,8 +1,7 @@
 import Foundation
-#if canImport(FoundationNetworking)
-import FoundationNetworking
-#endif
 import JXKit
+import AsyncHTTPClient
+import NIO
 
 extension JSFunctions {
     // MARK: - Networking
@@ -10,7 +9,7 @@ extension JSFunctions {
     /// Result object that a `fetch` returns when call was succeeded
     struct FetchResponse: Codable {
         /// HTTP status code of the response
-        let code: Int
+        let code: UInt
         /// Content of the response
         let body: String
     }
@@ -22,20 +21,43 @@ extension JSFunctions {
     /// - Returns: A function that produces a Promise to fetch content
     ///
     func fetch() -> JXValue {
+        let clientConfiguration = HTTPClient.Configuration(
+            redirectConfiguration: .follow(max: 100, allowCycles: true)
+        )
+
+        let httpClient = HTTPClient(
+            eventLoopGroupProvider: .singleton,
+            configuration: clientConfiguration
+        )
+
+        func doDefer() {
+            do {
+                try httpClient.syncShutdown()
+            } catch {
+                Log.error("Can't shutdown http client. \(error.localizedDescription)")
+            }
+        }
+
         // swiftlint:disable:next closure_body_length
-        JXValue(newFunctionIn: ctx) { context, _, arguments in
+        return JXValue(newFunctionIn: ctx) { context, _, arguments in
             // swiftlint:disable:next closure_body_length
             JXValue(newPromiseIn: context) { _, resolve, reject in
+                /// Internal function that rejects thre request, because of any error.
+                /// Parameter: 
+                /// - error, String that describes the error
+                func requestFailed(error: String) {
+                    Log.error("Request failed: \(error)")
+                    reject.call(withArguments: [
+                        JXValue(newErrorFromMessage: error, in: context)
+                    ])
+                }
+
                 guard let urlArgument = arguments.first?.stringValue else {
-                    let err = "Can not fetch without url"
-                    Log.error("\(err)")
-                    reject.call(withArguments: [JXValue(newErrorFromMessage: err, in: ctx)])
+                    requestFailed(error: "Can not fetch without url")
                     return
                 }
                 guard let url = URL(string: urlArgument) else {
-                    let err = "Can not fetch, because url is not valid"
-                    Log.error("\(err)")
-                    reject.call(withArguments: [JXValue(newErrorFromMessage: err, in: ctx)])
+                    requestFailed(error: "Can not fetch, because url is not valid")
                     return
                 }
 
@@ -43,57 +65,65 @@ extension JSFunctions {
                 let method: String = settingsArgument?["method"].stringValue ?? "get"
                 Log.info("Fetch \(method): \(url)")
 
-                let session = URLSession.shared
-                var request = URLRequest(url: url)
-                request.httpMethod = method
+                guard var request = try? HTTPClient.Request(
+                    url: url.absoluteString,
+                    method: .RAW(value: method.uppercased() )
+                    ) else {
+                        requestFailed(error: "Can not construct a request to \(url.absoluteString)")
+                        return
+                }
 
                 if let headers = settingsArgument?["headers"].dictionary {
                     headers.forEach { key, value in
-                        request.setValue(value.stringValue, forHTTPHeaderField: key)
+                        request.headers.add(name: key, value: value.stringValue ?? "true")
                     }
                 }
 
                 if let body = settingsArgument?["body"].stringValue, body != "undefined" {
-                    request.httpBody = body.data(using: .utf8)
+                    request.body = .string(body)
                 }
 
-                let task = session.dataTask(with: request) { data, response, error in
-                    if let error = error {
-                        Log.error("Request failed: \(error.localizedDescription)")
-                        reject.call(withArguments: [
-                            JXValue(newErrorFromMessage: error.localizedDescription, in: context)
-                        ])
+                httpClient.execute(request: request).whenComplete { result in
+                    switch result {
+                        case .failure(let error):
+                            requestFailed(error: error.localizedDescription)
+                        case .success(let response):
+                        switch response.status.code {
+                        case (200...299):
+                            let code = response.status.code
+                            let body = String(buffer: response.body ?? ByteBuffer(string: "String"))
+                            Log.info("""
+                                        Response from \(urlArgument) 
+                                        with status code \(code): \(code != 200 ? body : "length: \(body.count)")
+                                        """)
 
-                    } else if let data = data {
-                        let code = (response as? HTTPURLResponse)?.statusCode ?? -1
-                        let body = (String(data: data, encoding: .utf8) ?? "")
-                        Log.info(
-                                "Response with status code \(code): \(code != 200 ? body : "length: \(body.count)")"
-                        )
+                            let fetchResponse = FetchResponse(code: code, body: body)
+                            let jsonResponse = try? encoder.encode(fetchResponse)
 
-                        let response = FetchResponse(code: code, body: body)
-                        let jsonResponse = try? encoder.encode(response)
-
-                        if let jsonResponseData = jsonResponse,
-                           let jsonResponseString = String(data: jsonResponseData, encoding: .utf8) {
-                            if let argument = JXValue(json: jsonResponseString, in: context) {
-                                Log.info("Resolve \(context.ident)")
-                                resolve.call(withArguments: [
-                                    argument
-                                ])
+                            if let jsonResponseData = jsonResponse,
+                            let jsonResponseString = String(data: jsonResponseData, encoding: .utf8) {
+                                if let argument = JXValue(json: jsonResponseString, in: context) {
+                                    Log.info("Resolve \(context.ident)")
+                                    resolve.call(withArguments: [
+                                        argument
+                                    ])
+                                } else {
+                                    Log.info("Reject \(context.ident)")
+                                    resolve.call()
+                                }
                             } else {
-                                Log.info("Reject \(context.ident)")
-                                resolve.call()
+                                Log.error("Reject \(context.ident) - Can not encode response")
+                                reject.call(withArguments: [
+                                    JXValue(newErrorFromMessage: "Can not encode response", in: ctx)
+                                ])
                             }
-                        } else {
-                            Log.error("Reject \(context.ident) - Can not encode response")
-                            reject.call(withArguments: [
-                                JXValue(newErrorFromMessage: "Can not encode response", in: ctx)
-                            ])
+                        default:
+                            requestFailed(
+                                error: "Call to \(urlArgument) failed. Error status code \(response.status.code)."
+                            )
                         }
                     }
                 }
-                task.resume()
             } ?? JXValue(nullIn: context)
         }
     }

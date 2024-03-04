@@ -1,0 +1,39 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "swift-build",
+      "type": "shell",
+      "command": "swift",
+      "args": [
+        "build",
+        "--manifest-cache",  "shared",
+        "-Xcc", "-I/usr/include/webkitgtk-4.0",
+        "-Xcc", "-I/usr/include/webkitgtk-4.0/JavaScriptCore"
+      ]
+    },
+    {
+      "label": "swift-build-tests",
+      "type": "process",
+      "command": "swift",
+      "group": "build",
+      "args": [
+        "build",
+        "--build-tests",
+        "--manifest-cache",  "shared", 
+        "-Xcc", "-I/usr/include/webkitgtk-4.0",
+        "-Xcc", "-I/usr/include/webkitgtk-4.0/JavaScriptCore"
+      ]
+    },
+    {
+      "label": "prepare-folders",
+      "type": "process",
+      "command": "mkdir",
+      "group": "build",
+      "args": [
+        "-p",
+        ".build/testresults/",
+      ]
+    }
+  ]
+}
