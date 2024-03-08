@@ -77,7 +77,7 @@ Go to the standard login page at http://localhost:8080
 
 
 ## Community
-Follow us on [Mastodon]([text](https://social.uitsmijter.io/public/local)) and discuss with us on [Discourse](http://discourse.uitsmijter.io).
+Follow us on [Mastodon](https://social.uitsmijter.io/public/local) and discuss with us on [Discourse](http://discourse.uitsmijter.io).
 
 ## Contribution
 To contribute a feature or idea to Uitsmijter, [create an issue](https://github.com/uitsmijter/Uitsmijter/issues/new) 
