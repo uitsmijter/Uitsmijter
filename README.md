@@ -26,7 +26,8 @@ Main goals of the project:
 - Fast response times
 - Low Memory and CPU consumption
 
-[Read more about Uitsmijter](https://docs.uitsmijter.io/general/about/)
+[Read more about Uitsmijter](https://docs.uitsmijter.io/general/about/) and visit our
+[articles page]([text](https://articles.uitsmijter.io)) to stay up to date.
 
 ## About the name
 Uitsmijter is a popular breakfast, brunch and lunch dish in the Netherlands. The ingredients are put on top of each 
@@ -76,7 +77,7 @@ Go to the standard login page at http://localhost:8080
 
 
 ## Community
-Coming soon. 
+Follow us on [Mastodon]([text](https://social.uitsmijter.io/public/local)) and discuss with us on [Discourse](http://discourse.uitsmijter.io).
 
 ## Contribution
 To contribute a feature or idea to Uitsmijter, [create an issue](https://github.com/uitsmijter/Uitsmijter/issues/new) 
