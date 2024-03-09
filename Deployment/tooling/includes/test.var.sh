@@ -6,6 +6,7 @@ TEST_HOSTS='api.example.com
   cookbooks.example.com
   goat.example.com
   toast.example.com
+  spa.example.net
   id.example.com
   login.example.com
   missing-tenant.example.com
