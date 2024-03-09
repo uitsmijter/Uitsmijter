@@ -21,7 +21,7 @@ final class TemplateTest: XCTestCase {
     func testWithoutLogin() {
         let request = Request(application: app, on: app.eventLoopGroup.any())
         request.headers = ["X-Forwarded-Host": "-"]
-        request.clientInfo = clientInfo(on: request)
+        request.clientInfo = SharedClientInfo.clientInfo(on: request)
 
         let result = Template.getPath(page: "index", request: request)
         XCTAssertEqual(result, "default/error")
@@ -30,7 +30,7 @@ final class TemplateTest: XCTestCase {
     func testWithHeaderFallbackToDefault() {
         let request = Request(application: app, on: app.eventLoopGroup.any())
         request.headers = ["X-Forwarded-Host": "example.com"]
-        request.clientInfo = clientInfo(on: request)
+        request.clientInfo = SharedClientInfo.clientInfo(on: request)
 
         let result = Template.getPath(page: "index", request: request)
         XCTAssertEqual(result, "default/index")
@@ -39,7 +39,7 @@ final class TemplateTest: XCTestCase {
     func testWithUnknownHeader() async {
         let request = Request(application: app, on: app.eventLoopGroup.any())
         request.headers = ["X-Forwarded-Host": "example.org"]
-        request.clientInfo = clientInfo(on: request)
+        request.clientInfo = SharedClientInfo.clientInfo(on: request)
 
         let result = Template.getPath(page: "index", request: request)
         XCTAssertEqual(result, "default/error")
@@ -48,7 +48,7 @@ final class TemplateTest: XCTestCase {
     func testWithHeaderToUnknownFallbackToDefault() {
         let request = Request(application: app, on: app.eventLoopGroup.any())
         request.headers = ["X-Forwarded-Host": "example.com"]
-        request.clientInfo = clientInfo(on: request)
+        request.clientInfo = SharedClientInfo.clientInfo(on: request)
 
         let result = Template.getPath(page: "not_exists", request: request)
         XCTAssertEqual(result, "default/index")
@@ -71,27 +71,5 @@ final class TemplateTest: XCTestCase {
 
         XCTAssertEqual(response.status, .ok)
         return try response.content.decode(TokenResponse.self)
-    }
-
-    // TODO: used in multiple files, refactor!
-    private func clientInfo(on request: Request) -> ClientInfo {
-        ClientInfo(
-                mode: .interceptor,
-                requested: ClientInfoRequest(
-                        scheme: request.url.scheme ?? "http",
-                        host: request.headers.first(name: "X-Forwarded-Host") ?? "",
-                        uri: request.url.path
-                ),
-                referer: nil,
-                responsibleDomain: request.headers.first(name: "X-Forwarded-Host") ?? "",
-                serviceUrl: "localhost",
-                tenant: Tenant.find(
-                        forHost: request.headers.first(name: "X-Forwarded-Host") ?? "_ERROR_"
-                ),
-                client: nil,
-                expired: nil,
-                subject: nil,
-                validPayload: nil
-        )
     }
 }

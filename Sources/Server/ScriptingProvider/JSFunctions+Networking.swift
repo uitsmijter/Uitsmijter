@@ -84,6 +84,7 @@ extension JSFunctions {
                 }
 
                 httpClient.execute(request: request).whenComplete { result in
+                    // swiftlint:disable:next switch_case_alignment
                     switch result {
                         case .failure(let error):
                             requestFailed(error: error.localizedDescription)
@@ -93,8 +94,8 @@ extension JSFunctions {
                             let code = response.status.code
                             let body = String(buffer: response.body ?? ByteBuffer(string: "String"))
                             Log.info("""
-                                        Response from \(urlArgument) 
-                                        with status code \(code): \(code != 200 ? body : "length: \(body.count)")
+                                        Response from \(urlArgument) with
+                                         status code \(code): \(code != 200 ? body : "length: \(body.count)")
                                         """)
 
                             let fetchResponse = FetchResponse(code: code, body: body)

@@ -215,6 +215,17 @@ struct LoginController: RouteCollection {
         }
     }
 
+    /// Returns a target location to redirect.
+    /// 
+    /// - Parameters:
+    ///   - locationUrl: URL of the location
+    ///   - queryItem: The query item that should append to the location
+    private func getRedirectTargetLocation(locationUrl: URL, queryItem: URLQueryItem ) -> String {
+        return locationUrl.path.starts(with: "/authorize") == true
+            ? locationUrl.appending(queryItems: [queryItem]).absoluteString
+            : locationUrl.absoluteString
+    }
+
     /// do the login with credentials from the login-form and check if the user is valid.
     /// The response will forward to the `location` with a JWT
     func doLogin(req: Request) async throws -> Response {
@@ -255,10 +266,9 @@ struct LoginController: RouteCollection {
             Log.error("Can not save loginid.", request: req)
         }
 
-        let additionalQueryItem = URLQueryItem(name: "loginid", value: loginSession.loginId.uuidString)
-        let redirectTargetLocation = redirectLocationUrl.path.starts(with: "/authorize") == true
-                ? redirectLocationUrl.appending(queryItems: [additionalQueryItem]).absoluteString
-                : redirectLocationUrl.absoluteString
+        let redirectTargetLocation = getRedirectTargetLocation(
+            locationUrl: redirectLocationUrl,
+            queryItem: URLQueryItem(name: "loginid", value: loginSession.loginId.uuidString) )
 
         // use a provider to check login requests
         let providerInterpreter = try await userLoginProvider(for: tenant, login: loginForm)
@@ -307,8 +317,7 @@ struct LoginController: RouteCollection {
         // set the cookie only for the request domain!
         var cookie = HTTPCookies.Value.defaultCookie(
                 expires: expirationDate,
-                withContent: token
-        )
+                withContent: token )
 
         if clientInfo.mode == .interceptor {
             cookie.domain = tenant.config.interceptor?.cookieOrDomain

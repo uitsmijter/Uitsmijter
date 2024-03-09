@@ -8,7 +8,6 @@ public final class RequestErrorMiddleware: AsyncMiddleware {
     /// - parameters:
     ///     - environment: The environment to respect when presenting errors.
     public static func `default`(environment: Environment) -> RequestErrorMiddleware {
-        // swiftlint:disable:next closure_body_length
         .init { req, error in
             // variables to determine
             let status: HTTPResponseStatus

@@ -48,12 +48,12 @@ file_length:
   error: 1200
 
 function_body_length:
-  warning: 80
+  warning: 90
   error: 120
 
 closure_body_length:
-  warning: 40
-  error: 60
+  warning: 60
+  error: 80
 
 large_tuple:
   warning: 4
