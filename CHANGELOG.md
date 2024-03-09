@@ -6,6 +6,7 @@
 - Fix: Change encoding date from `.iso8601` to `.deferredToDate` 
 
 - Change: Scripting Provider `fetch` method uses AsnHTTPClient instead of FoundationNetwork's URLSession
+- Change: in `--fast` mode e2e-tests run in chromium
 
 - Update: to Swift 5.9.2
 
