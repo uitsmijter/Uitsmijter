@@ -132,13 +132,15 @@ services:
     volumes:
       - ..:/Project
       - ./code-server/settings.json:/root/.local/share/code-server/User/settings.json
-      - build_data:/Project/.build
+      - build_data_code:/Project/.build
     privileged: true
     pid: "host"
 
 
 volumes:
   build_data:
+    name: ${PROJECT}_build
+  build_data_code:
     name: ${PROJECT}_build
   node_modules:
     name: ${PROJECT}_node_modules
