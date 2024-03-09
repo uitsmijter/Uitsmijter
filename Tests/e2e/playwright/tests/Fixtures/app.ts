@@ -21,11 +21,11 @@ export class Application {
         timeout = typeof timeout !== "undefined" ? timeout : this.timeout
 
         await page.waitForSelector('body', {state: 'attached', timeout: timeout});
-        await page.waitForLoadState("networkidle");
+        await page.waitForLoadState("domcontentloaded");
 
         if (page.context().browser()?.browserType().name() == "webkit") {
             // Webkit has problems with rendering the background image on time
-            await page.waitForTimeout(250)
+            await page.waitForTimeout(2250)
         }
     }
 }
