@@ -1,3 +1,6 @@
+import Foundation
+@testable import Server
+
 /// Shared ClieentInfo for tests
 enum SharedClientInfo {
 
