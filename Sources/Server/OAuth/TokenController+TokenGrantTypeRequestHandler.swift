@@ -132,7 +132,6 @@ extension TokenController {
         )
 
         // scopes should come from the login, not from the token request
-        // TODO send t priv
         if session.scopes.isEmpty == true && scopes.isEmpty == false {
             Log.warning("""
                         Taking scopes from token request is deprecated and should be avoided
