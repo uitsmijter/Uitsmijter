@@ -18,7 +18,7 @@ configMapGenerator:
     namespace: ham
     files:
       - template-techy/img/circles.jpg
-      - template-techy/img/logo-littleletter.svg
+      - template-techy/img/logo-hamlogin.svg
   - name: webserver-static-fonts
     namespace: ham
     files:
