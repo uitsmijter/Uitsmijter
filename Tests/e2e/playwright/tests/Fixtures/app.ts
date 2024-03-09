@@ -22,10 +22,11 @@ export class Application {
 
         await page.waitForSelector('body', {state: 'attached', timeout: timeout});
         await page.waitForLoadState("domcontentloaded");
+        await page.waitForLoadState("networkidle");
 
         if (page.context().browser()?.browserType().name() == "webkit") {
             // Webkit has problems with rendering the background image on time
-            await page.waitForTimeout(2250)
+            await page.waitForTimeout(250)
         }
     }
 }
