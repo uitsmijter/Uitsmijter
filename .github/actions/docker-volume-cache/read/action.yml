@@ -24,7 +24,7 @@ runs:
       run: echo "NOW=$(date +'%s')" >> $GITHUB_ENV
 
     - name: Cache
-      uses: actions/cache/restore@v3
+      uses: actions/cache/restore@v4
       with:
         path: ${{ inputs.path }}
         key: volume-${{ inputs.volume }}-${{ github.run_id }}-${{ env.NOW }}
