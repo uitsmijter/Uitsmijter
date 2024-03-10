@@ -1,4 +1,5 @@
 import Foundation
+import XCTVapor
 @testable import Server
 
 /// Shared ClieentInfo for tests
