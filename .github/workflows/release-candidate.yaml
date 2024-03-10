@@ -21,7 +21,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Check out the repo
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - uses: ./.github/actions/step-lint
         if: ${{ env.RUN_LINTER != 'false' }}
 
@@ -30,7 +30,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Check out the repo
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - uses: ./.github/actions/step-unittest
         if: ${{ env.RUN_UNITTESTS != 'false' }}
 
@@ -42,7 +42,7 @@ jobs:
       - unittest
     steps:
       - name: Check out the repo
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           lfs: true
       - uses: ./.github/actions/step-build
@@ -58,7 +58,7 @@ jobs:
       - build
     steps:
       - name: Check out the repo
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           lfs: true
 
@@ -76,7 +76,7 @@ jobs:
       contents: write
     steps:
       - name: Check out the repo
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         if: ${{ env.RUN_HELM != 'false' }}
       - uses: ./.github/actions/step-helm
         with:
@@ -93,7 +93,7 @@ jobs:
       - build-helm
     steps:
       - name: Check out the repo
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         if: ${{ env.RUN_PUBLISH != 'false' }}
       - uses: ./.github/actions/step-publish
         if: ${{ env.RUN_PUBLISH != 'false' }}
