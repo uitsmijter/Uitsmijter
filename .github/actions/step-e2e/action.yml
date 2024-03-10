@@ -61,7 +61,7 @@ runs:
         ./tooling.sh e2e ${DIRTY} ${FAST}
 
     - name: Archive artifacts
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       if: ${{ always() && env.STORE_ARTEFACTS != 'false' }}
       with:
         name: Test-Results
