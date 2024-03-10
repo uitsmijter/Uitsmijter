@@ -12,6 +12,6 @@
     "jsonwebtoken": "^9.0.2"
   },
   "devDependencies": {
-    "@playwright/test": "1.39.0"
+    "@playwright/test": "1.42.1"
   }
 }

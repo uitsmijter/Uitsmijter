@@ -6,9 +6,14 @@
 - Fix: Change encoding date from `.iso8601` to `.deferredToDate` 
 
 - Change: Scripting Provider `fetch` method uses AsnHTTPClient instead of FoundationNetwork's URLSession
+- Change: in `--fast` mode e2e-tests run in chromium
+- Change: Removed webp support for Uitsmijter default login page
 
 - Update: to Swift 5.9.2
+- Update buildbox to 2.3.0
 
+- Improvement: Tooling command code use its own build folder
+- Improvement: Rename "Littleletetr" to "Ham" to align the documentation
 
 # 0.9.5
 

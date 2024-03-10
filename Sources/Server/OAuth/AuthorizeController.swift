@@ -67,7 +67,7 @@ struct AuthorizeController: RouteCollection, OAuthControllerProtocol {
                     error: nil,
                     props: PageProperties(
                             title: "Login for a authorisation code",
-                            requestUri: req.url.string, // TODO: check if we can use `url` here. UIT-372
+                            requestUri: req.url.string, // UIT-372
                             tenant: clientInfo.tenant
                     )
             )

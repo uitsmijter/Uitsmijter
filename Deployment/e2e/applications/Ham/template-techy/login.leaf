@@ -17,7 +17,7 @@
         <div class="login">
 
             <div class="logo-box">
-                <img class="logo" src="https://page.ham.test/static/img/logo-littleletter.svg">
+                <img class="logo" src="https://page.ham.test/static/img/logo-hamlogin.svg">
             </div>
 
             <form action="#(serviceUrl)/login" method="post">

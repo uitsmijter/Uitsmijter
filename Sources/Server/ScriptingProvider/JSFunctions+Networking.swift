@@ -19,8 +19,7 @@ extension JSFunctions {
     /// properties: `code` for the http status code and `body` with the response body.
     ///
     /// - Returns: A function that produces a Promise to fetch content
-    ///
-    func fetch() -> JXValue {
+    func fetch() -> JXValue { // swiftlint:disable:this cyclomatic_complexity 
         let clientConfiguration = HTTPClient.Configuration(
             redirectConfiguration: .follow(max: 100, allowCycles: true)
         )
@@ -85,43 +84,43 @@ extension JSFunctions {
 
                 httpClient.execute(request: request).whenComplete { result in
                     switch result {
-                        case .failure(let error):
-                            requestFailed(error: error.localizedDescription)
-                        case .success(let response):
-                        switch response.status.code {
-                        case (200...299):
-                            let code = response.status.code
-                            let body = String(buffer: response.body ?? ByteBuffer(string: "String"))
-                            Log.info("""
-                                        Response from \(urlArgument) 
-                                        with status code \(code): \(code != 200 ? body : "length: \(body.count)")
-                                        """)
+                    case .failure(let error):
+                        requestFailed(error: error.localizedDescription)
+                    case .success(let response):
+                    switch response.status.code {
+                    case (200...299):
+                        let code = response.status.code
+                        let body = String(buffer: response.body ?? ByteBuffer(string: "String"))
+                        Log.info("""
+                                    Response from \(urlArgument) with
+                                        status code \(code): \(code != 200 ? body : "length: \(body.count)")
+                                    """)
 
-                            let fetchResponse = FetchResponse(code: code, body: body)
-                            let jsonResponse = try? encoder.encode(fetchResponse)
+                        let fetchResponse = FetchResponse(code: code, body: body)
+                        let jsonResponse = try? encoder.encode(fetchResponse)
 
-                            if let jsonResponseData = jsonResponse,
-                            let jsonResponseString = String(data: jsonResponseData, encoding: .utf8) {
-                                if let argument = JXValue(json: jsonResponseString, in: context) {
-                                    Log.info("Resolve \(context.ident)")
-                                    resolve.call(withArguments: [
-                                        argument
-                                    ])
-                                } else {
-                                    Log.info("Reject \(context.ident)")
-                                    resolve.call()
-                                }
-                            } else {
-                                Log.error("Reject \(context.ident) - Can not encode response")
-                                reject.call(withArguments: [
-                                    JXValue(newErrorFromMessage: "Can not encode response", in: ctx)
+                        if let jsonResponseData = jsonResponse,
+                        let jsonResponseString = String(data: jsonResponseData, encoding: .utf8) {
+                            if let argument = JXValue(json: jsonResponseString, in: context) {
+                                Log.info("Resolve \(context.ident)")
+                                resolve.call(withArguments: [
+                                    argument
                                 ])
+                            } else {
+                                Log.info("Reject \(context.ident)")
+                                resolve.call()
                             }
-                        default:
-                            requestFailed(
-                                error: "Call to \(urlArgument) failed. Error status code \(response.status.code)."
-                            )
+                        } else {
+                            Log.error("Reject \(context.ident) - Can not encode response")
+                            reject.call(withArguments: [
+                                JXValue(newErrorFromMessage: "Can not encode response", in: ctx)
+                            ])
                         }
+                    default:
+                        requestFailed(
+                            error: "Call to \(urlArgument) failed. Error status code \(response.status.code)."
+                        )
+                    }
                     }
                 }
             } ?? JXValue(nullIn: context)
