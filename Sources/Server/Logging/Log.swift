@@ -94,10 +94,11 @@ struct Log {
     /// - Parameter
     ///     - msg: Accept multiline string
     ///     - request: Optional Request Object
-    static func debug(_ msg: String, request: Request? = nil) {
+    static func debug(_ msg: String, request: Request? = nil /* , file: String = #fileID, function: String = #function, line: UInt = #line */) {
         Log.logger.debug(
                 .init(stringLiteral: msg.replacingOccurrences(of: "\n", with: " ")),
                 metadata: enrichMetadata(with: request)
+                //file: file, function: function, line: line
         )
     }
 
