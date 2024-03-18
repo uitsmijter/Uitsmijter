@@ -220,7 +220,3 @@ fi
 echo ""
 echoBanner "done." "*"
 echo ""
-
-
-## NOTES TODO:
-## pipeline
