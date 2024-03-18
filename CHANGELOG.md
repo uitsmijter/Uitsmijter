@@ -4,6 +4,7 @@
 - Feature: Add tooling: `code` - starts vscode in docker in brower
 
 - Fix: Change encoding date from `.iso8601` to `.deferredToDate` 
+- Fix: Show correct origin of log messages (#16)
 
 - Change: Scripting Provider `fetch` method uses AsnHTTPClient instead of FoundationNetwork's URLSession
 - Change: in `--fast` mode e2e-tests run in chromium
