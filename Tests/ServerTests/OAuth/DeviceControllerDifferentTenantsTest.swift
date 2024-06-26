@@ -10,7 +10,13 @@ final class DeviceControllerDifferentTenantsTest: XCTestCase {
     override func setUp() {
         super.setUp()
 
-        generateTestClientsWithMultipleTenants(uuids: [testAppIdent1, testAppIdent2], script: .johnDoe)
+        generateTestClientsWithMultipleTenants(
+            uuids: [testAppIdent1, testAppIdent2], 
+            script: .johnDoe,
+            scopes: nil, 
+            referrers: nil,
+            grant_types: [.authorization_code, .refresh_token, .device]
+        )
         try? configure(app)
     }
 
@@ -39,7 +45,6 @@ final class DeviceControllerDifferentTenantsTest: XCTestCase {
             return
         }
         
-        let deviceRequestUrl = "/device"
         let responseDeviceCode = try app.sendRequest(.POST, "/device", beforeRequest: ({ req in
             req.headers = ["Content-Type": "application/json"]
             try req.content.encode(

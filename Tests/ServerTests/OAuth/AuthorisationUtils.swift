@@ -13,7 +13,8 @@ enum TestTenantScripts {
 // swiftlint:disable:next function_body_length
 fileprivate func createTenant(
         script: TestTenantScripts,
-        name tenantName: String? = nil, hosts: [String]? = [
+        name tenantName: String? = nil, 
+        hosts: [String]? = [
             "127.0.0.1",
             "example.com",
             "localhost.localdomain",
@@ -271,7 +272,8 @@ func generateTestClientsWithMultipleTenants(
         uuids clientIdents: [UUID],
         script: TestTenantScripts? = .frodoBaker,
         scopes: [String]? = nil,
-        referrers: [String]? = []
+        referrers: [String]? = [],
+        grant_types: [GrantTypes]? = [.authorization_code, .refresh_token]
 ) {
     EntityStorage.shared.tenants.removeAll()
     EntityStorage.shared.clients.removeAll()
@@ -292,6 +294,7 @@ func generateTestClientsWithMultipleTenants(
                                 ident: clientIdent,
                                 tenantname: tenant.name,
                                 redirect_urls: ["http://localhost:?([0-9]+)?", "http://example.com"],
+                                grant_types: grant_types,
                                 scopes: scopes ?? ["*"],
                                 referrers: referrers ?? []
                         )

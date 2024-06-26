@@ -76,20 +76,19 @@ struct DeviceController: RouteCollection, OAuthControllerProtocol {
         }
 
         let userCode = String.random(length: 8)
-        guard let session = authCodeStorage.get(
-                type: .code,
-                codeValue: userCode,
-                remove: true
+
+        let session = AuthSession(
+            type: .code,
+            state: "",
+            code: Code(value: userCode),
+            scopes: [],
+            payload: nil,
+            redirect: "",
+            ttl: 60
         )
-        else {
-            Log.error("Could not store generated codeValue", request: req)
-            throw Abort(.serviceUnavailable , reason: "ERRORS.CANNOTSAVE_CODE")
-        }
 
-        if session.payload?.tenant != tenant.name {
-            throw Abort(.forbidden, reason: "ERRORS.TENANT_MISMATCH")
-        }
-
+        try authCodeStorage.set(authSession: session)
+        
         Log.info(
                 "Device code request succeeded \(session.payload?.user ?? "-") with scopes: \(scopes.joined(separator: ","))",
                 request: req
