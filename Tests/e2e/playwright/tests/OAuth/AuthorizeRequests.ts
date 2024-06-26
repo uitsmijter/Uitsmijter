@@ -3,6 +3,7 @@ import {Page, request} from "@playwright/test";
 import {TokenRequestData, TokenRequestDataPassword, TokenRequestDataVerified} from "../types/TokenRequestData";
 import {JwtToken} from "../types/JwtToken";
 import jwt from 'jsonwebtoken';
+import { CodeRequestData } from "../types/CodeRequestData";
 
 export async function authorizeFormRequest(url: string, data: AuthorizeFormRequestData) {
     const context = await request.newContext({
@@ -23,7 +24,7 @@ export async function authorizeFormRequest(url: string, data: AuthorizeFormReque
     });
 }
 
-export async function authorizeApiRequest(url: string, data: AuthorizeApiRequestData) {
+export async function authorizeApiRequest(url: string, data: AuthorizeApiRequestData | CodeRequestData) {
     const context = await request.newContext({
         baseURL: url,
         extraHTTPHeaders: {

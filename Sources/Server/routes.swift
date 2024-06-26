@@ -35,6 +35,9 @@ func routes(_ app: Application) throws {
     // Interceptor Flow
     try app.register(collection: InterceptorController())
 
+    // Device Flow
+    try app.register(collection: DeviceController())
+    
     // OAuth Flow
     try app.register(collection: WellKnownController())
     try app.register(collection: AuthorizeController())

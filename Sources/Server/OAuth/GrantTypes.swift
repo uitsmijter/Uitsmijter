@@ -34,4 +34,9 @@ enum GrantTypes: String, Codable {
     /// A special grant type that Uitsmijter supports for an authentication middleware that passes the user to
     /// a backend system if the login succeeds.
     case interceptor
+
+    /// Device Authorization Grant is an OAuth 2.0 extension that enables devices with no browser or limited input 
+    /// capability to obtain an access token. This is commonly seen on Apple TV apps, or devices like hardware encoders 
+    /// that can stream video to a YouTube channel.
+    case device
 }
