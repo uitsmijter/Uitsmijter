@@ -94,10 +94,16 @@ struct Log {
     /// - Parameter
     ///     - msg: Accept multiline string
     ///     - request: Optional Request Object
-    static func debug(_ msg: String, request: Request? = nil) {
+    static func debug(
+        _ msg: String,
+        request: Request? = nil,
+        file: String = #fileID,
+        function: String = #function,
+        line: UInt = #line) {
         Log.logger.debug(
                 .init(stringLiteral: msg.replacingOccurrences(of: "\n", with: " ")),
-                metadata: enrichMetadata(with: request)
+                metadata: enrichMetadata(with: request),
+                file: file, function: function, line: line
         )
     }
 
@@ -106,10 +112,16 @@ struct Log {
     /// - Parameter
     ///     - msg: Accept multiline string
     ///     - request: Optional Request Object
-    static func info(_ msg: String, request: Request? = nil) {
+    static func info(
+        _ msg: String,
+        request: Request? = nil,
+        file: String = #fileID,
+        function: String = #function,
+        line: UInt = #line) {
         Log.logger.info(
                 .init(stringLiteral: msg.replacingOccurrences(of: "\n", with: " ")),
-                metadata: enrichMetadata(with: request)
+                metadata: enrichMetadata(with: request),
+                file: file, function: function, line: line
         )
     }
 
@@ -118,10 +130,16 @@ struct Log {
     /// - Parameter
     ///     - msg: Accept multiline string
     ///     - request: Optional Request Object
-    static func notice(_ msg: String, request: Request? = nil) {
+    static func notice(
+        _ msg: String,
+        request: Request? = nil,
+        file: String = #fileID,
+        function: String = #function,
+        line: UInt = #line) {
         Log.logger.notice(
                 .init(stringLiteral: msg.replacingOccurrences(of: "\n", with: " ")),
-                metadata: enrichMetadata(with: request)
+                metadata: enrichMetadata(with: request),
+                file: file, function: function, line: line
         )
     }
 
@@ -130,10 +148,16 @@ struct Log {
     /// - Parameter
     ///      - msg: Accept multiline string
     ///      - request: Optional Request Object
-    static func warning(_ msg: String, request: Request? = nil) {
+    static func warning(
+        _ msg: String,
+        request: Request? = nil,
+        file: String = #fileID,
+        function: String = #function,
+        line: UInt = #line) {
         Log.logger.warning(
                 .init(stringLiteral: msg.replacingOccurrences(of: "\n", with: " ")),
-                metadata: enrichMetadata(with: request)
+                metadata: enrichMetadata(with: request),
+                file: file, function: function, line: line
         )
     }
 
@@ -142,10 +166,16 @@ struct Log {
     /// - Parameter
     ///      - msg: Accept multiline string
     ///      - request: Optional Request Object
-    static func error(_ msg: String, request: Request? = nil) {
+    static func error(
+        _ msg: String,
+        request: Request? = nil,
+        file: String = #fileID,
+        function: String = #function,
+        line: UInt = #line) {
         Log.logger.error(
                 .init(stringLiteral: msg.replacingOccurrences(of: "\n", with: " ")),
-                metadata: enrichMetadata(with: request)
+                metadata: enrichMetadata(with: request),
+                file: file, function: function, line: line
         )
     }
 
@@ -153,10 +183,16 @@ struct Log {
     ///
     /// - Parameter msg: Accept multiline string
     ///      - request: Optional Request Object
-    static func critical(_ msg: String, request: Request? = nil) {
+    static func critical(
+        _ msg: String,
+        request: Request? = nil,
+        file: String = #fileID,
+        function: String = #function,
+        line: UInt = #line) {
         Log.logger.critical(
                 .init(stringLiteral: msg.replacingOccurrences(of: "\n", with: " ")),
-                metadata: enrichMetadata(with: request)
+                metadata: enrichMetadata(with: request),
+                file: file, function: function, line: line
         )
     }
 

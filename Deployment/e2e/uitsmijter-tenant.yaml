@@ -23,7 +23,6 @@ spec:
       get role() { return "normal"; }
       }
 
-
 ---
 apiVersion: "uitsmijter.io/v1"
 kind: Tenant

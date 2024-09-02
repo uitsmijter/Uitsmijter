@@ -21,6 +21,7 @@ export class Application {
         timeout = typeof timeout !== "undefined" ? timeout : this.timeout
 
         await page.waitForSelector('body', {state: 'attached', timeout: timeout});
+        await page.waitForLoadState("domcontentloaded");
         await page.waitForLoadState("networkidle");
 
         if (page.context().browser()?.browserType().name() == "webkit") {

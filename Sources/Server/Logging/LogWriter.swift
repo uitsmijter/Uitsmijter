@@ -160,7 +160,7 @@ public struct LogWriter: LogHandler {
             var debugLog = ""
             if Constants.isRelease == false {
                 debugLog = " | \(logMessage.function ?? "")"
-                        + "in \(logMessage.file ?? ""):\(String(logMessage.line ?? 0))"
+                        + " in \(logMessage.file ?? ""):\(String(logMessage.line ?? 0))"
             }
             print("\(printLevel)\(logMessage.date.rfc1123): \(logMessage.message)\(printMetadata)\(debugLog)")
         }

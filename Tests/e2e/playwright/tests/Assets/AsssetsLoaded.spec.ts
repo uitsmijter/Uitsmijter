@@ -13,13 +13,14 @@ test.describe('Assets loading for', () => {
         page.on('requestfailed', request => responses.push([request.url(), request.failure().errorText]))
 
         app = new Application(page)
-        test.setTimeout(app.timeout)
+        test.setTimeout(app.timeout!)
     })
 
     test('login page should be present', async ({page}) => {
         await app.goto('https://login.example.com/login?for=http://cookbooks.example.com')
-
+        await app.waitForPage(page)
         await expectAssetsLoaded()
+        
         expect(await page.screenshot()).toMatchSnapshot();
     })
 

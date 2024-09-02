@@ -2,7 +2,7 @@
 # BUILD STAGE
 # ----------------------------------------------------------------------------------------
 ARG BASEIMAGE=swift:5.9.2-jammy
-ARG BUILDBOX=2.2.0
+ARG BUILDBOX=2.3.0
 FROM ghcr.io/uitsmijter/buildbox:${BUILDBOX} as build
 
 # First resolve dependencies only.

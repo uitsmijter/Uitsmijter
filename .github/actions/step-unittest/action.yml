@@ -18,7 +18,7 @@ runs:
       run: ./tooling.sh test
 
     - name: Archive artifacts
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       if: ${{ always() && env.STORE_ARTEFACTS != 'false' }}
       with:
         name: UnitTest
