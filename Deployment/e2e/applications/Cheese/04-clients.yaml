@@ -80,6 +80,26 @@ spec:
 apiVersion: "uitsmijter.io/v1"
 kind: Client
 metadata:
+  name: cheese-api-device
+  namespace: cheese
+spec:
+  ident: E819EDF6-2942-473E-B540-970A758E42A1
+  tenantname: cheese/cheese
+  redirect_urls:
+    - 'https?://api\.example\.com(:8080)?/?(.+)?'
+  grant_types:
+    - device
+    - authorization_code
+    - refresh_token
+  scopes:
+    - access
+    - update
+    - delete
+
+---
+apiVersion: "uitsmijter.io/v1"
+kind: Client
+metadata:
   name: cheese-spa
   namespace: cheese
 spec:

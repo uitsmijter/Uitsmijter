@@ -12,17 +12,17 @@ enum TestTenantScripts {
 
 // swiftlint:disable:next function_body_length
 fileprivate func createTenant(
-        script: TestTenantScripts,
-        name tenantName: String? = nil, 
-        hosts: [String]? = [
-            "127.0.0.1",
-            "example.com",
-            "localhost.localdomain",
-            "localhost" // we are using localhost for test against our self
-        ],
-        interceptor: TenantInterceptorSettings? = nil,
-        informations: TenantInformations? = nil,
-        templates: TenantTemplatesSettings? = nil
+  script: TestTenantScripts,
+  name tenantName: String? = nil, 
+  hosts: [String]? = [
+    "127.0.0.1",
+    "example.com",
+    "localhost.localdomain",
+    "localhost" // we are using localhost for test against our self
+  ],
+  interceptor: TenantInterceptorSettings? = nil,
+  informations: TenantInformations? = nil,
+  templates: TenantTemplatesSettings? = nil
 ) -> Tenant {
     var tenantConfig = TenantSpec(
             hosts: hosts ?? [],
