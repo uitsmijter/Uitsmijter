@@ -1,0 +1,46 @@
+
+services:
+  redis:
+    image: 'bitnami/redis:${REDIS_VERSION:-latest}'
+    ports:
+      - "6379:6379"
+    environment:
+      - ALLOW_EMPTY_PASSWORD=yes
+
+  traefik:
+      image: traefik:${TRAEFIK_VERSION:-latest}
+      container_name: traefik
+      restart: always
+      command:
+          - --providers.docker=true
+          - --providers.docker.exposedByDefault=false
+          - --api=true
+          - --api.insecure=true
+          - --api.dashboard=true
+          - --log.level=${LOG_LEVEL}
+          - --entrypoints.http.address=:80
+          - --entryPoints.https.address=:443
+          - --entrypoints.http.forwardedHeaders.insecure=true
+      network_mode: host
+      volumes:
+          - /var/run/docker.sock:/var/run/docker.sock:ro
+
+  uitsmijter:
+    image: ${IMAGENAME}:${TAG}
+    depends_on:
+      - redis
+      - traefik
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.services.uitsmijter.loadbalancer.server.port=8080"
+      - "traefik.http.routers.uitsmijter.rule=${ROUTE}"
+      #- "traefik.http.routers.uitsmijter.tls=false"
+      #- "traefik.http.routers.uitsmijter.tls.certresolver=le"
+      - "traefik.http.routers.uitsmijter.entrypoints=http,https"
+      - "traefik.http.routers.uitsmijter.service=uitsmijter"
+    environment:
+      REDIS_HOST: redis
+    volumes:
+      - ../../Resources:/app/Resources
+      - ../../Public:/app/Public
+

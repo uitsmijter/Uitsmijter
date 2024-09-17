@@ -13,6 +13,18 @@ function runInDocker() {
     run
 }
 
+# Run official Uitsmijter in docker compose 
+function runInDockerProduction() {
+  h2 "Run Uitsmijter in production environment"
+  local IMAGENAME="${1:-${IMAGENAME}}"
+  local TAG="${2:-${TAG}}"
+  IMAGENAME=${IMAGENAME} TAG=${TAG} \
+    docker compose \
+    -f "${PROJECT_DIR}/Deployment/Docker/docker-compose.yml" \
+    --env-file "${PROJECT_DIR}/Deployment/Docker/.env" \
+    up
+}
+
 # Run a release or prerelease in kind
 function runInKubernetesInDocker() {
   h2 "Run release in local KubernetesInDocker"
