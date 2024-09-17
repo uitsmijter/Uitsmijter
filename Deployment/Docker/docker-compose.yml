@@ -34,9 +34,9 @@ services:
       - "traefik.enable=true"
       - "traefik.http.services.uitsmijter.loadbalancer.server.port=8080"
       - "traefik.http.routers.uitsmijter.rule=${ROUTE}"
-      #- "traefik.http.routers.uitsmijter.tls=false"
-      #- "traefik.http.routers.uitsmijter.tls.certresolver=le"
-      - "traefik.http.routers.uitsmijter.entrypoints=http,https"
+      - "traefik.http.routers.uitsmijter.tls=${TLS}"
+      - "traefik.http.routers.uitsmijter.tls.certresolver=le"
+      - "traefik.http.routers.uitsmijter.entrypoints=${LISTEN}"
       - "traefik.http.routers.uitsmijter.service=uitsmijter"
     environment:
       REDIS_HOST: redis
