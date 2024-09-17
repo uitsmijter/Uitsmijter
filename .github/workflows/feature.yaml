@@ -75,7 +75,7 @@ jobs:
     needs:
       - e2etest
     if: always()
-    uses: uitsmijter/workflows/.github/workflows/builds-mattermost.yaml@main
+    uses: uitsmijter/workflows/.github/workflows/builds-mattermost.yaml@1.0.2
     secrets:
       WEBHOOK: ${{ secrets.MATTERMOST_WEBHOOK_BUILD }}
 
