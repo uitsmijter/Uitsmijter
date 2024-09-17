@@ -5,8 +5,8 @@
 # Run incremental build in docker environment
 function runInDocker() {
   h2 "Run incremental build in a docker environment"
-  RUNTIME_IMAGE="${IMAGENAME}-runtime:latest" docker-compose \
-    -f "${PROJECT_DIR}/Deployment/docker-compose.yml" \
+  RUNTIME_IMAGE="${IMAGENAME}-runtime:latest" docker compose \
+    -f "${PROJECT_DIR}/Deployment/build-compose.yml" \
     --env-file "${SCRIPT_DIR}/.env" \
     up \
     --exit-code-from run \
@@ -22,7 +22,7 @@ function runInKubernetesInDocker() {
   kindStartCluster "${TAG}"
   echo ''
   echo 'Cluster is running.'
-  # Keep in sync with docker-compose.yml
+  # Keep in sync with build-compose.yml
   echo 'Add the following to your local /etc/hosts file.'
   echo ''
   for host in ${TEST_HOSTS}; do
