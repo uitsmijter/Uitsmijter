@@ -44,3 +44,21 @@ services:
       - ../../Resources:/app/Resources
       - ../../Public:/app/Public
 
+  userapp:
+    image: nginx:latest
+    depends_on:
+      - traefik
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.services.userapp.loadbalancer.server.port=80"
+      - "traefik.http.routers.userapp.rule=Host(`test.example.com`)"
+      - "traefik.http.routers.userapp.tls=${TLS}"
+      - "traefik.http.routers.userapp.tls.certresolver=le"
+      - "traefik.http.routers.userapp.entrypoints=${LISTEN}"
+      - "traefik.http.routers.userapp.service=userapp"
+      - "traefik.http.middlewares.testHeader.headers.customrequestheaders.X-Uitsmijter-Mode=interceptor"
+      - "traefik.http.middlewares.uitsmijter-auth.forwardauth.address=http://login.example.com/interceptor"
+      - "traefik.http.middlewares.uitsmijter-auth.forwardauth.trustForwardHeader=true"
+      - "traefik.http.middlewares.uitsmijter-auth.forwardauth.authResponseHeaders=Authorization, X-User-Ident"
+      - "traefik.http.routers.userapp.middlewares=uitsmijter-auth@docker"
+      

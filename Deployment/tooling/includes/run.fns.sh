@@ -18,6 +18,7 @@ function runInDockerProduction() {
   h2 "Run Uitsmijter in production environment"
   local IMAGENAME="${1:-${IMAGENAME}}"
   local TAG="${2:-${TAG}}"
+  buildReleaseIfNotPresent "${IMAGENAME}:${TAG}"
   IMAGENAME=${IMAGENAME} TAG=${TAG} \
     docker compose \
     -f "${PROJECT_DIR}/Deployment/Docker/docker-compose.yml" \

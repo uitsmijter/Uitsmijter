@@ -56,18 +56,25 @@ final class RequestClientMiddleware: AsyncMiddleware {
     // MARK: - Private functions
 
     /// Get the current `LoginMode`
+    /// The LoginMode can be oauth|interceptor. It is importent toi track the mode very carfully and distinguish precisly between them.
+    /// Knowing the ruleset:
+    ///     - If the header `X-Uitsmijter-Mode` ist set
+    ///     - if a query string is given
+    ///     - if a body property is set
+    ///     - is a special route is called
     ///
     /// - Parameter request: The current `Request`
-    /// - Returns: The `LoginMode` that can be .interceptor or .oauth
+    /// - Returns: The `LoginMode` that can be .interceptor or .oauth, default is .oauth
     private func getLoginMode(on request: Request) -> LoginMode {
         LoginMode(
                 rawValue: request.headers.first(name: "X-Uitsmijter-Mode")          // 1. set by header
-                        ?? (try? request.query.get(at: "mode"))                     // 2. if not: set by query parameter
-                        ??
-                        (
-                                request.url.string == "/interceptor" ? "interceptor" : "oauth"
-                        )                                                           // 3. special route, or def
-        ) ?? .oauth                                                                 // 4. ensure default
+                ?? (try? request.query.get(at: "mode"))                             // 2. if not: set by query parameter
+                ?? ( try? request.content.get(at: "mode"))                          // 3. if not: get by content object
+                ??
+                (
+                        request.url.string == "/interceptor" ? "interceptor" : "oauth"
+                )                                                                   // 4. special route, or def
+        ) ?? .oauth                                                                 // 5. ensure default
     }
 
     /// Get the `ClientInfo` constructed from a `Request`
