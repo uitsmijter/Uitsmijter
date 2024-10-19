@@ -57,7 +57,7 @@ services:
       - "traefik.http.routers.userapp.entrypoints=${LISTEN}"
       - "traefik.http.routers.userapp.service=userapp"
       - "traefik.http.middlewares.testHeader.headers.customrequestheaders.X-Uitsmijter-Mode=interceptor"
-      - "traefik.http.middlewares.uitsmijter-auth.forwardauth.address=http://login.example.com/interceptor"
+      - "traefik.http.middlewares.uitsmijter-auth.forwardauth.address=${AUTHSERVER_URL}/interceptor"
       - "traefik.http.middlewares.uitsmijter-auth.forwardauth.trustForwardHeader=true"
       - "traefik.http.middlewares.uitsmijter-auth.forwardauth.authResponseHeaders=Authorization, X-User-Ident"
       - "traefik.http.routers.userapp.middlewares=uitsmijter-auth@docker"
