@@ -8,7 +8,7 @@ include "test.var.sh"
 function unitTests() {
   h2 "Run all UnitTests"
   local dockerComposeBuildParameter=${1}
-  docker-compose \
+  docker compose \
     -f "${PROJECT_DIR}/Deployment/docker-compose.yml" \
     --env-file "${PROJECT_DIR}/.env" \
     up \
@@ -32,7 +32,7 @@ function e2eTests(){
   echo "Running tests:"
 
   status=0
-  ARGUMENTS="${ARGUMENTS}" GITHUB_ACTION=${GITHUB_ACTION} docker-compose \
+  ARGUMENTS="${ARGUMENTS}" GITHUB_ACTION=${GITHUB_ACTION} docker compose \
     -f "${PROJECT_DIR}/Deployment/docker-compose.yml" \
     --env-file "${PROJECT_DIR}/.env" \
     up \
