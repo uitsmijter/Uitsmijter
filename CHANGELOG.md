@@ -2,9 +2,11 @@
 
 - Feature: Add tooling: `remove` - to clear out all docker resources and clean up build folder
 - Feature: Add tooling: `code` - starts vscode in docker in brower
+- Feature: Docker only support
 
 - Fix: Change encoding date from `.iso8601` to `.deferredToDate` 
 - Fix: Show correct origin of log messages (#16)
+- Fix: Error message on non existing pages (NOT_FOUND, before ERRORS.NO_TENANT)
 
 - Change: Scripting Provider `fetch` method uses AsnHTTPClient instead of FoundationNetwork's URLSession
 - Change: in `--fast` mode e2e-tests run in chromium
