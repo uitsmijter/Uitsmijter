@@ -161,15 +161,16 @@ class JavaScriptProvider: JSFunctionsDelegate {
     ///
     @discardableResult
     func start(
-            class classToRun: ScriptClassExecution,
-            arguments args: JSInputParameterProtocol?
+        class classToRun: ScriptClassExecution,
+        arguments args: JSInputParameterProtocol?
     ) async throws -> [String?] {
-        return try await withCheckedThrowingContinuation { continuation in
-            start(class: classToRun, arguments: args, completion: continuation.resume(with:))
+        try await withCheckedThrowingContinuation { continuation in
+            start(class: classToRun, arguments: args) { result in
+                continuation.resume(with: result)
+            }
         }
-
     }
-
+    
     /// Callback method to execute a specific function in the javascript context
     ///
     /// - Attention: Consider to use the async method

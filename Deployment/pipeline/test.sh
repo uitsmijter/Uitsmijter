@@ -18,6 +18,7 @@ echo "Running tests with ${CPU_COUNT} workers."
 swift test --scratch-path .build --num-workers ${CPU_COUNT} --parallel \
   --enable-code-coverage \
   --xunit-output .build/testresults/xunit.xml \
+  ${FILTER_TEST} \
   -Xcc -I/usr/include/webkitgtk-4.0 \
   -Xcc -I/usr/include/webkitgtk-4.0/JavaScriptCore
 

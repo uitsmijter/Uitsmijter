@@ -18,6 +18,9 @@ help() {
   echo "        -b    | --build           | build         Build the project"
   echo "        -l    | --lint            | lint          Check code quality"
   echo "        -t    | --test            | test          Run all UnitTests"
+  echo "                                                  Optional <filter> can be applyed as: '--test <filter>'"
+  echo "                                                  like: '--test ServerTests.AppTests/testHelloWorld'"
+  echo "        -o    | --list-tests      | list-tests    Shows a list of tests"
   echo "        -e    | --e2e             | e2e           Run end-to-end tests"
   echo "        -r/-c | --run[-cluster]   | run[-cluster] Run Uitsmijter in docker or in a local kind-cluster"
   echo "        -s    | --release         | release       Build a release version, can have an optional added image "
@@ -32,6 +35,7 @@ help() {
   echo "        --debug                       Enable debug output"
   echo "        --dirty                       Use incremental temporary runtime for the local cluster"
   echo "        --fast                        runs tests only on one virtual browser and resolution."
+  echo "        --filter                      Running 'tests' with '--filter' option will only run filterd test."
   echo ""
   echo "Example:"
   echo "        ./tooling build run"
@@ -51,6 +55,7 @@ MODE=""
 DEBUG=""
 USE_DIRTY=""
 USE_FAST=""
+FILTER=
 PARAMS=""
 COUNT=$#
 if [ ${COUNT} == 0 ]; then
@@ -79,7 +84,15 @@ while (("$#")); do
   -t | --test | test)
     MODE+="|test"
     shift 1
+    if [[ ${1} != "--"* ]]; then
+      FILTER=${1}
+      shift 1
+    fi
     ;;
+  -o | --list-tests | list-tests)
+    MODE+="|listtests"
+    shift 1
+    ;;    
   -e | --e2e | e2e)
     MODE+="|e2e"
     shift 1
@@ -185,8 +198,16 @@ if [[ "${MODE}" == *"lint"* ]]; then
   lintCode
 fi
 
-if [[ "${MODE}" == *"test"* ]]; then
-  unitTests "${dockerComposeBuildParameter}"
+if [[ "${MODE}" == *"|test"* ]]; then
+  if [[ -n ${FILTER} ]]; then
+    FILTER=" --filter ${FILTER}"
+    echo "--> ${FILTER}"
+  fi
+  unitTests "${dockerComposeBuildParameter}" "${FILTER}"
+fi
+
+if [[ "${MODE}" == *"|listtests"* ]]; then
+  unitTestsList "${dockerComposeBuildParameter}"
 fi
 
 if [[ "${MODE}" == *"run"* ]]; then

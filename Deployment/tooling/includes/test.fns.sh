@@ -8,13 +8,27 @@ include "test.var.sh"
 function unitTests() {
   h2 "Run all UnitTests"
   local dockerComposeBuildParameter=${1}
-  docker-compose \
+  local optionalFilter=${2}
+  FILTER_TEST="${optionalFilter}" docker compose \
     -f "${PROJECT_DIR}/Deployment/docker-compose.yml" \
     --env-file "${PROJECT_DIR}/.env" \
     up \
     ${dockerComposeBuildParameter} \
     --exit-code-from test \
     test
+}
+
+# Show a list of unit tests
+function unitTestsList() {
+  h2 "List of available UnitTests"
+  local dockerComposeBuildParameter=${1}
+  docker compose \
+    -f "${PROJECT_DIR}/Deployment/docker-compose.yml" \
+    --env-file "${PROJECT_DIR}/.env" \
+    up \
+    ${dockerComposeBuildParameter} \
+    --exit-code-from testlist \
+    testlist
 }
 
 # Run end-to-end tests
@@ -32,7 +46,7 @@ function e2eTests(){
   echo "Running tests:"
 
   status=0
-  ARGUMENTS="${ARGUMENTS}" GITHUB_ACTION=${GITHUB_ACTION} docker-compose \
+  ARGUMENTS="${ARGUMENTS}" GITHUB_ACTION=${GITHUB_ACTION} docker compose \
     -f "${PROJECT_DIR}/Deployment/docker-compose.yml" \
     --env-file "${PROJECT_DIR}/.env" \
     up \

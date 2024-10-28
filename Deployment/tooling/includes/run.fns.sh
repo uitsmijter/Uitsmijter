@@ -5,7 +5,7 @@
 # Run incremental build in docker environment
 function runInDocker() {
   h2 "Run incremental build in a docker environment"
-  RUNTIME_IMAGE="${IMAGENAME}-runtime:latest" docker-compose \
+  RUNTIME_IMAGE="${IMAGENAME}-runtime:latest" docker compose \
     -f "${PROJECT_DIR}/Deployment/docker-compose.yml" \
     --env-file "${SCRIPT_DIR}/.env" \
     up \

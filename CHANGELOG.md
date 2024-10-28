@@ -14,6 +14,7 @@
 - Update buildbox to 2.3.0
 
 - Improvement: Tooling command code use its own build folder
+- Improvement: Tooling command test can have an optional filter
 - Improvement: Rename "Littleletetr" to "Ham" to align the documentation
 
 # 0.9.5
