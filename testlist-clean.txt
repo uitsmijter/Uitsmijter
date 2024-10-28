@@ -25,22 +25,22 @@ ServerTests.InterceptorControllerDifferentTenantsTest
 ServerTests.InterceptorControllerNotConfiguredInClientTest
 ServerTests.InterceptorControllerTest
 ServerTests.IsClassExistsTest
-ServerTests.JSFunctionsHashingTest
-ServerTests.LoggingDebugFunctionsTest
-ServerTests.LoggingTest
-ServerTests.LoginControllerFormTests
-ServerTests.LoginControllerLoginTests
-ServerTests.LoginControllerLogoutTests
-ServerTests.LoginControllerProfileTests
-ServerTests.LoginControllerSilentDisallowTests
-ServerTests.LoginControllerSilentTests
-ServerTests.MetricsTests
-ServerTests.OAuthControllerProtocolTest
-ServerTests.RequestErrorMiddlewareTest
-ServerTests.ResponseTypesTest
-ServerTests.StringRegexTest
-ServerTests.StringSlugTest
-ServerTests.SubjectTest
+✅ ServerTests.JSFunctionsHashingTest
+✅ ServerTests.LoggingDebugFunctionsTest
+✅ ServerTests.LoggingTest
+✅ ServerTests.LoginControllerFormTests
+✅ ServerTests.LoginControllerLoginTests
+✅ ServerTests.LoginControllerLogoutTests
+✅ ServerTests.LoginControllerProfileTests
+✅ ServerTests.LoginControllerSilentDisallowTests
+✅ ServerTests.LoginControllerSilentTests
+✅ ServerTests.MetricsTests
+✅ ServerTests.OAuthControllerProtocolTest
+✅ ServerTests.RequestErrorMiddlewareTest
+✅ ServerTests.ResponseTypesTest
+✅ ServerTests.StringRegexTest
+✅ ServerTests.StringSlugTest
+✅ ServerTests.SubjectTest
 ✅ ServerTests.TemplateLoginTest
 ✅ ServerTests.TemplateTest
 ✅ ServerTests.TenantEncoderTest

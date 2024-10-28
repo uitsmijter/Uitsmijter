@@ -84,7 +84,7 @@ while (("$#")); do
   -t | --test | test)
     MODE+="|test"
     shift 1
-    if [[ ${1} != "--"* ]]; then
+    if [[ -n ${1} ]] && [[ ${1} != "--"* ]]; then
       FILTER=${1}
       shift 1
     fi
@@ -174,7 +174,6 @@ if [[ "${MODE}" != *"e2e"* ]] && [[ -n "${USE_FAST}" ]]; then
   exit 1
 fi
 
-
 # Settings
 shouldDebug "${DEBUG}"
 
@@ -201,7 +200,6 @@ fi
 if [[ "${MODE}" == *"|test"* ]]; then
   if [[ -n ${FILTER} ]]; then
     FILTER=" --filter ${FILTER}"
-    echo "--> ${FILTER}"
   fi
   unitTests "${dockerComposeBuildParameter}" "${FILTER}"
 fi
