@@ -22,7 +22,7 @@ final class AuthControllerCodeGenericTests: XCTestCase {
         try app.test(.GET, "authorize", afterResponse: { res in
             let err = try decoder.decode(ResponseError.self, from: res.body)
             XCTAssertEqual(res.status, .badRequest)
-            XCTAssertContains(err.reason, "Value of type 'String'")
+            XCTAssertContains(err.reason, "No String was found at 'response_type'")
         })
     } 
 
