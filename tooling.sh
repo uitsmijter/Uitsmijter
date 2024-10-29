@@ -178,22 +178,22 @@ fi
 shouldDebug "${DEBUG}"
 
 # Execute pipeline
-if [[ "${MODE}" == *"remove"* ]]; then
+if [[ "${MODE}" == *"|remove"* ]]; then
   removeContainer
   removeImages
   removeVolumes
   removeBuild
 fi
 
-if [[ "${MODE}" == *"imagetool"* ]]; then
+if [[ "${MODE}" == *"|imagetool"* ]]; then
   buildImages
 fi
 
-if [[ "${MODE}" == *"build"* ]]; then
+if [[ "${MODE}" == *"|build"* ]]; then
   buildIncrementalBinary "${dockerComposeBuildParameter}"
 fi
 
-if [[ "${MODE}" == *"lint"* ]]; then
+if [[ "${MODE}" == *"|lint"* ]]; then
   lintCode
 fi
 
@@ -208,27 +208,27 @@ if [[ "${MODE}" == *"|listtests"* ]]; then
   unitTestsList "${dockerComposeBuildParameter}"
 fi
 
-if [[ "${MODE}" == *"run"* ]]; then
+if [[ "${MODE}" == *"|run"* ]]; then
   runInDocker
 fi
 
-if [[ "${MODE}" == *'release'* ]]; then
+if [[ "${MODE}" == *'|release'* ]]; then
   buildRelease "${TAG}"
 fi
 
-if [[ "${MODE}" == *"code"* ]]; then
+if [[ "${MODE}" == *"|code"* ]]; then
   openCode
 fi
 
-if [[ "${MODE}" == *"helm"* ]]; then
+if [[ "${MODE}" == *"|helm"* ]]; then
   buildHelm
 fi
 
-if [[ "${MODE}" == *'cluster'* ]]; then
+if [[ "${MODE}" == *'|cluster'* ]]; then
   runInKubernetesInDocker "${TAG}"
 fi
 
-if [[ "${MODE}" == *"e2e"* ]]; then
+if [[ "${MODE}" == *"|e2e"* ]]; then
   EXTRAS=""
   if [  -n "${USE_FAST}" ]; then
     EXTRAS="--browser chromium"
