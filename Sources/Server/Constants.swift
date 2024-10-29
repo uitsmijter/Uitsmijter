@@ -5,7 +5,7 @@ import Vapor
 struct Constants {
     static let APPLICATION = "Uitsmijter"
     static let MAJOR_VERSION = 1
-    static let isRelease = Application().environment.isRelease
+    static let isRelease = false // Application().environment.isRelease
 
     static let PUBLIC_DOMAIN = Environment.get("PUBLIC_DOMAIN") ?? "localhost:8080"
 

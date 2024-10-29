@@ -5,7 +5,7 @@ import XCTVapor
 final class AuthControllerCodeGenericTests: XCTestCase {
     let decoder = JSONDecoder()
     let testAppIdent = UUID()
-    let app = Application(.testing)
+    let app: Application = Application(.testing)
 
     override func setUp() {
         super.setUp()
@@ -18,15 +18,15 @@ final class AuthControllerCodeGenericTests: XCTestCase {
         app.shutdown()
     }
 
-    func testCodeFlowWithoutParametersShouldFail() async throws {
+    func testCodeFlowWithoutParametersShouldFail() throws {
         try app.test(.GET, "authorize", afterResponse: { res in
             let err = try decoder.decode(ResponseError.self, from: res.body)
             XCTAssertEqual(res.status, .badRequest)
             XCTAssertContains(err.reason, "Value of type 'String'")
         })
-    }
+    } 
 
-    func testUnknownCodeChallengeShouldFail() async throws {
+    func testUnknownCodeChallengeShouldFail() throws {
         let response = try app.sendRequest(
                 .GET,
                 "authorize"
