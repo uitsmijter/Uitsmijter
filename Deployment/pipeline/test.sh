@@ -15,7 +15,11 @@ fi
 
 CPU_COUNT=$(grep --count ^processor /proc/cpuinfo || echo 2)
 echo "Running tests with ${CPU_COUNT} workers."
-swift test --scratch-path .build --num-workers ${CPU_COUNT} --parallel \
+EXTRA=""
+if [  -n "${DEBUG}" ]; then
+  EXTRA=" -v"
+fi
+swift test --scratch-path .build --num-workers ${CPU_COUNT} --parallel ${EXTRA} \
   --enable-code-coverage \
   --xunit-output .build/testresults/xunit.xml \
   ${FILTER_TEST} \

@@ -23,6 +23,7 @@ help() {
   echo "        -o    | --list-tests      | list-tests    Shows a list of tests"
   echo "        -e    | --e2e             | e2e           Run end-to-end tests"
   echo "        -r/-c | --run[-cluster]   | run[-cluster] Run Uitsmijter in docker or in a local kind-cluster"
+  echo "        -d    | --run-docker      | run-docker    Run Uitsmijter in a production docker environment"
   echo "        -s    | --release         | release       Build a release version, can have an optional added image "
   echo "                                                  name (with optional tag)"
   echo "        -p    | --helm            | helm          Build the helm package"
@@ -35,7 +36,6 @@ help() {
   echo "        --debug                       Enable debug output"
   echo "        --dirty                       Use incremental temporary runtime for the local cluster"
   echo "        --fast                        runs tests only on one virtual browser and resolution."
-  echo "        --filter                      Running 'tests' with '--filter' option will only run filterd test."
   echo ""
   echo "Example:"
   echo "        ./tooling build run"
@@ -105,6 +105,10 @@ while (("$#")); do
     MODE+="|cluster"
     shift 1
     ;;
+  -d | --run-docker | run-docker)
+    MODE+="|docker"
+    shift 1
+    ;;    
   -i | --images | images)
     MODE+="|imagetool"
     shift 1
@@ -228,7 +232,11 @@ if [[ "${MODE}" == *'|cluster'* ]]; then
   runInKubernetesInDocker "${TAG}"
 fi
 
-if [[ "${MODE}" == *"|e2e"* ]]; then
+if [[ "${MODE}" == *'docker'* ]]; then
+  runInDockerProduction "${IMAGENAME}" "${GIT_BRANCH}-${GIT_HASH}"
+fi
+
+if [[ "${MODE}" == *"e2e"* ]]; then
   EXTRAS=""
   if [  -n "${USE_FAST}" ]; then
     EXTRAS="--browser chromium"
