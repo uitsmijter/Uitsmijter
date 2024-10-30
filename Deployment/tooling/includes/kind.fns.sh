@@ -47,7 +47,7 @@ function kindStartCluster() {
     --set image.repository="${IMAGE%%:*}" \
     --set image.tag="${IMAGE##*:}"
 
-  kindWaitForPods uitsmijter app=redis,role=master app=uitsmijter
+  kindWaitForPods uitsmijter app=uitsmijter-sessions,role=master app=uitsmijter
 
   kubectl apply \
     -f "${PROJECT_DIR}/Deployment/e2e/uitsmijter-tenant.yaml" \

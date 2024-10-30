@@ -54,6 +54,8 @@ struct Constants {
     /// Runtime settings
     struct RUNTIME {
         static let SUPPORT_KUBERNETES_CRD: Bool = Bool(Environment.get("SUPPORT_KUBERNETES_CRD") ?? "false") ?? false
+        static let SCOPED_KUBERNETES_CRD: Bool = Bool(Environment.get("SCOPED_KUBERNETES_CRD") ?? "false") ?? false
+        static let UITSMIJTER_NAMESPACE: String = Environment.get("UITSMIJTER_NAMESPACE") ?? ""
     }
 
     // Security

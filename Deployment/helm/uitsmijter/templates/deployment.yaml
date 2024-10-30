@@ -44,12 +44,14 @@ spec:
                 name: jwt-secret
 
           env:
+            - name: UITSMIJTER_NAMESPACE
+              value: {{ include "uitsmijter.namespace" . }}
             - name: REDIS_HOST
-              value: "redis-master"
+              value: "uitsmijter-sessions-master"
             - name: REDIS_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  name: redis
+                  name: uitsmijter-sessions
                   key: 'redis-password'
 
 
