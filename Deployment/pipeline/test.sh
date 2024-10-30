@@ -22,6 +22,7 @@ fi
 swift test --scratch-path .build --num-workers ${CPU_COUNT} --parallel ${EXTRA} \
   --enable-code-coverage \
   --xunit-output .build/testresults/xunit.xml \
+  ${FILTER_TEST} \
   -Xcc -I/usr/include/webkitgtk-4.0 \
   -Xcc -I/usr/include/webkitgtk-4.0/JavaScriptCore
 

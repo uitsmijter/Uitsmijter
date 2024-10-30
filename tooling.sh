@@ -18,6 +18,9 @@ help() {
   echo "        -b    | --build           | build         Build the project"
   echo "        -l    | --lint            | lint          Check code quality"
   echo "        -t    | --test            | test          Run all UnitTests"
+  echo "                                                  Optional <filter> can be applyed as: '--test <filter>'"
+  echo "                                                  like: '--test ServerTests.AppTests/testHelloWorld'"
+  echo "        -o    | --list-tests      | list-tests    Shows a list of tests"
   echo "        -e    | --e2e             | e2e           Run end-to-end tests"
   echo "        -r/-c | --run[-cluster]   | run[-cluster] Run Uitsmijter in docker or in a local kind-cluster"
   echo "        -d    | --run-docker      | run-docker    Run Uitsmijter in a production docker environment"
@@ -52,6 +55,7 @@ MODE=""
 DEBUG=""
 USE_DIRTY=""
 USE_FAST=""
+FILTER=
 PARAMS=""
 COUNT=$#
 if [ ${COUNT} == 0 ]; then
@@ -80,7 +84,15 @@ while (("$#")); do
   -t | --test | test)
     MODE+="|test"
     shift 1
+    if [[ -n ${1} ]] && [[ ${1} != "--"* ]]; then
+      FILTER=${1}
+      shift 1
+    fi
     ;;
+  -o | --list-tests | list-tests)
+    MODE+="|listtests"
+    shift 1
+    ;;    
   -e | --e2e | e2e)
     MODE+="|e2e"
     shift 1
@@ -166,51 +178,57 @@ if [[ "${MODE}" != *"e2e"* ]] && [[ -n "${USE_FAST}" ]]; then
   exit 1
 fi
 
-
 # Settings
 shouldDebug "${DEBUG}"
 
 # Execute pipeline
-if [[ "${MODE}" == *"remove"* ]]; then
+if [[ "${MODE}" == *"|remove"* ]]; then
   removeContainer
   removeImages
   removeVolumes
   removeBuild
 fi
 
-if [[ "${MODE}" == *"imagetool"* ]]; then
+if [[ "${MODE}" == *"|imagetool"* ]]; then
   buildImages
 fi
 
-if [[ "${MODE}" == *"build"* ]]; then
+if [[ "${MODE}" == *"|build"* ]]; then
   buildIncrementalBinary "${dockerComposeBuildParameter}"
 fi
 
-if [[ "${MODE}" == *"lint"* ]]; then
+if [[ "${MODE}" == *"|lint"* ]]; then
   lintCode
 fi
 
-if [[ "${MODE}" == *"test"* ]]; then
-  unitTests "${dockerComposeBuildParameter}"
+if [[ "${MODE}" == *"|test"* ]]; then
+  if [[ -n ${FILTER} ]]; then
+    FILTER=" --filter ${FILTER}"
+  fi
+  unitTests "${dockerComposeBuildParameter}" "${FILTER}"
 fi
 
-if [[ "${MODE}" == *"run"* ]]; then
+if [[ "${MODE}" == *"|listtests"* ]]; then
+  unitTestsList "${dockerComposeBuildParameter}"
+fi
+
+if [[ "${MODE}" == *"|run"* ]]; then
   runInDocker
 fi
 
-if [[ "${MODE}" == *'release'* ]]; then
+if [[ "${MODE}" == *'|release'* ]]; then
   buildRelease "${TAG}"
 fi
 
-if [[ "${MODE}" == *"code"* ]]; then
+if [[ "${MODE}" == *"|code"* ]]; then
   openCode
 fi
 
-if [[ "${MODE}" == *"helm"* ]]; then
+if [[ "${MODE}" == *"|helm"* ]]; then
   buildHelm
 fi
 
-if [[ "${MODE}" == *'cluster'* ]]; then
+if [[ "${MODE}" == *'|cluster'* ]]; then
   runInKubernetesInDocker "${TAG}"
 fi
 

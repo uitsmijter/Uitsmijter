@@ -56,6 +56,9 @@ services:
 
   test:
     <<: *shared_job
+    environment:
+      <<: *shared_environment
+      FILTER_TEST: ${FILTER_TEST}
     command:
       - /bin/bash
       - -c
@@ -64,6 +67,15 @@ services:
         ./Deployment/pipeline/test.sh
         mkdir -p Deployment/Release/Coverage
         cp -r .build/testresults/* Deployment/Release/Coverage
+
+  testlist:
+    <<: *shared_job
+    command:
+      - /bin/bash
+      - -c
+      - |
+        set -e
+        swift test list
 
   e2e:
     image: ghcr.io/uitsmijter/e2e-runner:${BUILDBOX}

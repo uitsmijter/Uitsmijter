@@ -41,9 +41,9 @@ final class AuthCodeMemoryStorageGarbageCollectionTest: XCTestCase {
         }
     }
 
-    func testStoreSessionsInMemoryGarbageCollection() async throws {
-        let expectation_1 = expectation(description: "Wait for end of  ttl")
-        let expectation_2 = expectation(description: "Wait for end of  ttl")
+    func testStoreSessionsInMemoryGarbageCollection() throws {
+        let expectation_1 = expectation(description: "Wait for end of ttl")
+        let expectation_2 = expectation(description: "Wait for end of ttl")
         let expectation_3 = expectation(description: "Wait for end of ttl")
 
         XCTAssertEqual(storage.count, 3)
@@ -64,7 +64,7 @@ final class AuthCodeMemoryStorageGarbageCollectionTest: XCTestCase {
         }
 
         wait(for: [expectation_1, expectation_2, expectation_3], timeout: TestDefaults.waitTimeout)
-
+        
         // all gone?
         XCTAssertEqual(storage.count, 0)
     }

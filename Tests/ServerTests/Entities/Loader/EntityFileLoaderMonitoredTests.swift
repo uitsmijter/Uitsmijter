@@ -49,12 +49,12 @@ final class EntityFileLoaderMonitoredTests: XCTestCase {
 // MARK: - Tenants
 extension EntityFileLoaderMonitoredTests {
 
-    func testEmptyTenants() async throws {
+    func testEmptyTenants() throws {
         XCTAssertEqual(EntityStorage.shared.tenants.count, 0)
         XCTAssertEqual(EntityStorage.shared.clients.count, 0)
     }
 
-    func testAddTenant() async throws {
+    func testAddTenant() throws {
         let tenantUrl = temporaryDirectory
                 .appendingPathComponent("Configurations")
                 .appendingPathComponent("Tenants")
@@ -76,7 +76,7 @@ extension EntityFileLoaderMonitoredTests {
         try createTenant(tenantUrl: tenantUrl)
 
         wait(for: [expectation], timeout: TestDefaults.waitTimeout )
-        try await Task.sleep(nanoseconds: sleepTime)
+        usleep(1000000)
         XCTAssertEqual(EntityStorage.shared.tenants.count, 1)
     }
 
@@ -86,7 +86,7 @@ extension EntityFileLoaderMonitoredTests {
                 .appendingPathComponent("Tenants")
                 .appendingPathComponent("test.yaml")
 
-        try await testAddTenant()
+        try testAddTenant()
 
         let expectation = expectation(description: "Wait for tenant change")
         expectation.assertForOverFulfill = false

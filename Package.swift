@@ -1,4 +1,4 @@
-// swift-tools-version:5.7
+// swift-tools-version:5.9
 
 import PackageDescription
 
@@ -11,7 +11,7 @@ let package = Package(
             .executable(name: "Uitsmijter", targets: ["Uitsmijter"])
         ],
         dependencies: [
-            .package(url: "https://github.com/vapor/vapor.git", from: "4.0.0"),
+            .package(url: "https://github.com/vapor/vapor.git", from: "4.106.1"),
             .package(url: "https://github.com/vapor/redis.git", from: "4.0.0"),
             .package(url: "https://github.com/vapor/leaf.git", from: "4.0.0"),
             .package(url: "https://github.com/vapor/jwt.git", from: "4.1.0"),

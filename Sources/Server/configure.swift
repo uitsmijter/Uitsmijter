@@ -16,6 +16,7 @@ enum ApplicationConfigError: Error {
 
 /// Global ResourcePath
 var resourcePath = "./"
+var viewsPath = "./"
 
 /// Configures the application
 ///
@@ -48,6 +49,7 @@ public func configure(_ app: Application) throws {
     }
     #endif
     resourcePath = app.directory.resourcesDirectory
+    viewsPath = app.directory.viewsDirectory
 
     // Webroot
     app.middleware.use(FileMiddleware(publicDirectory: app.directory.publicDirectory))

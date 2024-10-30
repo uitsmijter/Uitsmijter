@@ -3,6 +3,7 @@ import SotoS3
 import Vapor
 
 actor TenantTemplateLoader {
+
     enum TenantTemplateLoaderOperations {
         case create(tenant: Tenant)
         case remove(tenant: Tenant)
@@ -45,7 +46,7 @@ actor TenantTemplateLoader {
             }
         }
 
-        guard let viewsDir = URL(string: Application().directory.viewsDirectory) else {
+        guard let viewsDir = URL(string: viewsPath) else {
             Log.critical("Views directory could not be initialized")
             return
         }
@@ -102,7 +103,7 @@ actor TenantTemplateLoader {
             return
         }
 
-        guard let viewsDir = URL(string: Application().directory.viewsDirectory) else {
+        guard let viewsDir = URL(string: viewsPath) else {
             Log.error("Views directory could not be found")
             return
         }
