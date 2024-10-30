@@ -10,5 +10,6 @@ data:
   COOKIE_EXPIRATION_IN_DAYS: {{ .Values.config.cookieExpirationInDays | default 7 | quote }}
   TOKEN_EXPIRATION_IN_HOURS: {{ .Values.config.tokenExpirationInHours | default 2 | quote }}
   TOKEN_REFRESH_EXPIRATION_IN_HOURS: {{ .Values.config.tokenRefreshExpirationInHours | default 720 | quote }}
-  SUPPORT_KUBERNETES_CRD: "true"
+  SUPPORT_KUBERNETES_CRD: {{ .Values.config.crd.enabled | default "true" | quote }}
+  SCOPED_KUBERNETES_CRD: {{ .Values.config.crd.scoped | default "false" | quote }}
   DISPLAY_VERSION: {{ if hasKey .Values.config "displayVersion" }}{{ .Values.config.displayVersion | quote }}{{ else }}"true"{{ end }}

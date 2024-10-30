@@ -1,26 +1,24 @@
 ---
-# Source: redis/templates/secret.yaml
 apiVersion: v1
 kind: Secret
 metadata:
   namespace: {{ include "uitsmijter.namespace" . }}
-  name: redis
+  name: uitsmijter-sessions
   labels:
-    app: redis
+    app: uitsmijter-sessions
 type: Opaque
 data:
   redis-password: {{ .Values.redisPassword | default (randAlphaNum 12) | b64enc | quote }}
 
 
 ---
-# Source: redis/templates/configmap.yaml
 apiVersion: v1
 kind: ConfigMap
 metadata:
   namespace: {{ include "uitsmijter.namespace" . }}
-  name: redis
+  name: uitsmijter-sessions
   labels:
-    app: redis
+    app: uitsmijter-sessions
 data:
   redis.conf: |-
     # User-supplied configuration:
@@ -39,14 +37,13 @@ data:
     rename-command FLUSHALL ""
 
 ---
-# Source: redis/templates/health-configmap.yaml
 apiVersion: v1
 kind: ConfigMap
 metadata:
   namespace: {{ include "uitsmijter.namespace" . }}
-  name: redis-health
+  name: uitsmijter-sessions-health
   labels:
-    app: redis
+    app: uitsmijter-sessions
 data:
   ping_readiness_local.sh: |-
     #!/bin/bash
@@ -122,14 +119,13 @@ data:
     exit $exit_status
 
 ---
-# Source: redis/templates/headless-svc.yaml
 apiVersion: v1
 kind: Service
 metadata:
   namespace: {{ include "uitsmijter.namespace" . }}
-  name: redis-headless
+  name: uitsmijter-sessions-headless
   labels:
-    app: redis
+    app: uitsmijter-sessions
 spec:
   type: ClusterIP
   clusterIP: None
@@ -138,17 +134,16 @@ spec:
       port: 6379
       targetPort: redis
   selector:
-    app: redis
+    app: uitsmijter-sessions
 
 ---
-# Source: redis/templates/redis-master-svc.yaml
 apiVersion: v1
 kind: Service
 metadata:
   namespace: {{ include "uitsmijter.namespace" . }}
-  name: redis-master
+  name: uitsmijter-sessions-master
   labels:
-    app: redis
+    app: uitsmijter-sessions
 spec:
   type: ClusterIP
   ports:
@@ -156,18 +151,17 @@ spec:
       port: 6379
       targetPort: redis
   selector:
-    app: redis
+    app: uitsmijter-sessions
     role: master
 
 ---
-# Source: redis/templates/redis-slave-svc.yaml
 apiVersion: v1
 kind: Service
 metadata:
   namespace: {{ include "uitsmijter.namespace" . }}
-  name: redis-slave
+  name: uitsmijter-sessions-slave
   labels:
-    app: redis
+    app: uitsmijter-sessions
 spec:
   type: ClusterIP
   ports:
@@ -175,28 +169,27 @@ spec:
       port: 6379
       targetPort: redis
   selector:
-    app: redis
+    app: uitsmijter-sessions
     role: slave
 
 ---
-# Source: redis/templates/redis-master-statefulset.yaml
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:
   namespace: {{ include "uitsmijter.namespace" . }}
-  name: redis-master
+  name: uitsmijter-sessions-master
   labels:
-    app: redis
+    app: uitsmijter-sessions
 spec:
   selector:
     matchLabels:
-      app: redis
+      app: uitsmijter-sessions
       role: master
-  serviceName: redis-headless
+  serviceName: uitsmijter-sessions-headless
   template:
     metadata:
       labels:
-        app: redis
+        app: uitsmijter-sessions
         role: master
       annotations:
         checksum/health: caabbb72e0c57d8fc605a29541deb6b7dc0aa883227a9d292183ef16103a36e7
@@ -239,7 +232,7 @@ spec:
             - name: REDIS_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  name: redis
+                  name: uitsmijter-sessions
                   key: redis-password
             - name: REDIS_PORT
               value: "6379"
@@ -273,7 +266,7 @@ spec:
           volumeMounts:
             - name: health
               mountPath: /health
-            - name: redis-data
+            - name: uitsmijter-sessions-data
               mountPath: /data
               subPath:
             - name: config
@@ -283,18 +276,18 @@ spec:
       volumes:
         - name: health
           configMap:
-            name: redis-health
+            name: uitsmijter-sessions-health
             defaultMode: 0755
         - name: config
           configMap:
-            name: redis
+            name: uitsmijter-sessions
         - name: redis-tmp-conf
           emptyDir: { }
   volumeClaimTemplates:
     - metadata:
-        name: redis-data
+        name: uitsmijter-sessions-data
         labels:
-          app: redis
+          app: uitsmijter-sessions
           component: master
       spec:
         storageClassName: {{ .Values.storageClassName | quote }}
@@ -309,25 +302,24 @@ spec:
     type: RollingUpdate
 
 ---
-# Source: redis/templates/redis-slave-statefulset.yaml
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:
   namespace: {{ include "uitsmijter.namespace" . }}
-  name: redis-slave
+  name: uitsmijter-sessions-slave
   labels:
-    app: redis
+    app: uitsmijter-sessions
 spec:
   replicas: 1
-  serviceName: redis-headless
+  serviceName: uitsmijter-sessions-headless
   selector:
     matchLabels:
-      app: redis
+      app: uitsmijter-sessions
       role: slave
   template:
     metadata:
       labels:
-        app: redis
+        app: uitsmijter-sessions
         role: slave
       annotations:
         checksum/health: caabbb72e0c57d8fc605a29541deb6b7dc0aa883227a9d292183ef16103a36e7
@@ -373,7 +365,7 @@ spec:
             - name: REDIS_REPLICATION_MODE
               value: slave
             - name: REDIS_MASTER_HOST
-              value: redis-master-0.redis-headless
+              value: uitsmijter-sessions-master-0.uitsmijter-sessions-headless
             - name: REDIS_PORT
               value: "6379"
             - name: REDIS_MASTER_PORT_NUMBER
@@ -381,12 +373,12 @@ spec:
             - name: REDIS_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  name: redis
+                  name: uitsmijter-sessions
                   key: redis-password
             - name: REDIS_MASTER_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  name: redis
+                  name: uitsmijter-sessions
                   key: redis-password
           ports:
             - name: redis
@@ -418,7 +410,7 @@ spec:
           volumeMounts:
             - name: health
               mountPath: /health
-            - name: redis-data
+            - name: uitsmijter-sessions-data
               mountPath: /data
             - name: config
               mountPath: /opt/bitnami/redis/mounted-etc
@@ -427,20 +419,20 @@ spec:
       volumes:
         - name: health
           configMap:
-            name: redis-health
+            name: uitsmijter-sessions-health
             defaultMode: 0755
         - name: config
           configMap:
-            name: redis
+            name: uitsmijter-sessions
         - name: sentinel-tmp-conf
           emptyDir: { }
         - name: redis-tmp-conf
           emptyDir: { }
   volumeClaimTemplates:
     - metadata:
-        name: redis-data
+        name: uitsmijter-sessions-data
         labels:
-          app: redis
+          app: uitsmijter-sessions
           component: slave
       spec:
         storageClassName: {{ .Values.storageClassName | quote }}

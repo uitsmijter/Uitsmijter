@@ -14,6 +14,6 @@ jobs:
       repository-projects: read
 
     if: always()
-    uses: uitsmijter/workflows/.github/workflows/pullrequest-mattermost.yaml@main
+    uses: uitsmijter/workflows/.github/workflows/pullrequest-mattermost.yaml@v1.0.5
     secrets:
       WEBHOOK: ${{ secrets.MATTERMOST_WEBHOOK_BUILD }}

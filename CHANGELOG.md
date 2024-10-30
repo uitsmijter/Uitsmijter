@@ -3,6 +3,7 @@
 - Feature: Add tooling: `remove` - to clear out all docker resources and clean up build folder
 - Feature: Add tooling: `code` - starts vscode in docker in brower
 - Feature: Docker only support
+- Feature: Add support for local namespace scoped tennants and clients
 
 - Fix: Change encoding date from `.iso8601` to `.deferredToDate` 
 - Fix: Show correct origin of log messages (#16)
@@ -11,6 +12,7 @@
 - Change: Scripting Provider `fetch` method uses AsnHTTPClient instead of FoundationNetwork's URLSession
 - Change: in `--fast` mode e2e-tests run in chromium
 - Change: Removed webp support for Uitsmijter default login page
+- Change: name of the redis database to uitsmijter-session-master and uitsmijter-session-slave
 
 - Update: to Swift 5.9.2
 - Update buildbox to 2.3.0

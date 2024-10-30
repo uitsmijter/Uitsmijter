@@ -70,7 +70,11 @@ struct EntityCRDLoader: EntityLoaderProtocol {
     }
 
     // MARK: - Initial Tenants
-
+    private var namespaceSelector: NamespaceSelector {
+        Constants.RUNTIME.SCOPED_KUBERNETES_CRD == true 
+            ? .namespace(Constants.RUNTIME.UITSMIJTER_NAMESPACE) 
+            : .allNamespaces
+    }
     private func loadInitialTenants() throws {
         let group = DispatchGroup()
         group.enter()
@@ -78,7 +82,7 @@ struct EntityCRDLoader: EntityLoaderProtocol {
             do {
                 let listTenants = try await kubeClient
                         .for(TenantResource.self, gvr: gvrTenants)
-                        .list(in: .allNamespaces)
+                        .list(in: namespaceSelector)
 
                 listTenants.items.forEach { item in
                     guard let namespace = item.metadata?.namespace else {
@@ -146,7 +150,7 @@ struct EntityCRDLoader: EntityLoaderProtocol {
     private func tenantListener() async throws {
         let task = try kubeClient
                 .for(TenantResource.self, gvr: gvrTenants)
-                .watch(in: .allNamespaces)
+                .watch(in: namespaceSelector)
 
         for try await item in task.start() {
             do {
@@ -168,7 +172,7 @@ struct EntityCRDLoader: EntityLoaderProtocol {
                 let listClients = try await kubeClient.for(
                         ClientResource.self,
                         gvr: gvrClients
-                ).list(in: .allNamespaces)
+                ).list(in: namespaceSelector)
 
                 listClients.items.forEach { item in
                     guard let name = item.name else {
@@ -225,7 +229,10 @@ struct EntityCRDLoader: EntityLoaderProtocol {
     }
 
     private func clientListener() async throws {
-        let task = try kubeClient.for(ClientResource.self, gvr: gvrClients).watch(in: .allNamespaces)
+        let task = try kubeClient.for(
+            ClientResource.self, 
+            gvr: gvrClients
+        ).watch(in: namespaceSelector)
 
         for try await item in task.start() {
             do {
