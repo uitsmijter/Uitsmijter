@@ -1,6 +1,6 @@
 <component name="ProjectRunConfigurationManager">
-  <configuration default="false" name="Uitsmijter-Server" type="docker-deploy" factoryName="docker-compose.yml" singleton="false" server-name="Docker">
-    <deployment type="docker-compose.yml">
+  <configuration default="false" name="Uitsmijter-Server" type="docker-deploy" factoryName="build-compose.yml" singleton="false" server-name="Docker">
+    <deployment type="build-compose.yml">
       <settings>
         <option name="envFilePath" value="../.env" />
         <option name="commandLineOptions" value="--build" />
@@ -9,7 +9,7 @@
             <option value="run" />
           </list>
         </option>
-        <option name="sourceFilePath" value="Deployment/docker-compose.yml" />
+        <option name="sourceFilePath" value="Deployment/build-compose.yml" />
       </settings>
     </deployment>
     <method v="2" />

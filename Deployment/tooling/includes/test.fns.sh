@@ -10,7 +10,7 @@ function unitTests() {
   local dockerComposeBuildParameter=${1}
   local optionalFilter=${2}
   FILTER_TEST="${optionalFilter}" docker compose \
-    -f "${PROJECT_DIR}/Deployment/docker-compose.yml" \
+    -f "${PROJECT_DIR}/Deployment/build-compose.yml" \
     --env-file "${PROJECT_DIR}/.env" \
     up \
     ${dockerComposeBuildParameter} \
@@ -23,7 +23,7 @@ function unitTestsList() {
   h2 "List of available UnitTests"
   local dockerComposeBuildParameter=${1}
   docker compose \
-    -f "${PROJECT_DIR}/Deployment/docker-compose.yml" \
+    -f "${PROJECT_DIR}/Deployment/build-compose.yml" \
     --env-file "${PROJECT_DIR}/.env" \
     up \
     ${dockerComposeBuildParameter} \

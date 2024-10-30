@@ -130,7 +130,7 @@ End-2-End:
     - docker tag "${CONTAINER_IMAGE}" "${IMAGENAME}:${GIT_BRANCH}-${GIT_HASH}"
     - docker ps | grep $(hostname)
     - repoDir=$(docker inspect $(docker ps | grep $(hostname) | grep k8s_build | cut -d ' ' -f 1 | head -n1) | jq -r '.[].Mounts|..|objects|select(.Destination=="/builds").Source' | head -n1)
-    - sed -i "s|- ../|- ${repoDir}/${CI_PROJECT_PATH}/|" Deployment/docker-compose.yml
+    - sed -i "s|- ../|- ${repoDir}/${CI_PROJECT_PATH}/|" Deployment/build-compose.yml
     - export KIND_CLUSTER_NAME=uitsmijter-${CI_PIPELINE_ID}
   script:
     - ./tooling.sh e2e --debug --rebuild

@@ -21,7 +21,7 @@ function runInDockerProduction() {
   buildReleaseIfNotPresent "${IMAGENAME}:${TAG}"
   IMAGENAME=${IMAGENAME} TAG=${TAG} \
     docker compose \
-    -f "${PROJECT_DIR}/Deployment/Docker/docker-compose.yml" \
+    -f "${PROJECT_DIR}/Deployment/Docker/build-compose.yml" \
     --env-file "${PROJECT_DIR}/Deployment/Docker/.env" \
     up
 }
