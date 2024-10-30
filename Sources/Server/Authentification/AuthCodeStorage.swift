@@ -50,26 +50,32 @@ struct AuthCodeStorage: AuthCodeStorageProtocol {
     }
 
     func get(type codeType: AuthSession.CodeType, codeValue value: String, remove: Bool? = false) -> AuthSession? {
-        implementation.get(type: codeType, codeValue: value, remove: remove)
+        Log.debug("Get AuthSession for type \(codeType.rawValue) with value \(value)")
+        return implementation.get(type: codeType, codeValue: value, remove: remove)
     }
 
     func push(loginId session: LoginSession) throws {
+        Log.debug("Push AuthSession loginId: \(session.loginId.uuidString)")
         try implementation.push(loginId: session)
     }
 
     func pull(loginUuid uuid: UUID) -> Bool {
-        implementation.pull(loginUuid: uuid)
+        Log.debug("Pull AuthSession loginUuid: \(uuid.uuidString)")
+        return implementation.pull(loginUuid: uuid)
     }
 
     func count(completion: @escaping (Int) -> Void) {
+        Log.debug("Count AuthSession")
         implementation.count(completion: completion)
     }
 
     func delete(type codeType: AuthSession.CodeType, codeValue value: String) throws {
+        Log.debug("Delete AuthSession for type \(codeType.rawValue) with value: \(value)")
         try implementation.delete(type: codeType, codeValue: value)
     }
 
     func wipe(tenant: Tenant, subject: String) {
+        Log.debug("Wipe AuthSession for tenant: \(tenant.name) with subject: \(subject)")
         implementation.wipe(tenant: tenant, subject: subject)
     }
 

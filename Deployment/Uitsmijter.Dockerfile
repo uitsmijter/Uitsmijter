@@ -22,7 +22,8 @@ RUN DIRECTORY=/build; \
       swift test \
       --scratch-path .build --num-workers 2 --parallel \
       -Xcc -I/usr/include/webkitgtk-4.0 \
-      -Xcc -I/usr/include/webkitgtk-4.0/JavaScriptCore; fi
+      -Xcc -I/usr/include/webkitgtk-4.0/JavaScriptCore; \
+    fi
 
 # Build everything, with optimizations
 # --static-swift-stdlib - turned off while timer does not compile in static bins

@@ -1,5 +1,6 @@
 .build/
 .run/
+DerivedData
 README.md
 Deployment/demopage
 Deployment/e2e
@@ -9,3 +10,4 @@ Deployment/Release
 Deployment/tooling
 Deployment/docker-compose.yml
 Deployment/*Dockerfile
+

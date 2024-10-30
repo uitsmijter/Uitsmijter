@@ -1,0 +1,18 @@
+---
+name: test
+config:
+  hosts:
+    - login.example.com
+    - test.example.com
+  interceptor:
+    enabled: true
+    domain: login.example.com
+    cookie: .example.com
+  providers:
+    - class UserLoginProvider {
+      constructor(credentials) { commit(true); }
+      get canLogin() { return true; }
+      get userProfile() { return { name:"Test User" }; }
+      get role() { return "normal"; }
+      }
+

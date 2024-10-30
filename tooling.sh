@@ -20,6 +20,7 @@ help() {
   echo "        -t    | --test            | test          Run all UnitTests"
   echo "        -e    | --e2e             | e2e           Run end-to-end tests"
   echo "        -r/-c | --run[-cluster]   | run[-cluster] Run Uitsmijter in docker or in a local kind-cluster"
+  echo "        -d    | --run-docker      | run-docker    Run Uitsmijter in a production docker environment"
   echo "        -s    | --release         | release       Build a release version, can have an optional added image "
   echo "                                                  name (with optional tag)"
   echo "        -p    | --helm            | helm          Build the helm package"
@@ -92,6 +93,10 @@ while (("$#")); do
     MODE+="|cluster"
     shift 1
     ;;
+  -d | --run-docker | run-docker)
+    MODE+="|docker"
+    shift 1
+    ;;    
   -i | --images | images)
     MODE+="|imagetool"
     shift 1
@@ -207,6 +212,10 @@ fi
 
 if [[ "${MODE}" == *'cluster'* ]]; then
   runInKubernetesInDocker "${TAG}"
+fi
+
+if [[ "${MODE}" == *'docker'* ]]; then
+  runInDockerProduction "${IMAGENAME}" "${GIT_BRANCH}-${GIT_HASH}"
 fi
 
 if [[ "${MODE}" == *"e2e"* ]]; then
