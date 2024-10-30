@@ -6,7 +6,7 @@
 function openCode() {
   h2 "Open project in code"
   docker compose \
-    -f "${PROJECT_DIR}/Deployment/docker-compose.yml" \
+    -f "${PROJECT_DIR}/Deployment/build-compose.yml" \
     --env-file "${PROJECT_DIR}/.env" \
     up \
     ${dockerComposeBuildParameter} \
@@ -25,7 +25,7 @@ function openCode() {
   echo ""
   echo "Press enter to stop the code-server."
   read -r
-  docker compose -f "${SCRIPT_DIR}/Deployment/docker-compose.yml" down code
+  docker compose -f "${SCRIPT_DIR}/Deployment/build-compose.yml" down code
 
 
 }
