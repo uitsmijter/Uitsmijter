@@ -13,13 +13,11 @@ if [ -f "${BUILD_DB}" ]; then
   sqlite3 -cmd ".timeout 500" "${BUILD_DB}" "SELECT * FROM info"
 fi
 
-CPU_COUNT=$(grep --count ^processor /proc/cpuinfo || echo 2)
-echo "Running tests with ${CPU_COUNT} workers."
 EXTRA=""
 if [  -n "${DEBUG}" ]; then
   EXTRA=" -v"
 fi
-swift test --scratch-path .build --num-workers ${CPU_COUNT} --parallel ${EXTRA} \
+swift test --scratch-path .build ${EXTRA} \
   --enable-code-coverage \
   --xunit-output .build/testresults/xunit.xml \
   -Xcc -I/usr/include/webkitgtk-4.0 \
