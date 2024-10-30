@@ -1,4 +1,4 @@
-version: '3.7'
+# Uitsmijter Build Compose
 
 x-shared_environment: &shared_environment
   LOG_LEVEL: ${LOG_LEVEL:-info}
