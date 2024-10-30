@@ -6,7 +6,7 @@
 function buildImages() {
   h2 "Resize and reformat images"
   docker-compose \
-    -f "${PROJECT_DIR}/Deployment/docker-compose.yml" \
+    -f "${PROJECT_DIR}/Deployment/build-compose.yml" \
     --env-file "${PROJECT_DIR}/.env" \
     up \
     ${dockerComposeBuildParameter} \
@@ -20,7 +20,7 @@ function buildIncrementalBinary() {
   h2 "Build a binary incremental"
   local dockerComposeBuildParameter=${1}
   RUNTIME_IMAGE="" docker-compose \
-      -f "${PROJECT_DIR}/Deployment/docker-compose.yml" \
+      -f "${PROJECT_DIR}/Deployment/build-compose.yml" \
       --env-file "${PROJECT_DIR}/.env" \
       run --rm \
       ${dockerComposeBuildParameter} \
@@ -94,7 +94,7 @@ function buildRuntime() {
   h2 "Build uitsmijter runtime"
   local TAG=${1:-${TAG}}
   RUNTIME_IMAGE=${TAG} docker-compose \
-    -f "${PROJECT_DIR}/Deployment/docker-compose.yml" \
+    -f "${PROJECT_DIR}/Deployment/build-compose.yml" \
     --env-file "${SCRIPT_DIR}/.env" \
     build \
     run

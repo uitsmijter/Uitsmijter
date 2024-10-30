@@ -7,5 +7,5 @@ Deployment/grafana-dashboard
 Deployment/helm
 Deployment/Release
 Deployment/tooling
-Deployment/docker-compose.yml
+Deployment/build-compose.yml
 Deployment/*Dockerfile

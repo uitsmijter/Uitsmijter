@@ -9,7 +9,7 @@
             <option value="run" />
           </list>
         </option>
-        <option name="sourceFilePath" value="Deployment/docker-compose.yml" />
+        <option name="sourceFilePath" value="Deployment/build-compose.yml" />
       </settings>
     </deployment>
     <method v="2" />
