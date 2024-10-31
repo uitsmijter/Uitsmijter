@@ -1,26 +1,26 @@
 # 0.9.6
 
-- Feature: Add tooling: `remove` - to clear out all docker resources and clean up build folder
-- Feature: Add tooling: `code` - starts vscode in docker in brower
-- Feature: Docker only support
-- Feature: Add support for local namespace scoped tennants and clients
+- Feature: New Tooling Command `code`: Launches Visual Studio Code in a Dockerized environment directly within your browser, allowing seamless code editing without setup
+- Feature: New Tooling Command `remove`: Efficiently cleans up your Docker environment by removing all Docker resources and clearing the build folder
+- Feature: Namespace Scoped Tenants and Clients support for namespace-scoped tenants and clients, making it easier to define boundaries and permissions specific for various projects working on one cluster
+- Feature: Support for Docker-Mode installations
 
-- Fix: Change encoding date from `.iso8601` to `.deferredToDate` 
-- Fix: Show correct origin of log messages (#16)
-- Fix: Error message on non existing pages (NOT_FOUND, before ERRORS.NO_TENANT)
+- Fix: The encoding date format has been switched from `.iso8601` to `.deferredToDate`
+- Fix: The error message for missing pages has been updated to `NOT_FOUND` (replacing the prior `ERRORS.NO_TENANT`)
+- Fix: Log entries now display the correct origin, improving traceability and making debugging easier
 
-- Change: Scripting Provider `fetch` method uses AsnHTTPClient instead of FoundationNetwork's URLSession
-- Change: in `--fast` mode e2e-tests run in chromium
-- Change: Removed webp support for Uitsmijter default login page
-- Change: name of the redis database to uitsmijter-session-master and uitsmijter-session-slave
+- Change: The Scripting Provider `fetch` method now leverages `AsyncHTTPClient` rather than `FoundationNetwork`'s `URLSession`
+- Change: End-to-end tests running in `--fast` mode will now default to using Chromium, ensuring consistent behavior and results across tests
+- Change: To improve test compatibility, we have removed the “webp” support for the default login page of Uitsmijte End-To-End-Test
+- Change: Redis instances are now clearly identified with `uitsmijter-session-master` and `uitsmijter-session-slave`, helping to avoid confusion and enhancing configuration clarity
 
 - Update: to Swift 5.9.2
 - Update buildbox to 2.3.0
 - Update Vapor to 4.106.1
 
-- Improvement: Tooling command code use its own build folder
-- Improvement: Tooling command test can have an optional filter
-- Improvement: Rename "Littleletetr" to "Ham" to align the documentation
+- Improvement: The `code` tooling command now utilizes its own build folder, streamlining the workspace and reducing cross-dependencies
+- Improvement: The `test` command now supports an optional filter, allowing you to selectively run tests and focus on specific areas of the codebase
+- Improvement: To better align documentation and reduce ambiguity, “Littleletetr” has been renamed to “Ham” across all relevant documentation and testing szenarios
 
 # 0.9.5
 
