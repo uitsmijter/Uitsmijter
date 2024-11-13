@@ -54,15 +54,11 @@ spec:
                   name: uitsmijter-sessions
                   key: 'redis-password'
 
-
-          resources:
-            requests:
-              memory: "256Mi"
-              cpu: "500m"
-            limits:
-              memory: "512Mi"
-              cpu: "1000m"
-
+          {{- with .Values.resources }}
+            resources:
+            {{- toYaml . | nindent 14 }}
+          {{- end }}
+      
           livenessProbe:
             httpGet:
               path: /health
