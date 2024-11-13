@@ -117,7 +117,7 @@ class RedisAuthCodeStorage: AuthCodeStorageProtocol {
 
     func isHealthy() -> Bool {
         if (try? redis.ping().wait()) == "PONG" {
-            Log.info("Redis is healthy")
+            Log.debug("Redis is healthy")
             return true
         }
 

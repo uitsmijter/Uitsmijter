@@ -1,3 +1,6 @@
+# 0.9.7
+- Improvement: Redis is healthy log is now a debug only mesage
+
 # 0.9.6
 
 - Feature: New Tooling Command `code`: Launches Visual Studio Code in a Dockerized environment directly within your browser, allowing seamless code editing without setup
