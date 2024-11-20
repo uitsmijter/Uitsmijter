@@ -55,8 +55,8 @@ spec:
                   key: 'redis-password'
 
           {{- with .Values.resources }}
-            resources:
-            {{- toYaml . | nindent 14 }}
+          resources:
+            {{- toYaml . | nindent 12 }}
           {{- end }}
       
           livenessProbe:
