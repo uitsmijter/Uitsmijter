@@ -29,6 +29,14 @@ config:
     enabled: true
     scoped: false
 
+resources:
+  requests:
+    memory: "256Mi"
+    cpu: "500m"
+  limits:
+    memory: "512Mi"
+    cpu: "1000m"
+
 domains:
   - domain: "nightly.uitsmijter.io"
     tlsSecretName: "nightly.uitsmijter.io"

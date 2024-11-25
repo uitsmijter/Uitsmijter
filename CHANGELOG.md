@@ -1,4 +1,6 @@
 # 0.9.7
+
+- Feature: Deployment resource request and limits can be set in helm values.yaml
 - Improvement: Redis is healthy log is now a debug only mesage
 
 # 0.9.6
