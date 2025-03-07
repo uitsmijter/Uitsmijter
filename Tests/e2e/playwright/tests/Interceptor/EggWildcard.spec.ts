@@ -38,7 +38,7 @@ test.describe('Egg wildcard', () => {
             
         })
 
-        test('Visit Glair page should also be acceassable because of host wildcard', async ({page}) => {
+        test('Glair page should also be accessible because of host wildcard', async ({page}) => {
             await app.goto('https://glair.egg.example.com/')
             await expect(page).toHaveTitle(/Glair/)
         })
