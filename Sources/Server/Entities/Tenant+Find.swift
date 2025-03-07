@@ -11,7 +11,9 @@ extension Tenant: EntityFindResourceReferenceProtocol {
     ///
     static func find(forHost host: String) -> Tenant? {
         EntityStorage.shared.tenants.first { firstTenant in
-            firstTenant.config.hosts.contains(host)
+            firstTenant.config.hosts.contains(where: {entry in
+                host == entry || host.matchesWildcard(regex: entry)
+            })
         }
     }
 
