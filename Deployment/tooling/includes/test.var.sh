@@ -23,4 +23,7 @@ TEST_HOSTS='api.example.com
   api1.bnbc.example
   api2.bnbc.example
   blog.bnbc.example
-  shop.bnbc.example'
+  shop.bnbc.example
+  yolk.egg.example.com
+  glair.egg.example.com
+  '
