@@ -17,6 +17,7 @@ extension String {
     func matchesWildcard(regex pattern: String) -> Bool {
         let regexPattern = "^"
         + NSRegularExpression.escapedPattern(for: pattern)
+            .replacingOccurrences(of: "\\.", with: "\\.")
             .replacingOccurrences(of: "\\*", with: ".*")
         + "$"
         
