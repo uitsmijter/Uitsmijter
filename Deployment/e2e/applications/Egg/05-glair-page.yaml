@@ -3,10 +3,10 @@
 kind: Pod
 apiVersion: v1
 metadata:
-  name: yolk-webserver
+  name: glair-webserver
   namespace: egg
   labels:
-    app: yolk-webserver
+    app: glair-webserver
 
 spec:
   containers:
@@ -24,21 +24,21 @@ spec:
   volumes:
     - name: content
       configMap:
-        name: yolk-content
+        name: glair-content
     - name: config-templates
       configMap:
-        name: yolk-nginx-config-templates
+        name: glair-nginx-config-templates
 
 ---
 kind: Service
 apiVersion: v1
 metadata:
-  name: yolk-webserver
+  name: glair-webserver
   namespace: egg
 
 spec:
   selector:
-    app: yolk-webserver
+    app: glair-webserver
 
   ports:
     - protocol: TCP
@@ -49,13 +49,13 @@ spec:
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: yolk-nginx-config-templates
+  name: glair-nginx-config-templates
   namespace: egg
 data:
   default.conf.template: |
     server {
       listen        80;
-      server_name   yolk.egg.example.com;
+      server_name   glair.egg.example.com;
       location / {
         root   /usr/share/nginx/html;
         index  index.html;
@@ -69,24 +69,24 @@ data:
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: yolk-content
+  name: glair-content
   namespace: egg
 data:
   index.html: |
     <html>
     <head>
-        <title>Yolk</title>
+        <title>Glair</title>
         <meta http-equiv="Pragma" content="no-cache"/>
         <meta http-equiv="Cache-Control" content="no-cache"/>
     </head>
     <body>
     <h1 class="headline">Information about yolk</h1>
     <p>
-        Golden and trembling, the yolk cradles the sun’s promise within its delicate shell, a molten heart waiting to spill 
-        into the world. It holds the memory of dawn, the quiet hum of life unfurling in secret, rich with the warmth of 
-        unseen beginnings. Silken and slow, it drapes itself over heat, folding into golden rivers or whispering into the 
-        soft embrace of flour and air. In its glow lingers the echo of creation—fragile yet full, fleeting yet eternal, a 
-        quiet ember of something almost divine.
+        Pale and glistening, the glair stretches like ghostly silk, a trembling veil of quiet alchemy. It catches the light in 
+        wavering ribbons, a breath suspended between liquid and air, whispering secrets of structure and lift. In the stillness, 
+        it waits—pliant, unshaped—until heat or motion calls it forth, coaxing it into peaks that gleam like moonlit foam or 
+        firming it into something tender, translucent, whole. An unseen architect, it binds, it lifts, it seals—delicate yet 
+        unyielding, a silver thread weaving through the fabric of creation.
     </p>
 
 ---
@@ -94,7 +94,7 @@ apiVersion: networking.k8s.io/v1
 kind: Ingress
 
 metadata:
-  name: yolk-webserver
+  name: glair-webserver
   namespace: egg
   annotations:
     traefik.ingress.kubernetes.io/router.entrypoints: websecure
@@ -105,13 +105,13 @@ spec:
   tls:
     - secretName: egg.example.com
   rules:
-    - host: yolk.egg.example.com
+    - host: glair.egg.example.com
       http:
         paths:
           - path: "/"
             pathType: Prefix
             backend:
               service:
-                name: yolk-webserver
+                name: glair-webserver
                 port:
                   number: 80

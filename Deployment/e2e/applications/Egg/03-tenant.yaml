@@ -10,7 +10,7 @@ spec:
   interceptor:
     enabled: true
     domain: login.example.com
-    cookie: .egg.example.com
+    cookie: .example.com
   providers:
     # Allows all @example.com emails
     - |
