@@ -15,5 +15,6 @@ spec:
     - refresh_token
   scopes:
     - access
+  # use only test secrets: https://docs.uitsmijter.io/contribution/guidelines/#using-test-secrets-for-development
   secret: luaTha1qu019ohc13qu3ze1yuo5MumEl0hQuoE9bon
 
