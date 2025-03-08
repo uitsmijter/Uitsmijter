@@ -18,7 +18,7 @@ extension String {
         let regexPattern = "^"
         + NSRegularExpression.escapedPattern(for: pattern)
             .replacingOccurrences(of: "\\.", with: "\\.")
-            .replacingOccurrences(of: "\\*", with: ".*")
+            .replacingOccurrences(of: "\\*", with: "[a-zA-Z0-9\\-_]+")
         + "$"
         
         return self.range(of: regexPattern, options: .regularExpression) != nil
