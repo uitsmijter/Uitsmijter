@@ -44,7 +44,6 @@ test.describe('Egg wildcard', () => {
         })
         
         test('look inside cookies that they match the domain', async ({page}) => {
-            console.log("***cookies***")
             let cookie = cookies.find(o => o.name === 'uitsmijter-sso')
             await expect(cookie.domain).toBe('.example.com')
         })
