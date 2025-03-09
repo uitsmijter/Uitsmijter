@@ -1,0 +1,20 @@
+---
+apiVersion: "uitsmijter.io/v1"
+kind: Client
+metadata:
+  name: egg
+  namespace: egg
+spec:
+  ident: e92b4a0b-d1d7-4d55-b2e3-dc570faca745
+  tenantname: egg/egg
+  redirect_urls:
+    - 'https?://(.*\.)?egg.example\.com/.*'
+  grant_types:
+    - password
+    - authorization_code
+    - refresh_token
+  scopes:
+    - access
+  # use only test secrets: https://docs.uitsmijter.io/contribution/guidelines/#using-test-secrets-for-development
+  secret: luaTha1qu019ohc13qu3ze1yuo5MumEl0hQuoE9bon
+

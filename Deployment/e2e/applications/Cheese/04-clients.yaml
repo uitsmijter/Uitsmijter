@@ -15,6 +15,7 @@ spec:
     - refresh_token
   scopes:
     - access
+  # use only test secrets: https://docs.uitsmijter.io/contribution/guidelines/#using-test-secrets-for-development
   secret: luaTha1qu019ohc13qu3ze1yuo5MumEl0hQuoE9bon
 
 ---
@@ -40,6 +41,7 @@ spec:
   tenantname: cheese/cheese
   redirect_urls:
     - 'https?://api\.example\.com(:8080)?/.*'
+  # use only test secrets: https://docs.uitsmijter.io/contribution/guidelines/#using-test-secrets-for-development
   secret: luaTha1qu019ohc13qu3ze1yuo5MumEl0hQuoE9bon
   # Uses default grant type and thus should not allow password
 

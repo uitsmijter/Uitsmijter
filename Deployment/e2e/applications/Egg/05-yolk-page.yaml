@@ -1,0 +1,117 @@
+# Cookbooks Interceptor page
+---
+kind: Pod
+apiVersion: v1
+metadata:
+  name: yolk-webserver
+  namespace: egg
+  labels:
+    app: yolk-webserver
+
+spec:
+  containers:
+    - name: nginx
+      image: nginx
+
+      volumeMounts:
+        - name: content
+          mountPath: "/usr/share/nginx/html"
+          readOnly: true
+        - name: config-templates
+          mountPath: "/etc/nginx/templates"
+          readOnly: true
+
+  volumes:
+    - name: content
+      configMap:
+        name: yolk-content
+    - name: config-templates
+      configMap:
+        name: yolk-nginx-config-templates
+
+---
+kind: Service
+apiVersion: v1
+metadata:
+  name: yolk-webserver
+  namespace: egg
+
+spec:
+  selector:
+    app: yolk-webserver
+
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 80
+
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: yolk-nginx-config-templates
+  namespace: egg
+data:
+  default.conf.template: |
+    server {
+      listen        80;
+      server_name   yolk.egg.example.com;
+      location / {
+        root   /usr/share/nginx/html;
+        index  index.html;
+        add_header Cache-Control no-cache;
+        try_files $uri $uri.html $uri/index.html;
+      }
+    }
+
+
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: yolk-content
+  namespace: egg
+data:
+  index.html: |
+    <html>
+    <head>
+        <title>Yolk</title>
+        <meta http-equiv="Pragma" content="no-cache"/>
+        <meta http-equiv="Cache-Control" content="no-cache"/>
+    </head>
+    <body>
+    <h1 class="headline">Information about yolk</h1>
+    <p>
+        Golden and trembling, the yolk cradles the sun’s promise within its delicate shell, a molten heart waiting to spill 
+        into the world. It holds the memory of dawn, the quiet hum of life unfurling in secret, rich with the warmth of 
+        unseen beginnings. Silken and slow, it drapes itself over heat, folding into golden rivers or whispering into the 
+        soft embrace of flour and air. In its glow lingers the echo of creation—fragile yet full, fleeting yet eternal, a 
+        quiet ember of something almost divine.
+    </p>
+
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+
+metadata:
+  name: yolk-webserver
+  namespace: egg
+  annotations:
+    traefik.ingress.kubernetes.io/router.entrypoints: websecure
+    traefik.ingress.kubernetes.io/router.tls: "true"
+    traefik.ingress.kubernetes.io/router.middlewares: uitsmijter-forward-auth@kubernetescrd
+
+spec:
+  tls:
+    - secretName: egg.example.com
+  rules:
+    - host: yolk.egg.example.com
+      http:
+        paths:
+          - path: "/"
+            pathType: Prefix
+            backend:
+              service:
+                name: yolk-webserver
+                port:
+                  number: 80

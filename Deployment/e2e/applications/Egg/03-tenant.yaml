@@ -1,0 +1,35 @@
+---
+apiVersion: "uitsmijter.io/v1"
+kind: Tenant
+metadata:
+  name: egg
+  namespace: egg
+spec:
+  hosts:
+    - "*.egg.example.com"
+  interceptor:
+    enabled: true
+    domain: login.example.com
+    cookie: .example.com
+  providers:
+    # Allows all @example.com emails
+    - |
+      class UserLoginProvider {
+        auth = false;
+        constructor(credentials) { 
+          this.auth = credentials.username.endsWith("@example.com");
+          commit(true);
+        }
+        get canLogin() { return this.auth; }
+        get userProfile() { return { name: "Test User" }; }
+        get role() { return "user"; }
+      }
+    - |
+      class UserValidationProvider {
+        valid = false;
+        constructor(args) { 
+          this.valid = args.username.endsWith("@example.com") == true; 
+          commit(true); 
+        }
+        get isValid() { return this.valid; }
+      }

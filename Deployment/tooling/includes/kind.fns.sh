@@ -142,7 +142,7 @@ function kindSetupCert() {
     -pkeyopt ec_paramgen_curve:secp384r1 -days 3650 \
     -nodes -keyout "${certificate}".key -out "${certificate}".crt \
     -subj '/CN=uitsmijter.localhost' \
-    -addext 'subjectAltName=DNS:*.localhost,DNS:example.com,DNS:*.example.com,DNS:ham.test,DNS:*.ham.test,DNS:*.s3.ham.test,DNS:bnbc.example,DNS:*.bnbc.example'
+    -addext 'subjectAltName=DNS:*.localhost,DNS:example.com,DNS:*.example.com,DNS:*.egg.example.com,DNS:ham.test,DNS:*.ham.test,DNS:*.s3.ham.test,DNS:bnbc.example,DNS:*.bnbc.example'
 }
 
 function kindSetupTraefik() {
