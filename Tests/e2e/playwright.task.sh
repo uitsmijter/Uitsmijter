@@ -9,6 +9,7 @@ KUBECONFIG=${KUBECONFIG:-~/.kube/config}
 COMMAND=
 BROWSER=
 LIMIT_PROJECT=
+PLAYWRIGHT_ARGS=""
 while (("$#")); do
   case "$1" in
   run)
@@ -23,11 +24,14 @@ while (("$#")); do
     shift
     break
     ;;
-  --* | -*=) # unsupported flags
-    echo "Error: Unsupported flag $1" >&2
-    echo "Possible options are: --build --lint --test --e2e --run --run-cluster --release --helm and --help"
-    echo "Possible flags: --rebuild --debug"
-    exit 1
+  --grep)
+    # Playwright test filter argument
+    PLAYWRIGHT_ARGS="${PLAYWRIGHT_ARGS} --grep \"${2}\""
+    shift 2
+    ;;
+  --* | -*=) # pass through other flags to Playwright
+    PLAYWRIGHT_ARGS="${PLAYWRIGHT_ARGS} $1"
+    shift
     ;;
   *) # preserve positional arguments
     PARAMS="$PARAMS $1"
@@ -49,5 +53,5 @@ fi
 echo "${COMMAND}..."
 pushd "${SCRIPT_DIR}/playwright"
 	yarn install
-	yarn start ${LIMIT_PROJECT}
+	eval "yarn start ${LIMIT_PROJECT} ${PLAYWRIGHT_ARGS} ${PARAMS}"
 popd

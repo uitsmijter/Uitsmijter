@@ -18,10 +18,12 @@ help() {
   echo "        -b    | --build           | build         Build the project"
   echo "        -l    | --lint            | lint          Check code quality"
   echo "        -t    | --test            | test          Run all UnitTests"
-  echo "                                                  Optional <filter> can be applyed as: '--test <filter>'"
+  echo "                                                  Optional <filter> can be applied as: '--test <filter>'"
   echo "                                                  like: '--test ServerTests.AppTests/testHelloWorld'"
   echo "        -o    | --list-tests      | list-tests    Shows a list of tests"
   echo "        -e    | --e2e             | e2e           Run end-to-end tests"
+  echo "                                                  Optional --filter can be applied as: 'e2e --filter <pattern>'"
+  echo "                                                  like: 'e2e --filter \"should respond with error\"'"
   echo "        -r/-c | --run[-cluster]   | run[-cluster] Run Uitsmijter in docker or in a local kind-cluster"
   echo "        -d    | --run-docker      | run-docker    Run Uitsmijter in a production docker environment"
   echo "        -s    | --release         | release       Build a release version, can have an optional added image "
@@ -32,10 +34,10 @@ help() {
   echo ""
   echo "Additional Parameters: "
   echo ""
-  echo "        --rebuild                     Force rebuild images"
-  echo "        --debug                       Enable debug output"
-  echo "        --dirty                       Use incremental temporary runtime for the local cluster"
-  echo "        --fast                        runs tests only on one virtual browser and resolution."
+  echo "        --rebuild                 Force rebuild images"
+  echo "        --debug                   Enable debug output"
+  echo "        --dirty                   Use incremental temporary runtime for the local cluster"
+  echo "        --fast                    runs tests only on one virtual browser and resolution."
   echo ""
   echo "Example:"
   echo "        ./tooling build run"
@@ -85,17 +87,34 @@ while (("$#")); do
     MODE+="|test"
     shift 1
     if [[ -n ${1} ]] && [[ ${1} != "--"* ]]; then
-      FILTER=${1}
+      # Convert dashes to underscores for Swift test compatibility
+      # Swift test converts target names with dashes to underscores in test identifiers
+      FILTER=${1//-/_}
       shift 1
     fi
     ;;
   -o | --list-tests | list-tests)
     MODE+="|listtests"
     shift 1
+    if [[ -n ${1} ]] && [[ ${1} != "--"* ]]; then
+      # Convert dashes to underscores for Swift test compatibility
+      # Swift test converts target names with dashes to underscores in test identifiers
+      FILTER=${1//-/_}
+      shift 1
+    fi
     ;;    
   -e | --e2e | e2e)
     MODE+="|e2e"
     shift 1
+    ;;
+  --filter)
+    if [[ -n ${2} ]] && [[ ${2} != "--"* ]]; then
+      FILTER=${2}
+      shift 2
+    else
+      echo "Error: --filter requires a value" >&2
+      exit 1
+    fi
     ;;
   -r | --run | run)
     MODE+="|build|run"
@@ -180,6 +199,7 @@ fi
 
 # Settings
 shouldDebug "${DEBUG}"
+exportDefaults
 
 # Execute pipeline
 if [[ "${MODE}" == *"|remove"* ]]; then
@@ -209,7 +229,10 @@ if [[ "${MODE}" == *"|test"* ]]; then
 fi
 
 if [[ "${MODE}" == *"|listtests"* ]]; then
-  unitTestsList "${dockerComposeBuildParameter}"
+  if [[ -n ${FILTER} ]]; then
+    FILTER=" --filter ${FILTER}"
+  fi
+  unitTestsList "${dockerComposeBuildParameter}" "${FILTER}"
 fi
 
 if [[ "${MODE}" == *"|run"* ]]; then
@@ -240,6 +263,10 @@ if [[ "${MODE}" == *"e2e"* ]]; then
   EXTRAS=""
   if [  -n "${USE_FAST}" ]; then
     EXTRAS="--browser chromium"
+  fi
+  if [[ -n "${FILTER}" ]]; then
+    # Pass filter as a single argument by escaping it properly
+    EXTRAS="${EXTRAS} --grep '${FILTER}'"
   fi
   e2eTests "${dockerComposeBuildParameter}" "${EXTRAS}" "${TAG}"
 fi

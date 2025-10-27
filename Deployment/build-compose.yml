@@ -20,7 +20,7 @@ x-shared_job: &shared_job
 services:
 
   redis:
-    image: 'bitnami/redis:latest'
+    image: 'redis:8.2.2'
     ports:
       - "6379:6379"
     environment:
@@ -46,10 +46,17 @@ services:
       - -c
       - |
         set -e
+        echo "Creating webkitgtk-4.0 compatibility layer for JXKit..."
+        ln -sf /usr/include/webkitgtk-4.1 /usr/include/webkitgtk-4.0
+        # Create symlink for the library
+        ln -sf /usr/lib/aarch64-linux-gnu/libjavascriptcoregtk-4.1.so /usr/lib/aarch64-linux-gnu/libjavascriptcoregtk-4.0.so 2>/dev/null || \
+        ln -sf /usr/lib/x86_64-linux-gnu/libjavascriptcoregtk-4.1.so /usr/lib/x86_64-linux-gnu/libjavascriptcoregtk-4.0.so 2>/dev/null || true
         echo "Resolve...."
         swift package resolve
         echo "Build...."
-        swift build -c release --manifest-cache shared -Xcc -I/usr/include/webkitgtk-4.0 -Xcc -I/usr/include/webkitgtk-4.0/JavaScriptCore
+        INCLUDES="$$(pkg-config --cflags-only-I javascriptcoregtk-4.1 | sed 's/-I/ -Xcc -I/g')"
+        LIBS="$$(pkg-config --libs javascriptcoregtk-4.1 | sed 's/-l/ -Xlinker -l/g')"
+        swift build -c release --manifest-cache shared $$INCLUDES $$LIBS
         echo "Copy release"
         mkdir -p Deployment/Release/Linux
         cp "$$(swift build --package-path /build -c release --show-bin-path)/Uitsmijter" Deployment/Release/Linux/
@@ -59,23 +66,38 @@ services:
     environment:
       <<: *shared_environment
       FILTER_TEST: ${FILTER_TEST}
+      SUPPRESS_PACKAGE_WARNINGS: ${SUPPRESS_PACKAGE_WARNINGS}
     command:
       - /bin/bash
       - -c
       - |
         set -e
+        echo "Creating webkitgtk-4.0 compatibility layer for JXKit..."
+        ln -sf /usr/include/webkitgtk-4.1 /usr/include/webkitgtk-4.0
+        # Create symlink for the library
+        ln -sf /usr/lib/aarch64-linux-gnu/libjavascriptcoregtk-4.1.so /usr/lib/aarch64-linux-gnu/libjavascriptcoregtk-4.0.so 2>/dev/null || \
+        ln -sf /usr/lib/x86_64-linux-gnu/libjavascriptcoregtk-4.1.so /usr/lib/x86_64-linux-gnu/libjavascriptcoregtk-4.0.so 2>/dev/null || true
         ./Deployment/pipeline/test.sh
         mkdir -p Deployment/Release/Coverage
         cp -r .build/testresults/* Deployment/Release/Coverage
 
   testlist:
     <<: *shared_job
+    environment:
+      <<: *shared_environment
+      SUPPRESS_PACKAGE_WARNINGS: ${SUPPRESS_PACKAGE_WARNINGS}
+      FILTER_TEST: ${FILTER_TEST}
     command:
       - /bin/bash
       - -c
       - |
         set -e
-        swift test list
+        echo "Creating webkitgtk-4.0 compatibility layer for JXKit..."
+        ln -sf /usr/include/webkitgtk-4.1 /usr/include/webkitgtk-4.0
+        # Create symlink for the library
+        ln -sf /usr/lib/aarch64-linux-gnu/libjavascriptcoregtk-4.1.so /usr/lib/aarch64-linux-gnu/libjavascriptcoregtk-4.0.so 2>/dev/null || \
+        ln -sf /usr/lib/x86_64-linux-gnu/libjavascriptcoregtk-4.1.so /usr/lib/x86_64-linux-gnu/libjavascriptcoregtk-4.0.so 2>/dev/null || true
+        ./Deployment/pipeline/testlist.sh
 
   e2e:
     image: ghcr.io/uitsmijter/e2e-runner:${BUILDBOX}
@@ -136,7 +158,7 @@ services:
         /app/bin/Uitsmijter serve --env production --hostname 0.0.0.0 --port 8080
 
   code:
-    image: ghcr.io/uitsmijter/swift-codeserver:1.0.1
+    image: ghcr.io/uitsmijter/swift-codeserver:1.1.0
     environment:
       <<: *shared_environment
     ports:

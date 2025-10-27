@@ -1,0 +1,359 @@
+import Foundation
+@testable import Uitsmijter_AuthServer
+import Testing
+import JWTKit
+
+@Suite("JWT Signer Tests")
+// swiftlint:disable type_body_length
+struct SignerTest {
+
+    // MARK: - jwt_signer Initialization Tests
+
+    @Test("jwt_signer is initialized and available")
+    func jwtSignerIsInitialized() {
+        // Verify jwt_signer is accessible and can be added to signers
+        let signers = JWTSigners()
+        signers.use(jwt_signer)
+        // Verify the signer was added by checking we can get it back
+        let retrievedSigner = signers.get()
+        #expect(retrievedSigner != nil)
+    }
+
+    @Test("jwt_signer can sign a simple payload")
+    func jwtSignerCanSign() throws {
+        let payload = Payload(
+            subject: "test@example.com",
+            expiration: ExpirationClaim(value: Date(timeIntervalSinceNow: 3600)),
+            tenant: "test-tenant",
+            role: "user",
+            user: "test@example.com"
+        )
+
+        let signers = JWTSigners()
+        signers.use(jwt_signer)
+        let token = try signers.sign(payload)
+
+        // Verify token is generated
+        #expect(!token.isEmpty)
+        // JWT tokens have three parts separated by dots
+        let parts = token.split(separator: ".")
+        #expect(parts.count == 3)
+    }
+
+    @Test("jwt_signer can verify a signed payload")
+    func jwtSignerCanVerify() throws {
+        let expirationDate = Date(timeIntervalSinceNow: 3600)
+        let payload = Payload(
+            subject: "verify@example.com",
+            expiration: ExpirationClaim(value: expirationDate),
+            tenant: "verify-tenant",
+            role: "admin",
+            user: "verify@example.com"
+        )
+
+        let signers = JWTSigners()
+        signers.use(jwt_signer)
+
+        // Sign the payload
+        let token = try signers.sign(payload)
+
+        // Verify and decode the token
+        let verifiedPayload = try signers.verify(token, as: Payload.self)
+
+        // Check that payload matches
+        #expect(verifiedPayload.subject.value == "verify@example.com")
+        #expect(verifiedPayload.tenant == "verify-tenant")
+        #expect(verifiedPayload.role == "admin")
+        #expect(verifiedPayload.user == "verify@example.com")
+    }
+
+    @Test("jwt_signer rejects tampered tokens")
+    func jwtSignerRejectsTamperedTokens() throws {
+        let payload = Payload(
+            subject: "tamper@example.com",
+            expiration: ExpirationClaim(value: Date(timeIntervalSinceNow: 3600)),
+            tenant: "test-tenant",
+            role: "user",
+            user: "tamper@example.com"
+        )
+
+        let signers = JWTSigners()
+        signers.use(jwt_signer)
+        let token = try signers.sign(payload)
+
+        // Tamper with the token (change a character in the payload section)
+        let parts = token.split(separator: ".")
+        guard parts.count == 3 else {
+            Issue.record("Token doesn't have 3 parts")
+            return
+        }
+
+        // Modify the payload part
+        var tamperedPayload = String(parts[1])
+        if let lastChar = tamperedPayload.last, lastChar == "A" {
+            tamperedPayload.removeLast()
+            tamperedPayload.append("B")
+        } else {
+            tamperedPayload.removeLast()
+            tamperedPayload.append("A")
+        }
+
+        let tamperedToken = "\(parts[0]).\(tamperedPayload).\(parts[2])"
+
+        // Verification should fail
+        #expect(throws: Error.self) {
+            try signers.verify(tamperedToken, as: Payload.self)
+        }
+    }
+
+    @Test("jwt_signer uses HS256 algorithm")
+    func jwtSignerUsesHS256() throws {
+        let payload = Payload(
+            subject: "hs256@example.com",
+            expiration: ExpirationClaim(value: Date(timeIntervalSinceNow: 3600)),
+            tenant: "test-tenant",
+            role: "user",
+            user: "hs256@example.com"
+        )
+
+        let signers = JWTSigners()
+        signers.use(jwt_signer)
+        let token = try signers.sign(payload)
+
+        // Decode the header to check algorithm
+        let parts = token.split(separator: ".")
+        #expect(parts.count == 3)
+
+        // Decode base64url header
+        let header = String(parts[0])
+        let base64 = header
+            .replacingOccurrences(of: "-", with: "+")
+            .replacingOccurrences(of: "_", with: "/")
+
+        // Add padding if needed
+        let paddedBase64: String
+        let remainder = base64.count % 4
+        if remainder > 0 {
+            paddedBase64 = base64 + String(repeating: "=", count: 4 - remainder)
+        } else {
+            paddedBase64 = base64
+        }
+
+        guard let headerData = Data(base64Encoded: paddedBase64) else {
+            Issue.record("Failed to decode header")
+            return
+        }
+
+        let headerJson = try JSONSerialization.jsonObject(with: headerData) as? [String: Any]
+        #expect(headerJson?["alg"] as? String == "HS256")
+    }
+
+    @Test("jwt_signer produces consistent signatures")
+    func jwtSignerConsistentSignatures() throws {
+        let expirationDate = Date(timeIntervalSinceNow: 3600)
+        let payload = Payload(
+            subject: "consistent@example.com",
+            expiration: ExpirationClaim(value: expirationDate),
+            tenant: "test-tenant",
+            role: "user",
+            user: "consistent@example.com"
+        )
+
+        let signers = JWTSigners()
+        signers.use(jwt_signer)
+
+        // Sign the same payload twice
+        let token1 = try signers.sign(payload)
+        let token2 = try signers.sign(payload)
+
+        // Both tokens should be identical (same payload, same secret, same timestamp)
+        #expect(token1 == token2)
+    }
+
+    @Test("jwt_signer handles payload with optional fields")
+    func jwtSignerHandlesOptionalFields() throws {
+        let profile = CodableProfile.object([
+            "firstName": .string("John"),
+            "lastName": .string("Doe")
+        ])
+
+        let payload = Payload(
+            subject: "optional@example.com",
+            expiration: ExpirationClaim(value: Date(timeIntervalSinceNow: 3600)),
+            tenant: "test-tenant",
+            responsibility: "admin-domain",
+            role: "admin",
+            user: "optional@example.com",
+            profile: profile
+        )
+
+        let signers = JWTSigners()
+        signers.use(jwt_signer)
+        let token = try signers.sign(payload)
+
+        // Verify and decode
+        let verified = try signers.verify(token, as: Payload.self)
+        #expect(verified.responsibility == "admin-domain")
+        #expect(verified.profile != nil)
+        #expect(verified.profile?.object?["firstName"]?.string == "John")
+    }
+
+    @Test("jwt_signer can verify tokens with different expiration times")
+    func jwtSignerDifferentExpirations() throws {
+        let shortExpiration = Date(timeIntervalSinceNow: 60) // 1 minute
+        let longExpiration = Date(timeIntervalSinceNow: 86_400) // 24 hours
+
+        let payload1 = Payload(
+            subject: "short@example.com",
+            expiration: ExpirationClaim(value: shortExpiration),
+            tenant: "test-tenant",
+            role: "user",
+            user: "short@example.com"
+        )
+
+        let payload2 = Payload(
+            subject: "long@example.com",
+            expiration: ExpirationClaim(value: longExpiration),
+            tenant: "test-tenant",
+            role: "user",
+            user: "long@example.com"
+        )
+
+        let signers = JWTSigners()
+        signers.use(jwt_signer)
+
+        let token1 = try signers.sign(payload1)
+        let token2 = try signers.sign(payload2)
+
+        // Both should verify successfully
+        let verified1 = try signers.verify(token1, as: Payload.self)
+        let verified2 = try signers.verify(token2, as: Payload.self)
+
+        #expect(verified1.subject.value == "short@example.com")
+        #expect(verified2.subject.value == "long@example.com")
+    }
+
+    @Test("jwt_signer handles empty strings in payload")
+    func jwtSignerHandlesEmptyStrings() throws {
+        let payload = Payload(
+            subject: "",
+            expiration: ExpirationClaim(value: Date(timeIntervalSinceNow: 3600)),
+            tenant: "",
+            role: "",
+            user: ""
+        )
+
+        let signers = JWTSigners()
+        signers.use(jwt_signer)
+
+        let token = try signers.sign(payload)
+        let verified = try signers.verify(token, as: Payload.self)
+
+        #expect(verified.subject.value == "")
+        #expect(verified.tenant == "")
+        #expect(verified.role == "")
+        #expect(verified.user == "")
+    }
+
+    @Test("jwt_signer handles special characters in payload")
+    func jwtSignerHandlesSpecialCharacters() throws {
+        let payload = Payload(
+            subject: "user+test@example.com",
+            expiration: ExpirationClaim(value: Date(timeIntervalSinceNow: 3600)),
+            tenant: "tenant-with-dashes_and_underscores",
+            role: "admin/developer",
+            user: "user@example.com (John Doe)"
+        )
+
+        let signers = JWTSigners()
+        signers.use(jwt_signer)
+
+        let token = try signers.sign(payload)
+        let verified = try signers.verify(token, as: Payload.self)
+
+        #expect(verified.subject.value == "user+test@example.com")
+        #expect(verified.tenant == "tenant-with-dashes_and_underscores")
+        #expect(verified.role == "admin/developer")
+        #expect(verified.user == "user@example.com (John Doe)")
+    }
+
+    @Test("jwt_signer handles unicode characters")
+    func jwtSignerHandlesUnicode() throws {
+        let payload = Payload(
+            subject: "用户@example.com",
+            expiration: ExpirationClaim(value: Date(timeIntervalSinceNow: 3600)),
+            tenant: "租户-テナント",
+            role: "Administrador",
+            user: "用户名"
+        )
+
+        let signers = JWTSigners()
+        signers.use(jwt_signer)
+
+        let token = try signers.sign(payload)
+        let verified = try signers.verify(token, as: Payload.self)
+
+        #expect(verified.subject.value == "用户@example.com")
+        #expect(verified.tenant == "租户-テナント")
+        #expect(verified.role == "Administrador")
+        #expect(verified.user == "用户名")
+    }
+
+    @Test("jwt_signer token format is valid JWT")
+    func jwtSignerProducesValidJWTFormat() throws {
+        let payload = Payload(
+            subject: "format@example.com",
+            expiration: ExpirationClaim(value: Date(timeIntervalSinceNow: 3600)),
+            tenant: "test-tenant",
+            role: "user",
+            user: "format@example.com"
+        )
+
+        let signers = JWTSigners()
+        signers.use(jwt_signer)
+        let token = try signers.sign(payload)
+
+        // JWT format: header.payload.signature
+        let parts = token.split(separator: ".")
+        #expect(parts.count == 3)
+
+        // Each part should be base64url encoded (alphanumeric plus - and _)
+        let base64urlPattern = "^[A-Za-z0-9_-]+$"
+        for part in parts {
+            let matches = String(part).range(of: base64urlPattern, options: .regularExpression)
+            #expect(matches != nil)
+        }
+    }
+
+    @Test("jwt_signer can sign multiple payloads sequentially")
+    func jwtSignerMultipleSequentialSigns() throws {
+        let signers = JWTSigners()
+        signers.use(jwt_signer)
+
+        var tokens: [String] = []
+
+        for i in 0..<10 {
+            let payload = Payload(
+                subject: SubjectClaim(value: "user\(i)@example.com"),
+                expiration: ExpirationClaim(value: Date(timeIntervalSinceNow: 3600)),
+                tenant: "test-tenant",
+                role: "user",
+                user: "user\(i)@example.com"
+            )
+
+            let token = try signers.sign(payload)
+            tokens.append(token)
+        }
+
+        // All tokens should be unique
+        let uniqueTokens = Set(tokens)
+        #expect(uniqueTokens.count == 10)
+
+        // All tokens should verify
+        for (i, token) in tokens.enumerated() {
+            let verified = try signers.verify(token, as: Payload.self)
+            #expect(verified.subject.value == "user\(i)@example.com")
+        }
+    }
+}
+// swiftlint:enable type_body_length

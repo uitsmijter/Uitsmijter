@@ -1,19 +1,30 @@
 #
 # Display functions
 #
+# This file contains utility functions for formatting and displaying output in the terminal,
+# including headings, separators, boxes, and banners for better readability.
+#
 
 include "display.var.sh"
 
-# Display a line of optional 1:characters and optional 2:length
-# if no character is given the default is `-`
-# if no length is given than the line will be in full width of the terminal
+# Display a horizontal separator line
+# Parameters:
+#   $1: char - Character to use for the line (default: "-")
+#   $2: length - Length of the line in characters (default: terminal width from displayCols)
+# Returns: None (outputs to stdout)
+# Example: printSeparatorLine "=" 50
 function printSeparatorLine() {
   local char=${1:-"-"}
-  local length=${2:-${dispalyCols}}
+  local length=${2:-${displayCols}}
   printf '%*s\n' "${length}" '' |  tr ' ' "${char}"
 }
 
-# Headline 1
+# Display a level 1 heading (most prominent)
+# Parameters:
+#   $1: text - The heading text to display (required)
+# Returns: None (outputs to stdout)
+# Format: Empty line, text, line of asterisks, empty line
+# Example: h1 "Uitsmijter Build System"
 function h1(){
   echo ""
   echo "${1}"
@@ -21,22 +32,36 @@ function h1(){
   echo ""
 }
 
-# Headline 2
+# Display a level 2 heading
+# Parameters:
+#   $1: text - The heading text to display (required)
+# Returns: None (outputs to stdout)
+# Format: Empty line, text, line of equals signs
+# Example: h2 "Running Unit Tests"
 function h2(){
   echo ""
   echo "${1}"
   printSeparatorLine "="
 }
 
-# Headline 3
+# Display a level 3 heading (least prominent)
+# Parameters:
+#   $1: text - The heading text to display (required)
+# Returns: None (outputs to stdout)
+# Format: Empty line, text, line of dashes
+# Example: h3 "Setting up certificates"
 function h3(){
   echo ""
   echo "${1}"
   printSeparatorLine "-"
 }
 
-# Underline given 1:text with optional 2:character
-# If no optional character is set the default `-` is taken
+# Display text with an underline
+# Parameters:
+#   $1: text - The text to underline (required)
+#   $2: char - Character to use for underlining (default: "-")
+# Returns: None (outputs to stdout)
+# Example: underline "Important Section" "="
 function underline() {
   local text=${1}
   local char=${2:-"-"}
@@ -45,8 +70,12 @@ function underline() {
   printf '%*s\n' "${length}" '' |  tr ' ' "${char}"
 }
 
-# Show a 1:message in a box. The box is made with optional 2:character.
-# If no character is set a `*` is used
+# Display a message in a compact box (width fits the message)
+# Parameters:
+#   $1: msg - The message to display in the box (required)
+#   $2: char - Character to use for box borders (default: "*")
+# Returns: None (outputs to stdout)
+# Example: echoBox "Build completed successfully" "="
 function echoBox() {
   local msg="${1}"
   local char="${2:-"*"}"
@@ -59,14 +88,19 @@ function echoBox() {
   printSeparatorLine "${char}" "${length}"
 }
 
-# Show a 1:message as a banner. The banner box is made with optional 2:character.
-# If no character is set a `*` is used
+# Display a message as a full-width banner
+# Parameters:
+#   $1: msg - The message to display in the banner (required)
+#   $2: char - Character to use for banner borders (default: "*")
+# Returns: None (outputs to stdout)
+# Format: Full-width top line, message with padding, full-width bottom line
+# Example: echoBanner "Uitsmijter Tooling" "~"
 function echoBanner() {
   local msg="${1}"
   local char="${2:-"*"}"
   local size=${#msg}
   local length=$((size + 4))
-  length=$((dispalyCols - length))
+  length=$((displayCols - length))
   printSeparatorLine "${char}"
   echo -n "${char} "
   echo -n "${msg}"

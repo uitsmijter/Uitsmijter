@@ -2,6 +2,8 @@ image:
   pullPolicy: IfNotPresent
 storageClassName: standard
 jwtSecret: "forTestingPurposesOnly"
+redis:
+  replicas: 1
 domains:
   - domain: "uitsmijter.localhost"
     cookieDomain: ".uitsmijter.localhost"

@@ -6,10 +6,7 @@ set -o pipefail
 TIMEOUT=${K8S_TIMEOUT:-"5m"}
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)"
 
-# Wait until the ham web server pod is ready to use
-kubectl -n ham wait --for=condition=ready pod --selector=app=ham-webserver --timeout=${TIMEOUT}
-
-# Setup S3 data
+# Setup S3 data FIRST, before applying the tenant
 s3cmd="s3cmd --access_key=admin --secret_key=adminSecretKey --no-ssl --host=localhost:8333 --host-bucket=%\(bucket\).localhost"
 files=$(find "${SCRIPT_DIR}" -name *.leaf)
 numFiles=$(echo "$files" | wc -l)
@@ -38,5 +35,8 @@ if [[ "${filesInS3}" -lt "${numFiles}" ]]; then
     exit 1
 fi
 
-# Update the tenant to reload S3 templates
-kubectl -n ham annotate --overwrite tenant ham "updated=$(date)"
+# Now apply the tenant so it can load templates from S3
+kubectl apply --server-side -f "${SCRIPT_DIR}/tenant.yaml"
+
+# Wait until the ham web server pod is ready to use
+kubectl -n ham wait --for=condition=ready pod --selector=app=ham-webserver --timeout=${TIMEOUT}

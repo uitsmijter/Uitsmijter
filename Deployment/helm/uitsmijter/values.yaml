@@ -11,6 +11,13 @@ imagePullSecrets: []
 jwtSecret: "vosai0za6iex8AelahGemaeBooph6pah6Saezae0oojahfa7Re6leibeeshiu8ie"
 redisPassword: "Shohmaz1"
 storageClassName: ""
+
+redis:
+  image:
+    repository: redis
+    tag: "8.2.2"
+  replicas: 3  # Testing with single instance to verify replication lag hypothesis
+
 installCRD: true
 installSA: true
 
@@ -35,7 +42,7 @@ resources:
     cpu: "500m"
   limits:
     memory: "512Mi"
-    cpu: "1000m"
+    cpu: "2000m"
 
 domains:
   - domain: "nightly.uitsmijter.io"

@@ -44,9 +44,14 @@ nesting:
   always_allow_one_type_in_functions: true
 
 file_length:
-  warning: 500
+  warning: 800
   error: 1200
 
+line_length:
+  warning: 120
+  ignores_multiline_strings: true
+  ignores_comments: true
+  
 function_body_length:
   warning: 90
   error: 120

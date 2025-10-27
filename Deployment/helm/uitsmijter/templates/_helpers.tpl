@@ -86,3 +86,20 @@ Build the default service name
 {{- define "uitsmijter.serviceName" -}}
 {{- default (include "uitsmijter.name" .) .Values.serviceNameOverride }}-authserver
 {{- end }}
+
+{{/*
+Define default resource limits and requests
+Returns the resources from .Values.resources if set, otherwise returns sensible defaults
+*/}}
+{{- define "uitsmijter.resources" -}}
+{{- if .Values.resources }}
+{{- toYaml .Values.resources }}
+{{- else }}
+requests:
+  memory: "256Mi"
+  cpu: "500m"
+limits:
+  memory: "512Mi"
+  cpu: "2000m"
+{{- end }}
+{{- end }}

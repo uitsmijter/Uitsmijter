@@ -27,3 +27,5 @@ TEST_HOSTS='api.example.com
   yolk.egg.example.com
   glair.egg.example.com
   '
+
+SUPPRESS_PACKAGE_WARNINGS=true

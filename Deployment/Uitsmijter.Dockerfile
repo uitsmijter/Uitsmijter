@@ -1,8 +1,8 @@
 # ----------------------------------------------------------------------------------------
 # BUILD STAGE
 # ----------------------------------------------------------------------------------------
-ARG BASEIMAGE=swift:5.9.2-jammy
-ARG BUILDBOX=2.3.0
+ARG BASEIMAGE=swift:6.2.0-noble
+ARG BUILDBOX=set.in.env
 FROM ghcr.io/uitsmijter/buildbox:${BUILDBOX} as build
 
 # First resolve dependencies only.
@@ -10,26 +10,28 @@ FROM ghcr.io/uitsmijter/buildbox:${BUILDBOX} as build
 # as long as your Package.swift/Package.resolved
 # files do not change.
 COPY ./Package.* ./
+
 RUN swift package resolve
 
 # Copy entire repo into container
 COPY . .
-
+    
 # Test
 ARG SKIPTESTS=false
 RUN DIRECTORY=/build; \
     if [ "${SKIPTESTS}" != "true" ]; then \
+      DISABLE_FILE_MONITORING=true \
       swift test \
       --scratch-path .build --num-workers 2 --parallel \
-      -Xcc -I/usr/include/webkitgtk-4.0 \
-      -Xcc -I/usr/include/webkitgtk-4.0/JavaScriptCore; \
+      -Xcc -I/usr/include/webkitgtk-4.1 \
+      -Xcc -I/usr/include/webkitgtk-4.1/JavaScriptCore; \
     fi
 
 # Build everything, with optimizations
 # --static-swift-stdlib - turned off while timer does not compile in static bins
 RUN swift build -c release \
-    -Xcc -I/usr/include/webkitgtk-4.0 \
-    -Xcc -I/usr/include/webkitgtk-4.0/JavaScriptCore
+    -Xcc -I/usr/include/webkitgtk-4.1 \
+    -Xcc -I/usr/include/webkitgtk-4.1/JavaScriptCore
 
 # Switch to the staging area
 WORKDIR /staging
@@ -61,7 +63,7 @@ RUN export DEBIAN_FRONTEND=noninteractive DEBCONF_NONINTERACTIVE_SEEN=true && \
     apt-get -q update && apt-get -q dist-upgrade -y \
     && apt-get -q install -y \
     ca-certificates \
-    libjavascriptcoregtk-4.0 \
+    libjavascriptcoregtk-4.1 \
     && rm -r /var/lib/apt/lists/*
 
 # Create a uitsmijter user and group with /app as its home directory
