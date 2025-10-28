@@ -89,7 +89,7 @@ function e2eTests(){
   echo "Running tests:"
 
   status=0
-  ARGUMENTS="${ARGUMENTS}" GITHUB_ACTION=${GITHUB_ACTION} docker compose \
+  ARGUMENTS="${ARGUMENTS}" GITHUB_ACTION=${GITHUB_ACTION:-} docker compose \
     -f "${PROJECT_DIR}/Deployment/build-compose.yml" \
     --env-file "${PROJECT_DIR}/.env" \
     up \

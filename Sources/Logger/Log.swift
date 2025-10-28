@@ -11,10 +11,10 @@ import Logging
 ///
 /// The Log struct serves as the primary logging mechanism throughout the Uitsmijter codebase. It provides:
 /// - Static logging methods for all standard log levels (debug, info, notice, warning, error, critical)
-/// - Automatic metadata enrichment with request context
+/// - Automatic metadata enrichment with request id
 /// - Configurable log levels via environment variables
 /// - Support for both console and structured (JSON) log formats
-/// - A separate audit logger for security-related events
+/// - A separate audit logger for login logs
 ///
 /// ## Usage
 ///
@@ -22,7 +22,7 @@ import Logging
 /// // Basic logging
 /// Log.info("Server started successfully")
 ///
-/// // Logging with request context
+/// // Logging with request id
 /// Log.warning("Invalid token received", requestId: req.id)
 ///
 /// // Different log levels

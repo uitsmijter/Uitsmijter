@@ -115,8 +115,6 @@ public struct CircularBuffer<Element> {
 
     /// Adds a single element to the buffer with configurable overflow behavior.
     ///
-    /// This operation is thread-safe.
-    ///
     /// - Parameters:
     ///   - value: The element to add to the buffer.
     ///   - drop: If `true`, the element is not added when the buffer is full.
@@ -133,7 +131,6 @@ public struct CircularBuffer<Element> {
     /// Adds multiple elements to the buffer.
     ///
     /// If the buffer becomes full during the operation, the oldest elements are overwritten.
-    /// This operation is thread-safe.
     ///
     /// - Parameter values: An array of elements to add to the buffer.
     public mutating func push(_ values: [Element]) {
@@ -204,7 +201,7 @@ public struct CircularBuffer<Element> {
     /// Removes and returns multiple elements from the buffer.
     ///
     /// Elements are removed in FIFO (first-in, first-out) order. If the requested amount exceeds
-    /// the number of available elements, only the available elements are returned. This operation is thread-safe.
+    /// the number of available elements, only the available elements are returned.
     ///
     /// - Parameter amount: The number of elements to remove from the buffer.
     /// - Returns: An array of elements, or `nil` if the buffer is empty. The returned array may contain

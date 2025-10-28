@@ -28,7 +28,7 @@ function checkExecutableInPath() {
 # Returns: 0 if found, exits with error if not found
 # Used for: Kubernetes cluster management and deployments
 function checkKubectl() {
-  checkExecutableInPath kubectl
+  checkExecutableInPath kubectl 'Please install kubectl: https://kubernetes.io/docs/tasks/tools/'
 }
 
 # Check if helm is installed
@@ -36,7 +36,7 @@ function checkKubectl() {
 # Returns: 0 if found, exits with error if not found
 # Used for: Deploying Helm charts to Kubernetes
 function checkHelm() {
-  checkExecutableInPath helm 'Please install helm'
+  checkExecutableInPath helm 'Please install helm: https://helm.sh/docs/intro/install/'
 }
 
 # Check if openssl is installed
@@ -44,7 +44,7 @@ function checkHelm() {
 # Returns: 0 if found, exits with error if not found
 # Used for: Generating TLS certificates for local testing
 function checkOpenssl() {
-  checkExecutableInPath openssl
+  checkExecutableInPath openssl 'Please install openssl: brew install openssl (macOS) or apt-get install openssl (Linux)'
 }
 
 # Check if Go is installed (required for installing kind)
@@ -52,7 +52,7 @@ function checkOpenssl() {
 # Returns: 0 if found, exits with error if not found
 # Used for: Installing kind via 'go install' if kind is not available
 function checkGoForKind() {
-  checkExecutableInPath go 'Please install kind or Golang to run e2e tests!'
+  checkExecutableInPath go 'Please install Go: https://golang.org/doc/install or brew install go (macOS)'
 }
 
 # Check if kind is installed, offer to install it via Go if not found
@@ -90,5 +90,5 @@ function checkDate() {
 # Returns: 0 if found, exits with error if not found
 # Used for: Interacting with S3-compatible storage in e2e tests
 function checkS3cmd() {
-  checkExecutableInPath s3cmd 'Please install s3cmd'
+  checkExecutableInPath s3cmd 'Please install s3cmd: brew install s3cmd (macOS) or apt-get install s3cmd (Linux)'
 }

@@ -164,10 +164,62 @@ function kindWaitForRunningClusters() {
 # Parameters: None (uses KIND_CLUSTER_NAME from kind.var.sh)
 # Returns: None
 # Side effects: Starts the control-plane container if it's stopped
-# Use case: Resume a stopped cluster instead of creating a new one
+# Use case: Check if cluster is running and start it if stopped (avoids recreating cluster)
 function kindEnsureClusterRunning() {
   local container="${KIND_CLUSTER_NAME}-control-plane"
   docker ps -a | grep "${container}" | grep 'Up ' > /dev/null || docker start "${container}"
+}
+
+# Generate certificate subjectAltName from TEST_HOSTS
+# Parameters: None (uses TEST_HOSTS from test.var.sh)
+# Returns: Comma-separated list of DNS entries for certificate SAN
+# Example output: "DNS:*.localhost,DNS:example.com,DNS:*.example.com,DNS:*.ham.test,DNS:*.bnbc.example"
+# Use case: Dynamically generate certificate domains from test host definitions
+function generateCertDomains() {
+  local domains="DNS:*.localhost"
+  local seen_domains=()
+
+  # Extract unique base domain patterns from TEST_HOSTS
+  while IFS= read -r host; do
+    # Skip empty lines
+    [[ -z "$host" ]] && continue
+
+    # Extract base domain and create wildcard pattern
+    if [[ $host == *.*.* ]]; then
+      # Multi-level subdomain: bucketname.s3.ham.test -> *.s3.ham.test and *.ham.test
+      local base
+      base=$(echo "$host" | sed 's/^[^.]*\.//')
+      local parent
+      parent=$(echo "$base" | sed 's/^[^.]*\.//')
+
+      # Add both patterns if not already present
+      if [[ ! " ${seen_domains[*]} " =~ " *.${base} " ]]; then
+        domains="${domains},DNS:*.${base}"
+        seen_domains+=("*.${base}")
+      fi
+      if [[ ! " ${seen_domains[*]} " =~ " *.${parent} " ]]; then
+        domains="${domains},DNS:*.${parent}"
+        seen_domains+=("*.${parent}")
+      fi
+    elif [[ $host == *.* ]]; then
+      # Simple subdomain: login.example.com -> example.com and *.example.com
+      local base
+      base=$(echo "$host" | sed 's/^[^.]*\.//')
+
+      # Add base domain
+      if [[ ! " ${seen_domains[*]} " =~ " ${base} " ]]; then
+        domains="${domains},DNS:${base}"
+        seen_domains+=("${base}")
+      fi
+      # Add wildcard pattern
+      if [[ ! " ${seen_domains[*]} " =~ " *.${base} " ]]; then
+        domains="${domains},DNS:*.${base}"
+        seen_domains+=("*.${base}")
+      fi
+    fi
+  done <<< "$(echo "${TEST_HOSTS}" | tr ' ' '\n')"
+
+  echo "${domains}"
 }
 
 # Generate self-signed TLS certificate for Traefik ingress
@@ -177,7 +229,7 @@ function kindEnsureClusterRunning() {
 # Certificate details:
 #   - Type: EC (secp384r1 curve)
 #   - Validity: 10 years
-#   - SANs: *.localhost, example.com, *.example.com, and various test domains
+#   - SANs: Dynamically generated from TEST_HOSTS variable
 # Use case: Enable HTTPS in local test environment
 function kindSetupCert() {
   local certificate="${PROJECT_DIR}/Deployment/e2e/traefik/certificates/tls"
@@ -186,12 +238,15 @@ function kindSetupCert() {
   fi
   mkdir -p "$(dirname "${certificate}")"
 
+  local cert_domains
+  cert_domains=$(generateCertDomains)
+
   echo "Creating default certificate"
   openssl req -x509 -newkey ec \
     -pkeyopt ec_paramgen_curve:secp384r1 -days 3650 \
     -nodes -keyout "${certificate}".key -out "${certificate}".crt \
     -subj '/CN=uitsmijter.localhost' \
-    -addext 'subjectAltName=DNS:*.localhost,DNS:example.com,DNS:*.example.com,DNS:*.egg.example.com,DNS:ham.test,DNS:*.ham.test,DNS:*.s3.ham.test,DNS:bnbc.example,DNS:*.bnbc.example'
+    -addext "subjectAltName=${cert_domains}"
 }
 
 # Install and configure Traefik ingress controller in the cluster

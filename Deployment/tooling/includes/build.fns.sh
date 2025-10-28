@@ -25,7 +25,7 @@ function buildImages() {
 # Parameters:
 #   $1: dockerComposeBuildParameter - Additional docker compose flags (optional)
 # Returns: Exit code from build container
-# Side effects: Builds images first, then compiles Swift code incrementally
+# Side effects: Resizes and reformats image assets first, then compiles Swift code incrementally
 # Environment variables:
 #   - SUPPRESS_PACKAGE_WARNINGS: Set to suppress Swift package warnings
 # Use case: Fast development builds that reuse previous compilation artifacts

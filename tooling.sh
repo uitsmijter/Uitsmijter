@@ -199,7 +199,6 @@ fi
 
 # Settings
 shouldDebug "${DEBUG}"
-exportDefaults
 
 # Execute pipeline
 if [[ "${MODE}" == *"|remove"* ]]; then
