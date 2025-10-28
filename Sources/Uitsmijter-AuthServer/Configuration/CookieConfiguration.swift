@@ -27,7 +27,7 @@ struct CookieConfiguration {
     ///
     /// - Environment: `SECURE`
     /// - Default: `false`
-    public static let isSecure: Bool = {
+    static let isSecure: Bool = {
         guard let value = ProcessInfo.processInfo.environment["SECURE"] else {
             return false
         }
@@ -40,7 +40,7 @@ struct CookieConfiguration {
     /// This helps prevent XSS (Cross-Site Scripting) attacks.
     ///
     /// - Default: `true`
-    public static let isHTTPOnly: Bool = true
+    static let isHTTPOnly: Bool = true
 
     /// The SameSite policy for cookies.
     ///
@@ -48,7 +48,7 @@ struct CookieConfiguration {
     ///
     /// - Default: `.strict`
     /// - SeeAlso: ``CookieSameSitePolicy``
-    public static let sameSitePolicy: CookieSameSitePolicy = .strict
+    static let sameSitePolicy: CookieSameSitePolicy = .strict
 
     /// The default path for cookies.
     ///
@@ -56,7 +56,7 @@ struct CookieConfiguration {
     /// browser to send the cookie.
     ///
     /// - Default: `"/"`
-    public static let defaultPath: String = "/"
+    static let defaultPath: String = "/"
 }
 
 // MARK: - SameSite Policy

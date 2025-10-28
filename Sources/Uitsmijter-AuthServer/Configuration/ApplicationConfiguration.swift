@@ -72,7 +72,7 @@ struct RuntimeConfiguration {
     ///
     /// - Environment: `SUPPORT_KUBERNETES_CRD`
     /// - Default: `false`
-    public static let SUPPORT_KUBERNETES_CRD: Bool = {
+    static let SUPPORT_KUBERNETES_CRD: Bool = {
         guard let value = ProcessInfo.processInfo.environment["SUPPORT_KUBERNETES_CRD"] else {
             return false
         }
@@ -87,7 +87,7 @@ struct RuntimeConfiguration {
     /// - Environment: `SCOPED_KUBERNETES_CRD`
     /// - Default: `false`
     /// - SeeAlso: ``UITSMIJTER_NAMESPACE``
-    public static let SCOPED_KUBERNETES_CRD: Bool = {
+    static let SCOPED_KUBERNETES_CRD: Bool = {
         guard let value = ProcessInfo.processInfo.environment["SCOPED_KUBERNETES_CRD"] else {
             return false
         }
@@ -102,6 +102,6 @@ struct RuntimeConfiguration {
     /// - Environment: `UITSMIJTER_NAMESPACE`
     /// - Default: `""` (empty string)
     /// - SeeAlso: ``SCOPED_KUBERNETES_CRD``
-    public static let UITSMIJTER_NAMESPACE: String =
+    static let UITSMIJTER_NAMESPACE: String =
         ProcessInfo.processInfo.environment["UITSMIJTER_NAMESPACE"] ?? ""
 }

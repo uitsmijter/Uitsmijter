@@ -54,7 +54,7 @@ nonisolated(unsafe) var metricsCountClients: PromGauge<Int>?
 ///
 public struct Prometheus: Sendable {
     /// Singleton reference
-    public static let main: Prometheus = Prometheus()
+    static let main: Prometheus = Prometheus()
 
     /// The static prometheus client
     private nonisolated(unsafe) static let prometheusClient = PrometheusClient()
