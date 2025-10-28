@@ -23,7 +23,9 @@ function printSeparatorLine() {
 # Parameters:
 #   $1: text - The heading text to display (required)
 # Returns: None (outputs to stdout)
-# Format: Empty line, text, line of asterisks, empty line
+# Format:
+#   Headline
+#   *******************************************************************************************************************
 # Example: h1 "Uitsmijter Build System"
 function h1(){
   echo ""
@@ -36,7 +38,9 @@ function h1(){
 # Parameters:
 #   $1: text - The heading text to display (required)
 # Returns: None (outputs to stdout)
-# Format: Empty line, text, line of equals signs
+# Format:
+#   Headline
+#   ===================================================================================================================
 # Example: h2 "Running Unit Tests"
 function h2(){
   echo ""
@@ -48,7 +52,9 @@ function h2(){
 # Parameters:
 #   $1: text - The heading text to display (required)
 # Returns: None (outputs to stdout)
-# Format: Empty line, text, line of dashes
+# Format:
+#   Headline
+#   -------------------------------------------------------------------------------------------------------------------
 # Example: h3 "Setting up certificates"
 function h3(){
   echo ""
@@ -75,6 +81,10 @@ function underline() {
 #   $1: msg - The message to display in the box (required)
 #   $2: char - Character to use for box borders (default: "*")
 # Returns: None (outputs to stdout)
+# Format:
+#   ********
+#   * Text *
+#   ********
 # Example: echoBox "Build completed successfully" "="
 function echoBox() {
   local msg="${1}"
@@ -93,7 +103,10 @@ function echoBox() {
 #   $1: msg - The message to display in the banner (required)
 #   $2: char - Character to use for banner borders (default: "*")
 # Returns: None (outputs to stdout)
-# Format: Full-width top line, message with padding, full-width bottom line
+# Format:
+#   *******************************************************************************************************************
+#   * Text                                                                                                            *
+#   *******************************************************************************************************************
 # Example: echoBanner "Uitsmijter Tooling" "~"
 function echoBanner() {
   local msg="${1}"
