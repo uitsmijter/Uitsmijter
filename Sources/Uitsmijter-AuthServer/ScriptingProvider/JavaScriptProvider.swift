@@ -50,7 +50,7 @@ actor JavaScriptProvider: JSFunctionsDelegate {
     ///     - run
     ///     - exceptionHandler
     ///
-    public enum JavaScriptError: Error {
+    enum JavaScriptError: Error {
         case syntaxError(String?)
         case parserError(String)
         case propertyCast(String, class: String, into: any Sendable)
@@ -151,7 +151,7 @@ actor JavaScriptProvider: JSFunctionsDelegate {
     /// Specification of the classes that can be run inside the provider script
     ///
     /// - See: start
-    public enum ScriptClassExecution: String, Sendable {
+    enum ScriptClassExecution: String, Sendable {
         case userLogin = "UserLoginProvider"
         case userValidate = "UserValidationProvider"
         case custom

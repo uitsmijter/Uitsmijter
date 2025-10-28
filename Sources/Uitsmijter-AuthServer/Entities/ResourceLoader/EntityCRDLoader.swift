@@ -5,7 +5,7 @@ import Logger
 
 struct TenantResource: KubernetesAPIResource, NamespacedResource, MetadataHavingResource,
                               ReadableResource, CreatableResource, ListableResource {
-    public typealias List = TenantResourceList
+    typealias List = TenantResourceList
     var apiVersion = "uitsmijter.io/v1"
     var kind = "Tenant"
     var metadata: meta.v1.ObjectMeta?
@@ -22,7 +22,7 @@ struct TenantResourceList: KubernetesResourceList {
 
 struct ClientResource: KubernetesAPIResource, NamespacedResource, MetadataHavingResource,
                               ReadableResource, CreatableResource, ListableResource {
-    public typealias List = ClientResourceList
+    typealias List = ClientResourceList
     var apiVersion = "uitsmijter.io/v1"
     var kind = "Client"
     var metadata: meta.v1.ObjectMeta?

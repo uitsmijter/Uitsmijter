@@ -52,7 +52,7 @@ nonisolated(unsafe) var metricsCountClients: PromGauge<Int>?
 ///
 /// - Complexity: Singleton pattern ensures single PrometheusClient instance
 ///
-public struct Prometheus: Sendable {
+struct Prometheus: Sendable {
     /// Singleton reference
     static let main: Prometheus = Prometheus()
 

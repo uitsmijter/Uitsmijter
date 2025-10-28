@@ -48,7 +48,7 @@ struct AuthSession: Codable, TimeToLiveProtocol, Sendable {
     /// The type of authorization code.
     ///
     /// Distinguishes between standard authorization codes and refresh tokens.
-    public enum CodeType: String, Codable, Sendable {
+    enum CodeType: String, Codable, Sendable {
         /// Standard authorization code from authorization endpoint.
         case code
 

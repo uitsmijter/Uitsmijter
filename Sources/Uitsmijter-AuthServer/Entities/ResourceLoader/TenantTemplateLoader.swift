@@ -4,7 +4,7 @@ import Logger
 
 actor TenantTemplateLoader {
 
-    public enum TenantTemplateLoaderOperations {
+    enum TenantTemplateLoaderOperations {
         case create(tenant: Tenant)
         case remove(tenant: Tenant)
     }
