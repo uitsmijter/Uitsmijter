@@ -119,25 +119,25 @@ enum CookieSameSitePolicy: String, Sendable {
 /// ```
 struct CookieSettings {
     /// The cookie value/content
-    public let content: String
+    let content: String
 
     /// When the cookie expires
-    public let expires: Date
+    let expires: Date
 
     /// Whether the cookie requires HTTPS
-    public let isSecure: Bool
+    let isSecure: Bool
 
     /// Whether the cookie is HTTP-only (not accessible via JavaScript)
-    public let isHTTPOnly: Bool
+    let isHTTPOnly: Bool
 
     /// The SameSite policy
-    public let sameSite: CookieSameSitePolicy
+    let sameSite: CookieSameSitePolicy
 
     /// The URL path for the cookie
-    public let path: String
+    let path: String
 
     /// The max-age value in seconds
-    public var maxAge: Int {
+    var maxAge: Int {
         expires.millisecondsSinceNow / 1000
     }
 
@@ -150,7 +150,7 @@ struct CookieSettings {
     ///   - isHTTPOnly: Whether to be HTTP-only (defaults to ``CookieConfiguration/isHTTPOnly``)
     ///   - sameSite: The SameSite policy (defaults to ``CookieConfiguration/sameSitePolicy``)
     ///   - path: The URL path (defaults to ``CookieConfiguration/defaultPath``)
-    public init(
+    init(
         content: String,
         expires: Date,
         isSecure: Bool = CookieConfiguration.isSecure,
@@ -172,7 +172,7 @@ struct CookieSettings {
     ///   - content: The cookie value
     ///   - expires: The expiration date
     /// - Returns: A new cookie settings instance with default security values
-    public static func `default`(content: String, expires: Date) -> CookieSettings {
+    static func `default`(content: String, expires: Date) -> CookieSettings {
         CookieSettings(content: content, expires: expires)
     }
 }
