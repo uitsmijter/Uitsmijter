@@ -11,10 +11,10 @@ struct Code: Codable, Equatable, ExpressibleByStringLiteral, Sendable {
     public typealias StringLiteralType = String
 
     /// The `Code`'s content
-    public var value: String = String.random(length: Constants.TOKEN.LENGTH)
+    var value: String = String.random(length: Constants.TOKEN.LENGTH)
 
     /// The method with which the code is presented
-    public var codeChallengeMethod: CodeChallengeMethod?
+    var codeChallengeMethod: CodeChallengeMethod?
 
     /// The original challenge
     /// The client computes a `code_challenge` starting from the code_verifier
@@ -22,19 +22,19 @@ struct Code: Codable, Equatable, ExpressibleByStringLiteral, Sendable {
     ///
     /// - SeeAlso:
     ///   - codeChallengeHash
-    public var codeChallenge: String?
+    var codeChallenge: String?
 
     /// Initialize a new Code with a random `value`
-    public init() {
+    init() {
     }
 
     /// Initialize a new Code with a given pre-generated `value`
-    public init(stringLiteral value: String) {
+    init(stringLiteral value: String) {
         self.value = value
     }
 
     /// Initialize a new Code with a given pre-generated `value`
-    public init(value: String) {
+    init(value: String) {
         self.init(stringLiteral: value)
     }
 
@@ -45,7 +45,7 @@ struct Code: Codable, Equatable, ExpressibleByStringLiteral, Sendable {
     ///   - codeChallenge: The original string (send in the first call)
     /// - SeeAlso:
     ///   - codeChallengeHash
-    public init(codeChallengeMethod: CodeChallengeMethod, codeChallenge: String) {
+    init(codeChallengeMethod: CodeChallengeMethod, codeChallenge: String) {
         self.codeChallengeMethod = codeChallengeMethod
         self.codeChallenge = codeChallenge
     }
@@ -53,7 +53,7 @@ struct Code: Codable, Equatable, ExpressibleByStringLiteral, Sendable {
     // MARK: - Equatable
 
     /// Compare one code with another
-    public static func ==(lhs: Code, rhs: Code) -> Bool { // swiftlint:disable:this operator_whitespace
+    static func ==(lhs: Code, rhs: Code) -> Bool { // swiftlint:disable:this operator_whitespace
         lhs.codeChallengeMethod == rhs.codeChallengeMethod
             && lhs.codeChallenge == rhs.codeChallenge
             && lhs.value == rhs.value

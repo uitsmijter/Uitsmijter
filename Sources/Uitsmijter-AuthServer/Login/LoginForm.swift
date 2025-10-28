@@ -10,22 +10,22 @@ import Vapor
 ///     - location: URL to redirect the user to after a login
 struct LoginForm: Content, Sendable {
     /// The users username or email address that is used as a _username_
-    public let username: String
+    let username: String
 
     /// The cleartext password of the user that will checked against the backend user storage
-    public let password: String
+    let password: String
 
     /// A location where the user will be redirected after the login proceeds.
     /// The `location` must match one of the `Client``s `redirect_urls`.
     /// - SeeAlso:
     ///     - Client
     ///     - redirect_urls
-    public let location: String
+    let location: String
 
     /// Optional request scopes
-    public let scope: String?
+    let scope: String?
 
-    public init(username: String, password: String, location: String, scope: String? = nil) {
+    init(username: String, password: String, location: String, scope: String? = nil) {
         self.username = username
         self.password = password
         self.location = location

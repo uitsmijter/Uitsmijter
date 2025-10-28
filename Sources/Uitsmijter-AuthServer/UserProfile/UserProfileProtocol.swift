@@ -186,21 +186,21 @@ struct UserProfile: UserProfileProtocol {
     /// This property determines access levels and permissions throughout the system.
     ///
     /// - SeeAlso: ``UserProfileProtocol/role`` for detailed role usage documentation
-    public var role: String
+    var role: String
 
     /// The unique identifier or username of the user.
     ///
     /// This is the primary user identifier used for authentication and identity.
     ///
     /// - SeeAlso: ``UserProfileProtocol/user`` for identifier format documentation
-    public var user: String
+    var user: String
 
     /// Optional additional profile data with flexible structure.
     ///
     /// Stores custom user attributes in a JSON-like format.
     ///
     /// - SeeAlso: ``UserProfileProtocol/profile`` for usage examples and common patterns
-    public var profile: CodableProfile?
+    var profile: CodableProfile?
 
     /// Creates a new user profile with the specified authentication and authorization data.
     ///
@@ -225,7 +225,7 @@ struct UserProfile: UserProfileProtocol {
     ///     ])
     /// )
     /// ```
-    public init(role: String, user: String, profile: CodableProfile? = nil) {
+    init(role: String, user: String, profile: CodableProfile? = nil) {
         self.role = role
         self.user = user
         self.profile = profile

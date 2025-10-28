@@ -4,11 +4,11 @@ import Foundation
 ///
 struct JSInputCredentials: JSInputParameterProtocol, Sendable {
     /// Users username or email address
-    public let username: String
+    let username: String
     /// Users password
-    public let password: String
+    let password: String
 
-    public init(username: String, password: String) {
+    init(username: String, password: String) {
         self.username = username
         self.password = password
     }

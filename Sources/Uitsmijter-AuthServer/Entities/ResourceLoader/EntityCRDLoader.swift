@@ -6,35 +6,35 @@ import Logger
 struct TenantResource: KubernetesAPIResource, NamespacedResource, MetadataHavingResource,
                               ReadableResource, CreatableResource, ListableResource {
     public typealias List = TenantResourceList
-    public var apiVersion = "uitsmijter.io/v1"
-    public var kind = "Tenant"
-    public var metadata: meta.v1.ObjectMeta?
-    public var spec: TenantSpec
+    var apiVersion = "uitsmijter.io/v1"
+    var kind = "Tenant"
+    var metadata: meta.v1.ObjectMeta?
+    var spec: TenantSpec
 }
 
 struct TenantResourceList: KubernetesResourceList {
-    public var metadata: SwiftkubeModel.meta.v1.ListMeta?
+    var metadata: SwiftkubeModel.meta.v1.ListMeta?
 
-    public var apiVersion = "uitsmijter.io/v1"
-    public var kind = "tenants"
-    public var items: [TenantResource]
+    var apiVersion = "uitsmijter.io/v1"
+    var kind = "tenants"
+    var items: [TenantResource]
 }
 
 struct ClientResource: KubernetesAPIResource, NamespacedResource, MetadataHavingResource,
                               ReadableResource, CreatableResource, ListableResource {
     public typealias List = ClientResourceList
-    public var apiVersion = "uitsmijter.io/v1"
-    public var kind = "Client"
-    public var metadata: meta.v1.ObjectMeta?
-    public var spec: ClientSpec
+    var apiVersion = "uitsmijter.io/v1"
+    var kind = "Client"
+    var metadata: meta.v1.ObjectMeta?
+    var spec: ClientSpec
 }
 
 struct ClientResourceList: KubernetesResourceList {
-    public var metadata: SwiftkubeModel.meta.v1.ListMeta?
+    var metadata: SwiftkubeModel.meta.v1.ListMeta?
 
-    public var apiVersion = "uitsmijter.io/v1"
-    public var kind = "clients"
-    public var items: [ClientResource]
+    var apiVersion = "uitsmijter.io/v1"
+    var kind = "clients"
+    var items: [ClientResource]
 }
 
 @MainActor
@@ -47,7 +47,7 @@ struct EntityCRDLoader: EntityLoaderProtocol {
     private let gvrTenants = GroupVersionResource(group: "uitsmijter.io", version: "v1", resource: "tenants")
     private let gvrClients = GroupVersionResource(group: "uitsmijter.io", version: "v1", resource: "clients")
 
-    public init(handler: EntityLoaderProtocolFunctions?) throws {
+    init(handler: EntityLoaderProtocolFunctions?) throws {
         // set delegate
         delegate = handler
 
@@ -60,7 +60,7 @@ struct EntityCRDLoader: EntityLoaderProtocol {
         // Don't block init() - initial loading will happen in start()
     }
 
-    public func start() throws {
+    func start() throws {
         // Load initial resources asynchronously, then start watching
         Task {
             try await loadInitialTenantsAsync()
@@ -72,7 +72,7 @@ struct EntityCRDLoader: EntityLoaderProtocol {
         }
     }
 
-    public nonisolated func shutdown() {
+    nonisolated func shutdown() {
         try? kubeClient.syncShutdown()
     }
 

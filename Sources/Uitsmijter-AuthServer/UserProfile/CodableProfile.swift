@@ -114,7 +114,7 @@ extension CodableProfile: Encodable {
     ///
     /// - Parameter encoder: The encoder to write data to.
     /// - Throws: An encoding error if the value cannot be encoded.
-    public func encode(to encoder: Encoder) throws {
+    func encode(to encoder: Encoder) throws {
         var container = encoder.singleValueContainer()
         switch self {
         case .double(let value):
@@ -175,7 +175,7 @@ extension CodableProfile: Decodable {
     ///
     /// - Parameter decoder: The decoder to read data from.
     /// - Throws: `DecodingError.dataCorrupted` if the value cannot be decoded as any supported type.
-    public init(from decoder: Decoder) throws {
+    init(from decoder: Decoder) throws {
         let container = try decoder.singleValueContainer()
 
         // Try integer first (before double) to preserve whole number precision
@@ -258,7 +258,7 @@ extension CodableProfile {
     /// Returns the integer value if this profile is an `.integer` case, otherwise `nil`.
     ///
     /// - Returns: The wrapped `Int` value, or `nil` if this is not an integer.
-    public var int: Int? {
+    var int: Int? {
         guard case let .integer(value) = self else {
             return nil
         }
@@ -268,7 +268,7 @@ extension CodableProfile {
     /// Returns the double value if this profile is a `.double` case, otherwise `nil`.
     ///
     /// - Returns: The wrapped `Double` value, or `nil` if this is not a double.
-    public var double: Double? {
+    var double: Double? {
         guard case let .double(value) = self else {
             return nil
         }
@@ -278,7 +278,7 @@ extension CodableProfile {
     /// Returns the string value if this profile is a `.string` case, otherwise `nil`.
     ///
     /// - Returns: The wrapped `String` value, or `nil` if this is not a string.
-    public var string: String? {
+    var string: String? {
         guard case let .string(value) = self else {
             return nil
         }
@@ -288,7 +288,7 @@ extension CodableProfile {
     /// Checks if this profile represents a null value.
     ///
     /// - Returns: `true` if this is the `.null` case, `false` otherwise.
-    public var isNil: Bool {
+    var isNil: Bool {
         guard case .null = self else {
             return false
         }
@@ -298,7 +298,7 @@ extension CodableProfile {
     /// Returns the boolean value if this profile is a `.boolean` case, otherwise `nil`.
     ///
     /// - Returns: The wrapped `Bool` value, or `nil` if this is not a boolean.
-    public var bool: Bool? {
+    var bool: Bool? {
         guard case let .boolean(value) = self else {
             return nil
         }
@@ -318,7 +318,7 @@ extension CodableProfile {
     ///     }
     /// }
     /// ```
-    public var array: [CodableProfile]? {
+    var array: [CodableProfile]? {
         guard case let .array(value) = self else {
             return nil
         }
@@ -341,7 +341,7 @@ extension CodableProfile {
     ///     let role = userObj["role"]?.string  // "admin"
     /// }
     /// ```
-    public var object: [String: CodableProfile]? {
+    var object: [String: CodableProfile]? {
         guard case let .object(value) = self else {
             return nil
         }

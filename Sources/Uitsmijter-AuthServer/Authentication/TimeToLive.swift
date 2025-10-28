@@ -48,5 +48,5 @@ protocol TimeToLiveProtocol {
 /// ```
 struct TimeToLive: TimeToLiveProtocol, Decodable {
     /// The time-to-live in seconds.
-    public var ttl: Int64?
+    var ttl: Int64?
 }

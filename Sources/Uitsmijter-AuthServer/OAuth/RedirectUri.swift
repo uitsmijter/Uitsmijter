@@ -26,12 +26,12 @@ enum RedirectError: Error {
 /// as a redirect destination in Uitsmijter authentication flows.
 struct RedirectUri: RedirectUriProtocol {
     /// The redirect URI where Uitsmijter will send its response.
-    public let redirect_uri: URL
+    let redirect_uri: URL
 
     /// Creates a new redirect URI from a URL instance.
     ///
     /// - Parameter uri: The URL to use as the redirect URI.
-    public init(_ uri: URL) {
+    init(_ uri: URL) {
         redirect_uri = uri
     }
 
@@ -42,7 +42,7 @@ struct RedirectUri: RedirectUriProtocol {
     ///
     /// - Parameter string: A string representation of the redirect URI.
     /// - Throws: `RedirectError.notAnUrl` if the string cannot be converted to a valid URL.
-    public init(_ string: String) throws {
+    init(_ string: String) throws {
         guard let uri = URL(string: string) else {
             throw RedirectError.notAnUrl(string)
         }

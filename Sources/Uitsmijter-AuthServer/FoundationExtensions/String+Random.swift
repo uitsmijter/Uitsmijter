@@ -18,7 +18,7 @@ extension String {
         ///
         /// Contains lowercase letters, uppercase letters, and digits.
         /// - Returns: A `RandomCharacterSet` with alphanumeric characters
-        public static var aZ09: RandomCharacterSet {
+        static var aZ09: RandomCharacterSet {
             get {
                 RandomCharacterSet(value: "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789")
             }
@@ -29,7 +29,7 @@ extension String {
         /// Contains alphanumeric characters plus hyphen, period, underscore, and tilde,
         /// as specified in RFC 7636 for PKCE code verifiers.
         /// - Returns: A `RandomCharacterSet` suitable for OAuth PKCE code verifiers
-        public static var codeVerifier: RandomCharacterSet {
+        static var codeVerifier: RandomCharacterSet {
             get {
                 RandomCharacterSet(value: "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-._~")
             }
@@ -39,7 +39,7 @@ extension String {
         ///
         /// - Parameter characterSet: A string containing all allowed characters
         /// - Returns: A `RandomCharacterSet` with the specified characters
-        public static func custom(_ characterSet: String) -> RandomCharacterSet {
+        static func custom(_ characterSet: String) -> RandomCharacterSet {
             RandomCharacterSet(value: characterSet)
         }
     }

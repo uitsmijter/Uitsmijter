@@ -59,30 +59,30 @@ struct ResponseError: Codable, Sendable {
     /// The HTTP status code for the error.
     ///
     /// Examples: 400 (Bad Request), 401 (Unauthorized), 403 (Forbidden), 500 (Internal Server Error)
-    public let status: Int?
+    let status: Int?
 
     /// Indicates whether an error occurred.
     ///
     /// - `true`: An error occurred
     /// - `false`: Special case where no error occurred (used for informational responses)
-    public let error: Bool
+    let error: Bool
 
     /// A description or translation key explaining why the error occurred.
     ///
     /// This typically contains a translation key like "LOGIN.ERRORS.NO_TENANT" that can
     /// be localized in the frontend. For informational responses (`error: false`), this
     /// explains why the expected error did not occur.
-    public let reason: String
+    let reason: String
 
     /// Contextual information about the request that failed.
     ///
     /// Provides additional context for debugging or displaying helpful error messages.
-    public let requestInfo: RequestInfo?
+    let requestInfo: RequestInfo?
 
     /// The base URL of the Uitsmijter authorization server.
     ///
     /// Used for constructing asset URLs and links in error pages.
-    public var baseurl: String
+    var baseurl: String
 
     /// Creates a new response error.
     ///
@@ -92,7 +92,7 @@ struct ResponseError: Codable, Sendable {
     ///   - reason: The error reason or translation key
     ///   - requestInfo: Additional request context
     ///   - baseurl: The authorization server base URL (defaults to "localhost:8080")
-    public init(
+    init(
         status: Int?, error: Bool, reason: String, requestInfo: RequestInfo?, baseurl: String = "localhost:8080"
     ) {
         self.status = status

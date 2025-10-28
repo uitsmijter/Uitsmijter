@@ -28,13 +28,13 @@ import Foundation
 ///   - Values protected by external synchronization
 struct UnsafeTransfer<T>: @unchecked Sendable {
     /// The wrapped value that can be transferred across concurrency boundaries.
-    public let wrappedValue: T
+    let wrappedValue: T
 
     /// Creates a new unsafe transfer wrapper.
     ///
     /// - Parameter wrappedValue: The value to wrap for transfer
     /// - Warning: Ensure the wrapped value's usage is thread-safe before using this
-    public init(_ wrappedValue: T) {
+    init(_ wrappedValue: T) {
         self.wrappedValue = wrappedValue
     }
 }

@@ -64,7 +64,7 @@ protocol ClientIdProtocol {
 /// Used for decoding client ID from request parameters.
 struct ClientIdParameter: ClientIdProtocol, Decodable {
     /// The OAuth2 client identifier extracted from the request.
-    public var client_id: String
+    var client_id: String
 }
 
 /// Type alias for backward compatibility.
@@ -124,17 +124,17 @@ struct Client: ClientProtocol, Sendable {
     /// Reference to the source from which this client was loaded.
     ///
     /// Used for hot-reloading when the source changes.
-    public var ref: EntityResourceReference?
+    var ref: EntityResourceReference?
 
     /// The unique name of this client.
     ///
     /// Used for identification and logging.
-    public let name: String
+    let name: String
 
     /// The configuration specification for this client.
     ///
     /// Contains all OAuth2 settings and security constraints.
-    public let config: ClientSpec
+    let config: ClientSpec
 
     /// Initialize a client with explicit values.
     ///
@@ -142,7 +142,7 @@ struct Client: ClientProtocol, Sendable {
     ///   - ref: Optional reference to the source resource
     ///   - name: Unique client name
     ///   - config: Client configuration specification
-    public init(ref: EntityResourceReference? = nil, name: String, config: ClientSpec) {
+    init(ref: EntityResourceReference? = nil, name: String, config: ClientSpec) {
         self.ref = ref
         self.name = name
         self.config = config
@@ -159,12 +159,12 @@ struct ClientSpec: Codable, Sendable {
     /// The unique identifier for this client (client_id in OAuth2 terms).
     ///
     /// This UUID is used as the `client_id` parameter in OAuth2 flows.
-    public let ident: UUID
+    let ident: UUID
 
     /// The name of the tenant this client belongs to.
     ///
     /// Every client must be associated with exactly one tenant.
-    public let tenantname: String
+    let tenantname: String
 
     /// Regular expression patterns for allowed redirect URIs.
     ///
@@ -184,7 +184,7 @@ struct ClientSpec: Codable, Sendable {
     ///   - "https://app\\.example\\.com/(callback|oauth/callback)"
     ///   - "https://[^.]+\\.example\\.com/auth/complete"
     /// ```
-    public let redirect_urls: [String]
+    let redirect_urls: [String]
 
     /// OAuth2 grant types allowed for this client.
     ///
@@ -194,7 +194,7 @@ struct ClientSpec: Codable, Sendable {
     /// - `authorization_code`: Standard OAuth2 authorization code flow
     /// - `refresh_token`: Allows token refresh
     /// - `client_credentials`: Service-to-service authentication
-    public var grant_types: [String]?
+    var grant_types: [String]?
 
     /// OAuth2 scopes allowed for this client.
     ///
@@ -202,7 +202,7 @@ struct ClientSpec: Codable, Sendable {
     /// - `openid`: OpenID Connect authentication
     /// - `profile`: User profile information
     /// - `email`: User email address
-    public let scopes: [String]?
+    let scopes: [String]?
 
     /// Allowed HTTP referers for additional origin validation.
     ///
@@ -216,7 +216,7 @@ struct ClientSpec: Codable, Sendable {
     ///   - "https://app.example.com"
     ///   - "https://admin.example.com"
     /// ```
-    public let referrers: [String]?
+    let referrers: [String]?
 
     /// The client secret for confidential clients.
     ///
@@ -224,7 +224,7 @@ struct ClientSpec: Codable, Sendable {
     /// Public clients (e.g., SPAs, mobile apps) should not have a secret.
     ///
     /// - Warning: This should be kept confidential and never exposed to end users.
-    public var secret: String?
+    var secret: String?
 
     /// Whether this client requires PKCE (Proof Key for Code Exchange).
     ///
@@ -232,7 +232,7 @@ struct ClientSpec: Codable, Sendable {
     /// providing additional security for public clients (RFC 7636).
     ///
     /// Recommended for: SPAs, mobile apps, and any public client.
-    public var isPkceOnly: Bool? = false
+    var isPkceOnly: Bool? = false
 
     /// Initialize a client specification.
     ///
@@ -245,7 +245,7 @@ struct ClientSpec: Codable, Sendable {
     ///   - referrers: Allowed HTTP referers
     ///   - secret: Client secret for confidential clients
     ///   - isPkceOnly: Whether PKCE is required (defaults to false)
-    public init(
+    init(
         ident: UUID,
         tenantname: String,
         redirect_urls: [String],
@@ -274,11 +274,11 @@ extension ClientSpec: Equatable, Hashable {
     ///   - rhs: An other client
     /// - Returns: True if both clients are identical
     ///
-    public static func == (lhs: ClientSpec, rhs: ClientSpec) -> Bool {
+    static func == (lhs: ClientSpec, rhs: ClientSpec) -> Bool {
         lhs.ident == rhs.ident
     }
 
-    public func hash(into hasher: inout Hasher) {
+    func hash(into hasher: inout Hasher) {
         hasher.combine(ident)
     }
 }
@@ -287,7 +287,7 @@ extension ClientSpec: Equatable, Hashable {
 ///
 extension Client: Hashable {
     /// Hashable implementation
-    public func hash(into hasher: inout Hasher) {
+    func hash(into hasher: inout Hasher) {
         hasher.combine(name)
     }
 }
@@ -300,12 +300,12 @@ extension Client: Decodable, Encodable, Entity {
     ///
     /// - Parameter yaml: YAML String of a client
     /// - Throws: An error when decoding fails
-    public init(yaml: String) throws {
+    init(yaml: String) throws {
         let decoder = YAMLDecoder()
         self = try decoder.decode(Client.self, from: yaml)
     }
 
-    public init(yaml: String, ref: EntityResourceReference) throws {
+    init(yaml: String, ref: EntityResourceReference) throws {
         self = try Client(yaml: yaml)
         self.ref = ref
     }

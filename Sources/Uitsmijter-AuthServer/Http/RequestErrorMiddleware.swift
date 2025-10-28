@@ -8,7 +8,7 @@ final class RequestErrorMiddleware: AsyncMiddleware {
     ///
     /// - parameters:
     ///     - environment: The environment to respect when presenting errors.
-    public static func `default`(environment: Environment) -> RequestErrorMiddleware {
+    static func `default`(environment: Environment) -> RequestErrorMiddleware {
         .init { req, error in
             // variables to determine
             let status: HTTPResponseStatus
@@ -76,7 +76,7 @@ final class RequestErrorMiddleware: AsyncMiddleware {
     ///
     /// - parameters:
     ///     - closure: Error-handling closure. Converts `Error` to `Response`.
-    public init(_ closure: @Sendable @escaping (Request, Error) async -> Response) {
+    init(_ closure: @Sendable @escaping (Request, Error) async -> Response) {
         self.closure = closure
     }
 
@@ -87,7 +87,7 @@ final class RequestErrorMiddleware: AsyncMiddleware {
     ///   - next: next hob
     /// - Returns: A `Response`
     /// - Throws:
-    public func respond(
+    func respond(
         to request: Vapor.Request,
         chainingTo next: Vapor.AsyncResponder
     ) async throws -> Vapor.Response {

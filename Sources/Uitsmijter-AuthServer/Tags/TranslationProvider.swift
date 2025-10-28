@@ -105,7 +105,7 @@ struct TranslationProvider {
     ///     // Work with German translations
     /// }
     /// ```
-    public func getTranslation(for lang: String) -> Dictionary<String, AnyObject>? {
+    func getTranslation(for lang: String) -> Dictionary<String, AnyObject>? {
         translations[lang] ?? translations[TranslationProvider.defaultLanguage]
     }
 
@@ -121,7 +121,7 @@ struct TranslationProvider {
     /// let availableLanguages = provider.knownLanguages
     /// print("Supported languages: \(availableLanguages.joined(separator: ", "))")
     /// ```
-    public var knownLanguages: [String] {
+    var knownLanguages: [String] {
         translations.compactMap({ (key: String, _: Any?) -> String in
             key
         })

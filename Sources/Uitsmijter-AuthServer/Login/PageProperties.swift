@@ -10,7 +10,7 @@ import Foundation
 ///     - payload
 struct PageProperties: Encodable {
     /// The page title of the page to display
-    public let title: String
+    let title: String
 
     /// If an error occurred, the `error` property has a descriptive string about the cause of the error.
     /// Check for `nil` on the page.
@@ -23,31 +23,31 @@ struct PageProperties: Encodable {
     ///    </div>
     ///  #endif
     /// ~~
-    public var error: String?
+    var error: String?
 
     /// The optional original URL the user called before redirected to the authorisation server
     /// If `nil`, than the login will be for the authorisation server itself.
-    public var requestUri: String?
+    var requestUri: String?
 
     /// The optional URL of the authorisation server itself to display links to subpages.
     /// If `nil` only relative path's are used.
-    public var serviceUrl: String?
+    var serviceUrl: String?
 
     /// The payload of the current users JWT-Token
     /// - SeeAlso:
     ///      - Payload
-    public var payload: Payload?
+    var payload: Payload?
 
     /// Login mode
-    public var mode: LoginMode?
+    var mode: LoginMode?
 
     /// Additional information that is carried around the request
-    public var requestInfo: RequestInfo?
+    var requestInfo: RequestInfo?
 
     /// The requesting tenant if available
-    public var tenant: Tenant?
+    var tenant: Tenant?
 
-    public init(
+    init(
         title: String,
         error: String? = nil,
         requestUri: String? = nil,

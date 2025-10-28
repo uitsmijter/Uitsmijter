@@ -97,7 +97,7 @@ final class RequestClientMiddleware: AsyncMiddleware {
     /// - SeeAlso: ``ClientInfo``
     /// - SeeAlso: ``getLoginMode(on:)``
     /// - SeeAlso: ``enrichClientInfo(on:with:info:)``
-    public func respond(to request: Request, chainingTo next: AsyncResponder) async throws -> Response {
+    func respond(to request: Request, chainingTo next: AsyncResponder) async throws -> Response {
         // we dp not need a clientInfo for some requests
         if ["/health", "/health/ready", "/metrics", "/versions"].contains(request.url.string) {
             return try await next.respond(to: request)

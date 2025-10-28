@@ -26,41 +26,41 @@ struct Payload: JWTPayload, SubjectProtocol, UserProfileProtocol, Sendable {
     ///
     /// The "sub" (subject) claim identifies the principal that is the subject of the JWT,
     /// typically the authenticated user identifier.
-    public var subject: SubjectClaim
+    var subject: SubjectClaim
 
     /// The expiration time claim
     ///
     /// The "exp" (expiration time) claim identifies the expiration time on or after which
     /// the JWT must not be accepted for processing.
-    public var expiration: ExpirationClaim
+    var expiration: ExpirationClaim
 
     // MARK: - Custom data
 
     /// The tenant for which the payload is valid
     ///
     /// Identifies the tenant context for this token, enabling multi-tenant authorization.
-    public var tenant: String
+    var tenant: String
 
     /// Hash for responsibility domain verification
     ///
     /// Optional hash used to verify the responsibility domain, ensuring the token
     /// is used within the correct authorization scope.
-    public var responsibility: String?
+    var responsibility: String?
 
     /// The user's role within the system
     ///
     /// Used for role-based access control (RBAC) decisions.
-    public var role: String
+    var role: String
 
     /// The username or identifier of the user
     ///
     /// The authenticated user's username, typically an email address.
-    public var user: String
+    var user: String
 
     /// Additional user profile data
     ///
     /// Optional untyped profile information containing custom user attributes.
-    public var profile: CodableProfile?
+    var profile: CodableProfile?
 
     /// Creates a new JWT payload
     ///
@@ -72,7 +72,7 @@ struct Payload: JWTPayload, SubjectProtocol, UserProfileProtocol, Sendable {
     ///   - role: The user's role for authorization
     ///   - user: The username or identifier
     ///   - profile: Optional additional profile data
-    public init(
+    init(
         subject: SubjectClaim, expiration: ExpirationClaim, tenant: String, responsibility: String? = nil,
         role: String, user: String, profile: CodableProfile? = nil
     ) {
@@ -93,7 +93,7 @@ struct Payload: JWTPayload, SubjectProtocol, UserProfileProtocol, Sendable {
     ///
     /// - Parameter signer: The JWT signer to use for verification (unused, but required by protocol)
     /// - Throws: `JWTError.claimVerificationFailure` if the token has expired
-    public func verify(using signer: JWTSigner) throws {
+    func verify(using signer: JWTSigner) throws {
         try expiration.verifyNotExpired()
     }
 }

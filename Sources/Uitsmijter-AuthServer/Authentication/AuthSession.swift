@@ -59,7 +59,7 @@ struct AuthSession: Codable, TimeToLiveProtocol, Sendable {
     /// The type of this authorization session.
     ///
     /// Specifies whether this is a standard authorization code or refresh token session.
-    public let type: AuthSession.CodeType
+    let type: AuthSession.CodeType
 
     /// The state parameter from the client's authorization request.
     ///
@@ -68,7 +68,7 @@ struct AuthSession: Codable, TimeToLiveProtocol, Sendable {
     ///
     /// Per OAuth 2.0 (RFC 6749, Section 10.12), the state parameter is recommended
     /// for preventing cross-site request forgery.
-    public let state: String
+    let state: String
 
     /// The authorization code generated for this session.
     ///
@@ -76,7 +76,7 @@ struct AuthSession: Codable, TimeToLiveProtocol, Sendable {
     /// The code is cryptographically random and expires quickly (typically 5-10 minutes).
     ///
     /// - SeeAlso: ``Code``
-    public let code: Code
+    let code: Code
 
     /// The OAuth2 scopes approved for this authorization.
     ///
@@ -86,7 +86,7 @@ struct AuthSession: Codable, TimeToLiveProtocol, Sendable {
     /// - Scopes authorized by the user
     ///
     /// These scopes determine the permissions granted to the resulting access token.
-    public let scopes: [String]
+    let scopes: [String]
 
     /// The authenticated user's payload.
     ///
@@ -94,13 +94,13 @@ struct AuthSession: Codable, TimeToLiveProtocol, Sendable {
     /// This payload is used to populate claims in the issued JWT access token.
     ///
     /// - SeeAlso: ``Payload``
-    public let payload: Payload?
+    let payload: Payload?
 
     /// The redirect URI where the authorization response will be sent.
     ///
     /// This URI must match one of the client's registered redirect URIs.
     /// After authorization, the authorization code is sent to this URI.
-    public let redirect: String
+    let redirect: String
 
     /// Time-to-live for this session in seconds.
     ///
@@ -109,12 +109,12 @@ struct AuthSession: Codable, TimeToLiveProtocol, Sendable {
     ///
     /// Per OAuth 2.0 (RFC 6749, Section 4.1.2), authorization codes should be
     /// short-lived and single-use.
-    public var ttl: Int64?
+    var ttl: Int64?
 
     /// The timestamp when this session was created.
     ///
     /// Used for session expiration calculations and auditing.
-    public var generated: Date = Date()
+    var generated: Date = Date()
 
     /// Initialize an authorization session.
     ///
@@ -127,7 +127,7 @@ struct AuthSession: Codable, TimeToLiveProtocol, Sendable {
     ///   - redirect: The redirect URI for the authorization response
     ///   - ttl: Optional time-to-live in seconds (defaults to system configuration)
     ///   - generated: The session creation timestamp (defaults to now)
-    public init(
+    init(
         type: AuthSession.CodeType, state: String, code: Code, scopes: [String],
         payload: Payload?, redirect: String, ttl: Int64? = nil, generated: Date = Date()
     ) {

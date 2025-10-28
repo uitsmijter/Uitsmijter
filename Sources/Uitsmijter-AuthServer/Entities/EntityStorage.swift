@@ -68,14 +68,14 @@ final class EntityStorage {
     /// - Parameters:
     ///   - ManagedEntityType: The type of entity that changed
     ///   - Entity?: The entity that was added, or `nil` if removed
-    public var hook: (@Sendable (ManagedEntityType, Entity?) -> Void)?
+    var hook: (@Sendable (ManagedEntityType, Entity?) -> Void)?
     #endif
 
     /// Initialize a new entity storage instance.
     ///
     /// In production, there's typically one storage instance per application.
     /// In tests, each test gets its own instance for isolation.
-    public init() {
+    init() {
         #if DEBUG
         self.hook = nil
         #endif
@@ -108,7 +108,7 @@ final class EntityStorage {
     /// ```
     ///
     /// - SeeAlso: ``Tenant``
-    public var tenants: Set<Tenant> = [] {
+    var tenants: Set<Tenant> = [] {
         willSet {
             // Added Tenants
             if newValue.count > tenants.count {
@@ -172,7 +172,7 @@ final class EntityStorage {
     ///   insertion order. This is a legacy design that may be refactored in the future.
     ///
     /// - SeeAlso: ``UitsmijterClient``
-    public var clients: [UitsmijterClient] = [] {
+    var clients: [UitsmijterClient] = [] {
         willSet {
             // Added Clients
             if newValue.count > clients.count {

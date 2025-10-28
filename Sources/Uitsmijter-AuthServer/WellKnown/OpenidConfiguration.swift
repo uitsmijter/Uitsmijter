@@ -37,7 +37,7 @@ struct OpenidConfiguration: Codable, Sendable {
     /// ```
     /// "https://auth.example.com"
     /// ```
-    public let issuer: String
+    let issuer: String
 
     /// REQUIRED. URL of the OP's OAuth 2.0 Authorization Endpoint.
     ///
@@ -48,7 +48,7 @@ struct OpenidConfiguration: Codable, Sendable {
     /// ```
     /// "https://auth.example.com/authorize"
     /// ```
-    public let authorization_endpoint: String
+    let authorization_endpoint: String
 
     /// REQUIRED unless only the Implicit Flow is used. URL of the OP's OAuth 2.0 Token Endpoint.
     ///
@@ -59,7 +59,7 @@ struct OpenidConfiguration: Codable, Sendable {
     /// ```
     /// "https://auth.example.com/token"
     /// ```
-    public let token_endpoint: String?
+    let token_endpoint: String?
 
     /// REQUIRED. URL of the OP's JWK Set document.
     ///
@@ -71,7 +71,7 @@ struct OpenidConfiguration: Codable, Sendable {
     /// ```
     /// "https://auth.example.com/.well-known/jwks.json"
     /// ```
-    public let jwks_uri: String
+    let jwks_uri: String
 
     /// REQUIRED. JSON array containing a list of the OAuth 2.0 response_type values that this OP supports.
     ///
@@ -82,7 +82,7 @@ struct OpenidConfiguration: Codable, Sendable {
     /// ```
     /// ["code", "code id_token", "id_token", "token id_token"]
     /// ```
-    public let response_types_supported: [String]
+    let response_types_supported: [String]
 
     /// REQUIRED. JSON array containing a list of Subject Identifier types that this OP supports.
     ///
@@ -93,7 +93,7 @@ struct OpenidConfiguration: Codable, Sendable {
     /// ```
     /// ["public"]
     /// ```
-    public let subject_types_supported: [String]
+    let subject_types_supported: [String]
 
     /// REQUIRED. JSON array containing a list of JWS signing algorithms (alg values) supported
     /// by the OP for the ID Token.
@@ -105,7 +105,7 @@ struct OpenidConfiguration: Codable, Sendable {
     /// ```
     /// ["RS256", "ES256"]
     /// ```
-    public let id_token_signing_alg_values_supported: [String]
+    let id_token_signing_alg_values_supported: [String]
 
     // MARK: - Recommended Fields
 
@@ -118,7 +118,7 @@ struct OpenidConfiguration: Codable, Sendable {
     /// ```
     /// "https://auth.example.com/userinfo"
     /// ```
-    public let userinfo_endpoint: String?
+    let userinfo_endpoint: String?
 
     /// RECOMMENDED. URL of the OP's Dynamic Client Registration Endpoint.
     ///
@@ -127,7 +127,7 @@ struct OpenidConfiguration: Codable, Sendable {
     /// ```
     /// "https://auth.example.com/register"
     /// ```
-    public let registration_endpoint: String?
+    let registration_endpoint: String?
 
     /// RECOMMENDED. JSON array containing a list of the OAuth 2.0 scope values that this server supports.
     ///
@@ -138,7 +138,7 @@ struct OpenidConfiguration: Codable, Sendable {
     /// ```
     /// ["openid", "profile", "email", "address", "phone"]
     /// ```
-    public let scopes_supported: [String]?
+    let scopes_supported: [String]?
 
     /// RECOMMENDED. JSON array containing a list of the Claim Names of the Claims that the
     /// OpenID Provider MAY be able to supply values for.
@@ -148,7 +148,7 @@ struct OpenidConfiguration: Codable, Sendable {
     /// ```
     /// ["sub", "name", "email", "email_verified", "picture"]
     /// ```
-    public let claims_supported: [String]?
+    let claims_supported: [String]?
 
     // MARK: - Optional Fields
 
@@ -161,7 +161,7 @@ struct OpenidConfiguration: Codable, Sendable {
     /// ```
     /// ["query", "fragment", "form_post"]
     /// ```
-    public let response_modes_supported: [String]?
+    let response_modes_supported: [String]?
 
     /// OPTIONAL. JSON array containing a list of the OAuth 2.0 grant type values that this OP supports.
     ///
@@ -172,7 +172,7 @@ struct OpenidConfiguration: Codable, Sendable {
     /// ```
     /// ["authorization_code", "refresh_token", "client_credentials"]
     /// ```
-    public let grant_types_supported: [String]?
+    let grant_types_supported: [String]?
 
     /// OPTIONAL. JSON array containing a list of the Authentication Context Class References that this OP supports.
     ///
@@ -181,7 +181,7 @@ struct OpenidConfiguration: Codable, Sendable {
     /// ```
     /// ["urn:mace:incommon:iap:silver", "urn:mace:incommon:iap:bronze"]
     /// ```
-    public let acr_values_supported: [String]?
+    let acr_values_supported: [String]?
 
     /// OPTIONAL. JSON array containing a list of Client Authentication methods supported by this Token Endpoint.
     ///
@@ -192,7 +192,7 @@ struct OpenidConfiguration: Codable, Sendable {
     /// ```
     /// ["client_secret_post", "client_secret_basic", "private_key_jwt"]
     /// ```
-    public let token_endpoint_auth_methods_supported: [String]?
+    let token_endpoint_auth_methods_supported: [String]?
 
     /// OPTIONAL. JSON array containing a list of JWS signing algorithms supported by the
     /// Token Endpoint for the signature on the JWT used to authenticate the client.
@@ -202,7 +202,7 @@ struct OpenidConfiguration: Codable, Sendable {
     /// ```
     /// ["RS256", "ES256"]
     /// ```
-    public let token_endpoint_auth_signing_alg_values_supported: [String]?
+    let token_endpoint_auth_signing_alg_values_supported: [String]?
 
     /// OPTIONAL. JSON array containing a list of display parameter values that the OP supports.
     ///
@@ -211,7 +211,7 @@ struct OpenidConfiguration: Codable, Sendable {
     /// ```
     /// ["page", "popup", "touch", "wap"]
     /// ```
-    public let display_values_supported: [String]?
+    let display_values_supported: [String]?
 
     /// OPTIONAL. JSON array containing a list of Claim Types that the OP supports.
     ///
@@ -222,7 +222,7 @@ struct OpenidConfiguration: Codable, Sendable {
     /// ```
     /// ["normal", "aggregated", "distributed"]
     /// ```
-    public let claim_types_supported: [String]?
+    let claim_types_supported: [String]?
 
     /// OPTIONAL. URL that the OP provides to the person registering the Client to read about the OP's
     /// requirements on how the Relying Party can use the data provided by the OP.
@@ -232,7 +232,7 @@ struct OpenidConfiguration: Codable, Sendable {
     /// ```
     /// "https://auth.example.com/about/policy"
     /// ```
-    public let service_documentation: String?
+    let service_documentation: String?
 
     /// OPTIONAL. Languages and scripts supported for values in Claims being returned.
     ///
@@ -241,7 +241,7 @@ struct OpenidConfiguration: Codable, Sendable {
     /// ```
     /// ["en-US", "en-GB", "de-DE"]
     /// ```
-    public let claims_locales_supported: [String]?
+    let claims_locales_supported: [String]?
 
     /// OPTIONAL. Languages and scripts supported for the user interface.
     ///
@@ -250,28 +250,28 @@ struct OpenidConfiguration: Codable, Sendable {
     /// ```
     /// ["en-US", "de-DE", "fr-FR"]
     /// ```
-    public let ui_locales_supported: [String]?
+    let ui_locales_supported: [String]?
 
     /// OPTIONAL. Boolean value specifying whether the OP supports use of the claims parameter.
     ///
     /// If omitted, the default value is `false`.
-    public let claims_parameter_supported: Bool?
+    let claims_parameter_supported: Bool?
 
     /// OPTIONAL. Boolean value specifying whether the OP supports use of the request parameter.
     ///
     /// If omitted, the default value is `false`.
-    public let request_parameter_supported: Bool?
+    let request_parameter_supported: Bool?
 
     /// OPTIONAL. Boolean value specifying whether the OP supports use of the request_uri parameter.
     ///
     /// If omitted, the default value is `true`.
-    public let request_uri_parameter_supported: Bool?
+    let request_uri_parameter_supported: Bool?
 
     /// OPTIONAL. Boolean value specifying whether the OP requires any request_uri values
     /// used to be pre-registered.
     ///
     /// If omitted, the default value is `false`.
-    public let require_request_uri_registration: Bool?
+    let require_request_uri_registration: Bool?
 
     /// OPTIONAL. URL that the OP provides to the person registering the Client to read about
     /// the OP's policy regarding use of data.
@@ -281,7 +281,7 @@ struct OpenidConfiguration: Codable, Sendable {
     /// ```
     /// "https://auth.example.com/privacy"
     /// ```
-    public let op_policy_uri: String?
+    let op_policy_uri: String?
 
     /// OPTIONAL. URL that the OP provides to the person registering the Client to read about
     /// the OP's terms of service.
@@ -291,7 +291,7 @@ struct OpenidConfiguration: Codable, Sendable {
     /// ```
     /// "https://auth.example.com/terms"
     /// ```
-    public let op_tos_uri: String?
+    let op_tos_uri: String?
 
     /// OPTIONAL. URL of the OP's Revocation Endpoint.
     ///
@@ -300,7 +300,7 @@ struct OpenidConfiguration: Codable, Sendable {
     /// ```
     /// "https://auth.example.com/revoke"
     /// ```
-    public let revocation_endpoint: String?
+    let revocation_endpoint: String?
 
     /// OPTIONAL. JSON array containing a list of JWS encoding algorithms supported for
     /// UserInfo responses.
@@ -310,7 +310,7 @@ struct OpenidConfiguration: Codable, Sendable {
     /// ```
     /// ["RS256", "ES256", "HS256"]
     /// ```
-    public let userinfo_signing_alg_values_supported: [String]?
+    let userinfo_signing_alg_values_supported: [String]?
 
     /// OPTIONAL. JSON array containing a list of JWE encryption algorithms (alg values)
     /// supported for UserInfo responses.
@@ -320,7 +320,7 @@ struct OpenidConfiguration: Codable, Sendable {
     /// ```
     /// ["RSA-OAEP", "A256KW"]
     /// ```
-    public let userinfo_encryption_alg_values_supported: [String]?
+    let userinfo_encryption_alg_values_supported: [String]?
 
     /// OPTIONAL. JSON array containing a list of JWE encryption algorithms (enc values)
     /// supported for UserInfo responses.
@@ -330,7 +330,7 @@ struct OpenidConfiguration: Codable, Sendable {
     /// ```
     /// ["A256GCM", "A128CBC-HS256"]
     /// ```
-    public let userinfo_encryption_enc_values_supported: [String]?
+    let userinfo_encryption_enc_values_supported: [String]?
 
     /// OPTIONAL. JSON array containing a list of JWE encryption algorithms (alg values)
     /// supported for ID Tokens.
@@ -340,7 +340,7 @@ struct OpenidConfiguration: Codable, Sendable {
     /// ```
     /// ["RSA-OAEP", "A256KW"]
     /// ```
-    public let id_token_encryption_alg_values_supported: [String]?
+    let id_token_encryption_alg_values_supported: [String]?
 
     /// OPTIONAL. JSON array containing a list of JWE encryption algorithms (enc values)
     /// supported for ID Tokens.
@@ -350,7 +350,7 @@ struct OpenidConfiguration: Codable, Sendable {
     /// ```
     /// ["A256GCM", "A128CBC-HS256"]
     /// ```
-    public let id_token_encryption_enc_values_supported: [String]?
+    let id_token_encryption_enc_values_supported: [String]?
 
     /// OPTIONAL. JSON array containing a list of JWS signing algorithms supported for
     /// Request Objects.
@@ -360,7 +360,7 @@ struct OpenidConfiguration: Codable, Sendable {
     /// ```
     /// ["RS256", "ES256"]
     /// ```
-    public let request_object_signing_alg_values_supported: [String]?
+    let request_object_signing_alg_values_supported: [String]?
 
     /// OPTIONAL. JSON array containing a list of JWE encryption algorithms (alg values)
     /// supported for Request Objects.
@@ -370,7 +370,7 @@ struct OpenidConfiguration: Codable, Sendable {
     /// ```
     /// ["RSA-OAEP", "A256KW"]
     /// ```
-    public let request_object_encryption_alg_values_supported: [String]?
+    let request_object_encryption_alg_values_supported: [String]?
 
     /// OPTIONAL. JSON array containing a list of JWE encryption algorithms (enc values)
     /// supported for Request Objects.
@@ -380,7 +380,7 @@ struct OpenidConfiguration: Codable, Sendable {
     /// ```
     /// ["A256GCM", "A128CBC-HS256"]
     /// ```
-    public let request_object_encryption_enc_values_supported: [String]?
+    let request_object_encryption_enc_values_supported: [String]?
 
     /// OPTIONAL. JSON array containing a list of Proof Key for Code Exchange (PKCE) code challenge methods supported.
     ///
@@ -389,7 +389,7 @@ struct OpenidConfiguration: Codable, Sendable {
     /// ```
     /// ["plain", "S256"]
     /// ```
-    public let code_challenge_methods_supported: [String]?
+    let code_challenge_methods_supported: [String]?
 
     // MARK: - Initialization
 
@@ -433,7 +433,7 @@ struct OpenidConfiguration: Codable, Sendable {
     ///   - request_object_encryption_alg_values_supported: OPTIONAL. Supported Request Object encryption algorithms (alg)
     ///   - request_object_encryption_enc_values_supported: OPTIONAL. Supported Request Object encryption algorithms (enc)
     ///   - code_challenge_methods_supported: OPTIONAL. Supported PKCE code challenge methods
-    public init(
+    init(
         issuer: String,
         authorization_endpoint: String,
         token_endpoint: String?,

@@ -72,7 +72,7 @@ public struct Prometheus: Sendable {
     ///
     /// - Returns: The prometheus client
     ///
-    public func getClient() -> PrometheusClient {
+    func getClient() -> PrometheusClient {
         Prometheus.prometheusClient
     }
 

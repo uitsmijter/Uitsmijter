@@ -145,7 +145,7 @@ enum EntityResourceReference: Codable, Equatable, Sendable {
     ///
     /// For file references, returns the file path.
     /// For Kubernetes references, returns the UUID and revision.
-    public var description: String {
+    var description: String {
         get {
             switch self {
             case .file(let url):
@@ -187,7 +187,7 @@ enum EntityResourceReference: Codable, Equatable, Sendable {
     ///   - lhs: The left-hand side resource reference
     ///   - rhs: The right-hand side resource reference
     /// - Returns: `true` if the references are considered equal, `false` otherwise
-    public static func == (lhs: EntityResourceReference, rhs: EntityResourceReference) -> Bool {
+    static func == (lhs: EntityResourceReference, rhs: EntityResourceReference) -> Bool {
         // Compare .file with .file
         if case .file(let lFile) = lhs,
            case .file(let rFile) = rhs {

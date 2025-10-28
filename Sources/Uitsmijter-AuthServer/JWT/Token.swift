@@ -83,7 +83,7 @@ struct Token: ExpressibleByStringLiteral {
     ///
     /// After this date, the token is no longer valid and should not be accepted
     /// for authentication. Clients should request a new token before expiration.
-    public let expirationDate: Date
+    let expirationDate: Date
 
     /// Number of seconds remaining until the token expires.
     ///
@@ -102,7 +102,7 @@ struct Token: ExpressibleByStringLiteral {
     ///     // Token expired
     /// }
     /// ```
-    public let secondsToExpire: Int
+    let secondsToExpire: Int
 
     /// The decoded JWT payload containing user authentication and authorization data.
     ///
@@ -111,7 +111,7 @@ struct Token: ExpressibleByStringLiteral {
     /// only after successful signature verification.
     ///
     /// - SeeAlso: ``Payload`` for payload structure details
-    public let payload: Payload
+    let payload: Payload
 
     /// The encoded JWT string value in the form "header.payload.signature".
     ///
@@ -125,7 +125,7 @@ struct Token: ExpressibleByStringLiteral {
     /// eyJzdWIiOiJ1c2VyQGV4YW1wbGUuY29tIiwiZXhwIjoxNjE2MjM5MDIyfQ.
     /// SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c
     /// ```
-    public let value: String
+    let value: String
 
     /// Initializes a token by verifying and decoding a JWT string.
     ///
@@ -168,7 +168,7 @@ struct Token: ExpressibleByStringLiteral {
     /// - Parameter value: The JWT token string to verify and decode.
     ///
     /// - Note: Consider checking `secondsToExpire > 0` to verify the token is not expired.
-    public init(stringLiteral value: Self.StringLiteralType) {
+    init(stringLiteral value: Self.StringLiteralType) {
         self.value = value
         do {
             signers.use(jwt_signer)
@@ -209,7 +209,7 @@ struct Token: ExpressibleByStringLiteral {
     ///     userProfile: userProfile
     /// )
     /// ```
-    public init(tenantName: String, subject: SubjectClaim, userProfile: UserProfileProtocol) throws {
+    init(tenantName: String, subject: SubjectClaim, userProfile: UserProfileProtocol) throws {
         let expirationHours = Int(ProcessInfo.processInfo.environment["TOKEN_EXPIRATION_IN_HOURS"] ?? "2") ?? 2
         let calendar = Calendar.current
         guard let expirationDate = calendar.date(

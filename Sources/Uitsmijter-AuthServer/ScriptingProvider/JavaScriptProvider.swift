@@ -33,7 +33,7 @@ actor JavaScriptProvider: JSFunctionsDelegate {
     /// state of the javascript, it has to `commit` its final results back into the caller stack once.
     /// Actor isolation ensures thread-safe access to this property.
     ///
-    public private(set) var committedResults: [String?]? {
+    private(set) var committedResults: [String?]? {
         didSet {
             if let committedResults {
                 Log.debug(
@@ -83,7 +83,7 @@ actor JavaScriptProvider: JSFunctionsDelegate {
 
     /// Creates a new empty JavaScriptProvider with an isolated javascript context
     ///
-    public init() {
+    init() {
         // javascript context
         ctx = JXContext()
         ctx.exceptionHandler = exceptionHandler
@@ -135,7 +135,7 @@ actor JavaScriptProvider: JSFunctionsDelegate {
     /// - Parameter script: Plaintext script to load into the context
     /// - Throws: A JavaScriptError when the syntax is invalid
     ///
-    @discardableResult public func loadProvider(script: String) throws -> String {
+@discardableResult func loadProvider(script: String) throws -> String {
         // Maybe it slows down the process to check the script first, but will give proper information about syntax
         // errors which is important for the implementation developer
         if ctx.checkScriptSyntax(script) == false {
@@ -161,7 +161,7 @@ actor JavaScriptProvider: JSFunctionsDelegate {
     ///
     /// - Parameter classToRun: A ScriptClassExecution to check
     /// - Returns: true if the class exists
-    public func isClassExists(class classToRun: ScriptClassExecution) -> Bool {
+    func isClassExists(class classToRun: ScriptClassExecution) -> Bool {
         let result = ctx.evaluateScript("""
                                         typeof \(classToRun.rawValue) === 'function'
                                         """)
@@ -180,7 +180,7 @@ actor JavaScriptProvider: JSFunctionsDelegate {
     /// Replaces the DispatchGroup/queue pattern with proper Swift concurrency.
     ///
     @discardableResult
-    public func start(
+    func start(
         class classToRun: ScriptClassExecution,
         arguments args: JSInputParameterProtocol?
     ) async throws -> [String?] {
@@ -293,7 +293,7 @@ actor JavaScriptProvider: JSFunctionsDelegate {
     /// - Returns: The number stores in `property`
     /// - Throws: When it can not get the property value as a Double
     ///
-    public func getValue(class classToRun: ScriptClassExecution, property: String) throws -> Double {
+    func getValue(class classToRun: ScriptClassExecution, property: String) throws -> Double {
         let value = try ctx.eval(script: "r_\(classToRun.rawValue).\(property)")
         guard let numberValue = value.numberValue else {
             throw JavaScriptError.propertyCast(property, class: classToRun.rawValue, into: Double.self)
@@ -309,7 +309,7 @@ actor JavaScriptProvider: JSFunctionsDelegate {
     /// - Returns: The boolean stores in `property`
     /// - Throws: When it can not get the property value as a Bool
     ///
-    public func getValue(class classToRun: ScriptClassExecution, property: String) throws -> Bool {
+    func getValue(class classToRun: ScriptClassExecution, property: String) throws -> Bool {
         try ctx.eval(script: "r_\(classToRun.rawValue).\(property)").booleanValue
     }
 
@@ -321,7 +321,7 @@ actor JavaScriptProvider: JSFunctionsDelegate {
     /// - Returns: The literal stores in `property`
     /// - Throws: When it can not get the property value as a String
     ///
-    public func getValue(class classToRun: ScriptClassExecution, property: String) throws -> String {
+    func getValue(class classToRun: ScriptClassExecution, property: String) throws -> String {
         let value = try ctx.eval(script: "r_\(classToRun.rawValue).\(property)")
         guard let stringValue = value.stringValue else {
             throw JavaScriptError.propertyCast(property, class: classToRun.rawValue, into: String.self)
@@ -329,7 +329,7 @@ actor JavaScriptProvider: JSFunctionsDelegate {
         return stringValue
     }
 
-    public func getObject<T: Decodable>(class classToRun: ScriptClassExecution, property: String) throws -> T {
+    func getObject<T: Decodable>(class classToRun: ScriptClassExecution, property: String) throws -> T {
         try ctx.eval(script: "r_\(classToRun.rawValue).\(property)").toDecodable(ofType: T.self)
     }
 }

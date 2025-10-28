@@ -15,7 +15,7 @@ import Foundation
 ///     }
 /// }
 /// ```
-@propertyWrapper public struct Synchronised<T> {
+@propertyWrapper struct Synchronised<T> {
     private let lock = NSLock()
 
     private var _wrappedValue: T
@@ -23,7 +23,7 @@ import Foundation
     /// The wrapped value with thread-safe access
     ///
     /// Reading and writing this property is automatically protected by a lock.
-    public var wrappedValue: T {
+    var wrappedValue: T {
         get {
             lock.lock()
             defer {
@@ -43,7 +43,7 @@ import Foundation
     /// Creates a new synchronized property wrapper
     ///
     /// - Parameter wrappedValue: The initial value to wrap with thread-safe access
-    public init(wrappedValue: T) {
+    init(wrappedValue: T) {
         self._wrappedValue = wrappedValue
     }
 }

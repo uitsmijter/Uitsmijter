@@ -90,7 +90,7 @@ actor OpenidConfigurationBuilder {
     // MARK: - Initialization
 
     /// Initialize a new OpenID Configuration builder.
-    public init() {}
+    init() {}
 
     // MARK: - Public Methods
 
@@ -116,7 +116,7 @@ actor OpenidConfigurationBuilder {
     ///   - storage: Entity storage to access client configurations
     /// - Returns: Complete OpenID Provider Metadata for the tenant
     @MainActor
-    public func build(
+    func build(
         for tenant: Tenant,
         request: Request,
         storage: EntityStorage

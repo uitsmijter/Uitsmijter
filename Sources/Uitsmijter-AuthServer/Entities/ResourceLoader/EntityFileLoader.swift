@@ -15,7 +15,7 @@ class EntityFileLoaderTenantChangedHandler: @unchecked Sendable, FileDidChangeDe
     /// Gets called when a file changes
     ///
     /// - Parameter event: FileChange event
-    public nonisolated func fileDidChanged(event: FileChange) {
+    nonisolated func fileDidChanged(event: FileChange) {
         Log.info("Detected tenant change \(event)")
         // FileChange from external FileMonitor package isn't Sendable, but this usage is safe
         let unsafeEvent = UnsafeTransfer(event)
@@ -68,7 +68,7 @@ class EntityFileLoaderClientChangedHandler: @unchecked Sendable, FileDidChangeDe
     var delegate: EntityLoaderProtocolFunctions?
     var loader: LoaderFunction?
 
-    public nonisolated func fileDidChanged(event: FileChange) {
+    nonisolated func fileDidChanged(event: FileChange) {
         Log.info("Detected client change \(event)")
         // FileChange from external FileMonitor package isn't Sendable, but this usage is safe
         let unsafeEvent = UnsafeTransfer(event)
@@ -115,7 +115,7 @@ struct EntityFileLoader: EntityLoaderProtocol {
     nonisolated(unsafe) let clientFileMonitor: FileMonitor?
     nonisolated(unsafe) let tenantFileMonitor: FileMonitor?
 
-    public init(handler: EntityLoaderProtocolFunctions?) throws {
+    init(handler: EntityLoaderProtocolFunctions?) throws {
         guard let tenantPath = URL(string: resourcePath)?
                 .appendingPathComponent("Configurations")
                 .appendingPathComponent("Tenants")
@@ -193,12 +193,12 @@ struct EntityFileLoader: EntityLoaderProtocol {
         }
     }
 
-    public func start() throws {
+    func start() throws {
         try tenantFileMonitor?.start()
         try clientFileMonitor?.start()
     }
 
-    public nonisolated func shutdown() {
+    nonisolated func shutdown() {
         clientFileMonitor?.stop()
         tenantFileMonitor?.stop()
     }

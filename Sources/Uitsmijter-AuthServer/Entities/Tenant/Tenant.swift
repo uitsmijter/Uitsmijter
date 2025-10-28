@@ -36,17 +36,17 @@ struct TenantInformations: Codable, Sendable {
     /// URL to the legal imprint page.
     ///
     /// Typically required in certain jurisdictions (e.g., Germany's "Impressum").
-    public let imprint_url: String?
+    let imprint_url: String?
 
     /// URL to the privacy policy page.
     ///
     /// Should explain how user data is collected, used, and protected.
-    public let privacy_url: String?
+    let privacy_url: String?
 
     /// URL to the user registration page.
     ///
     /// Allows new users to create accounts if self-registration is enabled.
-    public let register_url: String?
+    let register_url: String?
 
     /// Initialize tenant informational URLs.
     ///
@@ -54,7 +54,7 @@ struct TenantInformations: Codable, Sendable {
     ///   - imprint_url: Optional URL to imprint page
     ///   - privacy_url: Optional URL to privacy policy
     ///   - register_url: Optional URL to registration page
-    public init(imprint_url: String? = nil, privacy_url: String? = nil, register_url: String? = nil) {
+    init(imprint_url: String? = nil, privacy_url: String? = nil, register_url: String? = nil) {
         self.imprint_url = imprint_url
         self.privacy_url = privacy_url
         self.register_url = register_url
@@ -89,19 +89,19 @@ struct TenantInterceptorSettings: Codable, Sendable {
     /// Whether interceptor mode is enabled for this tenant.
     ///
     /// When `true`, this tenant can be used with Traefik ForwardAuth.
-    public let enabled: Bool
+    let enabled: Bool
 
     /// The login domain for this interceptor.
     ///
     /// This is the domain where the login page will be hosted.
     /// For example: `login.example.com`
-    public let domain: String?
+    let domain: String?
 
     /// Optional specific cookie domain for this interceptor.
     ///
     /// If set, cookies will be scoped to this domain instead of `domain`.
     /// Use a leading dot to share cookies across subdomains: `.example.com`
-    public var cookie: String?
+    var cookie: String?
 
     /// The domain to use for setting cookies.
     ///
@@ -118,7 +118,7 @@ struct TenantInterceptorSettings: Codable, Sendable {
     /// )
     /// print(settings.cookieOrDomain)  // ".example.com"
     /// ```
-    public var cookieOrDomain: String? {
+    var cookieOrDomain: String? {
         get {
             cookie ?? domain
         }
@@ -130,7 +130,7 @@ struct TenantInterceptorSettings: Codable, Sendable {
     ///   - enabled: Whether interceptor mode is enabled
     ///   - domain: The login domain (e.g., "login.example.com")
     ///   - cookie: Optional specific cookie domain (e.g., ".example.com")
-    public init(enabled: Bool, domain: String? = nil, cookie: String? = nil) {
+    init(enabled: Bool, domain: String? = nil, cookie: String? = nil) {
         self.enabled = enabled
         self.domain = domain
         self.cookie = cookie
@@ -177,37 +177,37 @@ struct TenantTemplatesSettings: Codable, Sendable {
     /// S3 access key ID or account name.
     ///
     /// Used for authenticating with the S3-compatible storage service.
-    public var access_key_id: String
+    var access_key_id: String
 
     /// S3 secret access key or password.
     ///
     /// Used for authenticating with the S3-compatible storage service.
     /// - Warning: This should be kept secure and not logged or exposed.
-    public var secret_access_key: String
+    var secret_access_key: String
 
     /// The S3 bucket name where templates are stored.
     ///
     /// For example: `"uitsmijter-templates"`
-    public var bucket: String
+    var bucket: String
 
     /// The S3 host endpoint URL.
     ///
     /// Defaults to AWS S3. For other providers:
     /// - MinIO: `"https://minio.example.com"`
     /// - Backblaze: `"https://s3.us-west-002.backblazeb2.com"`
-    public var host: String = "https://s3.amazonaws.com"
+    var host: String = "https://s3.amazonaws.com"
 
     /// The path within the bucket where templates are located.
     ///
     /// For example: `"tenants/acme"` would look for templates at
     /// `bucket/tenants/acme/login.leaf`, etc.
-    public var path: String = ""
+    var path: String = ""
 
     /// The AWS region name.
     ///
     /// For AWS S3, use regions like `"us-east-1"`, `"eu-west-1"`, etc.
     /// For other providers, consult their documentation.
-    public var region: String = "us-east-1"
+    var region: String = "us-east-1"
 
     /// Initialize S3 template storage settings.
     ///
@@ -218,7 +218,7 @@ struct TenantTemplatesSettings: Codable, Sendable {
     ///   - host: S3 host endpoint (defaults to AWS S3)
     ///   - path: Path within bucket (defaults to root)
     ///   - region: AWS region (defaults to us-east-1)
-    public init(
+    init(
         access_key_id: String,
         secret_access_key: String,
         bucket: String,
@@ -291,17 +291,17 @@ struct Tenant: TenantProtocol, Sendable {
     /// Reference to the source from which this tenant was loaded.
     ///
     /// Used for hot-reloading when the source changes.
-    public var ref: EntityResourceReference?
+    var ref: EntityResourceReference?
 
     /// The unique name of this tenant.
     ///
     /// Used for identification and lookup within the system.
-    public let name: String
+    let name: String
 
     /// The configuration specification for this tenant.
     ///
     /// Contains all tenant settings including hosts, providers, and features.
-    public let config: TenantSpec
+    let config: TenantSpec
 
     /// Initialize a tenant with explicit values.
     ///
@@ -309,7 +309,7 @@ struct Tenant: TenantProtocol, Sendable {
     ///   - ref: Optional reference to the source resource
     ///   - name: Unique tenant name
     ///   - config: Tenant configuration specification
-    public init(ref: EntityResourceReference? = nil, name: String, config: TenantSpec) {
+    init(ref: EntityResourceReference? = nil, name: String, config: TenantSpec) {
         self.ref = ref
         self.name = name
         self.config = config
@@ -336,17 +336,17 @@ struct TenantSpec: Codable, Sendable {
     ///   - "*.example.com"
     ///   - "app.example.org"
     /// ```
-    public let hosts: [String]
+    let hosts: [String]
 
     /// Optional informational URLs for legal and registration pages.
     ///
     /// These URLs are made available to templates for display in the UI.
-    public var informations: TenantInformations?
+    var informations: TenantInformations?
 
     /// Configuration for Traefik ForwardAuth interceptor mode.
     ///
     /// When enabled, this tenant can be used with Traefik to protect routes.
-    public var interceptor: TenantInterceptorSettings?
+    var interceptor: TenantInterceptorSettings?
 
     /// List of JavaScript provider files for this tenant.
     ///
@@ -360,13 +360,13 @@ struct TenantSpec: Codable, Sendable {
     ///   - "ldap-auth.js"
     ///   - "custom-db.js"
     /// ```
-    public var providers: [String] = []
+    var providers: [String] = []
 
     /// Configuration for loading templates from S3-compatible storage.
     ///
     /// When set, tenant-specific templates are loaded from S3 instead of
     /// the default file system templates.
-    public var templates: TenantTemplatesSettings?
+    var templates: TenantTemplatesSettings?
 
     /// Whether silent login is enabled for this tenant.
     ///
@@ -374,7 +374,7 @@ struct TenantSpec: Codable, Sendable {
     /// if they have a valid session. Defaults to `true`.
     ///
     /// Set to `false` to always show the login form, even for authenticated users.
-    public var silent_login: Bool? = true
+    var silent_login: Bool? = true
 
     /// Initialize a tenant specification.
     ///
@@ -385,7 +385,7 @@ struct TenantSpec: Codable, Sendable {
     ///   - providers: List of provider file paths
     ///   - templates: Optional S3 template configuration
     ///   - silent_login: Whether silent login is enabled (defaults to true)
-    public init(
+    init(
         hosts: [String],
         informations: TenantInformations? = nil,
         interceptor: TenantInterceptorSettings? = nil,
@@ -416,7 +416,7 @@ extension Tenant: Hashable {
     ///   - lhs: The left-hand side tenant
     ///   - rhs: The right-hand side tenant
     /// - Returns: `true` if both tenants have the same name
-    public static func == (lhs: Tenant, rhs: Tenant) -> Bool {
+    static func == (lhs: Tenant, rhs: Tenant) -> Bool {
         lhs.name == rhs.name
     }
 
@@ -426,7 +426,7 @@ extension Tenant: Hashable {
     /// equality implementation.
     ///
     /// - Parameter hasher: The hasher to use for combining values
-    public func hash(into hasher: inout Hasher) {
+    func hash(into hasher: inout Hasher) {
         hasher.combine(name)
     }
 }
@@ -445,7 +445,7 @@ extension TenantSpec: Equatable, Hashable {
     ///   - lhs: The left-hand side specification
     ///   - rhs: The right-hand side specification
     /// - Returns: `true` if both specifications have the same hosts
-    public static func == (lhs: TenantSpec, rhs: TenantSpec) -> Bool {
+    static func == (lhs: TenantSpec, rhs: TenantSpec) -> Bool {
         lhs.hosts == rhs.hosts
     }
 
@@ -455,7 +455,7 @@ extension TenantSpec: Equatable, Hashable {
     /// equality implementation.
     ///
     /// - Parameter hasher: The hasher to use for combining values
-    public func hash(into hasher: inout Hasher) {
+    func hash(into hasher: inout Hasher) {
         hasher.combine(hosts)
     }
 }
@@ -487,7 +487,7 @@ extension Tenant: Decodable, Encodable, Entity {
     ///
     /// - Parameter yaml: The YAML content string to parse
     /// - Throws: `DecodingError` if the YAML is invalid or missing required fields
-    public init(yaml: String) throws {
+    init(yaml: String) throws {
         let decoder = YAMLDecoder()
         self = try decoder.decode(Tenant.self, from: yaml)
     }
@@ -501,7 +501,7 @@ extension Tenant: Decodable, Encodable, Entity {
     ///   - yaml: The YAML content string to parse
     ///   - ref: The resource reference to associate with this tenant
     /// - Throws: `DecodingError` if the YAML is invalid or missing required fields
-    public init(yaml: String, ref: EntityResourceReference) throws {
+    init(yaml: String, ref: EntityResourceReference) throws {
         self = try Tenant(yaml: yaml)
         self.ref = ref
     }

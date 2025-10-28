@@ -99,22 +99,22 @@ extension AuthRequestProtocol {
 /// - ``AuthRequestProtocol``
 struct AuthRequest: AuthRequestProtocol {
     /// The type of requested response, typically `.code`.
-    public var response_type: ResponseType
+    var response_type: ResponseType
 
     /// The client identifier registered with the authorization server.
-    public var client_id: String
+    var client_id: String
 
     /// Optional client secret for confidential clients.
-    public var client_secret: String?
+    var client_secret: String?
 
     /// The URI where the authorization response will be sent.
-    public var redirect_uri: URL
+    var redirect_uri: URL
 
     /// Space-delimited list of requested scopes.
-    public var scope: String?
+    var scope: String?
 
     /// Opaque state value to prevent CSRF attacks.
-    public var state: String
+    var state: String
 
     /// Creates a new authorization request.
     ///
@@ -125,7 +125,7 @@ struct AuthRequest: AuthRequestProtocol {
     ///   - redirect_uri: Where to redirect after authorization
     ///   - scope: Optional space-delimited scopes
     ///   - state: State value for CSRF protection
-    public init(
+    init(
         response_type: ResponseType,
         client_id: String,
         client_secret: String? = nil,
@@ -171,22 +171,22 @@ struct AuthRequest: AuthRequestProtocol {
 /// - ``AuthRequestProtocol``
 struct AuthRequestPKCE: AuthRequestProtocol {
     /// The type of requested response, typically `.code`.
-    public var response_type: ResponseType
+    var response_type: ResponseType
 
     /// The client identifier registered with the authorization server.
-    public var client_id: String
+    var client_id: String
 
     /// Optional client secret (typically not used with PKCE).
-    public var client_secret: String?
+    var client_secret: String?
 
     /// The URI where the authorization response will be sent.
-    public var redirect_uri: URL
+    var redirect_uri: URL
 
     /// Space-delimited list of requested scopes.
-    public var scope: String?
+    var scope: String?
 
     /// Opaque state value to prevent CSRF attacks.
-    public var state: String
+    var state: String
 
     /// The code challenge derived from the code verifier.
     ///
@@ -197,7 +197,7 @@ struct AuthRequestPKCE: AuthRequestProtocol {
     /// ```
     /// code_challenge = base64urlEncode(SHA256(ASCII(code_verifier)))
     /// ```
-    public let code_challenge: String
+    let code_challenge: String
 
     /// The method used to derive the code challenge from the code verifier.
     ///
@@ -205,7 +205,7 @@ struct AuthRequestPKCE: AuthRequestProtocol {
     /// is not available.
     ///
     /// - SeeAlso: ``CodeChallengeMethod``
-    public let code_challenge_method: CodeChallengeMethod
+    let code_challenge_method: CodeChallengeMethod
 
     /// Creates a new PKCE authorization request.
     ///
@@ -218,7 +218,7 @@ struct AuthRequestPKCE: AuthRequestProtocol {
     ///   - state: State value for CSRF protection
     ///   - code_challenge: The challenge derived from the code verifier
     ///   - code_challenge_method: The method used to derive the challenge
-    public init(
+    init(
         response_type: ResponseType,
         client_id: String,
         client_secret: String? = nil,

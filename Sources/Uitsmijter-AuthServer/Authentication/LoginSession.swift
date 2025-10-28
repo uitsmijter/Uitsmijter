@@ -41,23 +41,23 @@ struct LoginSession: Codable, TimeToLiveProtocol, Sendable {
     ///
     /// This UUID correlates the login with the subsequent authorization,
     /// ensuring that only the authenticated user can authorize clients.
-    public let loginId: UUID
+    let loginId: UUID
 
     /// Time-to-live for this login session in seconds.
     ///
     /// Defaults to 120 seconds (2 minutes). After expiration, the user
     /// must re-authenticate before authorizing clients.
-    public var ttl: Int64? = 2 * 60
+    var ttl: Int64? = 2 * 60
 
     /// The timestamp when this login session was created.
     ///
     /// Used for session expiration calculations and auditing.
-    public var generated: Date = Date()
+    var generated: Date = Date()
 
     /// Initialize a login session.
     ///
     /// - Parameter loginId: A unique identifier for this login attempt
-    public init(loginId: UUID) {
+    init(loginId: UUID) {
         self.loginId = loginId
     }
 }

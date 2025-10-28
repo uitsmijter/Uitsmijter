@@ -4,9 +4,9 @@ import Foundation
 ///
 struct JSInputUsername: JSInputParameterProtocol, Sendable {
     /// Users username or email address
-    public let username: String
+    let username: String
 
-    public init(username: String) {
+    init(username: String) {
         self.username = username
     }
 }

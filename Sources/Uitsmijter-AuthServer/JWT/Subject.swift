@@ -41,12 +41,12 @@ protocol SubjectProtocol: Sendable {
 /// ```
 struct Subject: SubjectProtocol, Decodable {
     /// The subject claim value.
-    public var subject: SubjectClaim
+    var subject: SubjectClaim
 
     /// Creates a new subject with the specified claim value.
     ///
     /// - Parameter subject: The subject claim identifying the principal.
-    public init(subject: SubjectClaim) {
+    init(subject: SubjectClaim) {
         self.subject = subject
     }
 }
@@ -87,7 +87,7 @@ extension SubjectProtocol {
     ///
     /// - Parameter values: Optional array of strings that may contain JSON-encoded subject claims.
     /// - Returns: An array of decoded `SubjectProtocol` instances. Returns empty array if input is `nil`.
-    public static func decode(from values: [String]?) -> [SubjectProtocol] {
+    static func decode(from values: [String]?) -> [SubjectProtocol] {
         // is subject given in fetchedValue
         let subjects: [SubjectProtocol]? = values?.compactMap { (element: String?) -> SubjectProtocol? in
             if let element, let data = element.data(using: .utf8) {

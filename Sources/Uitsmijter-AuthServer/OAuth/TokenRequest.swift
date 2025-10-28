@@ -56,15 +56,15 @@ protocol TokenRequestProtocol: Codable, Sendable {
 struct TokenRequest: TokenRequestProtocol, ClientIdProtocol,
     /*RedirectUriProtocol, */  ScopesProtocol, Sendable {
 
-    public var grant_type: GrantTypes
+    var grant_type: GrantTypes
 
-    public var client_id: String
+    var client_id: String
 
-    public var client_secret: String?
+    var client_secret: String?
 
-    public var scope: String?
+    var scope: String?
 
-    public init(grant_type: GrantTypes, client_id: String, client_secret: String? = nil, scope: String? = nil) {
+    init(grant_type: GrantTypes, client_id: String, client_secret: String? = nil, scope: String? = nil) {
         self.grant_type = grant_type
         self.client_id = client_id
         self.client_secret = client_secret
@@ -121,37 +121,37 @@ struct CodeTokenRequest: TokenRequestProtocol, Sendable {
     // MARK: - Protocol Implementation
 
     /// The grant type, must be `.authorization_code`.
-    public var grant_type: GrantTypes
+    var grant_type: GrantTypes
 
     /// The client identifier.
-    public var client_id: String
+    var client_id: String
 
     /// The client secret (required for confidential clients).
-    public var client_secret: String?
+    var client_secret: String?
 
     /// The requested OAuth scopes.
-    public var scope: String?
+    var scope: String?
 
     // MARK: - Code Implementation
 
     /// The authorization code received from the authorization endpoint.
     ///
     /// This short-lived code is exchanged for an access token.
-    public let code: Code.StringLiteralType
+    let code: Code.StringLiteralType
 
     /// The method used to generate the code challenge.
     ///
     /// If using PKCE, this must match the method used in the authorization request.
     /// Common values: `.plain` or `.S256` (SHA-256).
-    public var code_challenge_method: CodeChallengeMethod?
+    var code_challenge_method: CodeChallengeMethod?
 
     /// The PKCE code verifier string.
     ///
     /// The server will hash this value and compare it to the `code_challenge`
     /// provided in the authorization request to verify the exchange.
-    public var code_verifier: String?
+    var code_verifier: String?
 
-    public init(
+    init(
         grant_type: GrantTypes,
         client_id: String,
         client_secret: String? = nil,
@@ -194,17 +194,17 @@ extension CodeTokenRequest {
 
 struct RefreshTokenRequest: TokenRequestProtocol, Sendable {
 
-    public var grant_type: GrantTypes
+    var grant_type: GrantTypes
 
-    public var client_id: String
+    var client_id: String
 
-    public var client_secret: String?
+    var client_secret: String?
 
     // MARK: - Refresh Token Implementation
 
-    public let refresh_token: String
+    let refresh_token: String
 
-    public init(grant_type: GrantTypes, client_id: String, client_secret: String? = nil, refresh_token: String) {
+    init(grant_type: GrantTypes, client_id: String, client_secret: String? = nil, refresh_token: String) {
         self.grant_type = grant_type
         self.client_id = client_id
         self.client_secret = client_secret
@@ -216,21 +216,21 @@ struct PasswordTokenRequest: TokenRequestProtocol, Sendable {
 
     // MARK: - Protocol Implementation
 
-    public var grant_type: GrantTypes
+    var grant_type: GrantTypes
 
-    public var client_id: String
+    var client_id: String
 
-    public var client_secret: String?
+    var client_secret: String?
 
-    public var scope: String?
+    var scope: String?
 
     // MARK: - Code Implementation
 
-    public let username: String
+    let username: String
 
-    public let password: String
+    let password: String
 
-    public init(
+    init(
         grant_type: GrantTypes, client_id: String, client_secret: String? = nil,
         scope: String? = nil, username: String, password: String
     ) {

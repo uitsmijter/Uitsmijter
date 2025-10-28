@@ -13,7 +13,7 @@ final class TokenToHeaderMiddleware: Middleware {
     ///   - next: Responder next in chain
     /// - Returns: A future response
     ///
-    public func respond(to request: Request, chainingTo next: Responder) -> EventLoopFuture<Response> {
+    func respond(to request: Request, chainingTo next: Responder) -> EventLoopFuture<Response> {
 
         /// set token from cookie into headers if not set in request
         if request.headers.bearerAuthorization == nil {

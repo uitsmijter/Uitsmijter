@@ -11,7 +11,7 @@ extension JavaScriptProvider {
     ///
     /// - Parameter loginHandle: Pass the login handle (username. login name, ect.)
     /// - Returns: An object based on `SubjectProtocol` with a `SubjectClaim`
-    public func getSubject(loginHandle: String) async -> SubjectProtocol {
+    func getSubject(loginHandle: String) async -> SubjectProtocol {
         Subject.decode(
             from: committedResults?.compactMap({ $0 })
         ).first ?? Subject(subject: JWT.SubjectClaim(value: loginHandle))
@@ -21,7 +21,7 @@ extension JavaScriptProvider {
     ///
     /// - Parameter:
     /// - Returns: A boolean indication of the rights to login
-    public func canLogin(scriptClass: ScriptClassExecution = .userLogin) async -> Bool {
+    func canLogin(scriptClass: ScriptClassExecution = .userLogin) async -> Bool {
         if let canLogin: Bool = try? self.getValue(class: .userLogin, property: "canLogin") {
             return canLogin
         }
@@ -32,7 +32,7 @@ extension JavaScriptProvider {
     ///
     /// - Parameter scriptClass: a `ScriptClassExecution`, default: userBackend
     /// - Returns: The users `profile` as a `CodableProfile`
-    public func getProfile(scriptClass: ScriptClassExecution = .userLogin) async -> CodableProfile? {
+    func getProfile(scriptClass: ScriptClassExecution = .userLogin) async -> CodableProfile? {
         let profile: CodableProfile? = try? self.getObject(class: scriptClass, property: "userProfile")
         return profile
     }
@@ -41,7 +41,7 @@ extension JavaScriptProvider {
     ///
     /// - Parameter scriptClass: a `ScriptClassExecution`, default: userBackend
     /// - Returns: The `role` as a `String`
-    public func getRole(scriptClass: ScriptClassExecution = .userLogin) async -> String {
+    func getRole(scriptClass: ScriptClassExecution = .userLogin) async -> String {
         let role: String? = try? self.getObject(class: scriptClass, property: "role")
         guard let role else {
             return "default"

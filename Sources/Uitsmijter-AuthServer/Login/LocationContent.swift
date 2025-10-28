@@ -29,19 +29,19 @@ import Foundation
 /// - SeeAlso: ``RequestClientMiddleware``
 struct LocationContent: Codable, Sendable {
     /// The raw location string.
-    public let location: String
+    let location: String
 
     /// The parsed URL representation of the location.
     ///
     /// Returns `nil` if the location string is not a valid URL.
-    public var url: URL? {
+    var url: URL? {
         URL(string: location)
     }
 
     /// Creates a new location content instance.
     ///
     /// - Parameter location: The location URL string
-    public init(location: String) {
+    init(location: String) {
         self.location = location
     }
 }

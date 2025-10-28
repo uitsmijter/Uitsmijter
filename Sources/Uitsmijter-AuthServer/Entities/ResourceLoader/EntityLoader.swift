@@ -39,7 +39,7 @@ final class EntityLoader: EntityLoaderProtocolFunctions {
     var entityLoaders: [EntityLoaderProtocol] = []
 
     /// The storage where loaded entities are kept.
-    public let storage: EntityStorage
+    let storage: EntityStorage
 
     /// Manages loading and cleanup of tenant-specific S3 templates.
     let tenantTemplateLoader = TenantTemplateLoader()
@@ -55,7 +55,7 @@ final class EntityLoader: EntityLoaderProtocolFunctions {
     /// - Throws: ``EntityLoaderError`` if any loader fails to initialize or start
     /// - Warning: Only create one EntityLoader instance per application!
     /// - SeeAlso: ``RuntimeConfiguration/SUPPORT_KUBERNETES_CRD``
-    @discardableResult public init(storage useStorage: EntityStorage) throws {
+@discardableResult init(storage useStorage: EntityStorage) throws {
         storage = useStorage
 
         // initial load all entity configurations from filesystem
@@ -83,7 +83,7 @@ final class EntityLoader: EntityLoaderProtocolFunctions {
     /// shut down before the EntityLoader is deallocated.
     ///
     /// - Note: This method is MainActor-isolated to safely access the loaders.
-    public func shutdown() {
+    func shutdown() {
         entityLoaders.forEach { loader in
             loader.shutdown()
         }
@@ -101,7 +101,7 @@ final class EntityLoader: EntityLoaderProtocolFunctions {
     /// - Returns: `true` if the entity was added successfully, `false` if the type is unsupported
     /// - SeeAlso: ``removeEntity(entity:)``
     @discardableResult
-    public func addEntity(entity: Entity) -> Bool {
+    func addEntity(entity: Entity) -> Bool {
         switch entity {
         case let tenant as Tenant:
             let (inserted, _) = storage.tenants.insert(tenant)
@@ -130,7 +130,7 @@ final class EntityLoader: EntityLoaderProtocolFunctions {
     /// - Parameter entity: The entity to remove (``Tenant`` or ``UitsmijterClient``)
     /// - Note: Entities without a reference cannot be removed and will log an error
     /// - SeeAlso: ``addEntity(entity:)``
-    public func removeEntity(entity: Entity) {
+    func removeEntity(entity: Entity) {
         guard let reference = entity.ref else {
             Log.error("Cannot remove entity without reference")
             return
