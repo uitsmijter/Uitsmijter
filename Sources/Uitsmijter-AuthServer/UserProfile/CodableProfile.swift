@@ -64,7 +64,7 @@ import Foundation
 ///         without stack overflow issues.
 ///
 /// - SeeAlso: ``UserProfileProtocol`` for the protocol that uses this type
-public enum CodableProfile: Sendable {
+enum CodableProfile: Sendable {
     /// A floating-point number value.
     case double(Double)
 

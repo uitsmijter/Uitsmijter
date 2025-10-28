@@ -53,7 +53,7 @@ import Foundation
 ///
 /// - SeeAlso: ``RequestClientMiddleware``
 /// - SeeAlso: ``ClientInfo``
-public enum LoginMode: String, Codable, Sendable {
+enum LoginMode: String, Codable, Sendable {
     /// Traefik ForwardAuth middleware mode for transparent authentication.
     case interceptor
 

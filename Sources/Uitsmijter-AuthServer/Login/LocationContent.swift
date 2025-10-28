@@ -27,7 +27,7 @@ import Foundation
 ///
 /// - SeeAlso: ``LoginForm``
 /// - SeeAlso: ``RequestClientMiddleware``
-public struct LocationContent: Codable, Sendable {
+struct LocationContent: Codable, Sendable {
     /// The raw location string.
     public let location: String
 

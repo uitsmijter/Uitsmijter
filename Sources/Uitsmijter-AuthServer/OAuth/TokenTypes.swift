@@ -2,7 +2,7 @@ import Foundation
 
 // swiftlint:disable identifier_name
 
-public enum TokenTypes: String, Codable, Sendable {
+enum TokenTypes: String, Codable, Sendable {
     case Bearer
 }
 

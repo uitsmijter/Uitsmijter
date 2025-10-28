@@ -1,7 +1,7 @@
 import Vapor
 import Logger
 
-public final class RequestErrorMiddleware: AsyncMiddleware {
+final class RequestErrorMiddleware: AsyncMiddleware {
 
     /// Create a default `RequestErrorMiddleware`. Logs errors
     /// and converts `Error` to `Response` based on conformance to `AbortError` and `Debuggable`.

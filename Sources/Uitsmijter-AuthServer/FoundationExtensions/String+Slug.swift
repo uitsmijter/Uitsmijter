@@ -1,7 +1,7 @@
 import Foundation
 
 /// Extension providing URL-safe slug generation from strings
-public extension String {
+extension String {
     private static let slugSafeCharacters = CharacterSet(
         charactersIn: "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz-"
     )

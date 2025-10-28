@@ -27,7 +27,7 @@ import Logger
 /// - Important: Only one EntityLoader should be created per application instance.
 /// - SeeAlso: ``EntityLoaderProtocol``, ``EntityStorage``
 @MainActor
-public final class EntityLoader: EntityLoaderProtocolFunctions {
+final class EntityLoader: EntityLoaderProtocolFunctions {
 
     /// All registered entity loader implementations.
     ///

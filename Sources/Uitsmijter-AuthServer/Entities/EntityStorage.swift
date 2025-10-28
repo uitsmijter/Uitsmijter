@@ -57,7 +57,7 @@ import Logger
 ///
 /// - SeeAlso: ``Entity``, ``Tenant``, ``UitsmijterClient``
 @MainActor
-public final class EntityStorage {
+final class EntityStorage {
 
     #if DEBUG
     /// Hook for observing entity changes in tests.

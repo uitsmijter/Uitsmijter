@@ -8,7 +8,7 @@ import Vapor
 ///     - username: The users username or email address
 ///     - password: The users password
 ///     - location: URL to redirect the user to after a login
-public struct LoginForm: Content, Sendable {
+struct LoginForm: Content, Sendable {
     /// The users username or email address that is used as a _username_
     public let username: String
 

@@ -1,7 +1,7 @@
 import Foundation
 
 /// Extension providing convenient check for non-empty arrays
-public extension Array {
+extension Array {
     /// Returns `true` if the array contains at least one element
     ///
     /// This is a convenience property that negates `isEmpty` for more readable code.

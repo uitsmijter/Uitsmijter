@@ -2,7 +2,7 @@ import Foundation
 
 /// Protocol for storing and retrieving authorization code sessions
 /// All implementations should be actors to ensure thread-safe access
-public protocol AuthCodeStorageProtocol: Sendable {
+protocol AuthCodeStorageProtocol: Sendable {
     /// Store an authorization session
     func set(authSession: AuthSession) async throws
 
@@ -29,7 +29,7 @@ public protocol AuthCodeStorageProtocol: Sendable {
 }
 
 /// Errors that can occur during auth code storage operations
-public enum AuthCodeStorageError: Error {
+enum AuthCodeStorageError: Error {
     case CODE_TAKEN
     case KEY_ERROR
 }

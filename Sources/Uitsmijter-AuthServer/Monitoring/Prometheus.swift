@@ -3,33 +3,33 @@ import Foundation
 import Metrics
 
 /// How many attempts to login
-public nonisolated(unsafe) var metricsLoginAttempts: PromHistogram<Int>?
+nonisolated(unsafe) var metricsLoginAttempts: PromHistogram<Int>?
 /// How many logins succeeded over time
-public nonisolated(unsafe) var metricsLoginSuccess: PromCounter<Int>?
+nonisolated(unsafe) var metricsLoginSuccess: PromCounter<Int>?
 /// How many logins failed over time
-public nonisolated(unsafe) var metricsLoginFailure: PromCounter<Int>?
+nonisolated(unsafe) var metricsLoginFailure: PromCounter<Int>?
 /// How many logouts happens over time
-public nonisolated(unsafe) var metricsLogout: PromCounter<Int>?
+nonisolated(unsafe) var metricsLogout: PromCounter<Int>?
 
 /// How many request pass the interceptor flow successfully over time
-public nonisolated(unsafe) var metricsInterceptorSuccess: PromCounter<Int>?
+nonisolated(unsafe) var metricsInterceptorSuccess: PromCounter<Int>?
 /// How many request fails the interceptor flow over time
-public nonisolated(unsafe) var metricsInterceptorFailure: PromCounter<Int>?
+nonisolated(unsafe) var metricsInterceptorFailure: PromCounter<Int>?
 
 /// How many attempts to /authorize
-public nonisolated(unsafe) var metricsAuthorizeAttempts: PromHistogram<Int>?
+nonisolated(unsafe) var metricsAuthorizeAttempts: PromHistogram<Int>?
 /// How many OAuth flows succeeded over time
-public nonisolated(unsafe) var metricsOAuthSuccess: PromCounter<Int>?
+nonisolated(unsafe) var metricsOAuthSuccess: PromCounter<Int>?
 /// How many OAuth flows failed over time
-public nonisolated(unsafe) var metricsOAuthFailure: PromCounter<Int>?
+nonisolated(unsafe) var metricsOAuthFailure: PromCounter<Int>?
 
 // How may tokens are in the store
-public nonisolated(unsafe) var metricsTokensStored: PromHistogram<Int>?
+nonisolated(unsafe) var metricsTokensStored: PromHistogram<Int>?
 
 // Currently known tenants
-public nonisolated(unsafe) var metricsCountTenants: PromGauge<Int>?
+nonisolated(unsafe) var metricsCountTenants: PromGauge<Int>?
 // Currently known tenants
-public nonisolated(unsafe) var metricsCountClients: PromGauge<Int>?
+nonisolated(unsafe) var metricsCountClients: PromGauge<Int>?
 
 /// Registers a single prometheus client and registers metrics for monitoring
 ///

@@ -4,7 +4,7 @@ import Foundation
 ///
 /// This protocol defines the minimum contract for tenant entities,
 /// ensuring they have a name and configuration regardless of implementation.
-public protocol TenantProtocol {
+protocol TenantProtocol {
     /// The unique display name of the tenant.
     ///
     /// This name is used for identification and must be unique across all tenants.
@@ -32,7 +32,7 @@ public protocol TenantProtocol {
 /// ```
 ///
 /// - SeeAlso: ``TenantSpec``
-public struct TenantInformations: Codable, Sendable {
+struct TenantInformations: Codable, Sendable {
     /// URL to the legal imprint page.
     ///
     /// Typically required in certain jurisdictions (e.g., Germany's "Impressum").
@@ -85,7 +85,7 @@ public struct TenantInformations: Codable, Sendable {
 /// ```
 ///
 /// - SeeAlso: ``TenantSpec``
-public struct TenantInterceptorSettings: Codable, Sendable {
+struct TenantInterceptorSettings: Codable, Sendable {
     /// Whether interceptor mode is enabled for this tenant.
     ///
     /// When `true`, this tenant can be used with Traefik ForwardAuth.
@@ -173,7 +173,7 @@ public struct TenantInterceptorSettings: Codable, Sendable {
 /// ```
 ///
 /// - SeeAlso: ``TenantSpec``
-public struct TenantTemplatesSettings: Codable, Sendable {
+struct TenantTemplatesSettings: Codable, Sendable {
     /// S3 access key ID or account name.
     ///
     /// Used for authenticating with the S3-compatible storage service.
@@ -236,7 +236,7 @@ public struct TenantTemplatesSettings: Codable, Sendable {
 }
 
 /// Type alias for backward compatibility.
-public typealias UitsmijterTenant = Tenant
+typealias UitsmijterTenant = Tenant
 
 /// A tenant represents an organization or domain in the Uitsmijter system.
 ///
@@ -287,7 +287,7 @@ public typealias UitsmijterTenant = Tenant
 /// the tenant in ``EntityStorage``.
 ///
 /// - SeeAlso: ``TenantSpec``, ``UitsmijterClient``, ``EntityStorage``
-public struct Tenant: TenantProtocol, Sendable {
+struct Tenant: TenantProtocol, Sendable {
     /// Reference to the source from which this tenant was loaded.
     ///
     /// Used for hot-reloading when the source changes.
@@ -322,7 +322,7 @@ public struct Tenant: TenantProtocol, Sendable {
 /// configured for a tenant, loaded from YAML or Kubernetes CRDs.
 ///
 /// - SeeAlso: ``Tenant``
-public struct TenantSpec: Codable, Sendable {
+struct TenantSpec: Codable, Sendable {
     /// List of hosts that this tenant serves.
     ///
     /// Requests are matched against these hosts to determine which tenant

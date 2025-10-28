@@ -17,7 +17,7 @@ import JXKit // Replacement for JavaScriptCore, works with webkitgtk-4.0
 /// automatic serialization of access to shared mutable state, eliminating the need for manual DispatchQueue/DispatchGroup
 /// synchronization. Per ACTOR.md recommendations.
 ///
-public actor JavaScriptProvider: JSFunctionsDelegate {
+actor JavaScriptProvider: JSFunctionsDelegate {
     /// The context for the provider plugins. Multiple scripts can be loaded into one context.
     ///
     /// - Important: Every requesting user should have its own context.

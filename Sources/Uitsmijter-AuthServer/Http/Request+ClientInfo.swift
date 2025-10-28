@@ -15,7 +15,7 @@ import Vapor
 /// - ``host``
 /// - ``uri``
 /// - ``description``
-public struct ClientInfoRequest: Codable {
+struct ClientInfoRequest: Codable {
     /// The HTTP scheme (http or https).
     let scheme: String
 
@@ -96,7 +96,7 @@ public struct ClientInfoRequest: Codable {
 ///
 /// - SeeAlso: ``LoginMode``
 /// - SeeAlso: ``RequestClientMiddleware``
-public struct ClientInfo: Codable, @unchecked Sendable {
+struct ClientInfo: Codable, @unchecked Sendable {
     /// The login mode (OAuth or Interceptor).
     let mode: LoginMode
 

@@ -9,7 +9,7 @@ import Foundation
 ///
 /// ### Response Types
 /// - ``code``
-public enum ResponseType: String, Codable, Sendable {
+enum ResponseType: String, Codable, Sendable {
     /// Authorization code response type.
     ///
     /// Indicates that the application expects to receive an authorization code

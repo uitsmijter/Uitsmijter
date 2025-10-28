@@ -4,7 +4,7 @@ import Foundation
 ///
 /// Types conforming to this protocol provide a redirect URI that Uitsmijter
 /// uses to redirect the authentication response.
-public protocol RedirectUriProtocol {
+protocol RedirectUriProtocol {
     /// The redirect URI where Uitsmijter will send its response.
     ///
     /// This URL represents the destination endpoint that will receive
@@ -13,7 +13,7 @@ public protocol RedirectUriProtocol {
 }
 
 /// Errors that can occur during redirect URI operations.
-public enum RedirectError: Error {
+enum RedirectError: Error {
     /// Indicates that the provided value could not be converted to a valid URL.
     ///
     /// - Parameter value: The value that failed to convert to a URL.
@@ -24,7 +24,7 @@ public enum RedirectError: Error {
 ///
 /// `RedirectUri` provides a type-safe wrapper around a URL specifically for use
 /// as a redirect destination in Uitsmijter authentication flows.
-public struct RedirectUri: RedirectUriProtocol {
+struct RedirectUri: RedirectUriProtocol {
     /// The redirect URI where Uitsmijter will send its response.
     public let redirect_uri: URL
 

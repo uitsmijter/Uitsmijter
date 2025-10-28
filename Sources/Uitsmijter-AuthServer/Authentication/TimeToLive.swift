@@ -22,7 +22,7 @@ import Foundation
 /// ```
 ///
 /// - SeeAlso: ``AuthSession``, ``LoginSession``
-public protocol TimeToLiveProtocol {
+protocol TimeToLiveProtocol {
     /// The time-to-live in seconds.
     ///
     /// - `nil`: No expiration (or use system default)
@@ -46,7 +46,7 @@ public protocol TimeToLiveProtocol {
 /// let ttl = try JSONDecoder().decode(TimeToLive.self, from: json.data(using: .utf8)!)
 /// print(ttl.ttl)  // 300
 /// ```
-public struct TimeToLive: TimeToLiveProtocol, Decodable {
+struct TimeToLive: TimeToLiveProtocol, Decodable {
     /// The time-to-live in seconds.
     public var ttl: Int64?
 }

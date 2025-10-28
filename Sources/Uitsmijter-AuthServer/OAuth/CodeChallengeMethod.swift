@@ -15,7 +15,7 @@ import Foundation
 ///
 /// ## See Also
 /// - ``AuthRequestPKCE``
-public enum CodeChallengeMethod: String, Codable, Sendable {
+enum CodeChallengeMethod: String, Codable, Sendable {
     /// No code challenge is used.
     ///
     /// - Warning: This option should not be used in production as it provides

@@ -13,7 +13,7 @@ import Foundation
 ///
 /// - Note: Conforms to `Sendable` for Swift 6 concurrency safety.
 /// - SeeAlso: ``GrantTypes`` for supported grant types
-public protocol TokenRequestProtocol: Codable, Sendable {
+protocol TokenRequestProtocol: Codable, Sendable {
 
     /// The OAuth 2.0 grant type being requested.
     ///
@@ -53,7 +53,7 @@ public protocol TokenRequestProtocol: Codable, Sendable {
 /// - SeeAlso: ``CodeTokenRequest`` for authorization code grant
 /// - SeeAlso: ``RefreshTokenRequest`` for refresh token grant
 /// - SeeAlso: ``PasswordTokenRequest`` for password grant
-public struct TokenRequest: TokenRequestProtocol, ClientIdProtocol,
+struct TokenRequest: TokenRequestProtocol, ClientIdProtocol,
     /*RedirectUriProtocol, */  ScopesProtocol, Sendable {
 
     public var grant_type: GrantTypes
@@ -116,7 +116,7 @@ public struct TokenRequest: TokenRequestProtocol, ClientIdProtocol,
 /// - Note: PKCE is recommended for all clients and required for public clients.
 /// - SeeAlso: [RFC 7636 - PKCE](https://tools.ietf.org/html/rfc7636)
 /// - SeeAlso: ``CodeChallengeMethod`` for challenge methods
-public struct CodeTokenRequest: TokenRequestProtocol, Sendable {
+struct CodeTokenRequest: TokenRequestProtocol, Sendable {
 
     // MARK: - Protocol Implementation
 
@@ -172,7 +172,7 @@ public struct CodeTokenRequest: TokenRequestProtocol, Sendable {
 
 import CryptoSwift
 
-public extension CodeTokenRequest {
+extension CodeTokenRequest {
     /// The SHA-256 hash in Base64 of the original code_verifier
     ///
     /// code_challenge = BASE64URL-ENCODE(SHA256(ASCII(code_verifier)))
@@ -192,7 +192,7 @@ public extension CodeTokenRequest {
     }
 }
 
-public struct RefreshTokenRequest: TokenRequestProtocol, Sendable {
+struct RefreshTokenRequest: TokenRequestProtocol, Sendable {
 
     public var grant_type: GrantTypes
 
@@ -212,7 +212,7 @@ public struct RefreshTokenRequest: TokenRequestProtocol, Sendable {
     }
 }
 
-public struct PasswordTokenRequest: TokenRequestProtocol, Sendable {
+struct PasswordTokenRequest: TokenRequestProtocol, Sendable {
 
     // MARK: - Protocol Implementation
 

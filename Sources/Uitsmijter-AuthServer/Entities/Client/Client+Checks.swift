@@ -16,7 +16,7 @@ import Logger
 ///
 /// - SeeAlso: ``ClientSpec/redirect_urls``
 /// - SeeAlso: ``ClientSpec/referrers``
-public extension Client {
+extension Client {
 
     /// Validates that a redirect URI is allowed for this client.
     ///

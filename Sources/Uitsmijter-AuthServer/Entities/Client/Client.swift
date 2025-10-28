@@ -5,7 +5,7 @@ import Logger
 ///
 /// These errors are thrown when client configuration or request validation fails,
 /// typically during OAuth2 authorization flows.
-public enum ClientError: Error {
+enum ClientError: Error {
     /// The client is not properly associated with a tenant.
     ///
     /// All clients must belong to a tenant. This error occurs when attempting
@@ -36,7 +36,7 @@ public enum ClientError: Error {
 /// Base protocol that all client implementations must conform to.
 ///
 /// Defines the minimum contract for OAuth2 client entities.
-public protocol ClientProtocol {
+protocol ClientProtocol {
     /// The display name of this client.
     ///
     /// Used for identification and logging purposes.
@@ -52,7 +52,7 @@ public protocol ClientProtocol {
 ///
 /// Used for parameter objects that need to carry a client identifier,
 /// particularly in OAuth2 request handling.
-public protocol ClientIdProtocol {
+protocol ClientIdProtocol {
     /// The OAuth2 client identifier.
     ///
     /// This is the public identifier used in OAuth2 flows (e.g., authorization requests).
@@ -62,13 +62,13 @@ public protocol ClientIdProtocol {
 /// A concrete implementation of a client ID parameter for OAuth2 requests.
 ///
 /// Used for decoding client ID from request parameters.
-public struct ClientIdParameter: ClientIdProtocol, Decodable {
+struct ClientIdParameter: ClientIdProtocol, Decodable {
     /// The OAuth2 client identifier extracted from the request.
     public var client_id: String
 }
 
 /// Type alias for backward compatibility.
-public typealias UitsmijterClient = Client
+typealias UitsmijterClient = Client
 
 /// An OAuth2 client application registered with a tenant.
 ///
@@ -120,7 +120,7 @@ public typealias UitsmijterClient = Client
 /// - Referer validation provides additional origin verification
 ///
 /// - SeeAlso: ``ClientSpec``, ``Tenant``, ``ClientError``
-public struct Client: ClientProtocol, Sendable {
+struct Client: ClientProtocol, Sendable {
     /// Reference to the source from which this client was loaded.
     ///
     /// Used for hot-reloading when the source changes.
@@ -155,7 +155,7 @@ public struct Client: ClientProtocol, Sendable {
 /// security constraints and allowed operations.
 ///
 /// - SeeAlso: ``Client``
-public struct ClientSpec: Codable, Sendable {
+struct ClientSpec: Codable, Sendable {
     /// The unique identifier for this client (client_id in OAuth2 terms).
     ///
     /// This UUID is used as the `client_id` parameter in OAuth2 flows.

@@ -6,7 +6,7 @@ import Glibc
 #endif
 
 @MainActor
-public class EntityFileLoaderTenantChangedHandler: @unchecked Sendable, FileDidChangeDelegate {
+class EntityFileLoaderTenantChangedHandler: @unchecked Sendable, FileDidChangeDelegate {
     typealias LoaderFunction = (URL) throws -> Tenant?
 
     var delegate: EntityLoaderProtocolFunctions?
@@ -62,7 +62,7 @@ public class EntityFileLoaderTenantChangedHandler: @unchecked Sendable, FileDidC
 }
 
 @MainActor
-public class EntityFileLoaderClientChangedHandler: @unchecked Sendable, FileDidChangeDelegate {
+class EntityFileLoaderClientChangedHandler: @unchecked Sendable, FileDidChangeDelegate {
     typealias LoaderFunction = (URL) throws -> UitsmijterClient?
 
     var delegate: EntityLoaderProtocolFunctions?
@@ -109,7 +109,7 @@ public class EntityFileLoaderClientChangedHandler: @unchecked Sendable, FileDidC
 }
 
 @MainActor
-public struct EntityFileLoader: EntityLoaderProtocol {
+struct EntityFileLoader: EntityLoaderProtocol {
     var delegate: EntityLoaderProtocolFunctions?
 
     nonisolated(unsafe) let clientFileMonitor: FileMonitor?

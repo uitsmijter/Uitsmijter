@@ -8,7 +8,7 @@ import Yams
 /// - Clients: OAuth2 applications that belong to a tenant
 ///
 /// These entity types form the core domain model for multi-tenant OAuth2 authorization.
-public enum ManagedEntityType: Sendable {
+enum ManagedEntityType: Sendable {
     /// A tenant entity representing an organization or domain
     case tenant
 
@@ -49,7 +49,7 @@ public enum ManagedEntityType: Sendable {
 /// ```
 ///
 /// - SeeAlso: ``Tenant``, ``UitsmijterClient``, ``EntityStorage``
-public protocol Entity {
+protocol Entity {
     /// The unique name of this entity.
     ///
     /// The name is used for identification and lookup within the system.
@@ -85,7 +85,7 @@ public protocol Entity {
 /// - Important: This protocol requires `@MainActor` isolation to ensure
 ///   thread-safe access to the ``EntityStorage``.
 @MainActor
-public protocol EntityFindResourceReferenceProtocol {
+protocol EntityFindResourceReferenceProtocol {
     /// Find an entity in storage by its resource reference.
     ///
     /// - Parameters:
@@ -130,7 +130,7 @@ public protocol EntityFindResourceReferenceProtocol {
 /// - File references are never equal to Kubernetes references
 ///
 /// - SeeAlso: ``Entity``, ``EntityStorage``
-public enum EntityResourceReference: Codable, Equatable, Sendable {
+enum EntityResourceReference: Codable, Equatable, Sendable {
     /// A reference to a file on the local filesystem
     case file(URL)
 

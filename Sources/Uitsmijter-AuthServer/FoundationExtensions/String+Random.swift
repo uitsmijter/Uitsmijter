@@ -2,7 +2,7 @@ import Foundation
 
 /// Extends a `String` with functions to generate a random literal
 ///
-public extension String {
+extension String {
 
     /// Character set used for building a random string
     ///

@@ -2,7 +2,7 @@ import Foundation
 
 /// Protocol that have to be implemented in JavaScriptParameter implementations
 ///
-public protocol JSInputParameterProtocol: Codable, Sendable {
+protocol JSInputParameterProtocol: Codable, Sendable {
 
 }
 

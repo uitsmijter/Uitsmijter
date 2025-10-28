@@ -15,7 +15,7 @@ import Foundation
 ///     let scope: String? = "read write profile"
 /// }
 /// ```
-public protocol ScopesProtocol {
+protocol ScopesProtocol {
     /// Optional requested scopes to get permissions for.
     ///
     /// A space-delimited list of scope values indicating the access

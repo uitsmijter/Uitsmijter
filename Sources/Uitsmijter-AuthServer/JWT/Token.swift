@@ -6,7 +6,7 @@ import Logger
 ///
 /// These errors represent failures in token lifecycle operations that prevent
 /// successful token generation or processing.
-public enum TokenError: Error {
+enum TokenError: Error {
     /// Failed to calculate the expiration time.
     ///
     /// This error occurs when the calendar date calculation for token expiration fails,
@@ -70,7 +70,7 @@ public enum TokenError: Error {
 /// - Note: This struct conforms to `ExpressibleByStringLiteral` for convenient initialization.
 /// - SeeAlso: ``Payload`` for the token payload structure
 /// - SeeAlso: ``jwt_signer`` for the signing mechanism
-public struct Token: ExpressibleByStringLiteral {
+struct Token: ExpressibleByStringLiteral {
 
     public typealias StringLiteralType = String
 

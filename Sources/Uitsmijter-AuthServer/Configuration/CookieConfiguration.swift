@@ -18,7 +18,7 @@ import Foundation
 /// - ``defaultPath``
 ///
 /// - SeeAlso: ``CookieSameSitePolicy``
-public struct CookieConfiguration {
+struct CookieConfiguration {
 
     /// Indicates whether cookies should only be sent over HTTPS connections.
     ///
@@ -72,7 +72,7 @@ public struct CookieConfiguration {
 /// - ``strict``
 /// - ``lax``
 /// - ``noRestriction``
-public enum CookieSameSitePolicy: String, Sendable {
+enum CookieSameSitePolicy: String, Sendable {
     /// Cookies are only sent for same-site requests.
     ///
     /// The browser sends cookies only for same-site requests, that is,
@@ -117,7 +117,7 @@ public enum CookieSameSitePolicy: String, Sendable {
 ///     path: CookieConfiguration.defaultPath
 /// )
 /// ```
-public struct CookieSettings {
+struct CookieSettings {
     /// The cookie value/content
     public let content: String
 

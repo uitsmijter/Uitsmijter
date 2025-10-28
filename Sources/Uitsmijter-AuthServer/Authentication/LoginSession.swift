@@ -35,7 +35,7 @@ import Foundation
 /// - Sessions are single-use and consumed during authorization
 ///
 /// - SeeAlso: ``AuthSession``, ``TimeToLiveProtocol``
-public struct LoginSession: Codable, TimeToLiveProtocol, Sendable {
+struct LoginSession: Codable, TimeToLiveProtocol, Sendable {
 
     /// A unique identifier for this login attempt.
     ///

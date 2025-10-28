@@ -8,7 +8,7 @@ import Foundation
 ///     - requestUri
 ///     - serviceUrl
 ///     - payload
-public struct PageProperties: Encodable {
+struct PageProperties: Encodable {
     /// The page title of the page to display
     public let title: String
 

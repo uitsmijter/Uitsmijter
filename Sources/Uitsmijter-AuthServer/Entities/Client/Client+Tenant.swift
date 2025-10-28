@@ -15,7 +15,7 @@ import Logger
 ///
 /// - SeeAlso: ``Tenant``
 /// - SeeAlso: ``EntityStorage``
-public extension ClientSpec {
+extension ClientSpec {
     /// Resolves the tenant that owns this client.
     ///
     /// This method looks up the tenant by name from the client's `tenantname`

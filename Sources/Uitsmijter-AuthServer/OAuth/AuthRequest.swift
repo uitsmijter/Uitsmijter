@@ -21,7 +21,7 @@ import Foundation
 /// - ``AuthRequest``
 /// - ``AuthRequestPKCE``
 /// - ``AuthRequests``
-public protocol AuthRequestProtocol: Codable, ClientIdProtocol, RedirectUriProtocol, ScopesProtocol, Sendable {
+protocol AuthRequestProtocol: Codable, ClientIdProtocol, RedirectUriProtocol, ScopesProtocol, Sendable {
 
     /// The type of response expected from the authorization server.
     ///
@@ -65,7 +65,7 @@ public protocol AuthRequestProtocol: Codable, ClientIdProtocol, RedirectUriProto
 }
 
 /// Default implementations for all authorization requests.
-public extension AuthRequestProtocol {
+extension AuthRequestProtocol {
     /// The path component of the redirect URI.
     ///
     /// Extracts just the path portion from the full redirect URI.
@@ -97,7 +97,7 @@ public extension AuthRequestProtocol {
 /// ## See Also
 /// - ``AuthRequestPKCE`` for PKCE-enabled requests
 /// - ``AuthRequestProtocol``
-public struct AuthRequest: AuthRequestProtocol {
+struct AuthRequest: AuthRequestProtocol {
     /// The type of requested response, typically `.code`.
     public var response_type: ResponseType
 
@@ -169,7 +169,7 @@ public struct AuthRequest: AuthRequestProtocol {
 /// - ``AuthRequest`` for requests without PKCE
 /// - ``CodeChallengeMethod``
 /// - ``AuthRequestProtocol``
-public struct AuthRequestPKCE: AuthRequestProtocol {
+struct AuthRequestPKCE: AuthRequestProtocol {
     /// The type of requested response, typically `.code`.
     public var response_type: ResponseType
 
@@ -253,7 +253,7 @@ public struct AuthRequestPKCE: AuthRequestProtocol {
 /// ## See Also
 /// - ``AuthRequest``
 /// - ``AuthRequestPKCE``
-public enum AuthRequests: Sendable {
+enum AuthRequests: Sendable {
     /// A standard authorization request without PKCE.
     ///
     /// Suitable for confidential clients that can securely store credentials.

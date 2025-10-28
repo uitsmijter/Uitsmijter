@@ -6,7 +6,7 @@ import Foundation
 ///
 /// These errors represent configuration issues that prevent the application
 /// from starting or loading entities correctly.
-public enum ApplicationConfigError: Error {
+enum ApplicationConfigError: Error {
     /// The application could not access or validate a required directory.
     /// - Parameter String: A description of the directory issue
     case directoryConfigError(String)
@@ -38,7 +38,7 @@ public enum ApplicationConfigError: Error {
 /// - Note: Must be accessed from the main actor context.
 /// - SeeAlso: ``viewsPath``
 @MainActor
-public var resourcePath = "./"
+var resourcePath = "./"
 
 /// The path to the views/templates directory.
 ///
@@ -48,7 +48,7 @@ public var resourcePath = "./"
 /// - Note: Must be accessed from the main actor context.
 /// - SeeAlso: ``resourcePath``
 @MainActor
-public var viewsPath = "./"
+var viewsPath = "./"
 
 // MARK: - Runtime Configuration
 
@@ -63,7 +63,7 @@ public var viewsPath = "./"
 /// - ``SUPPORT_KUBERNETES_CRD``
 /// - ``SCOPED_KUBERNETES_CRD``
 /// - ``UITSMIJTER_NAMESPACE``
-public struct RuntimeConfiguration {
+struct RuntimeConfiguration {
 
     /// Indicates whether Kubernetes Custom Resource Definition (CRD) support is enabled.
     ///

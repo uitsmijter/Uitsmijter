@@ -26,7 +26,7 @@ import Foundation
 ///   - Transferring immutable values
 ///   - Values that are only accessed from a single actor
 ///   - Values protected by external synchronization
-public struct UnsafeTransfer<T>: @unchecked Sendable {
+struct UnsafeTransfer<T>: @unchecked Sendable {
     /// The wrapped value that can be transferred across concurrency boundaries.
     public let wrappedValue: T
 

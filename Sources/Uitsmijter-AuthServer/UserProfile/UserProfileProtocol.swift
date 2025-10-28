@@ -40,7 +40,7 @@ import Foundation
 ///
 /// - SeeAlso: ``UserProfile`` for the default implementation
 /// - SeeAlso: ``CodableProfile`` for the flexible profile data structure
-public protocol UserProfileProtocol {
+protocol UserProfileProtocol {
     /// The user's role within the authorization system.
     ///
     /// This property determines the user's permissions and access levels throughout the system.
@@ -179,7 +179,7 @@ public protocol UserProfileProtocol {
 ///
 /// - SeeAlso: ``UserProfileProtocol`` for the protocol definition
 /// - SeeAlso: ``CodableProfile`` for the profile data structure
-public struct UserProfile: UserProfileProtocol {
+struct UserProfile: UserProfileProtocol {
 
     /// The user's role for authorization decisions.
     ///

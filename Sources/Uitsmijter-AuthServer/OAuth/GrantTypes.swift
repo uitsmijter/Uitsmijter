@@ -1,7 +1,7 @@
 import Foundation
 
 /// The authentication server supports several grant types for different use cases
-public enum GrantTypes: String, Codable, Sendable {
+enum GrantTypes: String, Codable, Sendable {
 
     /// The Authorization Code grant type is used by confidential and public clients to exchange an authorization code
     /// for an access token.

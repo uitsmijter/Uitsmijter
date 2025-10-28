@@ -55,7 +55,7 @@ import Foundation
 /// - ``init(status:error:reason:requestInfo:baseurl:)``
 ///
 /// - SeeAlso: ``RequestInfo``
-public struct ResponseError: Codable, Sendable {
+struct ResponseError: Codable, Sendable {
     /// The HTTP status code for the error.
     ///
     /// Examples: 400 (Bad Request), 401 (Unauthorized), 403 (Forbidden), 500 (Internal Server Error)

@@ -22,7 +22,7 @@ import Foundation
 /// - **OPTIONAL**: May be included based on provider capabilities
 ///
 /// - SeeAlso: [OpenID Connect Discovery 1.0](https://openid.net/specs/openid-connect-discovery-1_0.html#ProviderMetadata)
-public struct OpenidConfiguration: Codable, Sendable {
+struct OpenidConfiguration: Codable, Sendable {
 
     // MARK: - Required Fields
 

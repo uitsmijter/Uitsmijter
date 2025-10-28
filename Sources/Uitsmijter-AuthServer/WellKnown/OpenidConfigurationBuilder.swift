@@ -29,7 +29,7 @@ import Vapor
 ///
 /// - SeeAlso: ``OpenidConfiguration``
 /// - SeeAlso: ``Tenant``
-public actor OpenidConfigurationBuilder {
+actor OpenidConfigurationBuilder {
 
     // MARK: - Default Values
 

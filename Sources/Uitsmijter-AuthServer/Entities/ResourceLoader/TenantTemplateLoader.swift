@@ -2,7 +2,7 @@ import Foundation
 import SotoS3
 import Logger
 
-public actor TenantTemplateLoader {
+actor TenantTemplateLoader {
 
     public enum TenantTemplateLoaderOperations {
         case create(tenant: Tenant)

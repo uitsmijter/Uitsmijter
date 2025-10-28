@@ -15,7 +15,7 @@ import Foundation
 /// - Scoped to be locally unique in the context of the issuer
 ///
 /// - SeeAlso: [RFC 7519 Section 4.1.2](https://tools.ietf.org/html/rfc7519#section-4.1.2)
-public protocol SubjectProtocol: Sendable {
+protocol SubjectProtocol: Sendable {
 
     /// The "sub" (subject) claim identifies the principal that is the subject of the JWT.
     ///
@@ -39,7 +39,7 @@ public protocol SubjectProtocol: Sendable {
 /// let subject = Subject(subject: "user@example.com")
 /// let token = try Token(tenantName: "acme", subject: subject.subject, userProfile: profile)
 /// ```
-public struct Subject: SubjectProtocol, Decodable {
+struct Subject: SubjectProtocol, Decodable {
     /// The subject claim value.
     public var subject: SubjectClaim
 

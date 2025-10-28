@@ -1,7 +1,7 @@
 import Foundation
 import Vapor
 
-public struct TokenResponse: Content, Sendable {
+struct TokenResponse: Content, Sendable {
     /// The access token string as issued by the authorization server.
     public let access_token: String
 

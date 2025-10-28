@@ -3,7 +3,7 @@ import Foundation
 /// Extends a `String` with regular expression functionality
 ///
 /// - Important: Swift 5.5 does not have a build in regex, as swift 5.6 do
-public extension String {
+extension String {
 
     /// Errors that can occur during regex matching
     enum StringRegexError: Error {

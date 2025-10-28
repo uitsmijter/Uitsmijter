@@ -6,7 +6,7 @@ import Foundation
 /// Contains all claims and custom data included in JWT access tokens issued by the authorization server.
 /// Conforms to `JWTPayload` for JWT encoding/decoding, `SubjectProtocol` for subject identification,
 /// and `UserProfileProtocol` for user profile information.
-public struct Payload: JWTPayload, SubjectProtocol, UserProfileProtocol, Sendable {
+struct Payload: JWTPayload, SubjectProtocol, UserProfileProtocol, Sendable {
 
     /// Maps Swift property names to JWT claim keys
     ///

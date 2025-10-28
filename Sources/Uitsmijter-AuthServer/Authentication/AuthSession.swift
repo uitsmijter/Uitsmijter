@@ -44,7 +44,7 @@ import Foundation
 /// - Codes should be cryptographically random
 ///
 /// - SeeAlso: ``Code``, ``Payload``, ``TimeToLiveProtocol``
-public struct AuthSession: Codable, TimeToLiveProtocol, Sendable {
+struct AuthSession: Codable, TimeToLiveProtocol, Sendable {
     /// The type of authorization code.
     ///
     /// Distinguishes between standard authorization codes and refresh tokens.

@@ -6,7 +6,7 @@ import Foundation
 ///
 /// These errors represent failures when loading tenant and client configurations
 /// from various sources such as files, Kubernetes CRDs, or other storage backends.
-public enum EntityLoaderError: Error {
+enum EntityLoaderError: Error {
     /// Failed to load an entity from the specified URL.
     /// - Parameter from: The URL that could not be loaded
     case canNotLoad(from: URL)
@@ -50,7 +50,7 @@ public enum EntityLoaderError: Error {
 ///
 /// - SeeAlso: ``EntityLoaderProtocolFunctions``
 @MainActor
-public protocol EntityLoaderProtocol {
+protocol EntityLoaderProtocol {
     /// Initializes the entity loader with a callback handler.
     ///
     /// The loader should perform initial loading of entities during initialization
@@ -92,7 +92,7 @@ public protocol EntityLoaderProtocol {
 /// - ``addEntity(entity:)``
 /// - ``removeEntity(entity:)``
 @MainActor
-public protocol EntityLoaderProtocolFunctions {
+protocol EntityLoaderProtocolFunctions {
     /// The storage instance used by this entity loader.
     var storage: EntityStorage { get }
 

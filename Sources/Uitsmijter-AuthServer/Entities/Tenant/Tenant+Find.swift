@@ -10,7 +10,7 @@ extension Tenant: EntityFindResourceReferenceProtocol {}
 ///
 /// This extension provides various methods for finding tenants in storage
 /// based on different criteria: host matching, name, or resource reference.
-public extension Tenant {
+extension Tenant {
 
     /// Find a tenant by matching a host against configured hosts.
     ///

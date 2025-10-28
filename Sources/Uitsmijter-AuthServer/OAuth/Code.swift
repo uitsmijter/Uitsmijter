@@ -7,7 +7,7 @@ import Foundation
 ///     - value: The content of the `Code`.
 ///
 /// - Note: If `value` is not given while instantiating, the code has an arbitrary string with the length of 16.
-public struct Code: Codable, Equatable, ExpressibleByStringLiteral, Sendable {
+struct Code: Codable, Equatable, ExpressibleByStringLiteral, Sendable {
     public typealias StringLiteralType = String
 
     /// The `Code`'s content

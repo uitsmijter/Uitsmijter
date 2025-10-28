@@ -21,7 +21,7 @@ extension Client: EntityFindResourceReferenceProtocol {}
 ///
 /// - SeeAlso: ``EntityStorage``
 /// - SeeAlso: ``Tenant``
-public extension Client {
+extension Client {
 
     /// Finds a client by its UUID identifier.
     ///

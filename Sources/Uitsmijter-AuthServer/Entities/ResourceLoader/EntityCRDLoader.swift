@@ -3,7 +3,7 @@ import SwiftkubeClient
 import SwiftkubeModel
 import Logger
 
-public struct TenantResource: KubernetesAPIResource, NamespacedResource, MetadataHavingResource,
+struct TenantResource: KubernetesAPIResource, NamespacedResource, MetadataHavingResource,
                               ReadableResource, CreatableResource, ListableResource {
     public typealias List = TenantResourceList
     public var apiVersion = "uitsmijter.io/v1"
@@ -12,7 +12,7 @@ public struct TenantResource: KubernetesAPIResource, NamespacedResource, Metadat
     public var spec: TenantSpec
 }
 
-public struct TenantResourceList: KubernetesResourceList {
+struct TenantResourceList: KubernetesResourceList {
     public var metadata: SwiftkubeModel.meta.v1.ListMeta?
 
     public var apiVersion = "uitsmijter.io/v1"
@@ -20,7 +20,7 @@ public struct TenantResourceList: KubernetesResourceList {
     public var items: [TenantResource]
 }
 
-public struct ClientResource: KubernetesAPIResource, NamespacedResource, MetadataHavingResource,
+struct ClientResource: KubernetesAPIResource, NamespacedResource, MetadataHavingResource,
                               ReadableResource, CreatableResource, ListableResource {
     public typealias List = ClientResourceList
     public var apiVersion = "uitsmijter.io/v1"
@@ -29,7 +29,7 @@ public struct ClientResource: KubernetesAPIResource, NamespacedResource, Metadat
     public var spec: ClientSpec
 }
 
-public struct ClientResourceList: KubernetesResourceList {
+struct ClientResourceList: KubernetesResourceList {
     public var metadata: SwiftkubeModel.meta.v1.ListMeta?
 
     public var apiVersion = "uitsmijter.io/v1"
@@ -38,7 +38,7 @@ public struct ClientResourceList: KubernetesResourceList {
 }
 
 @MainActor
-public struct EntityCRDLoader: EntityLoaderProtocol {
+struct EntityCRDLoader: EntityLoaderProtocol {
 
     let delegate: EntityLoaderProtocolFunctions?
     let kubeClient: KubernetesClient

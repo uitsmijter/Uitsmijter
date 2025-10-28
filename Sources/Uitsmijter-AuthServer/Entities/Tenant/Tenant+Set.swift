@@ -6,7 +6,7 @@ import Logger
 /// This extension adds custom insertion logic to enforce the constraint that
 /// tenant hosts must be unique across all tenants. It prevents configuration
 /// conflicts where multiple tenants try to serve the same host.
-public extension Set where Element == Tenant {
+extension Set where Element == Tenant {
 
     /// Insert a tenant into the set with host uniqueness validation.
     ///
