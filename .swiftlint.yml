@@ -44,8 +44,8 @@ nesting:
   always_allow_one_type_in_functions: true
 
 file_length:
-  warning: 800
-  error: 1200
+  warning: 600
+  error: 800
 
 line_length:
   warning: 120

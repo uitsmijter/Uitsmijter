@@ -8,8 +8,10 @@ image:
 
 imagePullSecrets: []
 
-jwtSecret: "vosai0za6iex8AelahGemaeBooph6pah6Saezae0oojahfa7Re6leibeeshiu8ie"
-redisPassword: "Shohmaz1"
+# jwtSecret and redisPassword will be auto-generated if not provided
+# Generated secrets persist across upgrades using Kubernetes secret lookup
+jwtSecret: ""
+redisPassword: ""
 storageClassName: ""
 
 redis:
@@ -39,10 +41,10 @@ config:
 resources:
   requests:
     memory: "256Mi"
-    cpu: "500m"
+    cpu: "250m"
   limits:
     memory: "512Mi"
-    cpu: "2000m"
+    cpu: "1000m"
 
 domains:
   - domain: "nightly.uitsmijter.io"

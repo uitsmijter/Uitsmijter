@@ -20,7 +20,7 @@ x-shared_job: &shared_job
 services:
 
   redis:
-    image: 'ghcr.io/uitsmijter/redis:8.2.2'
+    image: 'ghcr.io/uitsmijter/redis:${REDIS_VERSION:-8.2.2}'
     ports:
       - "6379:6379"
     environment:
