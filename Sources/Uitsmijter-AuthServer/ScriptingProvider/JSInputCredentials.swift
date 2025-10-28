@@ -7,9 +7,4 @@ struct JSInputCredentials: JSInputParameterProtocol, Sendable {
     let username: String
     /// Users password
     let password: String
-
-    init(username: String, password: String) {
-        self.username = username
-        self.password = password
-    }
 }

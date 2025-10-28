@@ -42,13 +42,6 @@ protocol SubjectProtocol: Sendable {
 struct Subject: SubjectProtocol, Decodable {
     /// The subject claim value.
     var subject: SubjectClaim
-
-    /// Creates a new subject with the specified claim value.
-    ///
-    /// - Parameter subject: The subject claim identifying the principal.
-    init(subject: SubjectClaim) {
-        self.subject = subject
-    }
 }
 
 extension SubjectProtocol {

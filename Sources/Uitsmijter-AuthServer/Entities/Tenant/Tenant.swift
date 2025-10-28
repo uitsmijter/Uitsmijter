@@ -208,31 +208,6 @@ struct TenantTemplatesSettings: Codable, Sendable {
     /// For AWS S3, use regions like `"us-east-1"`, `"eu-west-1"`, etc.
     /// For other providers, consult their documentation.
     var region: String = "us-east-1"
-
-    /// Initialize S3 template storage settings.
-    ///
-    /// - Parameters:
-    ///   - access_key_id: S3 access key ID
-    ///   - secret_access_key: S3 secret access key
-    ///   - bucket: S3 bucket name
-    ///   - host: S3 host endpoint (defaults to AWS S3)
-    ///   - path: Path within bucket (defaults to root)
-    ///   - region: AWS region (defaults to us-east-1)
-    init(
-        access_key_id: String,
-        secret_access_key: String,
-        bucket: String,
-        host: String = "https://s3.amazonaws.com",
-        path: String = "",
-        region: String = "us-east-1"
-    ) {
-        self.access_key_id = access_key_id
-        self.secret_access_key = secret_access_key
-        self.bucket = bucket
-        self.host = host
-        self.path = path
-        self.region = region
-    }
 }
 
 /// Type alias for backward compatibility.
