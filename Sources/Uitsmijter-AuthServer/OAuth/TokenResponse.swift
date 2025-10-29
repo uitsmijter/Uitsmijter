@@ -1,6 +1,33 @@
 import Foundation
 import Vapor
 
+/// OAuth2 token endpoint response structure.
+///
+/// Represents the successful response from the token endpoint as defined in
+/// RFC 6749, Section 5.1. This response contains the access token and related
+/// metadata that the client will use to access protected resources.
+///
+/// ## Response Fields
+///
+/// - `access_token`: The issued access token (typically a JWT)
+/// - `token_type`: The type of token, usually "Bearer"
+/// - `expires_in`: Token lifetime in seconds
+/// - `refresh_token`: Optional refresh token for obtaining new access tokens
+/// - `scope`: The approved scopes if different from requested
+///
+/// ## Example Response
+///
+/// ```json
+/// {
+///   "access_token": "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9...",
+///   "token_type": "Bearer",
+///   "expires_in": 3600,
+///   "refresh_token": "def50200...",
+///   "scope": "openid profile email"
+/// }
+/// ```
+///
+/// - SeeAlso: RFC 6749, Section 5.1 (Successful Response)
 struct TokenResponse: Content, Sendable {
     /// The access token string as issued by the authorization server.
     let access_token: String
