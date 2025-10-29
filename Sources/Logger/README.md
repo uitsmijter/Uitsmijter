@@ -12,7 +12,6 @@ The Logger module is a custom logging implementation built on top of the [Swift 
 - **Request Context**: Automatic correlation of logs with request IDs
 - **Log History**: Circular buffer storing the last 250 log messages for debugging
 - **Environment Configuration**: Control log level and format via environment variables
-- **Thread Safety**: Full Swift 6 concurrency support
 
 ## Quick Start
 

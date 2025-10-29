@@ -54,9 +54,6 @@ public struct Log: Sendable {
     ///
     /// This property reads the `LOG_LEVEL` environment variable at initialization time. It is used internally
     /// by the `logLevel` computed property to determine the active log level.
-    ///
-    /// - Note: Safe to access from any isolation domain because String? is Sendable and initialized
-    ///         once at startup before any concurrent access occurs.
     private static let useLevel: String? = ProcessInfo.processInfo.environment["LOG_LEVEL"]
 
     /// The active log level for the application.
@@ -119,9 +116,6 @@ public struct Log: Sendable {
     /// - Log level: Configured via `logLevel` property
     /// - Log format: Configured via `logFormat` property
     ///
-    /// - Note: Safe to access from any isolation domain. The Logger type from SwiftLog is Sendable
-    ///         and thread-safe by design. It can be safely accessed concurrently from any context.
-    ///
     /// - Important: Use the public static logging methods (e.g., `Log.info()`) rather than accessing
     ///              this property directly.
     private static let logger = Logger(label: "Uitsmijter", factory: { _ in
@@ -140,9 +134,6 @@ public struct Log: Sendable {
     /// - Log level: Configured via `logLevel` property (same as main logger)
     /// - Log format: Configured via `logFormat` property (same as main logger)
     ///
-    /// - Note: Safe to access from any isolation domain. The Logger type from SwiftLog is Sendable
-    ///         and thread-safe by design. It can be safely accessed concurrently from any context.
-    ///
     /// ## Usage
     ///
     /// ```swift
@@ -153,8 +144,8 @@ public struct Log: Sendable {
     /// ])
     /// ```
     ///
-    /// - Important: Use this logger for security-sensitive events that require audit trails for compliance
-    ///              or forensic purposes. Use the main logger for general application events.
+    /// - Important: Use this logger for security and compliance events. Use the main logger
+    ///              for general application events.
     public static let audit = Logger(label: "Uitsmijter/audit", factory: { _ in
         LogWriter(metadata: ["type": "audit"], logLevel: logLevel, logFormat: logFormat)
     })
