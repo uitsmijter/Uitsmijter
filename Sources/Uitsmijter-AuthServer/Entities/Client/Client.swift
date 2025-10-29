@@ -217,15 +217,6 @@ extension ClientSpec: Equatable, Hashable {
     }
 }
 
-/// Extend the Tenant to be Hashable
-///
-extension Client: Hashable {
-    /// Hashable implementation
-    func hash(into hasher: inout Hasher) {
-        hasher.combine(name)
-    }
-}
-
 import Yams
 
 /// Client from Yaml file
