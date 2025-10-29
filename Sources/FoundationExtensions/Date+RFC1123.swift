@@ -20,7 +20,7 @@ import Foundation
 /// ```
 ///
 /// - SeeAlso: [RFC 1123](https://tools.ietf.org/html/rfc1123)
-extension Date {
+public extension Date {
     /// Returns the date formatted as an RFC 1123 string.
     ///
     /// RFC 1123 format is the standard date format used in HTTP headers

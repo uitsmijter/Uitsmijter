@@ -30,8 +30,19 @@ let package = Package(
 
         targets: [
             .target(
+                    name: "FoundationExtensions",
+                    dependencies: [
+                        
+                    ],
+                    swiftSettings: [
+                        .unsafeFlags(["-warnings-as-errors"])
+                    ],
+                    plugins: []
+            ),
+            .target(
                     name: "Logger",
                     dependencies: [
+                        .target(name: "FoundationExtensions"),
                         .product(name: "Logging", package: "swift-log"),
                     ],
                     swiftSettings: [
@@ -42,6 +53,7 @@ let package = Package(
             .target(
                     name: "Uitsmijter-AuthServer",
                     dependencies: [
+                        .target(name: "FoundationExtensions"),
                         .target(name: "Logger"),
                         "JXKit",
                         .product(name: "AsyncHTTPClient", package: "async-http-client"),

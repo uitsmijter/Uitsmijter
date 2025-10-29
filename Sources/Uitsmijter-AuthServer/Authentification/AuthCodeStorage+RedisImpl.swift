@@ -5,7 +5,7 @@ import Logger
 /// Actor-based thread-safe Redis storage for authorization codes and login sessions
 actor RedisAuthCodeStorage: AuthCodeStorageProtocol {
     /// TTL for login session IDs in seconds (2 hours)
-    private static let loginSessionTTL = 60 * 120
+    private static let loginSessionTTL: Int64 = 60 * 120
 
     /// Injected redis client
     let redis: RedisClient

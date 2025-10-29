@@ -1,5 +1,6 @@
 import Foundation
 import Logging
+import FoundationExtensions
 
 /// A custom log handler implementation that provides formatted logging output and maintains a history of log messages.
 ///

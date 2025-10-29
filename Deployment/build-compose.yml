@@ -41,6 +41,9 @@ services:
 
   build:
     <<: *shared_job
+    environment:
+      <<: *shared_environment
+      SUPPRESS_PACKAGE_WARNINGS: ${SUPPRESS_PACKAGE_WARNINGS}
     command:
       - /bin/bash
       - -c
@@ -51,7 +54,13 @@ services:
         echo "Build...."
         INCLUDES="$$(pkg-config --cflags-only-I javascriptcoregtk-4.1 | sed 's/-I/ -Xcc -I/g')"
         LIBS="$$(pkg-config --libs javascriptcoregtk-4.1 | sed 's/-l/ -Xlinker -l/g')"
-        swift build -c release --manifest-cache shared $$INCLUDES $$LIBS
+        swift build -c release --manifest-cache shared $$INCLUDES $$LIBS 2>&1 | \
+        if [ "$SUPPRESS_PACKAGE_WARNINGS" = "true" ]; then
+            grep -v "warning:.*found .* file(s) which are unhandled" | \
+            grep -v "^\s*/.*/.build/checkouts/.*/.*\.swift"
+        else
+            cat
+        fi
         echo "Copy release"
         mkdir -p Deployment/Release/Linux
         cp "$$(swift build --package-path /build -c release --show-bin-path)/Uitsmijter" Deployment/Release/Linux/

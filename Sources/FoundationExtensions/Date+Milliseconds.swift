@@ -2,7 +2,7 @@ import Foundation
 
 /// Extends `Date` with milliseconds functions
 ///
-extension Date {
+public extension Date {
 
     /// The milliseconds between the `Date` and now
     var millisecondsSinceNow: Int {

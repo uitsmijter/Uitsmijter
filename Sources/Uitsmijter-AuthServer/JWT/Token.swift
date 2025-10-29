@@ -1,6 +1,7 @@
 import Foundation
 import JWTKit
 import Logger
+import FoundationExtensions
 
 /// JWT access token with embedded user payload and metadata.
 ///

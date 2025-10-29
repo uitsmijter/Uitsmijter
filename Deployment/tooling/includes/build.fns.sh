@@ -13,6 +13,8 @@
 function buildImages() {
   h2 "Resize and reformat images"
   ARGUMENTS="${ARGUMENTS:-}" GITHUB_ACTION="${GITHUB_ACTION:-}" FILTER_TEST="${FILTER_TEST:-}" \
+  SUPPRESS_PACKAGE_WARNINGS="${SUPPRESS_PACKAGE_WARNINGS}" \
+  RUNTIME_IMAGE="${RUNTIME_IMAGE}" \
   docker compose \
     -f "${PROJECT_DIR}/Deployment/build-compose.yml" \
     --env-file "${PROJECT_DIR}/.env" \
