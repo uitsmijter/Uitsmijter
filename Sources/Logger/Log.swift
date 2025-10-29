@@ -467,8 +467,6 @@ public struct Log: Sendable {
     /// // Fatal configuration errors
     /// Log.critical("Database is not connected")
     ///
-    /// // Security incidents
-    /// Log.critical("Potential security breach detected: unauthorized token generation", requestId: req.id)
     ///
     /// // Data integrity issues
     /// Log.critical("Database corruption detected in tenant table")
