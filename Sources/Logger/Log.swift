@@ -47,8 +47,9 @@ public struct Log: Sendable {
 
     /// The active log level for the application.
     ///
-    /// This computed property determines the minimum severity level for log messages. Messages below
-    /// this level will be filtered out and not written to the log.
+    /// This property determines the minimum severity level for log messages. Messages below
+    /// this level will be filtered out and not written to the log. The log level is read from
+    /// the `LOG_LEVEL` environment variable at application startup.
     ///
     /// The log level is determined by the `LOG_LEVEL` environment variable. Valid values are:
     /// - `debug`: Most verbose, includes all messages
@@ -125,10 +126,17 @@ public struct Log: Sendable {
     /// ## Usage
     ///
     /// ```swift
+    /// // Login event
     /// Log.audit.info("User login successful", metadata: [
     ///     "user_id": "\(userId)",
-    ///     "client_id": "\(clientId)",
+    ///     "tenant": "\(tenantName)",
     ///     "ip_address": "\(ipAddress)"
+    /// ])
+    ///
+    /// // Logout event
+    /// Log.audit.info("User logout", metadata: [
+    ///     "user_id": "\(userId)",
+    ///     "session_duration": "\(duration)"
     /// ])
     /// ```
     ///
@@ -186,17 +194,9 @@ public struct Log: Sendable {
     ///            - All metadata from the logger's metadata provider
     ///            - `"request"`: The unique request ID (if requestId is provided)
     ///
-    /// ## Example
-    ///
-    /// ```swift
-    /// // Without request context
-    /// let metadata = enrichMetadata(with: nil)
-    /// // Returns: [:]
-    ///
-    /// // With request context
-    /// let metadata = enrichMetadata(with: "3B7A9C2E-1F4D-4B8A-9E2C-5D6F7A8B9C0D")
-    /// // Returns: ["request": "3B7A9C2E-1F4D-4B8A-9E2C-5D6F7A8B9C0D"]
-    /// ```
+    /// - Note: This is an internal helper method used by all public logging methods to ensure
+    ///         consistent metadata enrichment across the application. It enables log correlation
+    ///         by request ID, making it easier to trace requests through distributed systems.
     private static func enrichMetadata(with requestId: String?) -> Logger.Metadata {
         var metadata: Logger.Metadata = Log.logger.metadataProvider?.get() ?? [:]
         if let requestId {
@@ -464,8 +464,8 @@ public struct Log: Sendable {
     /// ## Example
     ///
     /// ```swift
-    /// // System failures
-    /// Log.critical("Out of memory: unable to allocate resources")
+    /// // Fatal configuration errors
+    /// Log.critical("Database is not connected")
     ///
     /// // Security incidents
     /// Log.critical("Potential security breach detected: unauthorized token generation", requestId: req.id)
@@ -473,8 +473,8 @@ public struct Log: Sendable {
     /// // Data integrity issues
     /// Log.critical("Database corruption detected in tenant table")
     ///
-    /// // Fatal configuration errors
-    /// Log.critical("Database is not connected")
+    /// // System shutdown
+    /// Log.critical("Critical resource exhaustion: initiating graceful shutdown")
     /// ```
     public static func critical(
         _ msg: String,
