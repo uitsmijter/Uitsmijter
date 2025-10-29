@@ -3,7 +3,7 @@ import Logging
 import Testing
 @testable import Logger
 
-@Suite("Logging Tests")
+@Suite("Logging Tests", .serialized)
 @MainActor
 struct LoggingTest {
 

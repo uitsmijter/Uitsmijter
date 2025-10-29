@@ -4,7 +4,7 @@ import Testing
 @testable import Uitsmijter_AuthServer
 import Logger
 
-@Suite("JavaScript Functions Logging Output Tests")
+@Suite("JavaScript Functions Logging Output Tests", .serialized)
 struct JSFunctionsLoggingOutputTest {
 
     @Test("say function writes info message to log")

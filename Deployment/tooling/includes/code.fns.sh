@@ -17,6 +17,7 @@
 # Use case: Remote development or containerized editing environment
 function openCode() {
   h2 "Open project in code"
+  ARGUMENTS="${ARGUMENTS:-}" GITHUB_ACTION="${GITHUB_ACTION:-}" FILTER_TEST="${FILTER_TEST:-}" \
   docker compose \
     -f "${PROJECT_DIR}/Deployment/build-compose.yml" \
     --env-file "${PROJECT_DIR}/.env" \

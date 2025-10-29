@@ -3,7 +3,7 @@ import Logging
 import Testing
 @testable import Logger
 
-@Suite("NDJSON Logging Tests")
+@Suite("NDJSON Logging Tests", .serialized)
 @MainActor
 struct LoggingNDJSONTest {
 

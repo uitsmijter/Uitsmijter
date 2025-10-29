@@ -4,7 +4,7 @@ import Testing
 import JWTKit
 import Logger
 
-@Suite("JWT Token Tests")
+@Suite("JWT Token Tests", .serialized)
 // swiftlint:disable type_body_length
 struct TokenTest {
 

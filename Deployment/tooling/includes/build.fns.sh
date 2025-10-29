@@ -12,6 +12,7 @@
 # Use case: Optimize and prepare image assets before building
 function buildImages() {
   h2 "Resize and reformat images"
+  ARGUMENTS="${ARGUMENTS:-}" GITHUB_ACTION="${GITHUB_ACTION:-}" FILTER_TEST="${FILTER_TEST:-}" \
   docker compose \
     -f "${PROJECT_DIR}/Deployment/build-compose.yml" \
     --env-file "${PROJECT_DIR}/.env" \
@@ -33,6 +34,7 @@ function buildIncrementalBinary() {
   buildImages
   h2 "Build a binary incremental"
   local dockerComposeBuildParameter=${1}
+  ARGUMENTS="${ARGUMENTS:-}" GITHUB_ACTION="${GITHUB_ACTION:-}" FILTER_TEST="${FILTER_TEST:-}" \
   SUPPRESS_PACKAGE_WARNINGS="${SUPPRESS_PACKAGE_WARNINGS}" \
   RUNTIME_IMAGE="" docker compose \
       -f "${PROJECT_DIR}/Deployment/build-compose.yml" \
@@ -136,6 +138,7 @@ function buildHelm() {
 function buildRuntime() {
   h2 "Build uitsmijter runtime"
   local TAG=${1:-${TAG}}
+  ARGUMENTS="${ARGUMENTS:-}" GITHUB_ACTION="${GITHUB_ACTION:-}" FILTER_TEST="${FILTER_TEST:-}" \
   RUNTIME_IMAGE=${TAG} docker compose \
     -f "${PROJECT_DIR}/Deployment/build-compose.yml" \
     --env-file "${SCRIPT_DIR}/.env" \

@@ -21,6 +21,7 @@ function unitTests() {
   h2 "Run all UnitTests"
   local dockerComposeBuildParameter=${1}
   local optionalFilter=${2}
+  ARGUMENTS="${ARGUMENTS:-}" GITHUB_ACTION="${GITHUB_ACTION:-}" \
   SUPPRESS_PACKAGE_WARNINGS="${SUPPRESS_PACKAGE_WARNINGS}" \
   FILTER_TEST="${optionalFilter}" \
   docker compose \
@@ -47,6 +48,7 @@ function unitTestsList() {
   h2 "List of available UnitTests"
   local dockerComposeBuildParameter=${1}
   local optionalFilter=${2}
+  ARGUMENTS="${ARGUMENTS:-}" GITHUB_ACTION="${GITHUB_ACTION:-}" \
   SUPPRESS_PACKAGE_WARNINGS="${SUPPRESS_PACKAGE_WARNINGS}" \
   FILTER_TEST="${optionalFilter}" \
   docker compose \

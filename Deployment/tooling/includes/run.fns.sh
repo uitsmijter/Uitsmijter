@@ -12,6 +12,7 @@
 # Use case: Local development and testing with fast iteration
 function runInDocker() {
   h2 "Run incremental build in a docker environment"
+  ARGUMENTS="${ARGUMENTS:-}" GITHUB_ACTION="${GITHUB_ACTION:-}" FILTER_TEST="${FILTER_TEST:-}" \
   RUNTIME_IMAGE="${IMAGENAME}-runtime:latest" docker compose \
     -f "${PROJECT_DIR}/Deployment/build-compose.yml" \
     --env-file "${SCRIPT_DIR}/.env" \
