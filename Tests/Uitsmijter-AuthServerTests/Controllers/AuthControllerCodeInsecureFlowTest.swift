@@ -55,8 +55,9 @@ struct AuthControllerCodeInsecureFlowTest {
                     //                    #expect(cookie?.contains("Path=/") == true)
                     //                    #expect(cookie?.contains("SameSite=Strict") == true)
 
-                    // check status
+                    // check status and location header presence
                     #expect(res.status == .seeOther)
+                    #expect(location != nil, "Location header must be present for redirect")
 
                     // be sure that it can be used
                     guard let codeValue else {
@@ -160,8 +161,9 @@ struct AuthControllerCodeInsecureFlowTest {
                     //                    #expect(cookie?.contains("Path=/") == true)
                     //                    #expect(cookie?.contains("SameSite=Strict") == true)
 
-                    // check status
+                    // check status and location header presence
                     #expect(res.status == .seeOther)
+                    #expect(location != nil, "Location header must be present for redirect")
 
                     // be sure that it can be used
                     guard let codeValue else {

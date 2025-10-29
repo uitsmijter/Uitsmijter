@@ -111,7 +111,9 @@ test.describe('OpenID Connect Discovery', () => {
             expect(config.userinfo_endpoint).toContain('/token/info');
         });
 
-        test('should support authorization code flow', async ({page}) => {
+        test('should include "code" in response_types_supported for authorization code flow', async ({page}) => {
+            // Verify that the OpenID configuration advertises support for the authorization code flow
+            // by checking that "code" is present in the response_types_supported array
             const response = await page.goto('https://id.example.com/.well-known/openid-configuration');
             const config = await response.json();
 

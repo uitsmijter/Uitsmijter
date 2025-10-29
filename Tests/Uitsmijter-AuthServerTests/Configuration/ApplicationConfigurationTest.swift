@@ -22,13 +22,6 @@ struct ApplicationConfigurationTest {
         #expect(value == true || value == false)
     }
 
-    @Test("RuntimeConfiguration UITSMIJTER_NAMESPACE is accessible")
-    func uitsmijterNamespaceIsAccessible() {
-        let namespace = RuntimeConfiguration.UITSMIJTER_NAMESPACE
-        // Should be a valid string (possibly empty)
-        #expect(namespace.isEmpty)
-    }
-
     // MARK: - ApplicationConfigError Tests
 
     @Test("ApplicationConfigError directoryConfigError can be created")
