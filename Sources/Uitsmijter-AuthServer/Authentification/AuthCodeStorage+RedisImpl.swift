@@ -106,7 +106,6 @@ actor RedisAuthCodeStorage: AuthCodeStorageProtocol {
     func wipe(tenant: Tenant, subject: String) async {
         do {
             let (_, keys) = try await redis.scan(startingFrom: 0).get()
-            Log.debug("Checking \(keys.count) tokens for retention")
             let keysToDelete: [RedisKey] = try await withThrowingTaskGroup(of: RedisKey?.self) { group in
                 for key in keys {
                     group.addTask {
@@ -131,7 +130,6 @@ actor RedisAuthCodeStorage: AuthCodeStorageProtocol {
                 }
                 return result
             }
-            Log.debug("Deleting \(keysToDelete.count) tokens")
             if !keysToDelete.isEmpty {
                 _ = try await redis.delete(keysToDelete).get()
             }
@@ -142,7 +140,6 @@ actor RedisAuthCodeStorage: AuthCodeStorageProtocol {
 
     func isHealthy() async -> Bool {
         if (try? await redis.ping().get()) == "PONG" {
-            Log.debug("Redis is healthy")
             return true
         }
 

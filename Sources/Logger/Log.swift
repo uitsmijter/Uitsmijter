@@ -3,7 +3,7 @@ import Logging
 
 /// A project-wide global logging facility for the Uitsmijter application.
 ///
-/// `Log` provides a centralized, thread-safe logging interface that wraps Apple's Unified Logging system
+/// `Log` provides a centralized logging interface that wraps Apple's Unified Logging system
 /// through the SwiftLog framework. It implements a singleton pattern and supports multiple log levels,
 /// formats, and automatic request context enrichment.
 ///
@@ -36,17 +36,6 @@ import Logging
 /// The logger can be configured through environment variables:
 /// - `LOG_LEVEL`: Sets the minimum log level (debug, info, notice, warning, error, critical)
 /// - `LOG_FORMAT`: Sets the output format (console or json)
-///
-/// ## Thread Safety
-///
-/// The static logger properties are marked as `nonisolated(unsafe)` to allow access from any isolation
-/// domain. While this bypasses Swift's strict concurrency checking, the underlying SwiftLog Logger
-/// type is thread-safe by design and can be safely accessed from multiple concurrent contexts.
-///
-/// The Logger type from SwiftLog is explicitly documented as thread-safe and designed for this pattern.
-/// Using `nonisolated(unsafe)` is the recommended approach per SwiftLog's Swift 6 migration guide.
-///
-/// - Note: Use the static logging methods directly (e.g., `Log.info("message")`).
 ///
 public struct Log: Sendable {
 
@@ -122,11 +111,10 @@ public struct Log: Sendable {
         LogWriter(metadata: ["type": "log"], logLevel: logLevel, logFormat: logFormat)
     })
 
-    /// The dedicated audit logger for security and compliance events.
+    /// The dedicated audit logger for login/logout events.
     ///
-    /// This logger is specifically designed for audit trail logging, capturing security-relevant events
-    /// such as authentication attempts, authorization decisions, and access control changes. It maintains
-    /// a separate log stream to facilitate compliance reporting and security analysis.
+    /// This logger is specifically designed for capturing login and logout events. It maintains
+    /// a separate log stream dedicated to authentication audit trails.
     ///
     /// The audit logger is initialized with:
     /// - Label: "Uitsmijter/audit"
@@ -137,14 +125,14 @@ public struct Log: Sendable {
     /// ## Usage
     ///
     /// ```swift
-    /// Log.audit.info("User authentication successful", metadata: [
+    /// Log.audit.info("User login successful", metadata: [
     ///     "user_id": "\(userId)",
     ///     "client_id": "\(clientId)",
     ///     "ip_address": "\(ipAddress)"
     /// ])
     /// ```
     ///
-    /// - Important: Use this logger for security and compliance events. Use the main logger
+    /// - Important: Use this logger exclusively for login/logout events. Use the main logger
     ///              for general application events.
     public static let audit = Logger(label: "Uitsmijter/audit", factory: { _ in
         LogWriter(metadata: ["type": "audit"], logLevel: logLevel, logFormat: logFormat)
@@ -176,9 +164,6 @@ public struct Log: Sendable {
     /// // Use with Kubernetes client
     /// let kubeClient = KubernetesClient(logger: Log.shared)
     /// ```
-    ///
-    /// - Note: For application logging, prefer using the static methods like `Log.info()`, `Log.error()`,
-    ///         etc. This property is primarily for library integration.
     public static var shared: Logger {
         logger
     }
@@ -489,7 +474,7 @@ public struct Log: Sendable {
     /// Log.critical("Database corruption detected in tenant table")
     ///
     /// // Fatal configuration errors
-    /// Log.critical("Required JWT signing key not found - cannot start application")
+    /// Log.critical("Database is not connected")
     /// ```
     public static func critical(
         _ msg: String,

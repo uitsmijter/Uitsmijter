@@ -75,8 +75,8 @@ struct AuthorizeController: RouteCollection, OAuthControllerProtocol {
         // if not logged in, redirect to login - than proceed
         // if already logged in, than generate a code.
         let payloadStatus = req.clientInfo?.validPayload != nil ? "present" : "nil"
-        Log.info("DEBUG: req.clientInfo?.validPayload = \(payloadStatus)", requestId: req.id)
-        Log.info("DEBUG: req.clientInfo?.expired = \(req.clientInfo?.expired ?? false)", requestId: req.id)
+        Log.debug("req.clientInfo?.validPayload = \(payloadStatus)", requestId: req.id)
+        Log.debug("req.clientInfo?.expired = \(req.clientInfo?.expired ?? false)", requestId: req.id)
         guard let userPayload = req.clientInfo?.validPayload else {
             Log.info("No valid token, render login", requestId: req.id)
 

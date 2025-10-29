@@ -42,17 +42,17 @@ public struct CircularBuffer<Element> {
     /// Maximum number of elements the buffer can hold.
     ///
     /// Once initialized, the capacity cannot be changed.
-    private(set) var capacity = 0
+    private var capacity = 0
 
     /// Current write index in the circular buffer.
     ///
     /// Points to the next position where data will be written.
-    private(set) var headPosition = 0
+    private var headPosition = 0
 
     /// Current read index in the circular buffer.
     ///
     /// Points to the next position where data will be read.
-    private(set) var tailPosition = 0
+    private var tailPosition = 0
 
     /// Number of elements currently stored in the buffer.
     ///

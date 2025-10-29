@@ -1,6 +1,6 @@
 # Logger
 
-A Swift logging framework for the Uitsmijter project that provides structured, configurable, and thread-safe logging capabilities with support for multiple output formats and audit trails.
+A Swift logging framework for the Uitsmijter project that provides structured, configurable logging capabilities with support for multiple output formats and audit trails.
 
 ## Overview
 
@@ -8,7 +8,7 @@ The Logger module is a custom logging implementation built on top of the [Swift 
 
 - **Multiple Log Levels**: debug, info, notice, warning, error, critical
 - **Flexible Output Formats**: Console (human-readable) and NDJSON (machine-readable)
-- **Audit Logging**: Separate audit log stream for security and compliance events
+- **Audit Logging**: Separate audit log stream for login events
 - **Request Context**: Automatic correlation of logs with request IDs
 - **Log History**: Circular buffer storing the last 250 log messages for debugging
 - **Environment Configuration**: Control log level and format via environment variables
@@ -67,7 +67,7 @@ Configure logging behavior through environment variables:
 | Variable | Values | Default | Description |
 |----------|--------|---------|-------------|
 | `LOG_LEVEL` | `debug`, `info`, `notice`, `warning`, `error`, `critical` | `info` | Minimum log level to output |
-| `LOG_FORMAT` | `console`, `json` | `console` | Output format for log messages |
+| `LOG_FORMAT` | `console`, `ndjson` | `console` | Output format for log messages |
 
 **Examples:**
 
@@ -75,11 +75,11 @@ Configure logging behavior through environment variables:
 # Debug level with console output (development)
 LOG_LEVEL=debug LOG_FORMAT=console ./Uitsmijter
 
-# Info level with JSON output (production)
-LOG_LEVEL=info LOG_FORMAT=json ./Uitsmijter
+# Info level with NDJSON output (production)
+LOG_LEVEL=info LOG_FORMAT=ndjson ./Uitsmijter
 
-# Error level with JSON output (production with reduced verbosity)
-LOG_LEVEL=error LOG_FORMAT=json ./Uitsmijter
+# Error level with NDJSON output (production with reduced verbosity)
+LOG_LEVEL=error LOG_FORMAT=ndjson ./Uitsmijter
 ```
 
 ### Log Levels
@@ -268,15 +268,6 @@ public struct LogMessage: Encodable {
 }
 ```
 
-## Thread Safety
-
-The Logger module is fully compatible with Swift 6 strict concurrency:
-
-- **`Log`**: Marked as `Sendable`, safe to access from any isolation domain
-- **`LogWriter`**: Uses `nonisolated(unsafe)` for static storage with thread-safe operations
-- **`CircularBuffer`**: Implements internal locking for concurrent access
-- **SwiftLog Integration**: The underlying `Logger` type is thread-safe by design
-
 ## Best Practices
 
 ### 1. Choose Appropriate Log Levels
@@ -380,4 +371,3 @@ Log.audit.warning("Failed login attempt", metadata: [
 
 - [Swift Logging API Documentation](https://github.com/apple/swift-log)
 - [Uitsmijter Main Documentation](https://docs.uitsmijter.io)
-- [CLAUDE.md](../../CLAUDE.md) - Project-wide development guidelines
