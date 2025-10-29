@@ -77,6 +77,10 @@ actor MemoryAuthCodeStorage: AuthCodeStorageProtocol {
 
     // MARK: - AuthCodeStorageProtocol
 
+    /// Stores an authorization session in memory.
+    ///
+    /// - Parameter session: The authorization session to store
+    /// - Throws: `AuthCodeStorageError.CODE_TAKEN` if a session with this code already exists
     func set(authSession session: AuthSession) async throws {
         if storage.contains(where: { $0.code.value == session.code.value }) {
             throw AuthCodeStorageError.CODE_TAKEN
@@ -85,6 +89,13 @@ actor MemoryAuthCodeStorage: AuthCodeStorageProtocol {
         sortAndGc()
     }
 
+    /// Retrieves an authorization session by code value.
+    ///
+    /// - Parameters:
+    ///   - type: The type of authorization code (code or refresh)
+    ///   - value: The authorization code value to look up
+    ///   - remove: If true, removes the session after retrieval (single-use enforcement)
+    /// - Returns: The authorization session if found, nil otherwise
     func get(type: AuthSession.CodeType, codeValue value: String, remove: Bool? = false) async -> AuthSession? {
         let session = storage.first(where: { $0.code.value == value && $0.type == type })
         if remove ?? false {
@@ -93,10 +104,18 @@ actor MemoryAuthCodeStorage: AuthCodeStorageProtocol {
         return session
     }
 
+    /// Stores a login session in memory.
+    ///
+    /// - Parameter session: The login session to store
+    /// - Throws: Can throw errors from storage operations
     func push(loginId session: LoginSession) async throws {
         loginSessions.append(session)
     }
 
+    /// Retrieves and removes a login session by UUID.
+    ///
+    /// - Parameter uuid: The login session UUID to look up
+    /// - Returns: true if the session was found and removed, false otherwise
     func pull(loginUuid uuid: UUID) async -> Bool {
         let session = loginSessions.first { session in
             session.loginId == uuid
@@ -110,18 +129,35 @@ actor MemoryAuthCodeStorage: AuthCodeStorageProtocol {
         return true
     }
 
+    /// Returns the number of stored authorization sessions.
+    ///
+    /// - Returns: The count of authorization sessions in storage
     func count() async -> Int {
         return storage.count
     }
 
+    /// Deletes an authorization session by code value.
+    ///
+    /// - Parameters:
+    ///   - type: The type of authorization code (code or refresh)
+    ///   - value: The authorization code value to delete
+    /// - Throws: Can throw errors from storage operations
     func delete(type: AuthSession.CodeType, codeValue value: String) async throws {
         storage.removeAll(where: { $0.code.value == value && $0.type == type })
     }
 
+    /// Removes all authorization sessions for a specific user.
+    ///
+    /// - Parameters:
+    ///   - tenant: The tenant containing the user
+    ///   - subject: The subject (user identifier) whose sessions should be removed
     func wipe(tenant: Tenant, subject: String) async {
         storage.removeAll(where: { $0.payload?.tenant == tenant.name && $0.payload?.subject.value == subject })
     }
 
+    /// Checks if the storage backend is healthy and operational.
+    ///
+    /// - Returns: Always returns true for memory storage (always available)
     func isHealthy() async -> Bool {
         true
     }

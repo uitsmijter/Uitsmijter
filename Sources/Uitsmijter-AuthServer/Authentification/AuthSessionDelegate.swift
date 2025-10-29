@@ -3,6 +3,23 @@ import Vapor
 @preconcurrency import Redis
 import Logger
 
+/// Delegate for managing user sessions in Redis with TTL support.
+///
+/// This delegate implements Vapor's `RedisSessionsDelegate` protocol to provide
+/// session storage with automatic expiration based on TimeToLive values embedded
+/// in session data. Sessions containing TTL information will automatically expire
+/// in Redis after the specified duration.
+///
+/// ## TTL Handling
+///
+/// When storing session data, the delegate inspects the data for any value containing
+/// "ttl". If found, it attempts to decode a `TimeToLive` model and sets the Redis key
+/// expiration accordingly. This enables automatic cleanup of short-lived sessions.
+///
+/// ## Thread Safety
+///
+/// Uses `UnsafeTransfer` to safely capture non-Sendable Redis types in async contexts
+/// while maintaining safety guarantees through Vapor's EventLoop architecture.
 struct AuthSessionDelegate: RedisSessionsDelegate {
 
     func redis<RedisClientType>(
