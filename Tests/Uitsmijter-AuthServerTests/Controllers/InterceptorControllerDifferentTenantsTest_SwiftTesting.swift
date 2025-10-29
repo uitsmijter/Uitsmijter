@@ -5,9 +5,6 @@ import VaporTesting
 
 @Suite("Interceptor Controller - Different Tenants", .serialized)
 struct InterceptorDifferentTenantsSwiftTest {
-    // Note: Swift Testing suites are value types (structs) so they don't have deinit
-    // Resource cleanup needs to be handled explicitly in each test or with shared resources
-
     @Test("Interceptor should reject request with token from different tenant")
     func interceptorWithOtherTenantShouldFail() async throws {
         // Setup for this specific test
@@ -29,7 +26,6 @@ struct InterceptorDifferentTenantsSwiftTest {
                 return
             }
 
-            // Using Vapor's testable API directly to avoid XCTVapor Sendable issues
             try await app.testing().test(
                 .GET,
                 "interceptor",

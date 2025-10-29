@@ -4,7 +4,6 @@ import Dispatch
 import Logger
 
 /// Actor-based thread-safe storage for authorization codes and login sessions
-/// Converted from @unchecked Sendable to proper Actor isolation per ACTOR.md recommendations
 actor MemoryAuthCodeStorage: AuthCodeStorageProtocol {
     /// Poor mans GarbageCollector, trigger timer (using DispatchSourceTimer for Docker compatibility)
     private var gcTimer: DispatchSourceTimer?
@@ -12,7 +11,7 @@ actor MemoryAuthCodeStorage: AuthCodeStorageProtocol {
     /// Storage for AuthSessions
     private var storage: [AuthSession] = []
 
-    /// Storage for LoginSessions - no longer needs @Synchronised wrapper due to actor isolation
+    /// Storage for LoginSessions
     private var loginSessions: [LoginSession] = []
 
     var count: Int {
