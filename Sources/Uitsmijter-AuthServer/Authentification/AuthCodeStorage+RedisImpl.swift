@@ -5,6 +5,9 @@ import Logger
 /// Actor-based thread-safe Redis storage for authorization codes and login sessions
 /// Converted from @unchecked Sendable to proper Actor isolation per ACTOR.md recommendations
 actor RedisAuthCodeStorage: AuthCodeStorageProtocol {
+    /// TTL for login session IDs in seconds (2 hours)
+    private static let loginSessionTTL = 60 * 120
+
     /// Injected redis client
     let redis: RedisClient
 
@@ -67,7 +70,7 @@ actor RedisAuthCodeStorage: AuthCodeStorageProtocol {
         let stringValue = String(data: sessionData, encoding: .utf8)
 
         try await redis.set(key, to: stringValue).get()
-        _ = try await redis.expire(key, after: TimeAmount.seconds(60 * 120)).get()
+        _ = try await redis.expire(key, after: TimeAmount.seconds(Self.loginSessionTTL)).get()
     }
 
     func pull(loginUuid uuid: UUID) async -> Bool {
