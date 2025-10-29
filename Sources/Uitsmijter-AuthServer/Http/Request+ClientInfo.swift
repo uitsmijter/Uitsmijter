@@ -1,5 +1,6 @@
 import Foundation
 import Vapor
+import Logger
 
 // MARK: - Client Info Request
 
@@ -174,5 +175,36 @@ extension Request {
         set {
             storage[ClientInfoKey.self] = newValue
         }
+    }
+
+    /// Ensure that clientInfo is set on the request.
+    ///
+    /// This is a convenience method to safely extract client information that should
+    /// have been added by the ``RequestClientMiddleware``.
+    ///
+    /// - Returns: The ClientInfo if present
+    /// - Throws: `Abort(.badRequest)` if ClientInfo is not present on the request
+    func requireClientInfo() throws -> ClientInfo {
+        guard let clientInfo = self.clientInfo else {
+            Log.error("Request without clientInfo is not allowed", requestId: self.id)
+            throw Abort(.badRequest, reason: "ERRORS.NOT_ACCEPTABLE_REQUEST")
+        }
+        return clientInfo
+    }
+
+    /// Get the tenant from client information.
+    ///
+    /// This is a convenience method to extract the tenant that should be associated
+    /// with the client information.
+    ///
+    /// - Parameter clientInfo: A valid ClientInfo instance
+    /// - Returns: The Tenant associated with the client
+    /// - Throws: `Abort(.badRequest)` if the tenant is not present
+    func requireTenant(from clientInfo: ClientInfo) throws -> Tenant {
+        guard let tenant = clientInfo.tenant else {
+            Log.error("Request without tenant is not allowed", requestId: self.id)
+            throw Abort(.badRequest, reason: "ERRORS.NO_TENANT")
+        }
+        return tenant
     }
 }

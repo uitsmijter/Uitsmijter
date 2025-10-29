@@ -27,9 +27,3 @@ protocol AuthCodeStorageProtocol: Sendable {
     /// Check if the storage is healthy
     func isHealthy() async -> Bool
 }
-
-/// Errors that can occur during auth code storage operations
-enum AuthCodeStorageError: Error {
-    case CODE_TAKEN
-    case KEY_ERROR
-}

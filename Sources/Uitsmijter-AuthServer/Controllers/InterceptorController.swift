@@ -118,8 +118,8 @@ struct InterceptorController: RouteCollection {
     /// - Throws: `Abort` errors for configuration or validation failures.
     @Sendable func doAuthentication(req: Request) async throws -> Response {
 
-        let clientInfo = try getClientInfo(on: req)
-        let tenant = try getTenant(of: clientInfo)
+        let clientInfo = try req.requireClientInfo()
+        let tenant = try req.requireTenant(from: clientInfo)
 
         // check if tenant allowed for interceptor
         try await isAllowedForInterceptor(tenant: tenant)
@@ -165,29 +165,6 @@ struct InterceptorController: RouteCollection {
     /// Ensure that clientInfo is set
     ///
     /// - Parameter req: Request
-    /// - Returns: a ClientInfo if set
-    /// - Throws: badRequest error if ClientInfo is not present
-    private func getClientInfo(on req: Request) throws -> ClientInfo {
-        guard let clientInfo = req.clientInfo else {
-            Log.error("Client request without clientInfo is not allowed in this context", requestId: req.id)
-            throw Abort(.badRequest, reason: "ERRORS.NOT_ACCEPTABLE_REQUEST")
-        }
-        return clientInfo
-    }
-
-    /// Get the tenant for a ClientInfo
-    ///
-    /// - Parameter clientInfo: A valid ClientInfo
-    /// - Returns: a Tenant for the request is made
-    /// - Throws: badRequest error if the tenant is not present
-    private func getTenant(of clientInfo: ClientInfo) throws -> Tenant {
-        guard let tenant = clientInfo.tenant else {
-            Log.error("Client request without tenant is not allowed")
-            throw Abort(.badRequest, reason: "ERRORS.NO_TENANT")
-        }
-        return tenant
-    }
-
     /// Get a fallback cookie domain if other methods didn't match
     ///
     /// - Parameter clientInfo: A valid ClientInfo

@@ -22,7 +22,7 @@ struct AuthorizeController: RouteCollection, OAuthControllerProtocol {
 
         let codeChallengeMethod = try getCodeChallengeMethod(on: req)
         let authRequest = try getAuthRequest(on: req, with: codeChallengeMethod)
-        let clientInfo = try getClientInfo(on: req)
+        let clientInfo = try req.requireClientInfo()
 
         // PKCE validation must happen BEFORE loginid validation
         // This ensures we return the correct error for PKCE violations
@@ -290,11 +290,4 @@ struct AuthorizeController: RouteCollection, OAuthControllerProtocol {
         return authRequest
     }
 
-    private func getClientInfo(on request: Request) throws -> ClientInfo {
-        guard let clientInfo = request.clientInfo else {
-            Log.error("Auth request without clientInfo is not allowed", requestId: request.id)
-            throw Abort(.badRequest, reason: "LOGIN.ERRORS.NOT_ACCEPTABLE_REQUEST")
-        }
-        return clientInfo
-    }
 }
