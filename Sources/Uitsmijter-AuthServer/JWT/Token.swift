@@ -72,7 +72,7 @@ enum TokenError: Error {
 /// - SeeAlso: ``jwt_signer`` for the signing mechanism
 struct Token: ExpressibleByStringLiteral {
 
-    public typealias StringLiteralType = String
+    typealias StringLiteralType = String
 
     /// JWT signers instance for signing and verifying tokens.
     ///
