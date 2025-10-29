@@ -2,24 +2,6 @@ import Foundation
 import JWTKit
 import Logger
 
-/// Errors that can occur during token creation and validation.
-///
-/// These errors represent failures in token lifecycle operations that prevent
-/// successful token generation or processing.
-enum TokenError: Error {
-    /// Failed to calculate the expiration time.
-    ///
-    /// This error occurs when the calendar date calculation for token expiration fails,
-    /// typically due to invalid date arithmetic or system time issues.
-    case CALCULATE_TIME
-
-    /// No payload found in the authentication session.
-    ///
-    /// This error indicates that an operation requiring a payload (such as token refresh)
-    /// was attempted on a session without valid payload data.
-    case NO_PAYLOAD
-}
-
 /// JWT access token with embedded user payload and metadata.
 ///
 /// `Token` represents a complete JWT (JSON Web Token) that encapsulates user authentication

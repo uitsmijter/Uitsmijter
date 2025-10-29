@@ -12,14 +12,6 @@ protocol RedirectUriProtocol {
     var redirect_uri: URL { get }
 }
 
-/// Errors that can occur during redirect URI operations.
-enum RedirectError: Error {
-    /// Indicates that the provided value could not be converted to a valid URL.
-    ///
-    /// - Parameter value: The value that failed to convert to a URL.
-    case notAnUrl(any Sendable)
-}
-
 /// A concrete implementation of `RedirectUriProtocol` that encapsulates a redirect URI.
 ///
 /// `RedirectUri` provides a type-safe wrapper around a URL specifically for use

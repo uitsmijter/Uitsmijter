@@ -1,33 +1,5 @@
 import Foundation
 
-// MARK: - Configuration Errors
-
-/// Errors that can occur during application configuration.
-///
-/// These errors represent configuration issues that prevent the application
-/// from starting or loading entities correctly.
-enum ApplicationConfigError: Error {
-    /// The application could not access or validate a required directory.
-    /// - Parameter String: A description of the directory issue
-    case directoryConfigError(String)
-
-    /// A client configuration is missing a required name field.
-    /// - Parameter String: Additional context about the client
-    case clientWithoutName(String)
-
-    /// A client configuration does not specify its parent tenant.
-    /// - Parameter String: Additional context about the client
-    case clientWithoutTenant(String)
-
-    /// The specified tenant could not be found in the entity storage.
-    /// - Parameter String: The name of the tenant that was not found
-    case tenantNotFound(String)
-
-    /// One or more tenant configurations could not be parsed from YAML.
-    /// - Parameter [String]: List of tenant file paths that failed to parse
-    case tenantNotParsable([String])
-}
-
 // MARK: - Global Paths
 
 /// The base path to application resources directory.
