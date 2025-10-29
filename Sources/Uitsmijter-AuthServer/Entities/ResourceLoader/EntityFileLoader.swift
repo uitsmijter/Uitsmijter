@@ -193,11 +193,22 @@ struct EntityFileLoader: EntityLoaderProtocol {
         }
     }
 
+    /// Starts file monitoring for tenant and client configuration files.
+    ///
+    /// Begins watching the configured directories for changes to YAML files.
+    /// When files are added, modified, or deleted, the loader automatically
+    /// updates the entity storage.
+    ///
+    /// - Throws: Errors from the underlying file monitor initialization
     func start() throws {
         try tenantFileMonitor?.start()
         try clientFileMonitor?.start()
     }
 
+    /// Stops file monitoring and cleans up resources.
+    ///
+    /// Halts all file monitoring operations and releases associated resources.
+    /// This should be called during application shutdown to ensure clean termination.
     nonisolated func shutdown() {
         clientFileMonitor?.stop()
         tenantFileMonitor?.stop()

@@ -192,6 +192,19 @@ extension CodeTokenRequest {
     }
 }
 
+/// OAuth2 refresh token grant request.
+///
+/// Represents a token request using the refresh token grant type as defined in
+/// RFC 6749, Section 6. This grant type allows clients to obtain new access tokens
+/// using a previously issued refresh token without requiring user interaction.
+///
+/// ## Usage
+///
+/// Clients use refresh tokens to obtain new access tokens when the current access
+/// token expires. The refresh token must have been issued during a previous
+/// authorization code or password grant flow.
+///
+/// - SeeAlso: RFC 6749, Section 6 (Refreshing an Access Token)
 struct RefreshTokenRequest: TokenRequestProtocol, Sendable {
 
     var grant_type: GrantTypes
@@ -212,6 +225,22 @@ struct RefreshTokenRequest: TokenRequestProtocol, Sendable {
     }
 }
 
+/// OAuth2 resource owner password credentials grant request.
+///
+/// Represents a token request using the password grant type as defined in
+/// RFC 6749, Section 4.3. This grant type allows clients to exchange a user's
+/// credentials (username and password) directly for an access token.
+///
+/// ## Security Considerations
+///
+/// This grant type should only be used when:
+/// - The client is highly trusted (e.g., first-party applications)
+/// - Other authorization flows are not viable
+/// - Credentials are not stored by the client
+///
+/// The authorization code flow is preferred for most use cases.
+///
+/// - SeeAlso: RFC 6749, Section 4.3 (Resource Owner Password Credentials Grant)
 struct PasswordTokenRequest: TokenRequestProtocol, Sendable {
 
     // MARK: - Protocol Implementation

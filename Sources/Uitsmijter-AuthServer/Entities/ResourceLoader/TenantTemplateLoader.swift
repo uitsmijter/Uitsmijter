@@ -2,6 +2,23 @@ import Foundation
 import SotoS3
 import Logger
 
+/// Actor responsible for loading tenant-specific Leaf templates from S3 storage.
+///
+/// This actor manages the lifecycle of tenant templates by:
+/// - Downloading templates from S3 buckets
+/// - Creating local template directories per tenant
+/// - Cleaning up templates when tenants are removed
+///
+/// ## Template Loading
+///
+/// Templates are loaded from S3 based on the tenant's template configuration.
+/// The loader fetches standard Leaf templates (index, login, logout, error) and
+/// stores them in a tenant-specific directory identified by the tenant's slug.
+///
+/// ## Thread Safety
+///
+/// Implemented as an actor to ensure thread-safe template operations across
+/// concurrent tenant creation and removal requests.
 actor TenantTemplateLoader {
 
     enum TenantTemplateLoaderOperations {
@@ -11,6 +28,7 @@ actor TenantTemplateLoader {
 
     let fileManager = FileManager.default
 
+    /// Initialize the template loader.
     init() {}
 
     func operate(operation: TenantTemplateLoaderOperations) async {

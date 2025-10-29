@@ -60,6 +60,16 @@ struct EntityCRDLoader: EntityLoaderProtocol {
         // Don't block init() - initial loading will happen in start()
     }
 
+    /// Starts loading and watching Kubernetes Custom Resources.
+    ///
+    /// Initiates asynchronous tasks to:
+    /// 1. Load initial tenant and client resources from Kubernetes
+    /// 2. Start watching for resource changes (add, modify, delete events)
+    ///
+    /// The loading and watching happen concurrently in separate tasks for
+    /// tenants and clients to maximize startup performance.
+    ///
+    /// - Throws: Errors from Kubernetes client initialization
     func start() throws {
         // Load initial resources asynchronously, then start watching
         Task {
@@ -72,6 +82,10 @@ struct EntityCRDLoader: EntityLoaderProtocol {
         }
     }
 
+    /// Shuts down the Kubernetes client and stops watching resources.
+    ///
+    /// Performs a synchronous shutdown of the Kubernetes client connection,
+    /// stopping all resource watches and cleaning up associated resources.
     nonisolated func shutdown() {
         try? kubeClient.syncShutdown()
     }
