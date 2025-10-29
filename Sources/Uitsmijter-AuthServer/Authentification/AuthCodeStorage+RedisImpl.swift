@@ -3,7 +3,6 @@ import Foundation
 import Logger
 
 /// Actor-based thread-safe Redis storage for authorization codes and login sessions
-/// Converted from @unchecked Sendable to proper Actor isolation per ACTOR.md recommendations
 actor RedisAuthCodeStorage: AuthCodeStorageProtocol {
     /// TTL for login session IDs in seconds (2 hours)
     private static let loginSessionTTL = 60 * 120
