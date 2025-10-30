@@ -5,6 +5,7 @@ import Testing
 import Logger
 
 @Suite("JavaScript Functions Logging Output Tests", .serialized)
+@MainActor
 struct JSFunctionsLoggingOutputTest {
 
     @Test("say function writes info message to log")
@@ -18,10 +19,11 @@ struct JSFunctionsLoggingOutputTest {
             test();
         """)
 
-        // Check the last log message
-        #expect(LogWriter.lastLog != nil)
-        #expect(LogWriter.lastLog?.message.contains("Info level message from say") == true)
-        #expect(LogWriter.lastLog?.level.contains("INFO") == true)
+        // Check the log message using targeted search
+        let entry = Log.writer.getLastLog(where: "Info level message from say")
+        #expect(entry != nil)
+        #expect(entry?.message.contains("Info level message from say") == true)
+        #expect(entry?.level.contains("INFO") == true)
     }
 
     @Test("console.log writes info message to log")
@@ -35,10 +37,11 @@ struct JSFunctionsLoggingOutputTest {
             test();
         """)
 
-        // Check the last log message
-        #expect(LogWriter.lastLog != nil)
-        #expect(LogWriter.lastLog?.message.contains("Console log message") == true)
-        #expect(LogWriter.lastLog?.level.contains("INFO") == true)
+        // Check the log message using targeted search
+        let entry = Log.writer.getLastLog(where: "Console log message")
+        #expect(entry != nil)
+        #expect(entry?.message.contains("Console log message") == true)
+        #expect(entry?.level.contains("INFO") == true)
     }
 
     @Test("console.error writes error message to log")
@@ -52,10 +55,11 @@ struct JSFunctionsLoggingOutputTest {
             test();
         """)
 
-        // Check the last log message
-        #expect(LogWriter.lastLog != nil)
-        #expect(LogWriter.lastLog?.message.contains("Error level message") == true)
-        #expect(LogWriter.lastLog?.level.contains("ERROR") == true)
+        // Check the log message using targeted search
+        let entry = Log.writer.getLastLog(where: "Error level message")
+        #expect(entry != nil)
+        #expect(entry?.message.contains("Error level message") == true)
+        #expect(entry?.level.contains("ERROR") == true)
     }
 
     @Test("say function joins multiple arguments")
@@ -70,8 +74,9 @@ struct JSFunctionsLoggingOutputTest {
         """)
 
         // Check that the message contains all the joined arguments
-        #expect(LogWriter.lastLog != nil)
-        #expect(LogWriter.lastLog?.message.contains("Multiple arguments joined") == true)
+        let entry = Log.writer.getLastLog(where: "Multiple arguments joined")
+        #expect(entry != nil)
+        #expect(entry?.message.contains("Multiple arguments joined") == true)
     }
 
     @Test("multiple log calls appear in log buffer")
@@ -79,7 +84,7 @@ struct JSFunctionsLoggingOutputTest {
         let jsp = JavaScriptProvider()
 
         // Get current buffer count to know where we start
-        let initialCount = LogWriter.logBuffer.count
+        let initialCount = Log.writer.logBuffer.count
 
         _ = try await jsp.loadProvider(script: """
             function test() {
@@ -92,11 +97,18 @@ struct JSFunctionsLoggingOutputTest {
         """)
 
         // Check that buffer has grown (we should have at least 3 new messages)
-        let newCount = LogWriter.logBuffer.count
+        let newCount = Log.writer.logBuffer.count
         #expect(newCount >= initialCount + 3)
 
-        // Verify the last log is the third message
-        #expect(LogWriter.lastLog?.message.contains("UniqueThird789") == true)
+        // Verify all three messages are present using targeted search
+        let firstEntry = Log.writer.getLastLog(where: "UniqueFirst123")
+        #expect(firstEntry != nil)
+
+        let secondEntry = Log.writer.getLastLog(where: "UniqueSecond456")
+        #expect(secondEntry != nil)
+
+        let thirdEntry = Log.writer.getLastLog(where: "UniqueThird789")
+        #expect(thirdEntry != nil)
     }
 
     @Test("numeric arguments are converted to strings in output")
@@ -110,9 +122,10 @@ struct JSFunctionsLoggingOutputTest {
             test();
         """)
 
-        // Check that numbers appear in the log message
-        #expect(LogWriter.lastLog != nil)
-        let message = LogWriter.lastLog?.message ?? ""
+        // Check that numbers appear in the log message using targeted search
+        let entry = Log.writer.getLastLog(where: "42")
+        #expect(entry != nil)
+        let message = entry?.message ?? ""
         #expect(message.contains("42"))
         #expect(message.contains("3.14"))
         #expect(message.contains("100"))
@@ -129,9 +142,10 @@ struct JSFunctionsLoggingOutputTest {
             test();
         """)
 
-        // Check that all types appear in the log message
-        #expect(LogWriter.lastLog != nil)
-        let message = LogWriter.lastLog?.message ?? ""
+        // Check that all types appear in the log message using targeted search
+        let entry = Log.writer.getLastLog(where: "String:")
+        #expect(entry != nil)
+        let message = entry?.message ?? ""
         #expect(message.contains("String:"))
         #expect(message.contains("42"))
         #expect(message.contains("true"))

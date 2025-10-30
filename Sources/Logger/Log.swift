@@ -109,7 +109,7 @@ public struct Log: Sendable {
     /// - Important: Use the public static logging methods (e.g., `Log.info()`) rather than accessing
     ///              this property directly.
     private static let logger = Logger(label: "Uitsmijter", factory: { _ in
-        LogWriter(metadata: ["type": "log"], logLevel: logLevel, logFormat: logFormat)
+        writer
     })
 
     /// The dedicated audit logger for login/logout events.
@@ -143,14 +143,18 @@ public struct Log: Sendable {
     /// - Important: Use this logger exclusively for login/logout events. Use the main logger
     ///              for general application events.
     public static let audit = Logger(label: "Uitsmijter/audit", factory: { _ in
-        LogWriter(metadata: ["type": "audit"], logLevel: logLevel, logFormat: logFormat)
+        writer
     })
 
+    public static let writer: LogWriter = LogWriter(metadata: ["type": "log"], logLevel: Log.logLevel, logFormat: Log.logFormat)
+    
     /// Private initializer to prevent instantiation.
     ///
     /// The Log struct is designed to be used exclusively through its static methods.
     /// No instances should be created.
-    private init() {}
+    private init() {
+
+    }
 
     /// Returns a Logger instance for use with external libraries.
     ///
@@ -174,6 +178,12 @@ public struct Log: Sendable {
     /// ```
     public static var shared: Logger {
         logger
+    }
+    
+    public static func getPrivateLogger(label: String, writer: LogWriter) -> Logger {
+        Logger(label: label, factory: { _ in
+           writer
+        })
     }
 
     // MARK: - Log Helper

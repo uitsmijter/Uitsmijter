@@ -5,6 +5,7 @@ import Testing
 import Logger
 
 @Suite("JavaScript Functions Logging Tests", .serialized)
+@MainActor
 struct JSFunctionsLoggingTest {
 
     @Test("say function with info level logs correctly")
@@ -19,8 +20,8 @@ struct JSFunctionsLoggingTest {
         """)
 
         #expect(result == "\"info_logged\"")
-        #expect(LogWriter.lastLog?.message.contains("Info level message") == true)
-        #expect(LogWriter.lastLog?.level.contains("INFO") == true)
+        #expect(Log.writer.lastLog?.message.contains("Info level message") == true)
+        #expect(Log.writer.lastLog?.level.contains("INFO") == true)
     }
 
     @Test("say function with error level via console.error")
@@ -52,7 +53,7 @@ struct JSFunctionsLoggingTest {
         """)
 
         #expect(result == "\"joined\"")
-        #expect(LogWriter.lastLog?.message.contains("Multiple arguments joined together") == true)
+        #expect(Log.writer.lastLog?.message.contains("Multiple arguments joined together") == true)
     }
 
     @Test("console.log uses info level by default")
@@ -157,7 +158,7 @@ struct JSFunctionsLoggingTest {
         """)
 
         #expect(result == "\"numeric_logged\"")
-        let message = LogWriter.lastLog?.message ?? ""
+        let message = await Log.writer.lastLog?.message ?? ""
         #expect(message.contains("42"))
         #expect(message.contains("3.14"))
         #expect(message.contains("100"))
@@ -197,8 +198,8 @@ struct JSFunctionsLoggingTest {
 
         #expect(result == "\"all_logged\"")
         // The last log should be the "Second error"
-        #expect(LogWriter.lastLog?.message.contains("Second error") == true)
-        #expect(LogWriter.lastLog?.level.contains("ERROR") == true)
+        #expect(Log.writer.lastLog?.message.contains("Second error") == true)
+        #expect(Log.writer.lastLog?.level.contains("ERROR") == true)
     }
 
     @Test("say function in conditional statements")

@@ -44,7 +44,7 @@ import FoundationExtensions
 /// Swift Logging framework.
 ///
 /// - Note: This handler is primarily designed for use with the Swift Logging API's `LoggingSystem.bootstrap()` method.
-public struct LogWriter: LogHandler {
+public final class LogWriter: LogHandler {
 
     /// Messages that should be silently filtered and not logged.
     ///
@@ -116,7 +116,7 @@ public struct LogWriter: LogHandler {
     /// - Note: File, function, and line information are typically omitted in release builds
     ///         to reduce log size and avoid exposing internal implementation details.
     /// - SeeAlso: ``logBuffer`` and ``lastLog`` for accessing logged messages
-    public struct LogMessage: Encodable {
+    public struct LogMessage: Encodable, Sendable {
         /// The severity level of the log message (e.g., "INFO", "ERROR", "AUDIT").
         ///
         /// This is stored as a string representation of the `Logger.Level` enum value,
@@ -234,27 +234,18 @@ public struct LogWriter: LogHandler {
     /// discarding the oldest message when a new one is added beyond capacity. It's useful
     /// for debugging, testing, and runtime log inspection without file I/O.
     ///
-    /// ## Concurrency
-    ///
-    /// This property is marked as `nonisolated(unsafe)` to allow access from any isolation
-    /// domain in Swift 6. While this enables flexible access patterns, it means concurrent
-    /// access is not automatically synchronized. In practice, the Swift Logging framework
-    /// typically serializes log operations, but callers should be aware of potential race
-    /// conditions when accessing this buffer directly from multiple concurrent contexts.
     ///
     /// ## Usage
     ///
     /// ```swift
     /// // Access recent logs
-    /// for log in LogWriter.logBuffer.allElements() {
+    /// for log in logWriter.logBuffer.allElements() {
     ///     print("\(log.level): \(log.message)")
     /// }
     /// ```
     ///
-    /// - Note: This is an internal implementation detail primarily used for testing and debugging.
-    ///         Production code should rely on standard log output rather than buffer inspection.
     /// - SeeAlso: ``lastLog`` for accessing only the most recent log message
-    public nonisolated(unsafe) static var logBuffer = CircularBuffer<LogMessage>(capacity: 250)
+    public nonisolated(unsafe) var logBuffer = CircularBuffer<LogMessage>(capacity: 250)
 
     /// The most recently written log message.
     ///
@@ -288,12 +279,77 @@ public struct LogWriter: LogHandler {
     ///         rely on this property for application logic, as it represents global mutable state.
     /// - Important: The value may be `nil` if no logs have been written since application start.
     /// - SeeAlso: ``logBuffer`` for accessing a history of recent log messages
-    public nonisolated(unsafe) static var lastLog: LogMessage? {
+    nonisolated(unsafe) public var lastLog: LogMessage? {
         didSet {
             if let lastLog {
-                LogWriter.logBuffer.push(lastLog)
+                logBuffer.push(lastLog)
             }
         }
+    }
+
+    /// Searches the log buffer for the most recent log entry containing a specific string.
+    ///
+    /// This method traverses the circular buffer in reverse chronological order (newest to oldest)
+    /// and returns the first log entry whose message contains the specified search string.
+    ///
+    /// ## Search Behavior
+    ///
+    /// - Performs a case-sensitive substring search on the log message field
+    /// - Searches from newest to oldest entries in the buffer
+    /// - Returns immediately when a match is found
+    /// - Returns `nil` if no matching entry exists
+    ///
+    /// ## Performance
+    ///
+    /// The search is O(n) where n is the number of entries in the buffer (up to capacity of 250).
+    /// The method is optimized to return early when a match is found.
+    ///
+    /// ## Thread Safety
+    ///
+    /// This method is marked `@MainActor` for Swift 6 concurrency compliance and should be called
+    /// from the main actor context.
+    ///
+    /// ## Usage
+    ///
+    /// ```swift
+    /// // In test code
+    /// logger.info("User logged in successfully")
+    /// logger.info("Token generated")
+    ///
+    /// // Search for specific log entry
+    /// if let entry = Log.writer.getLastLog(where: "User logged in") {
+    ///     print("Found: \(entry.message)")
+    ///     XCTAssertEqual(entry.level, "INFO")
+    /// }
+    /// ```
+    ///
+    /// - Parameter searchString: The string to search for within log message contents.
+    ///                          This is a case-sensitive substring match.
+    ///
+    /// - Returns: The most recent ``LogMessage`` whose message field contains `searchString`,
+    ///           or `nil` if no matching entry is found.
+    ///
+    /// - Note: This method is primarily designed for testing purposes. Production code should not
+    ///         rely on this for application logic as it accesses global mutable state.
+    /// - SeeAlso: ``lastLog`` for accessing only the most recent log without filtering
+    /// - SeeAlso: ``logBuffer`` for direct buffer access
+    nonisolated public func getLastLog(where searchString: String) -> LogMessage? {
+        // Get all elements from the buffer (oldest to newest)
+        let allLogs = logBuffer.allElements()
+
+        // If buffer is empty, return nil
+        guard !allLogs.isEmpty else {
+            return nil
+        }
+
+        // Search from newest to oldest (reverse order)
+        for log in allLogs.reversed() {
+            if log.message.contains(searchString) {
+                return log
+            }
+        }
+
+        return nil
     }
 
     /// Accesses or modifies a specific metadata value by key.
@@ -328,7 +384,7 @@ public struct LogWriter: LogHandler {
     ///
     /// - Parameter metadataKey: The key for the metadata item to access or modify.
     /// - Returns: The metadata value for the given key, or `nil` if no value exists.
-    public subscript(metadataKey metadataKey: String) -> Logger.Metadata.Value? {
+    nonisolated public subscript(metadataKey metadataKey: String) -> Logger.Metadata.Value? {
         get {
             metadata[metadataKey]
         }
@@ -375,7 +431,7 @@ public struct LogWriter: LogHandler {
     ///
     /// - Note: Metadata keys and values should be chosen to facilitate log analysis. Common examples
     ///         include service names, request IDs, user IDs, and environment identifiers.
-    public var metadata: Logger.Metadata
+    nonisolated(unsafe) public var metadata: Logger.Metadata
 
     /// The minimum log level for messages to be processed by this handler.
     ///
@@ -414,7 +470,7 @@ public struct LogWriter: LogHandler {
     ///
     /// - Note: It is acceptable for the logging system to provide a global log level override that
     ///         supersedes this per-handler setting.
-    public var logLevel: Logger.Level
+    nonisolated(unsafe) public var logLevel: Logger.Level
 
     /// The output format used when writing log messages.
     ///
@@ -451,7 +507,7 @@ public struct LogWriter: LogHandler {
     /// ```
     ///
     /// - SeeAlso: ``LogFormat`` for detailed format specifications
-    public var logFormat: LogFormat
+    nonisolated(unsafe) public var logFormat: LogFormat
 
     /// Emits a log message with full context information.
     ///
@@ -510,7 +566,7 @@ public struct LogWriter: LogHandler {
     ///         to reduce log size and improve performance.
     /// - Note: The `fflush(stdout)` call was removed for Swift 6 concurrency compatibility.
     ///         The `print()` function already flushes on newlines.
-    public func log(// swiftlint:disable:this function_parameter_count
+    nonisolated public func log(// swiftlint:disable:this function_parameter_count
         level: Logger.Level,
         message: Logger.Message,
         metadata: Logger.Metadata?,
@@ -581,7 +637,7 @@ public struct LogWriter: LogHandler {
             #endif
             print("\(printLevel)\(logMessage.date.rfc1123): \(logMessage.message)\(printMetadata)\(debugLog)")
         }
-        LogWriter.lastLog = logMessage
+        lastLog = logMessage
         // Force flush stdout to ensure logs appear immediately in containerized environments
         // where stdout may be buffered even though it's not a TTY.
         try? FileHandle.standardOutput.synchronize()

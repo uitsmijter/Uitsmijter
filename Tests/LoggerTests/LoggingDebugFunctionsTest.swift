@@ -7,13 +7,21 @@ import Testing
 @MainActor
 struct LoggingDebugFunctionsTest {
 
+    let writer = LogWriter(metadata: ["type": "test"], logLevel: .debug, logFormat: .console)
+    let log: Logger
+    
+    init() async throws {
+        log = Log.getPrivateLogger(label: "test", writer: writer)
+    }
+    
+    
     @Test("Debug log captures function name")
     func debugLogFromThisFunction() {
-        Log.debug("Test log entry")
+        log.debug("Test log entry")
 
         // Debug logs are only captured if LOG_LEVEL is set to debug or trace
         // If the log was captured (not filtered), verify it
-        if let lastLog = LogWriter.lastLog, lastLog.level.lowercased() == "debug" {
+        if let lastLog = writer.lastLog, lastLog.level.lowercased() == "debug" {
             #expect(lastLog.message.contains("log") == true)
             #expect("debugLogFromThisFunction()" == #function)
             #expect(lastLog.function?.contains(#function) == true)
@@ -22,51 +30,51 @@ struct LoggingDebugFunctionsTest {
 
     @Test("Info log captures function name")
     func infoLogFromThisFunction() {
-        Log.info("Test log entry")
-        #expect(LogWriter.lastLog?.message.contains("log") == true)
-        #expect(LogWriter.lastLog?.level.lowercased() == "info")
+        log.info("Test log entry")
+        #expect(writer.lastLog?.message.contains("log") == true)
+        #expect(writer.lastLog?.level.lowercased() == "info")
         #expect("infoLogFromThisFunction()" == #function)
 
-        #expect(LogWriter.lastLog?.function?.contains(#function) == true)
+        #expect(writer.lastLog?.function?.contains(#function) == true)
     }
 
     @Test("Notice log captures function name")
     func noticeLogFromThisFunction() {
-        Log.notice("Test log entry")
-        #expect(LogWriter.lastLog?.message.contains("log") == true)
-        #expect(LogWriter.lastLog?.level.lowercased() == "notice")
+        log.notice("Test log entry")
+        #expect(writer.lastLog?.message.contains("log") == true)
+        #expect(writer.lastLog?.level.lowercased() == "notice")
         #expect("noticeLogFromThisFunction()" == #function)
 
-        #expect(LogWriter.lastLog?.function?.contains(#function) == true)
+        #expect(writer.lastLog?.function?.contains(#function) == true)
     }
 
     @Test("Warning log captures function name")
     func warningLogFromThisFunction() {
-        Log.warning("Test log entry")
-        #expect(LogWriter.lastLog?.message.contains("log") == true)
-        #expect(LogWriter.lastLog?.level.lowercased() == "warning")
+        log.warning("Test log entry")
+        #expect(writer.lastLog?.message.contains("log") == true)
+        #expect(writer.lastLog?.level.lowercased() == "warning")
         #expect("warningLogFromThisFunction()" == #function)
 
-        #expect(LogWriter.lastLog?.function?.contains(#function) == true)
+        #expect(writer.lastLog?.function?.contains(#function) == true)
     }
 
     @Test("Error log captures function name")
     func errorLogFromThisFunction() {
-        Log.error("Test log entry")
-        #expect(LogWriter.lastLog?.message.contains("log") == true)
-        #expect(LogWriter.lastLog?.level.lowercased() == "error")
+        log.error("Test log entry")
+        #expect(writer.lastLog?.message.contains("log") == true)
+        #expect(writer.lastLog?.level.lowercased() == "error")
         #expect("errorLogFromThisFunction()" == #function)
 
-        #expect(LogWriter.lastLog?.function?.contains(#function) == true)
+        #expect(writer.lastLog?.function?.contains(#function) == true)
     }
 
     @Test("Critical log captures function name")
     func criticalLogFromThisFunction() {
-        Log.critical("Test log entry")
-        #expect(LogWriter.lastLog?.message.contains("log") == true)
-        #expect(LogWriter.lastLog?.level.lowercased() == "critical")
+        log.critical("Test log entry")
+        #expect(writer.lastLog?.message.contains("log") == true)
+        #expect(writer.lastLog?.level.lowercased() == "critical")
         #expect("criticalLogFromThisFunction()" == #function)
 
-        #expect(LogWriter.lastLog?.function?.contains(#function) == true)
+        #expect(writer.lastLog?.function?.contains(#function) == true)
     }
 }

@@ -184,7 +184,7 @@ struct AuthControllerCodeInsecureFlowTest {
                         })
                     #expect(response.status == .ok)
                     let accessToken = try response.content.decode(TokenResponse.self)
-                    #expect(accessToken.access_token != nil)
+                    #expect(accessToken.access_token.isEmpty == false)
                     #expect(accessToken.refresh_token != nil)
                 }
             )

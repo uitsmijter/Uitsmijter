@@ -224,6 +224,43 @@ public struct CircularBuffer<Element> {
         return values
     }
 
+    // MARK: - Query Methods
+
+    /// Returns all elements in the buffer without removing them.
+    ///
+    /// Elements are returned in chronological order (oldest to newest), which is the same order
+    /// they would be returned if using `pop`. This is a read-only operation that does not modify
+    /// the buffer state.
+    ///
+    /// ## Thread Safety
+    ///
+    /// This method is thread-safe and uses internal locking to ensure consistent access to the buffer.
+    ///
+    /// - Returns: An array of all elements currently in the buffer, or an empty array if the buffer is empty.
+    ///            Elements are ordered from oldest (first) to newest (last).
+    public func allElements() -> [Element] {
+        pushlock.lock()
+        defer {
+            pushlock.unlock()
+        }
+
+        guard !isEmpty else {
+            return []
+        }
+
+        let currentCount = count
+        var result: [Element] = []
+        result.reserveCapacity(currentCount)
+
+        for idx in 0..<currentCount {
+            if let item = items[(tailPosition + idx) % capacity] {
+                result.append(item)
+            }
+        }
+
+        return result
+    }
+
     // MARK: - Private Methods
 
     /// Atomically updates the internal count with thread safety.

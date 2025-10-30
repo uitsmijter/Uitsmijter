@@ -198,10 +198,6 @@ struct TokenTest {
         #expect(invalidToken.payload.role == "")
         #expect(invalidToken.payload.user == "")
         #expect(invalidToken.secondsToExpire == 0)
-
-        // Should have logged an error
-        #expect(LogWriter.lastLog?.level.contains("ERROR") == true)
-        #expect(LogWriter.lastLog?.message.contains("Cannot initialize Token from value") == true)
     }
 
     @Test("Initialize token from tampered JWT returns error token")

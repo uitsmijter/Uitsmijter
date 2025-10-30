@@ -29,7 +29,7 @@ struct LoggingNDJSONTest {
         )
 
         // Verify the message was captured
-        guard let lastLog = LogWriter.lastLog else {
+        guard let lastLog = writer.lastLog else {
             throw TestError.noLogCaptured
         }
 
@@ -67,7 +67,7 @@ struct LoggingNDJSONTest {
             line: #line
         )
 
-        guard let lastLog = LogWriter.lastLog else {
+        guard let lastLog = writer.lastLog else {
             throw TestError.noLogCaptured
         }
 
@@ -109,7 +109,7 @@ struct LoggingNDJSONTest {
             line: #line
         )
 
-        guard let lastLog = LogWriter.lastLog else {
+        guard let lastLog = writer.lastLog else {
             throw TestError.noLogCaptured
         }
 
@@ -149,7 +149,7 @@ struct LoggingNDJSONTest {
             line: #line
         )
 
-        guard let lastLog = LogWriter.lastLog else {
+        guard let lastLog = writer.lastLog else {
             throw TestError.noLogCaptured
         }
 
