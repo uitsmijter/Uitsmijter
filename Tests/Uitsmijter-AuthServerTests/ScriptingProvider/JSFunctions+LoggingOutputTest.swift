@@ -20,10 +20,9 @@ struct JSFunctionsLoggingOutputTest {
         """)
 
         // Check the log message using targeted search
-        let entry = Log.writer.getLastLog(where: "Info level message from say")
-        #expect(entry != nil)
-        #expect(entry?.message.contains("Info level message from say") == true)
-        #expect(entry?.level.contains("INFO") == true)
+        let entry = try await Log.writer.waitForLog(where: "Info level message from say")
+        #expect(entry.message.contains("Info level message from say") == true)
+        #expect(entry.level.contains("INFO") == true)
     }
 
     @Test("console.log writes info message to log")
@@ -38,10 +37,9 @@ struct JSFunctionsLoggingOutputTest {
         """)
 
         // Check the log message using targeted search
-        let entry = Log.writer.getLastLog(where: "Console log message")
-        #expect(entry != nil)
-        #expect(entry?.message.contains("Console log message") == true)
-        #expect(entry?.level.contains("INFO") == true)
+        let entry = try await Log.writer.waitForLog(where: "Console log message")
+        #expect(entry.message.contains("Console log message") == true)
+        #expect(entry.level.contains("INFO") == true)
     }
 
     @Test("console.error writes error message to log")
@@ -56,10 +54,9 @@ struct JSFunctionsLoggingOutputTest {
         """)
 
         // Check the log message using targeted search
-        let entry = Log.writer.getLastLog(where: "Error level message")
-        #expect(entry != nil)
-        #expect(entry?.message.contains("Error level message") == true)
-        #expect(entry?.level.contains("ERROR") == true)
+        let entry = try await Log.writer.waitForLog(where: "Error level message")
+        #expect(entry.message.contains("Error level message") == true)
+        #expect(entry.level.contains("ERROR") == true)
     }
 
     @Test("say function joins multiple arguments")
@@ -74,17 +71,13 @@ struct JSFunctionsLoggingOutputTest {
         """)
 
         // Check that the message contains all the joined arguments
-        let entry = Log.writer.getLastLog(where: "Multiple arguments joined")
-        #expect(entry != nil)
-        #expect(entry?.message.contains("Multiple arguments joined") == true)
+        let entry = try await Log.writer.waitForLog(where: "Multiple arguments joined")
+        #expect(entry.message.contains("Multiple arguments joined") == true)
     }
 
     @Test("multiple log calls appear in log buffer")
     func multipleLogCallsAppear() async throws {
         let jsp = JavaScriptProvider()
-
-        // Get current buffer count to know where we start
-        let initialCount = Log.writer.logBuffer.count
 
         _ = try await jsp.loadProvider(script: """
             function test() {
@@ -96,19 +89,17 @@ struct JSFunctionsLoggingOutputTest {
             test();
         """)
 
-        // Check that buffer has grown (we should have at least 3 new messages)
-        let newCount = Log.writer.logBuffer.count
-        #expect(newCount >= initialCount + 3)
+        // Verify all three messages are present using waitForLog
+        // Note: We don't check buffer count growth because the circular buffer has a
+        // fixed capacity of 250 and may be full when running tests in parallel
+        let firstEntry = try await Log.writer.waitForLog(where: "UniqueFirst123")
+        #expect(firstEntry.message.contains("UniqueFirst123"))
 
-        // Verify all three messages are present using targeted search
-        let firstEntry = Log.writer.getLastLog(where: "UniqueFirst123")
-        #expect(firstEntry != nil)
+        let secondEntry = try await Log.writer.waitForLog(where: "UniqueSecond456")
+        #expect(secondEntry.message.contains("UniqueSecond456"))
 
-        let secondEntry = Log.writer.getLastLog(where: "UniqueSecond456")
-        #expect(secondEntry != nil)
-
-        let thirdEntry = Log.writer.getLastLog(where: "UniqueThird789")
-        #expect(thirdEntry != nil)
+        let thirdEntry = try await Log.writer.waitForLog(where: "UniqueThird789")
+        #expect(thirdEntry.message.contains("UniqueThird789"))
     }
 
     @Test("numeric arguments are converted to strings in output")
@@ -122,10 +113,10 @@ struct JSFunctionsLoggingOutputTest {
             test();
         """)
 
-        // Check that numbers appear in the log message using targeted search
-        let entry = Log.writer.getLastLog(where: "42")
-        #expect(entry != nil)
-        let message = entry?.message ?? ""
+        // Wait for the specific log entry - use "3.14" as it's more unique than "42"
+        // which might appear in UUIDs or other test logs
+        let entry = try await Log.writer.waitForLog(where: "3.14")
+        let message = entry.message
         #expect(message.contains("42"))
         #expect(message.contains("3.14"))
         #expect(message.contains("100"))
@@ -143,9 +134,8 @@ struct JSFunctionsLoggingOutputTest {
         """)
 
         // Check that all types appear in the log message using targeted search
-        let entry = Log.writer.getLastLog(where: "String:")
-        #expect(entry != nil)
-        let message = entry?.message ?? ""
+        let entry = try await Log.writer.waitForLog(where: "String:")
+        let message = entry.message
         #expect(message.contains("String:"))
         #expect(message.contains("42"))
         #expect(message.contains("true"))

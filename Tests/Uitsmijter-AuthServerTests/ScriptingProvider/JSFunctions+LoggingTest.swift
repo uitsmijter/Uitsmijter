@@ -20,8 +20,10 @@ struct JSFunctionsLoggingTest {
         """)
 
         #expect(result == "\"info_logged\"")
-        #expect(Log.writer.lastLog?.message.contains("Info level message") == true)
-        #expect(Log.writer.lastLog?.level.contains("INFO") == true)
+        // Use waitForLog to find the specific log entry
+        let log = try await Log.writer.waitForLog(where: "Info level message")
+        #expect(log.message.contains("Info level message") == true)
+        #expect(log.level.contains("INFO") == true)
     }
 
     @Test("say function with error level via console.error")
@@ -53,7 +55,9 @@ struct JSFunctionsLoggingTest {
         """)
 
         #expect(result == "\"joined\"")
-        #expect(Log.writer.lastLog?.message.contains("Multiple arguments joined together") == true)
+        // Use waitForLog to find the specific log entry
+        let log = try await Log.writer.waitForLog(where: "Multiple arguments joined together")
+        #expect(log.message.contains("Multiple arguments joined together") == true)
     }
 
     @Test("console.log uses info level by default")
@@ -158,7 +162,10 @@ struct JSFunctionsLoggingTest {
         """)
 
         #expect(result == "\"numeric_logged\"")
-        let message = await Log.writer.lastLog?.message ?? ""
+        // Use waitForLog to find the specific log entry - use "3.14" as it's more unique
+        // than "42" which might appear in UUIDs or other test logs
+        let log = try await Log.writer.waitForLog(where: "3.14")
+        let message = log.message
         #expect(message.contains("42"))
         #expect(message.contains("3.14"))
         #expect(message.contains("100"))
@@ -197,9 +204,10 @@ struct JSFunctionsLoggingTest {
         """)
 
         #expect(result == "\"all_logged\"")
-        // The last log should be the "Second error"
-        #expect(Log.writer.lastLog?.message.contains("Second error") == true)
-        #expect(Log.writer.lastLog?.level.contains("ERROR") == true)
+        // Wait for the "Second error" log entry
+        let log = try await Log.writer.waitForLog(where: "Second error")
+        #expect(log.message.contains("Second error") == true)
+        #expect(log.level.contains("ERROR") == true)
     }
 
     @Test("say function in conditional statements")

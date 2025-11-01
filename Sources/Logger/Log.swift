@@ -179,12 +179,6 @@ public struct Log: Sendable {
     public static var shared: Logger {
         logger
     }
-    
-    public static func getPrivateLogger(label: String, writer: LogWriter) -> Logger {
-        Logger(label: label, factory: { _ in
-           writer
-        })
-    }
 
     // MARK: - Log Helper
 

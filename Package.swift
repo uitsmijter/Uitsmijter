@@ -81,6 +81,11 @@ let package = Package(
                         .plugin(name: "PackageBuildInfoPlugin", package: "PackageBuildInfo")
                     ]
             ),
+            
+            // TESTS
+            .testTarget(name: "FoundationExtensionsTests", dependencies: [
+                .target(name: "FoundationExtensions"),
+            ]),
             .testTarget(name: "LoggerTests", dependencies: [
                 .target(name: "Logger"),
             ]),
@@ -89,6 +94,7 @@ let package = Package(
                 .product(name: "VaporTesting", package: "vapor"),
             ], exclude: ["Entities/Loader/Stubs"]),
 
+            // EXECUTE
             .executableTarget(
                     name: "Uitsmijter",
                     dependencies: [
