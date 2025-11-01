@@ -18,4 +18,5 @@ fileprivate let jwtSecret = ProcessInfo.processInfo.environment["JWT_SECRET"] ??
 /// let token = try jwt_signer.sign(payload)
 /// let verifiedPayload = try jwt_signer.verify(tokenString, as: Payload.self)
 /// ```
+///  ## MARKED Feature rollig secrets
 nonisolated(unsafe) let jwt_signer = JWTSigner.hs256(key: jwtSecret)
