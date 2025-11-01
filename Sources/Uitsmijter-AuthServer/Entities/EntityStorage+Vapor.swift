@@ -13,6 +13,7 @@ extension Application {
     ///
     /// In tests, each test creates its own Application, thus getting its own isolated
     /// EntityStorage instance, preventing race conditions when tests run in parallel.
+    ///
     @MainActor var entityStorage: EntityStorage {
         get {
             // Get existing instance or create new one

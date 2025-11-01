@@ -94,14 +94,16 @@ struct InterceptorControllerTest {
             }
 
             try await app.testing().test(.GET, "interceptor", beforeRequest: { @Sendable req async throws in
-                let dateInFuture = Calendar.current.date(
+                // Create a token that expires in less than 2 hours to trigger renewal
+                // Token expires 7 days after creation, so we create it 7 days - 1.5 hours ago
+                let dateInPast = Calendar.current.date(
                     byAdding: .hour,
-                    value: -166,
+                    value: -(7 * 24 - 1),  // Almost 7 days ago, leaving ~1 hour until expiration
                     to: Date()
                 )
 
-                #expect(Date() > (dateInFuture ?? Date()))
-                req.headers.bearerAuthorization = try validAuthorisation(for: tenant, in: app, now: dateInFuture)
+                #expect(Date() > (dateInPast ?? Date()))
+                req.headers.bearerAuthorization = try validAuthorisation(for: tenant, in: app, now: dateInPast)
                 req.headers.replaceOrAdd(name: "X-Forwarded-Proto", value: "http")
                 req.headers.replaceOrAdd(name: "X-Forwarded-Host", value: tenant.config.hosts.first ?? "_ERROR_")
                 req.headers.replaceOrAdd(name: "X-Forwarded-Uri", value: "/test")
