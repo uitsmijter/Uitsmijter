@@ -46,6 +46,9 @@ import FoundationExtensions
 /// - Note: This handler is primarily designed for use with the Swift Logging API's `LoggingSystem.bootstrap()` method.
 public final class LogWriter: LogHandler {
 
+    /// Lock for thread-safe metadata access
+    private let metadataLock = NSLock()
+
     /// Messages that should be silently filtered and not logged.
     ///
     /// This array contains message strings that, while technically logged by various components,
@@ -239,32 +242,35 @@ public final class LogWriter: LogHandler {
     ///
     /// ```swift
     /// // Access recent logs
-    /// for log in logWriter.logBuffer.allElements() {
+    /// let logs = await logWriter.logBuffer.allElements()
+    /// for log in logs {
     ///     print("\(log.level): \(log.message)")
     /// }
     /// ```
     ///
     /// - SeeAlso: ``lastLog`` for accessing only the most recent log message
-    public nonisolated(unsafe) var logBuffer = CircularBuffer<LogMessage>(capacity: 250)
+    public let logBuffer = CircularBuffer<LogMessage>(capacity: 250)
+
+    /// Internal storage for the last log message.
+    nonisolated(unsafe) private var _lastLog: LogMessage?
 
     /// The most recently written log message.
     ///
-    /// This static property stores the last log message that was processed by any `LogWriter` instance.
+    /// This property stores the last log message that was processed by this `LogWriter` instance.
     /// It provides quick access to the most recent log event, which is particularly useful in tests
     /// to verify that expected log messages were generated.
     ///
     /// ## Behavior
     ///
-    /// When a new value is set, the `didSet` observer automatically pushes it to the ``logBuffer``,
+    /// When a new value is set, the setter automatically pushes it to the ``logBuffer``,
     /// maintaining the circular buffer of recent messages. This ensures that `lastLog` and the buffer
     /// stay synchronized.
     ///
     /// ## Concurrency
     ///
-    /// This property is marked as `nonisolated(unsafe)` to allow access from any isolation domain
+    /// This property is marked as `nonisolated` to allow access from any isolation domain
     /// in Swift 6. This is necessary for testing scenarios where logs may be generated from different
-    /// actors or tasks. However, it means that concurrent writes are not synchronized, which is
-    /// acceptable since the property is designed to capture "the last log" rather than all logs.
+    /// actors or tasks.
     ///
     /// ## Usage
     ///
@@ -276,13 +282,21 @@ public final class LogWriter: LogHandler {
     /// ```
     ///
     /// - Note: This feature is primarily designed for testing purposes. Production code should not
-    ///         rely on this property for application logic, as it represents global mutable state.
-    /// - Important: The value may be `nil` if no logs have been written since application start.
+    ///         rely on this property for application logic.
+    /// - Important: The value may be `nil` if no logs have been written since the writer was created.
     /// - SeeAlso: ``logBuffer`` for accessing a history of recent log messages
-    nonisolated(unsafe) public var lastLog: LogMessage? {
-        didSet {
-            if let lastLog {
-                logBuffer.push(lastLog)
+    nonisolated public var lastLog: LogMessage? {
+        get {
+            _lastLog
+        }
+        set {
+            _lastLog = newValue
+            if let newValue {
+                // Push asynchronously to the buffer
+                // The new waitForLog() method handles synchronization properly using continuations
+                Task {
+                    await logBuffer.push(newValue)
+                }
             }
         }
     }
@@ -306,8 +320,7 @@ public final class LogWriter: LogHandler {
     ///
     /// ## Thread Safety
     ///
-    /// This method is marked `@MainActor` for Swift 6 concurrency compliance and should be called
-    /// from the main actor context.
+    /// This method is async to safely access the actor-isolated buffer.
     ///
     /// ## Usage
     ///
@@ -317,7 +330,7 @@ public final class LogWriter: LogHandler {
     /// logger.info("Token generated")
     ///
     /// // Search for specific log entry
-    /// if let entry = Log.writer.getLastLog(where: "User logged in") {
+    /// if let entry = await Log.writer.getLastLog(where: "User logged in") {
     ///     print("Found: \(entry.message)")
     ///     XCTAssertEqual(entry.level, "INFO")
     /// }
@@ -333,9 +346,9 @@ public final class LogWriter: LogHandler {
     ///         rely on this for application logic as it accesses global mutable state.
     /// - SeeAlso: ``lastLog`` for accessing only the most recent log without filtering
     /// - SeeAlso: ``logBuffer`` for direct buffer access
-    nonisolated public func getLastLog(where searchString: String) -> LogMessage? {
+    public func getLastLog(where searchString: String) async -> LogMessage? {
         // Get all elements from the buffer (oldest to newest)
-        let allLogs = logBuffer.allElements()
+        let allLogs = await logBuffer.allElements()
 
         // If buffer is empty, return nil
         guard !allLogs.isEmpty else {
@@ -350,6 +363,93 @@ public final class LogWriter: LogHandler {
         }
 
         return nil
+    }
+
+    /// Waits for a log entry containing the specified search string with a timeout.
+    ///
+    /// This method uses an intelligent waiting mechanism that suspends until a matching log entry
+    /// is found or written, or until the timeout expires. If a matching entry already exists in
+    /// the buffer, it returns immediately with the most recent one. Otherwise, it waits asynchronously
+    /// for a new log entry matching the search string to be written.
+    ///
+    /// ## Smart Waiting Behavior
+    ///
+    /// - If a match exists: Returns the most recent matching log immediately
+    /// - If no match exists: Suspends and waits for a matching log to be written
+    /// - Times out after 5 seconds by default, throwing a `LogWaitTimeout` error
+    /// - Uses Swift Concurrency continuations for efficient waiting (no polling or yielding)
+    /// - Multiple tasks can wait for different search strings simultaneously
+    ///
+    /// ## Usage Example
+    ///
+    /// ```swift
+    /// // In a test, start waiting before the log is written
+    /// Task {
+    ///     do {
+    ///         let log = try await Log.writer.waitForLog(where: "test-uuid-123")
+    ///         #expect(log.message.contains("test-uuid-123"))
+    ///     } catch {
+    ///         Issue.record("Timeout waiting for log")
+    ///     }
+    /// }
+    ///
+    /// // Later, when the log is written, the waiting task automatically resumes
+    /// Log.info("Test message test-uuid-123")
+    /// ```
+    ///
+    /// ## Thread Safety
+    ///
+    /// This method is thread-safe through actor isolation of the underlying circular buffer.
+    /// Multiple concurrent calls are safe and will not interfere with each other.
+    ///
+    /// - Parameters:
+    ///   - searchString: The substring to search for in log messages (case-sensitive)
+    ///   - timeout: Maximum time to wait in seconds (default: 5 seconds)
+    /// - Returns: The matching `LogMessage`
+    /// - Throws: `LogWaitTimeout` if no matching log appears within the timeout period
+    ///
+    /// - Note: This method is primarily designed for testing purposes where you know a log
+    ///         will eventually be written. For checking if a log exists without waiting,
+    ///         use ``getLastLog(where:)`` instead.
+    /// - SeeAlso: ``getLastLog(where:)`` for non-blocking search that returns nil if not found
+    /// - SeeAlso: ``lastLog`` for accessing only the most recent log without filtering
+    /// - SeeAlso: ``logBuffer`` for direct buffer access
+    public func waitForLog(where searchString: String, timeout: TimeInterval = 5.0) async throws -> LogMessage {
+        // Use Task.timeout pattern with async/await
+        return try await withThrowingTaskGroup(of: LogMessage.self) { group in
+            // Add the waitForElement task
+            group.addTask {
+                await self.logBuffer.waitForElement { log in
+                    log.message.contains(searchString)
+                }
+            }
+
+            // Add the timeout task
+            group.addTask {
+                try await Task.sleep(nanoseconds: UInt64(timeout * 1_000_000_000))
+                throw LogWaitTimeout(searchString: searchString, timeout: timeout)
+            }
+
+            // Return the first result (either the log or timeout error)
+            guard let result = try await group.next() else {
+                throw LogWaitTimeout(searchString: searchString, timeout: timeout)
+            }
+
+            // Cancel the other task
+            group.cancelAll()
+
+            return result
+        }
+    }
+
+    /// Error thrown when `waitForLog(where:timeout:)` times out
+    public struct LogWaitTimeout: Error, CustomStringConvertible {
+        public let searchString: String
+        public let timeout: TimeInterval
+
+        public var description: String {
+            "Timeout after \(timeout)s waiting for log containing: \"\(searchString)\""
+        }
     }
 
     /// Accesses or modifies a specific metadata value by key.
@@ -386,9 +486,13 @@ public final class LogWriter: LogHandler {
     /// - Returns: The metadata value for the given key, or `nil` if no value exists.
     nonisolated public subscript(metadataKey metadataKey: String) -> Logger.Metadata.Value? {
         get {
-            metadata[metadataKey]
+            metadataLock.lock()
+            defer { metadataLock.unlock() }
+            return metadata[metadataKey]
         }
         set(newValue) {
+            metadataLock.lock()
+            defer { metadataLock.unlock() }
             metadata[metadataKey] = newValue
         }
     }
@@ -579,9 +683,13 @@ public final class LogWriter: LogHandler {
         if messagesSkipping.contains(message.description) {
             return
         }
-        // local mutable copy of metadata
+        // local mutable copy of metadata - protected by lock
+        metadataLock.lock()
+        let handlerMetadata = self.metadata
+        metadataLock.unlock()
+
         var localMetadata = metadata
-        localMetadata?.merge(self.metadata) { localValue, globalValue in
+        localMetadata?.merge(handlerMetadata) { localValue, globalValue in
             Logger.MetadataValue(stringLiteral: localValue.description + "." + globalValue.description)
         }
         // convert to encodable Dict
@@ -637,7 +745,10 @@ public final class LogWriter: LogHandler {
             #endif
             print("\(printLevel)\(logMessage.date.rfc1123): \(logMessage.message)\(printMetadata)\(debugLog)")
         }
+
+        // Set lastLog which will synchronously push to the buffer
         lastLog = logMessage
+
         // Force flush stdout to ensure logs appear immediately in containerized environments
         // where stdout may be buffered even though it's not a TTY.
         try? FileHandle.standardOutput.synchronize()

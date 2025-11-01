@@ -11,44 +11,51 @@ enum TestError: Error {
 @MainActor
 struct CircularBufferTest {
     @Test("Push elements to circular buffer")
-    func pushElements() {
-        var buf = CircularBuffer<String>(capacity: 5)
-        #expect(buf.isEmpty)
+    func pushElements() async {
+        let buf = CircularBuffer<String>(capacity: 5)
+        let isEmpty = await buf.isEmpty
+        #expect(isEmpty)
 
-        buf.push("A")
-        #expect(buf.count == 1)
+        await buf.push("A")
+        let count1 = await buf.count
+        #expect(count1 == 1)
 
-        buf.push(["B", "C"])
-        #expect(buf.count == 3)
+        await buf.push(["B", "C"])
+        let count2 = await buf.count
+        #expect(count2 == 3)
     }
 
     @Test("Pop elements from circular buffer")
-    func popElements() throws {
-        var buf = CircularBuffer<String>(capacity: 5)
-        buf.push(["A", "B", "C"])
-        #expect(buf.count == 3)
+    func popElements() async throws {
+        let buf = CircularBuffer<String>(capacity: 5)
+        await buf.push(["A", "B", "C"])
+        let count1 = await buf.count
+        #expect(count1 == 3)
 
-        let testPop = buf.pop()
+        let testPop = await buf.pop()
         #expect(testPop == "A")
-        #expect(buf.count == 2)
+        let count2 = await buf.count
+        #expect(count2 == 2)
 
-        let testPops = buf.pop(amount: 2)
+        let testPops = await buf.pop(amount: 2)
         #expect(testPops?.count == 2)
         guard let testPops else {
             throw TestError.abort
         }
         #expect(testPops[0] == "B")
         #expect(testPops[1] == "C")
-        #expect(buf.isEmpty)
+        let isEmpty = await buf.isEmpty
+        #expect(isEmpty)
     }
 
     @Test("Pop more elements than available")
-    func overcommittedPopElements() throws {
-        var buf = CircularBuffer<String>(capacity: 5)
-        buf.push(["A", "B", "C"])
-        #expect(buf.count == 3)
+    func overcommittedPopElements() async throws {
+        let buf = CircularBuffer<String>(capacity: 5)
+        await buf.push(["A", "B", "C"])
+        let count = await buf.count
+        #expect(count == 3)
 
-        let testPops = buf.pop(amount: 5)
+        let testPops = await buf.pop(amount: 5)
         #expect(testPops?.count == 3)
         guard let testPops else {
             throw TestError.abort
@@ -56,6 +63,7 @@ struct CircularBufferTest {
         #expect(testPops[0] == "A")
         #expect(testPops[1] == "B")
         #expect(testPops[2] == "C")
-        #expect(buf.isEmpty)
+        let isEmpty = await buf.isEmpty
+        #expect(isEmpty)
     }
 }

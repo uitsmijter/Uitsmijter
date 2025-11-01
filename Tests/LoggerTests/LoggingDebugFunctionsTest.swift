@@ -9,9 +9,10 @@ struct LoggingDebugFunctionsTest {
 
     let writer = LogWriter(metadata: ["type": "test"], logLevel: .debug, logFormat: .console)
     let log: Logger
-    
-    init() async throws {
-        log = Log.getPrivateLogger(label: "test", writer: writer)
+
+    init() {
+        let w = writer
+        log = Logger(label: "test", factory: { _ in w })
     }
     
     
