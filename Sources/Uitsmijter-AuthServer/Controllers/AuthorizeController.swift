@@ -20,10 +20,8 @@ struct AuthorizeController: RouteCollection, OAuthControllerProtocol {
     /// - Throws: An Error if something can not be parsed correctly
     @Sendable func doAuth(req: Request) async throws -> Response {
 
-        let codeChallengeMethod = try getCodeChallengeMethod(on: req)
-        let authRequest = try getAuthRequest(on: req, with: codeChallengeMethod)
-
-        // Check if clientInfo is available - if not, render login with 401 instead of throwing 400
+        // Check if clientInfo is available FIRST - before parsing query parameters
+        // This ensures we return 401 with login page instead of 400 Bad Request
         guard let clientInfo = req.clientInfo else {
             Log.error("Request without clientInfo in authorize endpoint", requestId: req.id)
             return try await LoginController.renderLoginView(
@@ -37,6 +35,9 @@ struct AuthorizeController: RouteCollection, OAuthControllerProtocol {
                 )
             )
         }
+
+        let codeChallengeMethod = try getCodeChallengeMethod(on: req)
+        let authRequest = try getAuthRequest(on: req, with: codeChallengeMethod)
 
         // PKCE validation must happen BEFORE loginid validation
         // This ensures we return the correct error for PKCE violations
