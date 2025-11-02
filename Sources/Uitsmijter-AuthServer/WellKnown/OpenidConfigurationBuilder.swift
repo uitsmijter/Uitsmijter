@@ -81,9 +81,15 @@ actor OpenidConfigurationBuilder {
     ]
 
     /// Default supported token endpoint authentication methods.
+    ///
+    /// Currently supported methods:
+    /// - `client_secret_post`: Client credentials in POST body (implemented)
+    /// - `none`: Public clients without authentication (implemented)
+    ///
+    /// Not yet implemented:
+    /// - `client_secret_basic`: Client credentials in Authorization header (see BASIC_AUTH.md)
     private static let defaultTokenEndpointAuthMethods = [
         "client_secret_post",
-        "client_secret_basic",
         "none"
     ]
 
