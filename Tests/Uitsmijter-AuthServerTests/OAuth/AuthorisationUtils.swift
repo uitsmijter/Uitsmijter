@@ -1,6 +1,7 @@
 import Foundation
 import Testing
 import VaporTesting
+import JWTKit
 @testable import Uitsmijter_AuthServer
 
 enum TestTenantScripts {
@@ -344,8 +345,12 @@ func validAuthorisation(
         throw "Date failed"
     }
     let payload = Payload(
+        issuer: IssuerClaim(value: "https://test.example.com"),
         subject: "test",
+        audience: AudienceClaim(value: "test-client"),
         expiration: .init(value: expirationDate),
+        issuedAt: IssuedAtClaim(value: Date()),
+        authTime: AuthTimeClaim(value: Date()),
         tenant: tenant.name,
         role: "default",
         user: "holger@mimimi.org"

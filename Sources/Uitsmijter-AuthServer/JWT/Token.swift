@@ -160,9 +160,14 @@ struct Token: ExpressibleByStringLiteral {
             secondsToExpire = expirationDate.millisecondsSinceNow / 1000
         } catch {
             Log.error("Cannot initialize Token from value: \(value), because: \(error.localizedDescription)")
+            let now = Date()
             payload = Payload(
-                subject: "ERROR",
-                expiration: ExpirationClaim(value: Date()),
+                issuer: IssuerClaim(value: "ERROR"),
+                subject: SubjectClaim(value: "ERROR"),
+                audience: AudienceClaim(value: "ERROR"),
+                expiration: ExpirationClaim(value: now),
+                issuedAt: IssuedAtClaim(value: now),
+                authTime: AuthTimeClaim(value: now),
                 tenant: "",
                 role: "",
                 user: ""
@@ -175,30 +180,56 @@ struct Token: ExpressibleByStringLiteral {
     /// Creates a new JWT token for an authenticated user
     ///
     /// Generates a signed JWT token with the specified user information and tenant context.
+    /// The token includes standard JWT claims (issuer, subject, audience, expiration, issued-at,
+    /// auth_time) as well as custom claims (tenant, role, user, profile).
+    ///
     /// The token expiration is controlled by the `TOKEN_EXPIRATION_IN_HOURS` environment variable
     /// (defaults to 2 hours if not set).
     ///
+    /// ## Standard Claims
+    ///
+    /// - **iss** (Issuer): The authorization server URL
+    /// - **sub** (Subject): The authenticated user identifier
+    /// - **aud** (Audience): The client_id of the OAuth2 client
+    /// - **exp** (Expiration): Token expiration timestamp
+    /// - **iat** (Issued At): Token creation timestamp
+    /// - **auth_time**: When the user authentication occurred (OIDC)
+    ///
     /// - Parameters:
+    ///   - issuer: The issuer claim (authorization server URL)
+    ///   - audience: The audience claim (OAuth2 client_id)
     ///   - tenantName: The name of the tenant this token is issued for
     ///   - subject: The subject claim identifying the user
     ///   - userProfile: User profile information including role and metadata
+    ///   - authTime: When the user authentication occurred (defaults to current time)
     /// - Throws: `TokenError.CALCULATE_TIME` if the expiration date cannot be calculated
     ///
     /// ## Example
     /// ```swift
     /// let token = try Token(
+    ///     issuer: IssuerClaim(value: "https://auth.example.com"),
+    ///     audience: AudienceClaim(value: "my-client-id"),
     ///     tenantName: "example-tenant",
-    ///     subject: "user@example.com",
-    ///     userProfile: userProfile
+    ///     subject: SubjectClaim(value: "user@example.com"),
+    ///     userProfile: userProfile,
+    ///     authTime: Date()
     /// )
     /// ```
-    init(tenantName: String, subject: SubjectClaim, userProfile: UserProfileProtocol) throws {
+    init(
+        issuer: IssuerClaim,
+        audience: AudienceClaim,
+        tenantName: String,
+        subject: SubjectClaim,
+        userProfile: UserProfileProtocol,
+        authTime: Date? = nil
+    ) throws {
         let expirationHours = Int(ProcessInfo.processInfo.environment["TOKEN_EXPIRATION_IN_HOURS"] ?? "2") ?? 2
         let calendar = Calendar.current
+        let now = Date()
         guard let expirationDate = calendar.date(
             byAdding: .hour,
             value: expirationHours,
-            to: Date()
+            to: now
         )
         else {
             throw TokenError.CALCULATE_TIME
@@ -207,9 +238,14 @@ struct Token: ExpressibleByStringLiteral {
         secondsToExpire = expirationHours * 60 * 60
 
         payload = Payload(
+            issuer: issuer,
             subject: subject,
-            expiration: .init(value: expirationDate),
+            audience: audience,
+            expiration: ExpirationClaim(value: expirationDate),
+            issuedAt: IssuedAtClaim(value: now),
+            authTime: AuthTimeClaim(value: authTime ?? now),
             tenant: tenantName,
+            responsibility: nil,
             role: userProfile.role,
             user: userProfile.user,
             profile: userProfile.profile

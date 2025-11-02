@@ -18,6 +18,8 @@ struct TokenTest {
         )
 
         let token = try Token(
+            issuer: IssuerClaim(value: "https://test.example.com"),
+            audience: AudienceClaim(value: "test-client"),
             tenantName: "test-tenant",
             subject: SubjectClaim(value: "admin@example.com"),
             userProfile: userProfile
@@ -41,6 +43,8 @@ struct TokenTest {
         )
 
         let token = try Token(
+            issuer: IssuerClaim(value: "https://test.example.com"),
+            audience: AudienceClaim(value: "test-client"),
             tenantName: "test-tenant",
             subject: SubjectClaim(value: "user@example.com"),
             userProfile: userProfile
@@ -73,6 +77,8 @@ struct TokenTest {
         )
 
         let token = try Token(
+            issuer: IssuerClaim(value: "https://test.example.com"),
+            audience: AudienceClaim(value: "test-client"),
             tenantName: "test-tenant",
             subject: SubjectClaim(value: "john.doe@example.com"),
             userProfile: userProfile
@@ -94,6 +100,8 @@ struct TokenTest {
         )
 
         let createdToken = try Token(
+            issuer: IssuerClaim(value: "https://test.example.com"),
+            audience: AudienceClaim(value: "test-client"),
             tenantName: "dev-tenant",
             subject: SubjectClaim(value: "dev@example.com"),
             userProfile: userProfile
@@ -117,6 +125,8 @@ struct TokenTest {
         )
 
         let token = try Token(
+            issuer: IssuerClaim(value: "https://test.example.com"),
+            audience: AudienceClaim(value: "test-client"),
             tenantName: "test-tenant",
             subject: SubjectClaim(value: "user@example.com"),
             userProfile: userProfile
@@ -144,12 +154,16 @@ struct TokenTest {
         )
 
         let token1 = try Token(
+            issuer: IssuerClaim(value: "https://test.example.com"),
+            audience: AudienceClaim(value: "test-client"),
             tenantName: "tenant1",
             subject: SubjectClaim(value: "user1@example.com"),
             userProfile: userProfile
         )
 
         let token2 = try Token(
+            issuer: IssuerClaim(value: "https://test.example.com"),
+            audience: AudienceClaim(value: "test-client"),
             tenantName: "tenant2",
             subject: SubjectClaim(value: "user2@example.com"),
             userProfile: userProfile
@@ -172,6 +186,8 @@ struct TokenTest {
         )
 
         let originalToken = try Token(
+            issuer: IssuerClaim(value: "https://test.example.com"),
+            audience: AudienceClaim(value: "test-client"),
             tenantName: "test-tenant",
             subject: SubjectClaim(value: "test@example.com"),
             userProfile: userProfile
@@ -209,6 +225,8 @@ struct TokenTest {
         )
 
         let validToken = try Token(
+            issuer: IssuerClaim(value: "https://test.example.com"),
+            audience: AudienceClaim(value: "test-client"),
             tenantName: "test-tenant",
             subject: SubjectClaim(value: "test@example.com"),
             userProfile: userProfile
@@ -244,6 +262,8 @@ struct TokenTest {
         )
 
         let token = try Token(
+            issuer: IssuerClaim(value: "https://test.example.com"),
+            audience: AudienceClaim(value: "test-client"),
             tenantName: "test-tenant",
             subject: SubjectClaim(value: "user@example.com"),
             userProfile: userProfile
@@ -262,6 +282,8 @@ struct TokenTest {
         )
 
         let token = try Token(
+            issuer: IssuerClaim(value: "https://test.example.com"),
+            audience: AudienceClaim(value: "test-client"),
             tenantName: "test-tenant",
             subject: SubjectClaim(value: "user@example.com"),
             userProfile: userProfile
@@ -280,8 +302,12 @@ struct TokenTest {
         // Create a token with expired date
         let expiredDate = Date(timeIntervalSinceNow: -3600) // 1 hour ago
         let payload = Payload(
+            issuer: IssuerClaim(value: "https://test.example.com"),
             subject: SubjectClaim(value: "expired@example.com"),
+            audience: AudienceClaim(value: "test-client"),
             expiration: ExpirationClaim(value: expiredDate),
+            issuedAt: IssuedAtClaim(value: Date()),
+            authTime: AuthTimeClaim(value: Date()),
             tenant: "test-tenant",
             role: "user",
             user: "expired@example.com"
@@ -310,12 +336,16 @@ struct TokenTest {
         )
 
         let token1 = try Token(
+            issuer: IssuerClaim(value: "https://test.example.com"),
+            audience: AudienceClaim(value: "test-client"),
             tenantName: "tenant-a",
             subject: SubjectClaim(value: "user@example.com"),
             userProfile: userProfile
         )
 
         let token2 = try Token(
+            issuer: IssuerClaim(value: "https://test.example.com"),
+            audience: AudienceClaim(value: "test-client"),
             tenantName: "tenant-b",
             subject: SubjectClaim(value: "user@example.com"),
             userProfile: userProfile
@@ -334,6 +364,8 @@ struct TokenTest {
         )
 
         let token = try Token(
+            issuer: IssuerClaim(value: "https://test.example.com"),
+            audience: AudienceClaim(value: "test-client"),
             tenantName: "",
             subject: SubjectClaim(value: "user@example.com"),
             userProfile: userProfile
@@ -351,6 +383,8 @@ struct TokenTest {
         )
 
         let token = try Token(
+            issuer: IssuerClaim(value: "https://test.example.com"),
+            audience: AudienceClaim(value: "test-client"),
             tenantName: "tenant-with-dashes_underscores.dots",
             subject: SubjectClaim(value: "user@example.com"),
             userProfile: userProfile
@@ -369,6 +403,8 @@ struct TokenTest {
         )
 
         let token = try Token(
+            issuer: IssuerClaim(value: "https://test.example.com"),
+            audience: AudienceClaim(value: "test-client"),
             tenantName: "test-tenant",
             subject: SubjectClaim(value: "admin@example.com"),
             userProfile: userProfile
@@ -385,6 +421,8 @@ struct TokenTest {
         )
 
         let token = try Token(
+            issuer: IssuerClaim(value: "https://test.example.com"),
+            audience: AudienceClaim(value: "test-client"),
             tenantName: "test-tenant",
             subject: SubjectClaim(value: "power@example.com"),
             userProfile: userProfile
@@ -401,6 +439,8 @@ struct TokenTest {
         )
 
         let token = try Token(
+            issuer: IssuerClaim(value: "https://test.example.com"),
+            audience: AudienceClaim(value: "test-client"),
             tenantName: "test-tenant",
             subject: SubjectClaim(value: "user@example.com"),
             userProfile: userProfile
@@ -433,6 +473,8 @@ struct TokenTest {
         )
 
         let token = try Token(
+            issuer: IssuerClaim(value: "https://test.example.com"),
+            audience: AudienceClaim(value: "test-client"),
             tenantName: "test-tenant",
             subject: SubjectClaim(value: "john.doe@example.com"),
             userProfile: userProfile
@@ -465,6 +507,8 @@ struct TokenTest {
         )
 
         let token = try Token(
+            issuer: IssuerClaim(value: "https://test.example.com"),
+            audience: AudienceClaim(value: "test-client"),
             tenantName: "test-tenant",
             subject: SubjectClaim(value: "admin@example.com"),
             userProfile: userProfile
@@ -486,6 +530,8 @@ struct TokenTest {
         )
 
         let token = try Token(
+            issuer: IssuerClaim(value: "https://test.example.com"),
+            audience: AudienceClaim(value: "test-client"),
             tenantName: "test-tenant",
             subject: SubjectClaim(value: "user@example.com"),
             userProfile: userProfile
@@ -504,6 +550,8 @@ struct TokenTest {
         )
 
         let token = try Token(
+            issuer: IssuerClaim(value: "https://test.example.com"),
+            audience: AudienceClaim(value: "test-client"),
             tenantName: "test-tenant",
             subject: SubjectClaim(value: "user+tag@example.com"),
             userProfile: userProfile
@@ -520,6 +568,8 @@ struct TokenTest {
         )
 
         let token = try Token(
+            issuer: IssuerClaim(value: "https://test.example.com"),
+            audience: AudienceClaim(value: "test-client"),
             tenantName: "租户",
             subject: SubjectClaim(value: "用户@example.com"),
             userProfile: userProfile
@@ -547,6 +597,8 @@ struct TokenTest {
         )
 
         let originalToken = try Token(
+            issuer: IssuerClaim(value: "https://test.example.com"),
+            audience: AudienceClaim(value: "test-client"),
             tenantName: "engineering-tenant",
             subject: SubjectClaim(value: "senior@example.com"),
             userProfile: userProfile
@@ -572,6 +624,8 @@ struct TokenTest {
         )
 
         let token = try Token(
+            issuer: IssuerClaim(value: "https://test.example.com"),
+            audience: AudienceClaim(value: "test-client"),
             tenantName: "test-tenant",
             subject: SubjectClaim(value: "user@example.com"),
             userProfile: userProfile
@@ -611,6 +665,8 @@ struct TokenTest {
         )
 
         let token = try Token(
+            issuer: IssuerClaim(value: "https://test.example.com"),
+            audience: AudienceClaim(value: "test-client"),
             tenantName: "test-tenant",
             subject: SubjectClaim(value: longSubject),
             userProfile: userProfile
@@ -628,6 +684,8 @@ struct TokenTest {
         )
 
         let token = try Token(
+            issuer: IssuerClaim(value: "https://test.example.com"),
+            audience: AudienceClaim(value: "test-client"),
             tenantName: longTenant,
             subject: SubjectClaim(value: "user@example.com"),
             userProfile: userProfile
@@ -647,6 +705,8 @@ struct TokenTest {
 
         for i in 0..<100 {
             let token = try Token(
+                issuer: IssuerClaim(value: "https://test.example.com"),
+                audience: AudienceClaim(value: "test-client"),
                 tenantName: "tenant-\(i)",
                 subject: SubjectClaim(value: "user\(i)@example.com"),
                 userProfile: userProfile
@@ -668,6 +728,8 @@ struct TokenTest {
         )
 
         let token = try Token(
+            issuer: IssuerClaim(value: "https://test.example.com"),
+            audience: AudienceClaim(value: "test-client"),
             tenantName: "test-tenant",
             subject: SubjectClaim(value: "user@example.com"),
             userProfile: userProfile

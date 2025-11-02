@@ -380,6 +380,48 @@ struct LoginController: RouteCollection {
             : locationUrl.absoluteString
     }
 
+    /// Constructs the issuer URL and audience from request context.
+    ///
+    /// Determines the issuer (authorization server URL) and audience (client_id) for JWT tokens
+    /// by examining request headers and client information. This helper supports both proxied
+    /// and direct requests.
+    ///
+    /// ## Issuer Construction
+    ///
+    /// The issuer URL is built by:
+    /// 1. Checking `X-Forwarded-Proto` header (if behind a proxy)
+    /// 2. Falling back to `Constants.TOKEN.isSecure` (https vs http)
+    /// 3. Checking `X-Forwarded-Host` header (if behind a proxy)
+    /// 4. Falling back to `Host` header
+    /// 5. Using tenant's configured hosts as fallback
+    /// 6. Finally using `Constants.PUBLIC_DOMAIN` as last resort
+    ///
+    /// ## Audience Determination
+    ///
+    /// The audience is the OAuth2 client_id from the client configuration,
+    /// or "unknown" if not available.
+    ///
+    /// - Parameters:
+    ///   - req: The incoming HTTP request
+    ///   - tenant: The tenant for this authentication request
+    ///   - clientInfo: Client information from the request context
+    /// - Returns: A tuple containing (issuer: String, audience: String)
+    private func constructIssuerAndAudience(
+        from req: Request,
+        tenant: Tenant,
+        clientInfo: ClientInfo
+    ) -> (issuer: String, audience: String) {
+        let scheme = req.headers.first(name: "X-Forwarded-Proto")
+            ?? (Constants.TOKEN.isSecure ? "https" : "http")
+        let host = req.headers.first(name: "X-Forwarded-Host")
+            ?? req.headers.first(name: "Host")
+            ?? tenant.config.hosts.first
+            ?? Constants.PUBLIC_DOMAIN
+        let issuer = "\(scheme)://\(host)"
+        let audience = clientInfo.client?.name ?? "unknown"
+        return (issuer, audience)
+    }
+
     /// Processes login credentials and authenticates the user.
     ///
     /// This method handles POST requests to `/login`, validating submitted credentials
@@ -500,9 +542,19 @@ struct LoginController: RouteCollection {
         }
         let responsibleDomainHash = ResponsibilityDomain.getResponsibilityDomain(on: req, for: clientInfo)
 
+        // Construct issuer and audience for JWT claims
+        let (issuer, audience) = constructIssuerAndAudience(from: req, tenant: tenant, clientInfo: clientInfo)
+
+        // Create current timestamp for iat and auth_time
+        let now = Date()
+
         let payload = Payload(
+            issuer: IssuerClaim(value: issuer),
             subject: providedSubject.subject,
-            expiration: .init(value: expirationDate),
+            audience: AudienceClaim(value: audience),
+            expiration: ExpirationClaim(value: expirationDate),
+            issuedAt: IssuedAtClaim(value: now),
+            authTime: AuthTimeClaim(value: now),
             tenant: tenant.name,
             responsibility: responsibleDomainHash.hash,
             role: role,

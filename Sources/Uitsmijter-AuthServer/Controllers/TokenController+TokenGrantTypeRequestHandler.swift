@@ -258,14 +258,29 @@ extension TokenController {
         let profile = await providerInterpreter.getProfile()
         let role = await providerInterpreter.getRole()
 
+        // Construct issuer from request
+        let scheme = req.headers.first(name: "X-Forwarded-Proto")
+            ?? (Constants.TOKEN.isSecure ? "https" : "http")
+        let host = req.headers.first(name: "X-Forwarded-Host")
+            ?? req.headers.first(name: "Host")
+            ?? tenant.config.hosts.first
+            ?? Constants.PUBLIC_DOMAIN
+        let issuer = "\(scheme)://\(host)"
+
+        // Get client_id for audience
+        let tokenRequest = try req.content.decode(TokenRequest.self)
+
         let accessToken = try Token(
+            issuer: IssuerClaim(value: issuer),
+            audience: AudienceClaim(value: tokenRequest.client_id),
             tenantName: tenant.name,
             subject: providedSubject.subject,
             userProfile: UserProfile(
                 role: role,
                 user: passwordTokenRequest.username,
                 profile: profile
-            )
+            ),
+            authTime: Date()
         )
         return TokenResponse(
             access_token: accessToken.value,
@@ -291,10 +306,26 @@ extension TokenController {
             user: payload.user,
             profile: payload.profile
         )
+
+        // Construct issuer from request
+        let scheme = req.headers.first(name: "X-Forwarded-Proto")
+            ?? (Constants.TOKEN.isSecure ? "https" : "http")
+        let host = req.headers.first(name: "X-Forwarded-Host")
+            ?? req.headers.first(name: "Host")
+            ?? tenant.config.hosts.first
+            ?? Constants.PUBLIC_DOMAIN
+        let issuer = "\(scheme)://\(host)"
+
+        // Get client_id for audience
+        let tokenRequest = try req.content.decode(TokenRequest.self)
+
         let accessToken = try Token(
+            issuer: IssuerClaim(value: issuer),
+            audience: AudienceClaim(value: tokenRequest.client_id),
             tenantName: tenant.name,
             subject: payload.subject,
-            userProfile: profile
+            userProfile: profile,
+            authTime: payload.authTime.value
         )
         let refreshToken: Code = Code()
 

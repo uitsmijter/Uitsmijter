@@ -39,11 +39,4 @@ struct AuthTimeClaim: JWTUnixEpochClaim, Equatable, Sendable {
 
     /// The authentication time as a Date
     var value: Date
-
-    /// Creates a new authentication time claim.
-    ///
-    /// - Parameter value: The date/time when the user authenticated
-    init(value: Date) {
-        self.value = value
-    }
 }

@@ -22,8 +22,12 @@ struct SignerTest {
     @Test("jwt_signer can sign a simple payload")
     func jwtSignerCanSign() throws {
         let payload = Payload(
+            issuer: IssuerClaim(value: "https://test.example.com"),
             subject: "test@example.com",
+            audience: AudienceClaim(value: "test-client"),
             expiration: ExpirationClaim(value: Date(timeIntervalSinceNow: 3600)),
+            issuedAt: IssuedAtClaim(value: Date()),
+            authTime: AuthTimeClaim(value: Date()),
             tenant: "test-tenant",
             role: "user",
             user: "test@example.com"
@@ -44,8 +48,12 @@ struct SignerTest {
     func jwtSignerCanVerify() throws {
         let expirationDate = Date(timeIntervalSinceNow: 3600)
         let payload = Payload(
+            issuer: IssuerClaim(value: "https://test.example.com"),
             subject: "verify@example.com",
+            audience: AudienceClaim(value: "test-client"),
             expiration: ExpirationClaim(value: expirationDate),
+            issuedAt: IssuedAtClaim(value: Date()),
+            authTime: AuthTimeClaim(value: Date()),
             tenant: "verify-tenant",
             role: "admin",
             user: "verify@example.com"
@@ -70,8 +78,12 @@ struct SignerTest {
     @Test("jwt_signer rejects tampered tokens")
     func jwtSignerRejectsTamperedTokens() throws {
         let payload = Payload(
+            issuer: IssuerClaim(value: "https://test.example.com"),
             subject: "tamper@example.com",
+            audience: AudienceClaim(value: "test-client"),
             expiration: ExpirationClaim(value: Date(timeIntervalSinceNow: 3600)),
+            issuedAt: IssuedAtClaim(value: Date()),
+            authTime: AuthTimeClaim(value: Date()),
             tenant: "test-tenant",
             role: "user",
             user: "tamper@example.com"
@@ -109,8 +121,12 @@ struct SignerTest {
     @Test("jwt_signer uses HS256 algorithm")
     func jwtSignerUsesHS256() throws {
         let payload = Payload(
+            issuer: IssuerClaim(value: "https://test.example.com"),
             subject: "hs256@example.com",
+            audience: AudienceClaim(value: "test-client"),
             expiration: ExpirationClaim(value: Date(timeIntervalSinceNow: 3600)),
+            issuedAt: IssuedAtClaim(value: Date()),
+            authTime: AuthTimeClaim(value: Date()),
             tenant: "test-tenant",
             role: "user",
             user: "hs256@example.com"
@@ -152,8 +168,12 @@ struct SignerTest {
     func jwtSignerConsistentSignatures() throws {
         let expirationDate = Date(timeIntervalSinceNow: 3600)
         let payload = Payload(
+            issuer: IssuerClaim(value: "https://test.example.com"),
             subject: "consistent@example.com",
+            audience: AudienceClaim(value: "test-client"),
             expiration: ExpirationClaim(value: expirationDate),
+            issuedAt: IssuedAtClaim(value: Date()),
+            authTime: AuthTimeClaim(value: Date()),
             tenant: "test-tenant",
             role: "user",
             user: "consistent@example.com"
@@ -190,8 +210,12 @@ struct SignerTest {
         ])
 
         let payload = Payload(
+            issuer: IssuerClaim(value: "https://test.example.com"),
             subject: "optional@example.com",
+            audience: AudienceClaim(value: "test-client"),
             expiration: ExpirationClaim(value: Date(timeIntervalSinceNow: 3600)),
+            issuedAt: IssuedAtClaim(value: Date()),
+            authTime: AuthTimeClaim(value: Date()),
             tenant: "test-tenant",
             responsibility: "admin-domain",
             role: "admin",
@@ -216,16 +240,24 @@ struct SignerTest {
         let longExpiration = Date(timeIntervalSinceNow: 86_400) // 24 hours
 
         let payload1 = Payload(
+            issuer: IssuerClaim(value: "https://test.example.com"),
             subject: "short@example.com",
+            audience: AudienceClaim(value: "test-client"),
             expiration: ExpirationClaim(value: shortExpiration),
+            issuedAt: IssuedAtClaim(value: Date()),
+            authTime: AuthTimeClaim(value: Date()),
             tenant: "test-tenant",
             role: "user",
             user: "short@example.com"
         )
 
         let payload2 = Payload(
+            issuer: IssuerClaim(value: "https://test.example.com"),
             subject: "long@example.com",
+            audience: AudienceClaim(value: "test-client"),
             expiration: ExpirationClaim(value: longExpiration),
+            issuedAt: IssuedAtClaim(value: Date()),
+            authTime: AuthTimeClaim(value: Date()),
             tenant: "test-tenant",
             role: "user",
             user: "long@example.com"
@@ -248,8 +280,12 @@ struct SignerTest {
     @Test("jwt_signer handles empty strings in payload")
     func jwtSignerHandlesEmptyStrings() throws {
         let payload = Payload(
+            issuer: IssuerClaim(value: "https://test.example.com"),
             subject: "",
+            audience: AudienceClaim(value: "test-client"),
             expiration: ExpirationClaim(value: Date(timeIntervalSinceNow: 3600)),
+            issuedAt: IssuedAtClaim(value: Date()),
+            authTime: AuthTimeClaim(value: Date()),
             tenant: "",
             role: "",
             user: ""
@@ -270,8 +306,12 @@ struct SignerTest {
     @Test("jwt_signer handles special characters in payload")
     func jwtSignerHandlesSpecialCharacters() throws {
         let payload = Payload(
+            issuer: IssuerClaim(value: "https://test.example.com"),
             subject: "user+test@example.com",
+            audience: AudienceClaim(value: "test-client"),
             expiration: ExpirationClaim(value: Date(timeIntervalSinceNow: 3600)),
+            issuedAt: IssuedAtClaim(value: Date()),
+            authTime: AuthTimeClaim(value: Date()),
             tenant: "tenant-with-dashes_and_underscores",
             role: "admin/developer",
             user: "user@example.com (John Doe)"
@@ -292,8 +332,12 @@ struct SignerTest {
     @Test("jwt_signer handles unicode characters")
     func jwtSignerHandlesUnicode() throws {
         let payload = Payload(
+            issuer: IssuerClaim(value: "https://test.example.com"),
             subject: "用户@example.com",
+            audience: AudienceClaim(value: "test-client"),
             expiration: ExpirationClaim(value: Date(timeIntervalSinceNow: 3600)),
+            issuedAt: IssuedAtClaim(value: Date()),
+            authTime: AuthTimeClaim(value: Date()),
             tenant: "租户-テナント",
             role: "Administrador",
             user: "用户名"
@@ -314,8 +358,12 @@ struct SignerTest {
     @Test("jwt_signer token format is valid JWT")
     func jwtSignerProducesValidJWTFormat() throws {
         let payload = Payload(
+            issuer: IssuerClaim(value: "https://test.example.com"),
             subject: "format@example.com",
+            audience: AudienceClaim(value: "test-client"),
             expiration: ExpirationClaim(value: Date(timeIntervalSinceNow: 3600)),
+            issuedAt: IssuedAtClaim(value: Date()),
+            authTime: AuthTimeClaim(value: Date()),
             tenant: "test-tenant",
             role: "user",
             user: "format@example.com"
@@ -346,8 +394,12 @@ struct SignerTest {
 
         for i in 0..<10 {
             let payload = Payload(
+                issuer: IssuerClaim(value: "https://test.example.com"),
                 subject: SubjectClaim(value: "user\(i)@example.com"),
+                audience: AudienceClaim(value: "test-client"),
                 expiration: ExpirationClaim(value: Date(timeIntervalSinceNow: 3600)),
+                issuedAt: IssuedAtClaim(value: Date()),
+                authTime: AuthTimeClaim(value: Date()),
                 tenant: "test-tenant",
                 role: "user",
                 user: "user\(i)@example.com"
