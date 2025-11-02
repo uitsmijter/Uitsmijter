@@ -22,7 +22,21 @@ struct AuthorizeController: RouteCollection, OAuthControllerProtocol {
 
         let codeChallengeMethod = try getCodeChallengeMethod(on: req)
         let authRequest = try getAuthRequest(on: req, with: codeChallengeMethod)
-        let clientInfo = try req.requireClientInfo()
+
+        // Check if clientInfo is available - if not, render login with 401 instead of throwing 400
+        guard let clientInfo = req.clientInfo else {
+            Log.error("Request without clientInfo in authorize endpoint", requestId: req.id)
+            return try await LoginController.renderLoginView(
+                on: req,
+                status: .unauthorized,
+                error: nil,
+                props: PageProperties(
+                    title: "Login required",
+                    requestUri: req.url.string,
+                    tenant: nil
+                )
+            )
+        }
 
         // PKCE validation must happen BEFORE loginid validation
         // This ensures we return the correct error for PKCE violations
