@@ -258,7 +258,7 @@ struct EntityCRDLoader: EntityLoaderProtocol {
                     throw error
                 }
             } catch {
-                Log.fatal("Unable to fetch initial clients list: \(error)")
+                Log.critical("Unable to fetch initial clients list: \(error)")
                 throw error
             }
         }

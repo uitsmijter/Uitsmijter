@@ -1,0 +1,34 @@
+---
+apiVersion: "uitsmijter.io/v1"
+kind: Tenant
+metadata:
+  name: pepper
+  namespace: pepper
+spec:
+  hosts:
+    - pepper.example.com
+  interceptor:
+    enabled: false
+  providers:
+    # Allows all @example.com emails
+    - |
+      class UserLoginProvider {
+        auth = false;
+        constructor(credentials) { 
+          this.auth = credentials.username.endsWith("@example.com");
+          commit(true);
+        }
+        get canLogin() { return this.auth; }
+        get userProfile() { return { name: "Test User" }; }
+        get role() { return "user"; }
+      }
+    - |
+      class UserValidationProvider {
+        valid = false;
+        constructor(args) { 
+          this.valid = args.username.endsWith("@example.com") == true 
+            && args.username.startsWith("nosecondtime@") == false; 
+          commit(true); 
+        }
+        get isValid() { return this.valid; }
+      }

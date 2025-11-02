@@ -11,5 +11,11 @@ domains:
   - domain: "id.example.com"
     cookieDomain: ".example.com"
     tlsSecretName: "id.example.com"
+  - domain: "pepper.example.com"
+    cookieDomain: "pepper.example.com"
+    tlsSecretName: "pepper.example.com"
+  - domain: "login.bnbc.example"
+    cookieDomain: "*.bnbc.example"
+    tlsSecretName: "bnbc.example"
 config:
   logLevel: debug

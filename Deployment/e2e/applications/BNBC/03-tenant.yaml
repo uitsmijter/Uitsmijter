@@ -11,6 +11,7 @@ spec:
     - shop.bnbc.example
     - api1.bnbc.example
     - api2.bnbc.example
+    - login.bnbc.example
   interceptor:
     enabled: true
     domain: login.bnbc.example

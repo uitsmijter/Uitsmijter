@@ -41,6 +41,12 @@ actor OpenidConfigurationBuilder {
     /// Default supported subject types.
     ///
     /// Uitsmijter uses public subject identifiers.
+    /// ## Summary
+    ///
+    /// - "public" = Same sub for the same user across all clients (what Uitsmijter does)
+    /// - "pairwise" = Different sub for the same user in different clients (privacy-focused)
+    /// - The choice affects how user identifiers are exposed in JWT tokens
+    /// - Uitsmijter's use of "public" is the simpler, more common approach
     private static let defaultSubjectTypes = ["public"]
 
     /// Default supported ID token signing algorithms.
@@ -51,7 +57,7 @@ actor OpenidConfigurationBuilder {
     /// Default supported scopes.
     ///
     /// Basic OpenID Connect scopes that are always available.
-    private static let defaultScopes = ["openid", "profile", "email"]
+    private static let defaultScopes: [String] = []
 
     /// Default supported grant types.
     ///
@@ -128,7 +134,7 @@ actor OpenidConfigurationBuilder {
             ?? request.headers.first(name: "Host")
             ?? tenant.config.hosts.first
             ?? Constants.PUBLIC_DOMAIN
-
+        
         let issuer = "\(scheme)://\(host)"
 
         // Get all clients for this tenant
@@ -144,6 +150,12 @@ actor OpenidConfigurationBuilder {
 
         // Aggregate claims (for now use defaults, can be extended)
         let supportedClaims = Self.defaultClaims
+        
+        // Code Challanges
+        
+        let codeChallengeMethods = tenantClients.map(\.config.isPkceOnly).contains(false)
+            ? OpenidConfigurationBuilder.defaultCodeChallengeMethods
+            : ["S256"]
 
         // Build endpoint URLs
         let authorizationEndpoint = "\(issuer)/authorize"
@@ -192,7 +204,7 @@ actor OpenidConfigurationBuilder {
             request_object_signing_alg_values_supported: nil,
             request_object_encryption_alg_values_supported: nil,
             request_object_encryption_enc_values_supported: nil,
-            code_challenge_methods_supported: Self.defaultCodeChallengeMethods
+            code_challenge_methods_supported: codeChallengeMethods
         )
     }
 

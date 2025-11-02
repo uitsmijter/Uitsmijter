@@ -84,6 +84,13 @@ test.describe('OpenID Connect Discovery', () => {
 
             expect(config.issuer).toBe('https://id.example.com');
         });
+        
+        test('should have issuer matching the request host (bnbc)', async ({page}) => {
+            const response = await page.goto('https://login.bnbc.example/.well-known/openid-configuration');
+            const config = await response.json();
+            
+            expect(config.issuer).toBe('https://login.bnbc.example');
+         });
 
         test('should have properly formatted endpoint URLs', async ({page}) => {
             const response = await page.goto('https://id.example.com/.well-known/openid-configuration');
@@ -201,6 +208,15 @@ test.describe('OpenID Connect Discovery', () => {
 
             expect(config).toHaveProperty('response_modes_supported');
             expect(Array.isArray(config.response_modes_supported)).toBe(true);
+        });
+        
+        test('should not include PLAIN code challenge methods', async ({page}) => {
+            const response = await page.goto('https://login.bnbc.example/.well-known/openid-configuration');
+            const config = await response.json();
+            console.log(JSON.stringify(config, null, 4))
+            expect(config).toHaveProperty('code_challenge_methods_supported');
+            expect(config.code_challenge_methods_supported).toContain('S256');
+            expect(config.code_challenge_methods_supported).not.toContain('plain');
         });
     });
 

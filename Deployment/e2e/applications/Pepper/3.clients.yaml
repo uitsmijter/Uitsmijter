@@ -1,0 +1,16 @@
+---
+apiVersion: "uitsmijter.io/v1"
+kind: Client
+metadata:
+  name: pepper
+  namespace: pepper
+spec:
+  ident: 16FB010F-F2BC-4AEE-88FC-27D52BD82F1A
+  tenantname: pepper/pepper
+  redirect_urls:
+    - 'https?://pepper\.example\.com/?(.+)?'
+  grant_types:
+    - password
+  scopes:
+    - profile:read
+  isPkceOnly: false

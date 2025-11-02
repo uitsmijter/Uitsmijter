@@ -11,7 +11,8 @@ spec:
     - 'https?://(.*\.)?bnbc\.example(:8080)?/.*'
   grant_types:
     - authorization_code
-
+  isPkceOnly: true
+  
 ---
 apiVersion: "uitsmijter.io/v1"
 kind: Client
@@ -25,3 +26,4 @@ spec:
     - 'https?://(.*\.)?bnbc\.example(:8080)?/.*'
   grant_types:
     - authorization_code
+  isPkceOnly: true
