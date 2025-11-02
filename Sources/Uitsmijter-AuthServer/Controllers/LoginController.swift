@@ -1,9 +1,9 @@
-// swiftlint:disable type_body_length
 import Foundation
 import Vapor
 import JWT
 import Logger
 
+// swiftlint:disable:next orphaned_doc_comment
 /// Controller handling user authentication through login forms.
 ///
 /// The `LoginController` manages the complete user login flow for Uitsmijter,
@@ -61,6 +61,7 @@ import Logger
 /// - SeeAlso: ``JavaScriptProvider`` for credential validation
 /// - SeeAlso: ``LoginForm`` for the form data structure
 /// - SeeAlso: ``PageProperties`` for template rendering context
+// swiftlint:disable:next type_body_length
 struct LoginController: RouteCollection {
 
     /// Calendar instance for date calculations.
