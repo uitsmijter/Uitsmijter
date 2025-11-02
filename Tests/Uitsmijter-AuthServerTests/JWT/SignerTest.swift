@@ -176,7 +176,10 @@ struct SignerTest {
         #expect(decoded1.tenant == decoded2.tenant)
         #expect(decoded1.role == decoded2.role)
         #expect(decoded1.user == decoded2.user)
-        #expect(abs(decoded1.expiration.value.timeIntervalSince1970 - decoded2.expiration.value.timeIntervalSince1970) < 0.001)
+        let timeDifference = abs(
+            decoded1.expiration.value.timeIntervalSince1970 - decoded2.expiration.value.timeIntervalSince1970
+        )
+        #expect(timeDifference < 0.001)
     }
 
     @Test("jwt_signer handles payload with optional fields")

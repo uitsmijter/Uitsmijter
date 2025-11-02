@@ -11,8 +11,8 @@ struct LoggingTest {
     let log: Logger
 
     init() {
-        let w = writer
-        log = Logger(label: "test", factory: { _ in w })
+        let logWriter = writer
+        log = Logger(label: "test", factory: { _ in logWriter })
     }
 
     @Test("Log with basic logger")

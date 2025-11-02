@@ -134,7 +134,7 @@ actor OpenidConfigurationBuilder {
             ?? request.headers.first(name: "Host")
             ?? tenant.config.hosts.first
             ?? Constants.PUBLIC_DOMAIN
-        
+
         let issuer = "\(scheme)://\(host)"
 
         // Get all clients for this tenant
@@ -150,9 +150,9 @@ actor OpenidConfigurationBuilder {
 
         // Aggregate claims (for now use defaults, can be extended)
         let supportedClaims = Self.defaultClaims
-        
+
         // Code Challanges
-        
+
         let codeChallengeMethods = tenantClients.map(\.config.isPkceOnly).contains(false)
             ? OpenidConfigurationBuilder.defaultCodeChallengeMethods
             : ["S256"]

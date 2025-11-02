@@ -11,11 +11,10 @@ struct LoggingDebugFunctionsTest {
     let log: Logger
 
     init() {
-        let w = writer
-        log = Logger(label: "test", factory: { _ in w })
+        let logWriter = writer
+        log = Logger(label: "test", factory: { _ in logWriter })
     }
-    
-    
+
     @Test("Debug log captures function name")
     func debugLogFromThisFunction() {
         log.debug("Test log entry")

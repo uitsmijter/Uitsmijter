@@ -377,7 +377,6 @@ struct TenantSpec: Codable, Sendable {
     }
 }
 
-
 import Yams
 
 /// Extend Tenant to support YAML encoding/decoding and Entity protocol.
