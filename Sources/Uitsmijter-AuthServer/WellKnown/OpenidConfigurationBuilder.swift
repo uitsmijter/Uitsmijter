@@ -57,7 +57,7 @@ actor OpenidConfigurationBuilder {
     /// Default supported scopes.
     ///
     /// Basic OpenID Connect scopes that are always available.
-    private static let defaultScopes: [String] = []
+    private static let defaultScopes: [String] = ["openid", "profile", "email"]
 
     /// Default supported grant types.
     ///
@@ -74,10 +74,9 @@ actor OpenidConfigurationBuilder {
         "exp",
         "iat",
         "auth_time",
+        "tenant",
         "name",
-        "email",
-        "email_verified",
-        "tenant"
+        "email"
     ]
 
     /// Default supported token endpoint authentication methods.
@@ -159,7 +158,7 @@ actor OpenidConfigurationBuilder {
 
         // Code Challanges
 
-        let codeChallengeMethods = tenantClients.map(\.config.isPkceOnly).contains(false)
+        let codeChallengeMethods = tenantClients.isEmpty || tenantClients.map(\.config.isPkceOnly).contains(false)
             ? OpenidConfigurationBuilder.defaultCodeChallengeMethods
             : ["S256"]
 

@@ -146,8 +146,12 @@ public struct Log: Sendable {
         writer
     })
 
-    public static let writer: LogWriter = LogWriter(metadata: ["type": "log"], logLevel: Log.logLevel, logFormat: Log.logFormat)
-    
+    public static let writer: LogWriter = LogWriter(
+        metadata: ["type": "log"],
+        logLevel: Log.logLevel,
+        logFormat: Log.logFormat
+    )
+
     /// Private initializer to prevent instantiation.
     ///
     /// The Log struct is designed to be used exclusively through its static methods.

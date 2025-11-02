@@ -356,10 +356,8 @@ public final class LogWriter: LogHandler {
         }
 
         // Search from newest to oldest (reverse order)
-        for log in allLogs.reversed() {
-            if log.message.contains(searchString) {
-                return log
-            }
+        for log in allLogs.reversed() where log.message.contains(searchString) {
+            return log
         }
 
         return nil

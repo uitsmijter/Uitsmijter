@@ -16,8 +16,12 @@ struct PayloadTest {
         let user = "user@example.com"
 
         let payload = Payload(
+            issuer: IssuerClaim(value: "https://test.example.com"),
             subject: subject,
+            audience: AudienceClaim(value: "test-client"),
             expiration: expiration,
+            issuedAt: IssuedAtClaim(value: Date()),
+            authTime: AuthTimeClaim(value: Date()),
             tenant: tenant,
             role: role,
             user: user
@@ -43,8 +47,12 @@ struct PayloadTest {
         let profile: CodableProfile = .object(["name": .string("John Doe"), "age": .integer(30)])
 
         let payload = Payload(
+            issuer: IssuerClaim(value: "https://test.example.com"),
             subject: subject,
+            audience: AudienceClaim(value: "test-client"),
             expiration: expiration,
+            issuedAt: IssuedAtClaim(value: Date()),
+            authTime: AuthTimeClaim(value: Date()),
             tenant: tenant,
             responsibility: responsibility,
             role: role,
@@ -67,8 +75,12 @@ struct PayloadTest {
         let expiration = ExpirationClaim(value: expirationDate)
 
         let payload = Payload(
+            issuer: IssuerClaim(value: "https://test.example.com"),
             subject: subject,
+            audience: AudienceClaim(value: "test-client"),
             expiration: expiration,
+            issuedAt: IssuedAtClaim(value: Date()),
+            authTime: AuthTimeClaim(value: Date()),
             tenant: "my-tenant",
             role: "user",
             user: "test@example.com"
@@ -92,10 +104,15 @@ struct PayloadTest {
     @Test("Payload decodes from JSON with correct claim keys")
     func decodesFromJSONWithCorrectKeys() throws {
         let expirationTimestamp: Double = 1_700_000_000
+        let issuedAtTimestamp: Double = 1_699_900_000
         let json = """
         {
+            "iss": "https://test.example.com",
             "sub": "decoded-user",
+            "aud": "test-client",
             "exp": \(expirationTimestamp),
+            "iat": \(issuedAtTimestamp),
+            "auth_time": \(issuedAtTimestamp),
             "tenant": "decoded-tenant",
             "role": "moderator",
             "user": "mod@example.com"
@@ -120,8 +137,12 @@ struct PayloadTest {
     func decodesWithOptionalFields() throws {
         let json = """
         {
+            "iss": "https://test.example.com",
             "sub": "full-user",
+            "aud": "test-client",
             "exp": 1700000000,
+            "iat": 1699900000,
+            "auth_time": 1699900000,
             "tenant": "full-tenant",
             "responsibility": "full-scope",
             "role": "owner",
@@ -148,8 +169,12 @@ struct PayloadTest {
     @Test("Payload round-trip encoding and decoding")
     func roundTripEncodingDecoding() throws {
         let originalPayload = Payload(
+            issuer: IssuerClaim(value: "https://test.example.com"),
             subject: "roundtrip-user",
+            audience: AudienceClaim(value: "test-client"),
             expiration: ExpirationClaim(value: Date(timeIntervalSince1970: 1_700_000_000)),
+            issuedAt: IssuedAtClaim(value: Date()),
+            authTime: AuthTimeClaim(value: Date()),
             tenant: "roundtrip-tenant",
             responsibility: "roundtrip-scope",
             role: "developer",
@@ -178,8 +203,12 @@ struct PayloadTest {
     func verifySucceedsForNonExpiredToken() throws {
         let futureDate = Date(timeIntervalSinceNow: 3600) // 1 hour from now
         let payload = Payload(
+            issuer: IssuerClaim(value: "https://test.example.com"),
             subject: "valid-user",
+            audience: AudienceClaim(value: "test-client"),
             expiration: ExpirationClaim(value: futureDate),
+            issuedAt: IssuedAtClaim(value: Date()),
+            authTime: AuthTimeClaim(value: Date()),
             tenant: "test-tenant",
             role: "user",
             user: "valid@example.com"
@@ -195,8 +224,12 @@ struct PayloadTest {
     func verifyFailsForExpiredToken() throws {
         let pastDate = Date(timeIntervalSinceNow: -3600) // 1 hour ago
         let payload = Payload(
+            issuer: IssuerClaim(value: "https://test.example.com"),
             subject: "expired-user",
+            audience: AudienceClaim(value: "test-client"),
             expiration: ExpirationClaim(value: pastDate),
+            issuedAt: IssuedAtClaim(value: Date()),
+            authTime: AuthTimeClaim(value: Date()),
             tenant: "test-tenant",
             role: "user",
             user: "expired@example.com"
@@ -213,8 +246,12 @@ struct PayloadTest {
     @Test("Payload conforms to SubjectProtocol")
     func conformsToSubjectProtocol() {
         let payload = Payload(
+            issuer: IssuerClaim(value: "https://test.example.com"),
             subject: "protocol-user",
+            audience: AudienceClaim(value: "test-client"),
             expiration: ExpirationClaim(value: Date(timeIntervalSinceNow: 3600)),
+            issuedAt: IssuedAtClaim(value: Date()),
+            authTime: AuthTimeClaim(value: Date()),
             tenant: "test-tenant",
             role: "user",
             user: "protocol@example.com"
@@ -229,8 +266,12 @@ struct PayloadTest {
     func conformsToUserProfileProtocol() {
         let profile: CodableProfile = .object(["department": .string("Engineering")])
         var payload = Payload(
+            issuer: IssuerClaim(value: "https://test.example.com"),
             subject: "profile-user",
+            audience: AudienceClaim(value: "test-client"),
             expiration: ExpirationClaim(value: Date(timeIntervalSinceNow: 3600)),
+            issuedAt: IssuedAtClaim(value: Date()),
+            authTime: AuthTimeClaim(value: Date()),
             tenant: "test-tenant",
             role: "engineer",
             user: "engineer@example.com",
@@ -251,8 +292,12 @@ struct PayloadTest {
     @Test("Payload handles empty strings correctly")
     func handlesEmptyStrings() {
         let payload = Payload(
+            issuer: IssuerClaim(value: "https://test.example.com"),
             subject: "",
+            audience: AudienceClaim(value: "test-client"),
             expiration: ExpirationClaim(value: Date(timeIntervalSinceNow: 3600)),
+            issuedAt: IssuedAtClaim(value: Date()),
+            authTime: AuthTimeClaim(value: Date()),
             tenant: "",
             role: "",
             user: ""
@@ -278,8 +323,12 @@ struct PayloadTest {
         ])
 
         let payload = Payload(
+            issuer: IssuerClaim(value: "https://test.example.com"),
             subject: "nested-user",
+            audience: AudienceClaim(value: "test-client"),
             expiration: ExpirationClaim(value: Date(timeIntervalSinceNow: 3600)),
+            issuedAt: IssuedAtClaim(value: Date()),
+            authTime: AuthTimeClaim(value: Date()),
             tenant: "test-tenant",
             role: "user",
             user: "nested@example.com",
@@ -311,8 +360,12 @@ struct PayloadTest {
         ])
 
         let payload = Payload(
+            issuer: IssuerClaim(value: "https://test.example.com"),
             subject: "array-user",
+            audience: AudienceClaim(value: "test-client"),
             expiration: ExpirationClaim(value: Date(timeIntervalSinceNow: 3600)),
+            issuedAt: IssuedAtClaim(value: Date()),
+            authTime: AuthTimeClaim(value: Date()),
             tenant: "test-tenant",
             role: "admin",
             user: "array@example.com",

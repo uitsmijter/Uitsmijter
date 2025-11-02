@@ -135,7 +135,6 @@ public actor CircularBuffer<Element: Sendable> {
         waiters = remainingWaiters
     }
 
-
     /// Adds a single element to the buffer with configurable overflow behavior.
     ///
     /// - Parameters:
