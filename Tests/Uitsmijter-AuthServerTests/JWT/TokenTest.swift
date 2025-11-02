@@ -1,3 +1,4 @@
+// swiftlint:disable file_length
 @testable import Uitsmijter_AuthServer
 import Foundation
 import Testing
