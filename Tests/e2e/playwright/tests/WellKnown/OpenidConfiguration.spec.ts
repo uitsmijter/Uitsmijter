@@ -212,7 +212,10 @@ test.describe('OpenID Connect Discovery', () => {
         
         test('should not include PLAIN code challenge methods', async ({page}) => {
             const response = await page.goto('https://login.bnbc.example/.well-known/openid-configuration');
+
+            expect(await response.status()).toBe(200)
             const config = await response.json();
+            
             expect(config).toHaveProperty('code_challenge_methods_supported');
             expect(config.code_challenge_methods_supported).toContain('S256');
             expect(config.code_challenge_methods_supported).not.toContain('plain');
