@@ -4,6 +4,7 @@ import {
     authorizeApiRequest, authorizeApiRequestOnPage, authorizeApiRequestWithPage,
     loginAuthorizeFormRequest
 } from "./AuthorizeRequests"
+import { createCodeChallenge, generateCodeVerifier } from './Pkce'
 
 test.describe('OAuth flow - Silent login enabled', () => {
     let app: Application
@@ -35,6 +36,8 @@ test.describe('OAuth flow - Silent login enabled', () => {
 
         // Flow context
         const myState = Math.floor(Math.random() * 999999999)
+        const codeVerifier = generateCodeVerifier()
+        const codeChallenge = createCodeChallenge(codeVerifier)
         let code: string = null
 
         // General Auth 2 Flow - Step 1 - 2
@@ -47,7 +50,9 @@ test.describe('OAuth flow - Silent login enabled', () => {
                     client_secret: null,
                     redirect_uri: 'https://api1.bnbc.example/',
                     scope: '',
-                    state: '' + myState
+                    state: '' + myState,
+                    code_challenge: codeChallenge,
+                    code_challenge_method: 'S256'
                 }
             )
 
@@ -98,7 +103,9 @@ test.describe('OAuth flow - Silent login enabled', () => {
                     client_secret: null,
                     redirect_uri: 'https://api2.bnbc.example/',
                     scope: '',
-                    state: '' + myState
+                    state: '' + myState,
+                    code_challenge: codeChallenge,
+                    code_challenge_method: 'S256'
                 }
             )
 
