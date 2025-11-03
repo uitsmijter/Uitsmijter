@@ -44,48 +44,9 @@ struct AuthorizeController: RouteCollection, OAuthControllerProtocol {
         try await validatePKCERequirement(authRequest: authRequest, on: req)
 
         let loginIdent = try? req.query.decode(LoginId.self)
-        Log.info("CONTROLLER: loginIdent = \(loginIdent?.loginid.uuidString ?? "nil")", requestId: req.id)
-        if let loginIdent {
-            let loginUuid = loginIdent.loginid.uuidString
-            Log.info("CONTROLLER: About to call pull() with loginUuid: \(loginUuid)", requestId: req.id)
-            let pullResult = await req.application.authCodeStorage?.pull(loginUuid: loginIdent.loginid)
-            Log.info(
-                "CONTROLLER: pull() returned: \(String(describing: pullResult)) for loginUuid: \(loginUuid)",
-                requestId: req.id
-            )
-            if pullResult == false {
-                Log.error("CONTROLLER: pull() returned FALSE - throwing BADLOGINID error", requestId: req.id)
-                throw Abort(.badRequest, reason: "LOGIN.ERRORS.BADLOGINID")
-            }
-            Log.info("CONTROLLER: pull() SUCCESS - continuing with authorization flow", requestId: req.id)
-        }
-
-        if loginIdent == nil && clientInfo.client?.config.referrers?.isNotEmpty ?? false {
-            Log.debug("Checking referrers for client \(clientInfo.client?.name ?? "-")", requestId: req.id)
-            guard let referer = clientInfo.referer else {
-                Log.error("Request comes without referer", requestId: req.id)
-                throw Abort(.badRequest, reason: "LOGIN.ERRORS.WRONG_REFERER")
-            }
-            do {
-                try clientInfo.client?.checkedReferer(for: referer)
-            } catch ClientError.illegalReferer(let referer, let reason) {
-                Log.info(
-                    "Cannot authorize because client referer does not match \(referer). \(reason)", requestId: req.id
-                )
-                throw Abort(.forbidden, reason: reason)
-            } catch {
-                throw Abort(.badRequest, reason: error.localizedDescription)
-            }
-        }
-
-        if let silent_login = req.clientInfo?.tenant?.config.silent_login,
-           // If request is not from the login form
-           loginIdent == nil,
-           // Silent login is turned off
-           silent_login == false {
-            Log.info("Silent login is disabled for tenant \(req.clientInfo?.tenant?.name ?? "-")", requestId: req.id)
-            req.clientInfo?.validPayload = nil
-        }
+        try await validateLoginId(loginIdent, on: req)
+        try validateReferrer(loginIdent: loginIdent, clientInfo: clientInfo, on: req)
+        applySilentLoginPolicy(loginIdent: loginIdent, on: req)
 
         // if not logged in, redirect to login - than proceed
         // if already logged in, than generate a code.
@@ -135,6 +96,77 @@ struct AuthorizeController: RouteCollection, OAuthControllerProtocol {
                     throw Abort(.badRequest, reason: "LOGIN.ERRORS.CLIENT_ONLY_SUPPORTS_PKCE")
                 }
             }
+        }
+    }
+
+    /// Validates and pulls the login ID from storage if present
+    ///
+    /// - Parameters:
+    ///   - loginIdent: The optional login ID from the request
+    ///   - req: The current request
+    /// - Throws: `Abort` error if login ID validation fails
+    private func validateLoginId(_ loginIdent: LoginId?, on req: Request) async throws {
+        Log.info("CONTROLLER: loginIdent = \(loginIdent?.loginid.uuidString ?? "nil")", requestId: req.id)
+        if let loginIdent {
+            let loginUuid = loginIdent.loginid.uuidString
+            Log.info("CONTROLLER: About to call pull() with loginUuid: \(loginUuid)", requestId: req.id)
+            let pullResult = await req.application.authCodeStorage?.pull(loginUuid: loginIdent.loginid)
+            Log.info(
+                "CONTROLLER: pull() returned: \(String(describing: pullResult)) for loginUuid: \(loginUuid)",
+                requestId: req.id
+            )
+            if pullResult == false {
+                Log.error("CONTROLLER: pull() returned FALSE - throwing BADLOGINID error", requestId: req.id)
+                throw Abort(.badRequest, reason: "LOGIN.ERRORS.BADLOGINID")
+            }
+            Log.info("CONTROLLER: pull() SUCCESS - continuing with authorization flow", requestId: req.id)
+        }
+    }
+
+    /// Validates the referrer if required by the client
+    ///
+    /// - Parameters:
+    ///   - loginIdent: The optional login ID (referrer check skipped if present)
+    ///   - clientInfo: The client information from the request
+    ///   - req: The current request
+    /// - Throws: `Abort` error if referrer validation fails
+    private func validateReferrer(
+        loginIdent: LoginId?,
+        clientInfo: ClientInfo,
+        on req: Request
+    ) throws {
+        if loginIdent == nil && clientInfo.client?.config.referrers?.isNotEmpty ?? false {
+            Log.debug("Checking referrers for client \(clientInfo.client?.name ?? "-")", requestId: req.id)
+            guard let referer = clientInfo.referer else {
+                Log.error("Request comes without referer", requestId: req.id)
+                throw Abort(.badRequest, reason: "LOGIN.ERRORS.WRONG_REFERER")
+            }
+            do {
+                try clientInfo.client?.checkedReferer(for: referer)
+            } catch ClientError.illegalReferer(let referer, let reason) {
+                Log.info(
+                    "Cannot authorize because client referer does not match \(referer). \(reason)", requestId: req.id
+                )
+                throw Abort(.forbidden, reason: reason)
+            } catch {
+                throw Abort(.badRequest, reason: error.localizedDescription)
+            }
+        }
+    }
+
+    /// Applies silent login policy by clearing valid payload if silent login is disabled
+    ///
+    /// - Parameters:
+    ///   - loginIdent: The optional login ID (policy not applied if present)
+    ///   - req: The current request
+    private func applySilentLoginPolicy(loginIdent: LoginId?, on req: Request) {
+        if let silent_login = req.clientInfo?.tenant?.config.silent_login,
+           // If request is not from the login form
+           loginIdent == nil,
+           // Silent login is turned off
+           silent_login == false {
+            Log.info("Silent login is disabled for tenant \(req.clientInfo?.tenant?.name ?? "-")", requestId: req.id)
+            req.clientInfo?.validPayload = nil
         }
     }
 
