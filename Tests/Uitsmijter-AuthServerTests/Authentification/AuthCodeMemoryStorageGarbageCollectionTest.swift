@@ -62,7 +62,6 @@ import VaporTesting
         #expect(ret_nil_3 == nil)
 
         // all gone?
-        // swiftlint:disable:next empty_count
         #expect(await storage.count() == 0)
     }
 
