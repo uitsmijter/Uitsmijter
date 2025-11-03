@@ -44,7 +44,7 @@ import VaporTesting
             return
         }
 
-        #expect(await storage.count == 3)
+        #expect(await storage.count() == 3)
 
         // Wait for session 1 to expire
         try? await Task.sleep(for: .seconds(2.1))
@@ -63,7 +63,7 @@ import VaporTesting
 
         // all gone?
         // swiftlint:disable:next empty_count
-        #expect(await storage.count == 0)
+        #expect(await storage.count() == 0)
     }
 
 }

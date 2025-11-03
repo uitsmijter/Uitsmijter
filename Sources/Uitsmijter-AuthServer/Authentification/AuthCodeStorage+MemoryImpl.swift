@@ -14,12 +14,6 @@ actor MemoryAuthCodeStorage: AuthCodeStorageProtocol {
     /// Storage for LoginSessions
     private var loginSessions: [LoginSession] = []
 
-    var count: Int {
-        get {
-            storage.count
-        }
-    }
-
     /// Sort storage and restart garbage collection
     private func sortAndGc() {
         gcTimer?.cancel()

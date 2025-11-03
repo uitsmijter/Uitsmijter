@@ -93,6 +93,7 @@ actor OpenidConfigurationBuilder {
     ]
 
     /// Default supported PKCE code challenge methods.
+    /// Both S256 and plain are supported (RFC 7636 recommends S256 over plain).
     private static let defaultCodeChallengeMethods = ["S256", "plain"]
 
     /// Default supported response modes.
@@ -156,11 +157,13 @@ actor OpenidConfigurationBuilder {
         // Aggregate claims (for now use defaults, can be extended)
         let supportedClaims = Self.defaultClaims
 
-        // Code Challanges
-
-        let codeChallengeMethods = tenantClients.isEmpty || tenantClients.map(\.config.isPkceOnly).contains(false)
-            ? OpenidConfigurationBuilder.defaultCodeChallengeMethods
-            : ["S256"]
+        // Code Challenge Methods
+        // If all clients are PKCE-only, advertise only S256 for security
+        // Otherwise, advertise both S256 and plain for compatibility
+        let allClientsPkceOnly = !tenantClients.isEmpty && tenantClients.allSatisfy { $0.config.isPkceOnly == true }
+        let codeChallengeMethods = allClientsPkceOnly
+            ? ["S256"]
+            : Self.defaultCodeChallengeMethods
 
         // Build endpoint URLs
         let authorizationEndpoint = "\(issuer)/authorize"
