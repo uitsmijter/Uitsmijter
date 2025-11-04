@@ -54,7 +54,7 @@ jobs:
       - build
     steps:
       - name: Delete huge unnecessary tools folder
-        run: df -h && rm -rf /opt/hostedtoolcache && df -h
+        run: rm -rf /opt/hostedtoolcache
     
       - name: Check out the repo
         uses: actions/checkout@v4
