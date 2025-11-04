@@ -1,0 +1,122 @@
+# Dependabot configuration for Uitsmijter
+# https://docs.github.com/en/code-security/dependabot/dependabot-version-updates/configuration-options-for-the-dependabot.yml-file
+
+version: 2
+updates:
+  # Swift Package Manager dependencies
+  - package-ecosystem: "swift"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "03:00"
+    open-pull-requests-limit: 10
+    labels:
+      - "dependencies"
+      - "swift"
+    commit-message:
+      prefix: "chore(deps)"
+      include: "scope"
+    reviewers:
+      - "KrisSimon"
+    assignees:
+      - "KrisSimon"
+    # Prioritize security updates
+    groups:
+      security-updates:
+        patterns:
+          - "*"
+        update-types:
+          - "security"
+
+  # Docker dependencies
+  - package-ecosystem: "docker"
+    directory: "/Deployment"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "03:00"
+    open-pull-requests-limit: 5
+    labels:
+      - "dependencies"
+      - "docker"
+    commit-message:
+      prefix: "chore(deps)"
+      include: "scope"
+    reviewers:
+      - "KrisSimon"
+    assignees:
+      - "KrisSimon"
+
+  # GitHub Actions
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "03:00"
+    open-pull-requests-limit: 5
+    labels:
+      - "dependencies"
+      - "github-actions"
+    commit-message:
+      prefix: "chore(deps)"
+      include: "scope"
+    reviewers:
+      - "KrisSimon"
+    assignees:
+      - "KrisSimon"
+
+  # NPM dependencies for e2e tests (Playwright)
+  - package-ecosystem: "npm"
+    directory: "/Tests/e2e/playwright"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "03:00"
+    open-pull-requests-limit: 10
+    labels:
+      - "dependencies"
+      - "npm"
+      - "e2e-tests"
+    commit-message:
+      prefix: "chore(deps)"
+      include: "scope"
+    reviewers:
+      - "kris"
+    assignees:
+      - "kris"
+    # Prioritize security updates
+    groups:
+      security-updates:
+        patterns:
+          - "*"
+        update-types:
+          - "security"
+    # Ignore dev dependencies for non-security updates to reduce noise
+    ignore:
+      - dependency-name: "*"
+        update-types: ["version-update:semver-minor", "version-update:semver-patch"]
+    # But always create PRs for security updates
+    allow:
+      - dependency-type: "all"
+        update-types: ["security"]
+
+  # Helm chart dependencies
+  - package-ecosystem: "docker"
+    directory: "/Deployment/helm/uitsmijter"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "03:00"
+    open-pull-requests-limit: 5
+    labels:
+      - "dependencies"
+      - "helm"
+    commit-message:
+      prefix: "chore(deps)"
+      include: "scope"
+    reviewers:
+      - "KrisSimon"
+    assignees:
+      - "KrisSimon"
