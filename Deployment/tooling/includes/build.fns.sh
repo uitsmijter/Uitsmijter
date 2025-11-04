@@ -1,10 +1,20 @@
 #
 # Build functions
 #
+# This file contains functions for building Uitsmijter in various configurations,
+# including development builds, production releases, Helm packages, and Docker images.
+#
 
-# Resize and reformat images
+# Resize and reformat image assets for the project
+# Parameters: None (uses dockerComposeBuildParameter from environment)
+# Returns: Exit code from imagetool container
+# Side effects: Processes images in the project using Docker Compose
+# Use case: Optimize and prepare image assets before building
 function buildImages() {
   h2 "Resize and reformat images"
+  ARGUMENTS="${ARGUMENTS:-}" GITHUB_ACTION="${GITHUB_ACTION:-}" FILTER_TEST="${FILTER_TEST:-}" \
+  SUPPRESS_PACKAGE_WARNINGS="${SUPPRESS_PACKAGE_WARNINGS}" \
+  RUNTIME_IMAGE="${RUNTIME_IMAGE}" \
   docker compose \
     -f "${PROJECT_DIR}/Deployment/build-compose.yml" \
     --env-file "${PROJECT_DIR}/.env" \
@@ -14,11 +24,20 @@ function buildImages() {
     imagetool
 }
 
-# Build a binary incremental
+# Build Uitsmijter binary using incremental compilation (faster for development)
+# Parameters:
+#   $1: dockerComposeBuildParameter - Additional docker compose flags (optional)
+# Returns: Exit code from build container
+# Side effects: Resizes and reformats image assets first, then compiles Swift code incrementally
+# Environment variables:
+#   - SUPPRESS_PACKAGE_WARNINGS: Set to suppress Swift package warnings
+# Use case: Fast development builds that reuse previous compilation artifacts
 function buildIncrementalBinary() {
   buildImages
   h2 "Build a binary incremental"
   local dockerComposeBuildParameter=${1}
+  ARGUMENTS="${ARGUMENTS:-}" GITHUB_ACTION="${GITHUB_ACTION:-}" FILTER_TEST="${FILTER_TEST:-}" \
+  SUPPRESS_PACKAGE_WARNINGS="${SUPPRESS_PACKAGE_WARNINGS}" \
   RUNTIME_IMAGE="" docker compose \
       -f "${PROJECT_DIR}/Deployment/build-compose.yml" \
       --env-file "${PROJECT_DIR}/.env" \
@@ -27,7 +46,13 @@ function buildIncrementalBinary() {
       build
 }
 
-# Build a production release
+# Build a production-ready release image from scratch
+# Parameters:
+#   $1: TAG - Docker image tag to use (default: ${TAG} from environment)
+# Returns: None
+# Side effects: Builds images, creates release binary, saves Docker image as tar file
+# Output: Creates uitsmijter-${FILE}.tar in Deployment/Release/
+# Use case: Creating production releases for deployment
 function buildRelease() {
   buildImages
   h2 "Build a fresh production release"
@@ -37,7 +62,13 @@ function buildRelease() {
   docker save -o "${PROJECT_DIR}/Deployment/Release/uitsmijter-${FILE}.tar" ${TAG}
 }
 
-# Helper to trigger a release build if not present
+# Build a release if the Docker image doesn't already exist, or build dirty version
+# Parameters:
+#   $1: TAG - Docker image tag to check/build (default: ${TAG} from environment)
+# Returns: None
+# Side effects: May build release or dirty version depending on USE_DIRTY and image existence
+# Use case: Ensure release image is available before running tests or deployments
+# Note: If USE_DIRTY is set, creates a fast incremental build for local testing only
 function buildReleaseIfNotPresent() {
   local TAG=${1:-${TAG}}
 
@@ -61,7 +92,17 @@ function buildReleaseIfNotPresent() {
   fi
 }
 
-# Build a helm package
+# Build Helm chart packages for Kubernetes deployment
+# Parameters: None (uses GIT_TAG, GIT_BRANCH, BUILD_NUMBER from environment)
+# Returns: None
+# Side effects: Removes old .tgz files, creates new Helm packages in Deployment/Release/
+# Version logic:
+#   - Uses GIT_TAG if available, otherwise GIT_BRANCH
+#   - Converts "release-X" to "rc-X" for release candidates
+#   - Strips "ce-" and "ee-" prefixes
+#   - Adds "-rcN" suffix for release candidates using BUILD_NUMBER
+# Output: Creates .tgz files for all Helm charts in Deployment/helm/
+# Use case: Packaging Helm charts for distribution and deployment
 function buildHelm() {
   h2 "Build helm packages"
   local version=${GIT_TAG}
@@ -90,9 +131,16 @@ function buildHelm() {
   done
 }
 
+# Build the Uitsmijter runtime Docker image
+# Parameters:
+#   $1: TAG - Docker image tag for the runtime (default: ${TAG} from environment)
+# Returns: Exit code from docker compose build
+# Side effects: Builds Docker runtime image using docker compose
+# Use case: Creating the final runtime container image with Uitsmijter binary
 function buildRuntime() {
   h2 "Build uitsmijter runtime"
   local TAG=${1:-${TAG}}
+  ARGUMENTS="${ARGUMENTS:-}" GITHUB_ACTION="${GITHUB_ACTION:-}" FILTER_TEST="${FILTER_TEST:-}" \
   RUNTIME_IMAGE=${TAG} docker compose \
     -f "${PROJECT_DIR}/Deployment/build-compose.yml" \
     --env-file "${SCRIPT_DIR}/.env" \

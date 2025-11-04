@@ -22,12 +22,12 @@ spec:
 apiVersion: "uitsmijter.io/v1"
 kind: Client
 metadata:
-  name: bnbc
+  name: xbnbc
 spec:
   ident: 679a09cf-99ae-4a4b-bffb-5c2da6b4bf8f
-  tenantname: uitsmijter/bnbc
+  tenantname: uitsmijter/xbnbc
   redirect_urls:
-    - 'https?://(.*\.)?bnbc\.example(:8080)?/.*'
+    - 'https?://(.*\.)?xbnbc\.example(:8080)?/.*'
 
 ---
 apiVersion: "uitsmijter.io/v1"

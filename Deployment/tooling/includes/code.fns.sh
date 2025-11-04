@@ -1,10 +1,23 @@
 #
 # Code functions
 #
+# This file contains functions for opening and managing code-server
+# (web-based VS Code) for remote or containerized development.
+#
 
-# Open a code edior
+# Open the project in a web-based code editor (code-server)
+# Parameters: None (uses dockerComposeBuildParameter from environment)
+# Returns: None
+# Side effects:
+#   - Starts code-server container in detached mode
+#   - Opens browser to http://localhost:31546/?folder=/Project
+#   - Waits for user to press enter, then stops the container
+# Interactive: Prompts user to press enter to stop code-server
+# Platform-specific: Uses 'open' on macOS, 'xdg-open' on Linux
+# Use case: Remote development or containerized editing environment
 function openCode() {
   h2 "Open project in code"
+  ARGUMENTS="${ARGUMENTS:-}" GITHUB_ACTION="${GITHUB_ACTION:-}" FILTER_TEST="${FILTER_TEST:-}" \
   docker compose \
     -f "${PROJECT_DIR}/Deployment/build-compose.yml" \
     --env-file "${PROJECT_DIR}/.env" \

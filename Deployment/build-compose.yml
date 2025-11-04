@@ -20,7 +20,7 @@ x-shared_job: &shared_job
 services:
 
   redis:
-    image: 'bitnami/redis:latest'
+    image: 'ghcr.io/uitsmijter/redis:${REDIS_VERSION:-8.2.2}'
     ports:
       - "6379:6379"
     environment:
@@ -41,6 +41,9 @@ services:
 
   build:
     <<: *shared_job
+    environment:
+      <<: *shared_environment
+      SUPPRESS_PACKAGE_WARNINGS: ${SUPPRESS_PACKAGE_WARNINGS}
     command:
       - /bin/bash
       - -c
@@ -49,7 +52,15 @@ services:
         echo "Resolve...."
         swift package resolve
         echo "Build...."
-        swift build -c release --manifest-cache shared -Xcc -I/usr/include/webkitgtk-4.0 -Xcc -I/usr/include/webkitgtk-4.0/JavaScriptCore
+        INCLUDES="$$(pkg-config --cflags-only-I javascriptcoregtk-4.1 | sed 's/-I/ -Xcc -I/g')"
+        LIBS="$$(pkg-config --libs javascriptcoregtk-4.1 | sed 's/-l/ -Xlinker -l/g')"
+        swift build -c release --manifest-cache shared $$INCLUDES $$LIBS 2>&1 | \
+        if [ "$SUPPRESS_PACKAGE_WARNINGS" = "true" ]; then
+            grep -v "warning:.*found .* file(s) which are unhandled" | \
+            grep -v "^\s*/.*/.build/checkouts/.*/.*\.swift"
+        else
+            cat
+        fi
         echo "Copy release"
         mkdir -p Deployment/Release/Linux
         cp "$$(swift build --package-path /build -c release --show-bin-path)/Uitsmijter" Deployment/Release/Linux/
@@ -59,6 +70,7 @@ services:
     environment:
       <<: *shared_environment
       FILTER_TEST: ${FILTER_TEST}
+      SUPPRESS_PACKAGE_WARNINGS: ${SUPPRESS_PACKAGE_WARNINGS}
     command:
       - /bin/bash
       - -c
@@ -70,12 +82,16 @@ services:
 
   testlist:
     <<: *shared_job
+    environment:
+      <<: *shared_environment
+      SUPPRESS_PACKAGE_WARNINGS: ${SUPPRESS_PACKAGE_WARNINGS}
+      FILTER_TEST: ${FILTER_TEST}
     command:
       - /bin/bash
       - -c
       - |
         set -e
-        swift test list
+        ./Deployment/pipeline/testlist.sh
 
   e2e:
     image: ghcr.io/uitsmijter/e2e-runner:${BUILDBOX}
@@ -136,7 +152,7 @@ services:
         /app/bin/Uitsmijter serve --env production --hostname 0.0.0.0 --port 8080
 
   code:
-    image: ghcr.io/uitsmijter/swift-codeserver:1.0.1
+    image: ghcr.io/uitsmijter/swift-codeserver:1.1.0
     environment:
       <<: *shared_environment
     ports:

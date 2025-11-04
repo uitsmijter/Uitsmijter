@@ -8,9 +8,18 @@ image:
 
 imagePullSecrets: []
 
-jwtSecret: "vosai0za6iex8AelahGemaeBooph6pah6Saezae0oojahfa7Re6leibeeshiu8ie"
-redisPassword: "Shohmaz1"
+# jwtSecret and redisPassword will be auto-generated if not provided
+# Generated secrets persist across upgrades using Kubernetes secret lookup
+jwtSecret: ""
+redisPassword: ""
 storageClassName: ""
+
+redis:
+  image:
+    repository: redis
+    tag: "8.2.2"
+  replicas: 3  # Testing with single instance to verify replication lag hypothesis
+
 installCRD: true
 installSA: true
 
@@ -32,7 +41,7 @@ config:
 resources:
   requests:
     memory: "256Mi"
-    cpu: "500m"
+    cpu: "250m"
   limits:
     memory: "512Mi"
     cpu: "1000m"

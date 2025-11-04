@@ -18,3 +18,8 @@ Public/images/generated/**/*
 Deployment/Release/uitsmijter-*.tar
 /Deployment/Runtime/dirty
 /charts
+/node_modules
+packageBuildInfo.*
+/package.json
+/package-lock.json
+/CLAUDE.md

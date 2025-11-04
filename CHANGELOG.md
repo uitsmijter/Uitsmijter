@@ -1,3 +1,38 @@
+# 0.10.0
+
+- Feature: **OpenID Connect Discovery 1.0** endpoint at `/.well-known/openid-configuration` with full multi-tenant support, allowing clients to automatically discover provider capabilities and endpoints
+- Feature: **E2E Test Filtering** - New `--filter` flag for `./tooling.sh e2e` command allows selective test execution for faster development cycles
+- Feature: Enhanced **Kubernetes API** with automatic retry logic for improved reliability when loading tenant and client configurations from CRDs
+- Feature: Improved **Helm Chart** with default resource limits helper for easier production deployments
+
+- Fix: **Redis connection stability** - Connection pool no longer blocks startup, graceful handling of DNS resolution failures, and improved timeout configuration
+- Fix: **S3 template loading** race condition in multi-tenant environments
+- Fix: **PKCE validation** order in OAuth2 authorization flow
+- Fix: **JSON encoder/decoder** date strategy mismatch causing serialization issues
+- Fix: **MainActor deadlock** in EntityCRDLoader initialization
+- Fix: **Stdout buffering** in containerized environments for immediate log visibility
+- Fix: Translation provider initialization to use correct resource path in Docker environments
+- Fix: Helm template YAML indentation issues
+
+- Change: **Swift 6.2 Upgrade** - Complete migration to Swift 6.2 with full concurrency support, actor isolation, and Sendable conformance
+- Change: **Server target renamed** to `Uitsmijter-AuthServer` for better clarity
+- Change: **Controller structure** reorganized with flattened directory structure for improved maintainability
+- Change: Removed WebKitGTK compatibility layer (now handled by Buildbox 4.1.1)
+
+- Update: **Redis to 8.2.2** with Sentinel support for high availability
+- Update: **Buildbox to 4.1.1** with improved Swift 6.2 support
+- Update: **SwiftLint** to latest version with auto-fix capabilities
+- Update: **FileMonitor to 1.2.1** with Swift 6.2 concurrency fixes
+
+- Improvement: **Logging system** - Complete rewrite as independent module with NDJSON format support, improved error messages, spelling and grammar fixes
+- Improvement: **JavaScript Provider** converted to actor for thread-safe script execution
+- Improvement: **AuthCodeStorage** converted to actor with improved garbage collection in Docker environments
+- Improvement: **Redis replicas** default with 3 replicas for better reliability
+- Improvement: Comprehensive **DocC documentation** added throughout codebase
+- Improvement: **Test infrastructure** - Fixed flaky tests caused by parallel execution, improved test filtering, and added comprehensive test coverage
+- Improvement: **Tooling script** documentation with detailed function descriptions
+- Improvement: Code quality with zero SwiftLint violations and zero compiler warnings
+
 # 0.9.7
 
 - Feature: Deployment resource request and limits can be set in helm values.yaml
@@ -16,7 +51,7 @@
 
 - Change: The Scripting Provider `fetch` method now leverages `AsyncHTTPClient` rather than `FoundationNetwork`'s `URLSession`
 - Change: End-to-end tests running in `--fast` mode will now default to using Chromium, ensuring consistent behavior and results across tests
-- Change: To improve test compatibility, we have removed the “webp” support for the default login page of Uitsmijte End-To-End-Test
+- Change: To improve test compatibility, we have removed the "webp" support for the default login page of Uitsmijte End-To-End-Test
 - Change: Redis instances are now clearly identified with `uitsmijter-session-master` and `uitsmijter-session-slave`, helping to avoid confusion and enhancing configuration clarity
 
 - Update: to Swift 5.9.2
@@ -25,7 +60,7 @@
 
 - Improvement: The `code` tooling command now utilizes its own build folder, streamlining the workspace and reducing cross-dependencies
 - Improvement: The `test` command now supports an optional filter, allowing you to selectively run tests and focus on specific areas of the codebase
-- Improvement: To better align documentation and reduce ambiguity, “Littleletetr” has been renamed to “Ham” across all relevant documentation and testing szenarios
+- Improvement: To better align documentation and reduce ambiguity, "Littleletetr" has been renamed to "Ham" across all relevant documentation and testing szenarios
 
 # 0.9.5
 
@@ -142,4 +177,4 @@ Released at 15.08.2023
 
 # 0.9.1
 
-- Start development from the sources from different implementations 
+- Start development from the sources from different implementations

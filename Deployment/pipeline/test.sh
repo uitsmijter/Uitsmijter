@@ -19,12 +19,34 @@ EXTRA=""
 if [  -n "${DEBUG}" ]; then
   EXTRA=" -v"
 fi
-swift test --scratch-path .build --num-workers ${CPU_COUNT} --parallel ${EXTRA} \
-  --enable-code-coverage \
-  --xunit-output .build/testresults/xunit.xml \
-  ${FILTER_TEST} \
-  -Xcc -I/usr/include/webkitgtk-4.0 \
-  -Xcc -I/usr/include/webkitgtk-4.0/JavaScriptCore
+INCLUDES=$(pkg-config --cflags-only-I javascriptcoregtk-4.1 2>/dev/null | sed 's/-I/ -Xcc -I/g' || echo " -Xcc -I/usr/include/webkitgtk-4.1 -Xcc -I/usr/include/webkitgtk-4.1/JavaScriptCore")
+LIBS=$(pkg-config --libs javascriptcoregtk-4.1 2>/dev/null | sed 's/-l/ -Xlinker -l/g' || echo "")
+
+# Debug: Show filter if set
+if [ -n "${FILTER_TEST}" ]; then
+  echo "Test filter: ${FILTER_TEST}"
+else
+  echo "No test filter set - running all tests"
+fi
+
+# Configure output filtering based on SUPPRESS_PACKAGE_WARNINGS environment variable
+if [ "${SUPPRESS_PACKAGE_WARNINGS:-false}" = "true" ]; then
+  # Filter out package manifest warnings from dependencies
+  DISABLE_FILE_MONITORING=true swift test --scratch-path .build --num-workers ${CPU_COUNT} --parallel ${EXTRA} \
+    --enable-code-coverage \
+    --xunit-output .build/testresults/xunit.xml \
+    ${FILTER_TEST} \
+    ${INCLUDES} ${LIBS} 2>&1 | \
+    grep -v "warning:.*found .* file(s) which are unhandled" | \
+    grep -v "^\s*/.*/.build/checkouts/.*/.*\.swift"
+else
+  # Show all output including package warnings
+  DISABLE_FILE_MONITORING=true swift test --scratch-path .build --num-workers ${CPU_COUNT} --parallel ${EXTRA} \
+    --enable-code-coverage \
+    --xunit-output .build/testresults/xunit.xml \
+    ${FILTER_TEST} \
+    ${INCLUDES} ${LIBS}
+fi
 
 sleep 1
 

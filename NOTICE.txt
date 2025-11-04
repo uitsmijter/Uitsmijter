@@ -2,7 +2,7 @@
 //
 // This source file is part of the Uitsmijter open source project
 //
-// Copyright (c) 2022-2023 Uitsmijter contributor (aus der Technik Simon & Sinon Gbr)
+// Copyright (c) 2022-2025 Uitsmijter contributor (aus der Technik Simon & Sinon Gbr)
 // Licensed under Apache 2.0
 //
 // See LICENSE for license information
@@ -13,18 +13,56 @@
 
 This product contains open source libraries or a derivation from them:
 
-- https://github.com/Olipro/Coverify
-  Convert LLVM code coverage to cobertura
+Core Framework:
 - https://vapor.codes
-  Server Framework we love and used for this project
-- https://github.com/swift-server-community//SwiftPrometheus.git
+  Server Framework we use for this project
+- https://github.com/vapor/redis.git
+  Redis client for session storage
+- https://github.com/vapor/leaf.git
+  Template engine for rendering login pages
+- https://github.com/vapor/jwt.git
+  JWT token generation and validation
+
+Logging & Monitoring:
+- https://github.com/apple/swift-log.git
+  Apple's logging library for Swift
+- https://github.com/swift-server-community/SwiftPrometheus.git
   Prometheus exporter for custom metrics
-- https://github.com/jectivex/JXKit
-  Inspiration for the JavaScript bridge to work on linux
+
+JavaScript Engine:
+- https://github.com/aus-der-Technik/JXKit.git
+  JavaScript bridge for provider scripts (fork of jectivex/JXKit)
+
+Security & Cryptography:
 - https://github.com/krzyzanowskim/CryptoSwift.git
   Crypto related functions and helpers for Swift
-- https://github.com/jpsim/Yams.git
-  A sweet and swifty YAML parser built on LibYAML.
-- https://github.com/swiftkube/client
-  Inspiration for a Swift client for talking to a Kubernetes cluster
 
+Configuration & Data:
+- https://github.com/jpsim/Yams.git
+  A sweet and swifty YAML parser built on LibYAML
+
+Kubernetes Integration:
+- https://github.com/swiftkube/client.git
+  Swift client for talking to a Kubernetes cluster
+
+Cloud Storage:
+- https://github.com/soto-project/soto.git
+  AWS SDK for Swift (S3 template storage)
+
+Networking:
+- https://github.com/swift-server/async-http-client.git
+  HTTP client for async networking
+
+File System:
+- https://github.com/aus-der-Technik/FileMonitor.git
+  File monitoring for hot-reload of configurations
+
+Build Tools:
+- https://github.com/DimaRU/PackageBuildInfo
+  Package build information plugin
+- https://github.com/apple/swift-docc-plugin
+  Documentation generation plugin
+
+Testing & Coverage:
+- https://github.com/Olipro/Coverify
+  Convert LLVM code coverage to cobertura format

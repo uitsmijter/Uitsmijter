@@ -1,4 +1,4 @@
-// swift-tools-version:5.9
+// swift-tools-version:6.2
 
 import PackageDescription
 
@@ -11,6 +11,7 @@ let package = Package(
             .executable(name: "Uitsmijter", targets: ["Uitsmijter"])
         ],
         dependencies: [
+            .package(url: "https://github.com/apple/swift-log.git", from: "1.0.0"),
             .package(url: "https://github.com/vapor/vapor.git", from: "4.106.1"),
             .package(url: "https://github.com/vapor/redis.git", from: "4.0.0"),
             .package(url: "https://github.com/vapor/leaf.git", from: "4.0.0"),
@@ -21,27 +22,51 @@ let package = Package(
             .package(url: "https://github.com/jpsim/Yams.git", from: "5.0.1"),
             .package(url: "https://github.com/soto-project/soto.git", from: "6.0.0"),
             .package(url: "https://github.com/swiftkube/client.git", from: "0.15.0"),
-            .package(url: "https://github.com/aus-der-Technik/FileMonitor.git", from: "1.1.0"),
-            .package(url: "https://github.com/DimaRU/PackageBuildInfo", from: "1.0.1"),
-            .package(url: "https://github.com/swift-server/async-http-client.git", from: "1.9.0")
+            .package(url: "https://github.com/aus-der-Technik/FileMonitor.git", from: "1.2.1"),
+            .package(url: "https://github.com/DimaRU/PackageBuildInfo", from: "1.0.4"),
+            .package(url: "https://github.com/swift-server/async-http-client.git", from: "1.9.0"),
+            .package(url: "https://github.com/apple/swift-docc-plugin", from: "1.0.0"),
         ],
 
         targets: [
             .target(
-                    name: "Server",
+                    name: "FoundationExtensions",
                     dependencies: [
+                        
+                    ],
+                    swiftSettings: [
+                        .unsafeFlags(["-warnings-as-errors"])
+                    ],
+                    plugins: []
+            ),
+            .target(
+                    name: "Logger",
+                    dependencies: [
+                        .target(name: "FoundationExtensions"),
+                        .product(name: "Logging", package: "swift-log"),
+                    ],
+                    swiftSettings: [
+                        .unsafeFlags(["-warnings-as-errors"])
+                    ],
+                    plugins: []
+            ),
+            .target(
+                    name: "Uitsmijter-AuthServer",
+                    dependencies: [
+                        .target(name: "FoundationExtensions"),
+                        .target(name: "Logger"),
+                        "JXKit",
+                        .product(name: "AsyncHTTPClient", package: "async-http-client"),
                         .product(name: "Vapor", package: "vapor"),
                         .product(name: "Redis", package: "redis"),
                         .product(name: "Leaf", package: "leaf"),
                         .product(name: "JWT", package: "jwt"),
+                        "CryptoSwift",
                         .product(name: "SotoS3", package: "soto"),
                         "SwiftPrometheus",
-                        "JXKit",
-                        "CryptoSwift",
                         "Yams",
                         .product(name: "SwiftkubeClient", package: "client"),
                         .product(name: "FileMonitor", package: "FileMonitor"),
-                        .product(name: "AsyncHTTPClient", package: "async-http-client"),
                     ],
                     swiftSettings: [
                         // Enable better optimizations when building in Release configuration. Despite the use of
@@ -56,13 +81,25 @@ let package = Package(
                         .plugin(name: "PackageBuildInfoPlugin", package: "PackageBuildInfo")
                     ]
             ),
-            .testTarget(name: "ServerTests", dependencies: [
-                .target(name: "Server"),
-                .product(name: "XCTVapor", package: "vapor")
+            
+            // TESTS
+            .testTarget(name: "FoundationExtensionsTests", dependencies: [
+                .target(name: "FoundationExtensions"),
+            ]),
+            .testTarget(name: "LoggerTests", dependencies: [
+                .target(name: "Logger"),
+            ]),
+            .testTarget(name: "Uitsmijter-AuthServerTests", dependencies: [
+                .target(name: "Uitsmijter-AuthServer"),
+                .product(name: "VaporTesting", package: "vapor"),
             ], exclude: ["Entities/Loader/Stubs"]),
+
+            // EXECUTE
             .executableTarget(
                     name: "Uitsmijter",
-                    dependencies: [.target(name: "Server")],
+                    dependencies: [
+                        .target(name: "Uitsmijter-AuthServer")
+                    ],
                     plugins: []
             )
         ]

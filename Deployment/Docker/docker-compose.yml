@@ -1,7 +1,7 @@
 
 services:
   redis:
-    image: 'bitnami/redis:${REDIS_VERSION:-latest}'
+    image: 'ghcr.io/uitsmijter/redis:${REDIS_VERSION:-latest}'
     ports:
       - "6379:6379"
     environment:

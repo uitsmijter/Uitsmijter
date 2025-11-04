@@ -46,7 +46,7 @@ export async function authorizeApiRequestOnPage(page: Page, url: string, data: A
 }
 
 export async function loginAuthorizeFormRequest(page: Page, url: string, data: AuthorizeFormRequestData) {
-    const queryParams = {
+    const queryParams: Record<string, string> = {
         response_type: data.response_type,
         client_id: data.client_id,
         client_secret: data.client_secret || "null",
@@ -54,6 +54,15 @@ export async function loginAuthorizeFormRequest(page: Page, url: string, data: A
         scope: data.scope,
         state: data.state
     }
+
+    // Add optional PKCE parameters if provided
+    if (data.code_challenge) {
+        queryParams.code_challenge = data.code_challenge
+    }
+    if (data.code_challenge_method) {
+        queryParams.code_challenge_method = data.code_challenge_method
+    }
+
     const queryString = new URLSearchParams(queryParams).toString();
 
     return await page.request.post(url + '/login', {

@@ -54,16 +54,16 @@ spec:
                   name: uitsmijter-sessions
                   key: 'redis-password'
 
-          {{- with .Values.resources }}
           resources:
-            {{- toYaml . | nindent 12 }}
-          {{- end }}
+            {{- include "uitsmijter.resources" . | nindent 12 }}
 
           livenessProbe:
+            periodSeconds: 15
             httpGet:
               path: /health
               port: 8080
           readinessProbe:
+            periodSeconds: 10
             httpGet:
               path: /health/ready
               port: 8080

@@ -27,10 +27,10 @@ spec:
 apiVersion: "uitsmijter.io/v1"
 kind: Tenant
 metadata:
-  name: bnbc
+  name: xbnbc
 spec:
   hosts:
-    - login.bnbc.example
+    - login.xbnbc.example
   providers:
     # Allows all users
     - |

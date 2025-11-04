@@ -86,3 +86,54 @@ Build the default service name
 {{- define "uitsmijter.serviceName" -}}
 {{- default (include "uitsmijter.name" .) .Values.serviceNameOverride }}-authserver
 {{- end }}
+
+{{/*
+Define default resource limits and requests
+Returns the resources from .Values.resources if set, otherwise returns sensible defaults
+*/}}
+{{- define "uitsmijter.resources" -}}
+{{- if .Values.resources }}
+{{- toYaml .Values.resources }}
+{{- else }}
+requests:
+  memory: "256Mi"
+  cpu: "250m"
+limits:
+  memory: "512Mi"
+  cpu: "1000m"
+{{- end }}
+{{- end }}
+
+{{/*
+Generate or retrieve JWT secret
+Looks up existing secret first to maintain persistence across upgrades
+*/}}
+{{- define "uitsmijter.jwtSecret" -}}
+{{- if .Values.jwtSecret -}}
+  {{- .Values.jwtSecret -}}
+{{- else -}}
+  {{- $secret := lookup "v1" "Secret" (include "uitsmijter.namespace" .) "jwt-secret" -}}
+  {{- if and $secret $secret.data -}}
+    {{- index $secret.data "JWT_SECRET" | b64dec -}}
+  {{- else -}}
+    {{- randAlphaNum 64 -}}
+  {{- end -}}
+{{- end -}}
+{{- end -}}
+
+{{/*
+Generate or retrieve Redis password
+Looks up existing secret first to maintain persistence across upgrades
+*/}}
+{{- define "uitsmijter.redisPassword" -}}
+{{- if .Values.redisPassword -}}
+  {{- .Values.redisPassword -}}
+{{- else -}}
+  {{- $secret := lookup "v1" "Secret" (include "uitsmijter.namespace" .) "uitsmijter-sessions" -}}
+  {{- if and $secret $secret.data -}}
+    {{- index $secret.data "redis-password" | b64dec -}}
+  {{- else -}}
+    {{- randAlphaNum 32 -}}
+  {{- end -}}
+{{- end -}}
+{{- end -}}
