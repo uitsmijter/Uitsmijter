@@ -75,6 +75,7 @@ test.describe('OAuth - Default Login Page', () => {
                 timezoneId: 'Europe/Berlin',
             });
             test('vrt', async ({page}) => {
+                await page.waitForLoadState('networkidle');
                 expect(await page.screenshot()).toMatchSnapshot();
             });
         });

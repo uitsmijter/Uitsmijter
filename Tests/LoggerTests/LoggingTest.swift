@@ -53,24 +53,22 @@ struct LoggingTest {
     }
 
     @Test("getLastLog finds single matching entry")
-    func getLastLogSingleMatch() async {
+    func getLastLogSingleMatch() async throws {
         log.info("Unique test message 12345")
-        let result = await writer.getLastLog(where: "Unique test message")
-        #expect(result != nil)
-        #expect(result?.message == "Unique test message 12345")
-        #expect(result?.level == "INFO")
+        let result = try await writer.waitForLog(where: "Unique test message", timeout: 1.0)
+        #expect(result.message == "Unique test message 12345")
+        #expect(result.level == "INFO")
     }
 
     @Test("getLastLog returns most recent matching entry")
-    func getLastLogMultipleMatches() async {
+    func getLastLogMultipleMatches() async throws {
         log.info("Test message first occurrence")
         log.info("Some other message")
         log.info("Test message second occurrence")
         log.info("Yet another message")
 
-        let result = await writer.getLastLog(where: "Test message")
-        #expect(result != nil)
-        #expect(result?.message == "Test message second occurrence")
+        let result = try await writer.waitForLog(where: "Test message second occurrence", timeout: 1.0)
+        #expect(result.message == "Test message second occurrence")
     }
 
     @Test("getLastLog returns nil when no match found")
@@ -84,37 +82,37 @@ struct LoggingTest {
     }
 
     @Test("getLastLog is case sensitive")
-    func getLastLogCaseSensitive() async {
+    func getLastLogCaseSensitive() async throws {
         log.info("Case Sensitive Test")
 
-        let resultUppercase = await writer.getLastLog(where: "Case Sensitive")
-        #expect(resultUppercase != nil)
+        // Use waitForLog to ensure the log has been written to the buffer
+        let resultUppercase = try await writer.waitForLog(where: "Case Sensitive", timeout: 1.0)
+        #expect(resultUppercase.message.contains("Case Sensitive"))
 
         let resultLowercase = await writer.getLastLog(where: "case sensitive")
         #expect(resultLowercase == nil)
     }
 
     @Test("getLastLog performs substring search")
-    func getLastLogSubstringSearch() async {
+    func getLastLogSubstringSearch() async throws {
         log.info("This is a complete message")
 
-        let result = await writer.getLastLog(where: "complete")
-        #expect(result != nil)
-        #expect(result?.message == "This is a complete message")
+        let result = try await writer.waitForLog(where: "complete", timeout: 1.0)
+        #expect(result.message == "This is a complete message")
     }
 
     @Test("getLastLog searches across different log levels")
-    func getLastLogDifferentLevels() async {
+    func getLastLogDifferentLevels() async throws {
         log.debug("Debug level search test")
         log.info("Info level search test")
         log.warning("Warning level search test")
         log.error("Error level search test")
 
-        let debugResult = await writer.getLastLog(where: "Debug level")
-        #expect(debugResult?.level == "DEBUG")
+        let debugResult = try await writer.waitForLog(where: "Debug level", timeout: 1.0)
+        #expect(debugResult.level == "DEBUG")
 
-        let errorResult = await writer.getLastLog(where: "Error level")
-        #expect(errorResult?.level == "ERROR")
+        let errorResult = try await writer.waitForLog(where: "Error level", timeout: 1.0)
+        #expect(errorResult.level == "ERROR")
     }
 
     @Test("getLastLog with full circular buffer")
@@ -141,12 +139,11 @@ struct LoggingTest {
     }
 
     @Test("getLastLog with special characters")
-    func getLastLogSpecialCharacters() async {
+    func getLastLogSpecialCharacters() async throws {
         log.info("Message with special chars: @#$%^&*()")
 
-        let result = await writer.getLastLog(where: "special chars")
-        #expect(result != nil)
-        #expect(result?.message.contains("@#$%^&*()") == true)
+        let result = try await writer.waitForLog(where: "special chars", timeout: 1.0)
+        #expect(result.message.contains("@#$%^&*()") == true)
     }
 
     @Test("getLastLog preserves original buffer")

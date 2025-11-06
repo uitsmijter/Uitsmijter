@@ -11,11 +11,12 @@ test.describe('Templates', () => {
 
     test('error not from S3', async ({page}) => {
         let response = await app.goto('https://id.ham.test/login-404?for=https://shop.ham.test/')
-
+        
         // Should be the default 404 page
         expect(response?.status()).toBe(404)
         expect(await page.content()).toContain('class="error-main"')
         expect(await page.content()).not.toContain('data-tenant="ham"')
+        await page.waitForLoadState('networkidle');
         expect(await page.screenshot()).toMatchSnapshot();
     });
 
@@ -27,6 +28,7 @@ test.describe('Templates', () => {
         expect(await page.content()).toContain('Login')
         expect(await page.content()).toContain('logo-box')
         expect(await page.content()).toContain('data-tenant="ham"')
+        await page.waitForLoadState('networkidle');
         expect(await page.screenshot()).toMatchSnapshot();
     });
 
@@ -45,6 +47,7 @@ test.describe('Templates', () => {
         expect(await page.content()).toContain('in progress')
         expect(await page.content()).toContain('logout-box')
         expect(await page.content()).toContain('data-tenant="ham"')
+        await page.waitForLoadState('networkidle');
         expect(await page.screenshot()).toMatchSnapshot();
     });
 

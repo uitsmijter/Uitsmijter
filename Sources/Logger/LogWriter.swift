@@ -263,9 +263,10 @@ public final class LogWriter: LogHandler {
     ///
     /// ## Behavior
     ///
-    /// When a new value is set, the setter automatically pushes it to the ``logBuffer``,
-    /// maintaining the circular buffer of recent messages. This ensures that `lastLog` and the buffer
-    /// stay synchronized.
+    /// This property only stores the reference to the most recent message. The actual push to
+    /// ``logBuffer`` is performed synchronously by the ``log(level:message:metadata:source:file:function:line:)``
+    /// method via ``pushToBuffer(_:)``, ensuring that the buffer is updated before the log call returns.
+    /// This prevents race conditions in tests that immediately query the buffer.
     ///
     /// ## Concurrency
     ///
@@ -286,6 +287,7 @@ public final class LogWriter: LogHandler {
     ///         rely on this property for application logic.
     /// - Important: The value may be `nil` if no logs have been written since the writer was created.
     /// - SeeAlso: ``logBuffer`` for accessing a history of recent log messages
+    /// - SeeAlso: ``pushToBuffer(_:)`` for the synchronous buffer push implementation
     nonisolated public var lastLog: LogMessage? {
         get {
             _lastLog
@@ -293,10 +295,10 @@ public final class LogWriter: LogHandler {
         set {
             _lastLog = newValue
             if let newValue {
-                // Push asynchronously to the buffer
-                // The new waitForLog() method handles synchronization properly using continuations
-                Task {
-                    await logBuffer.push(newValue)
+                // Push to buffer using a detached task to avoid blocking any executor
+                // The waitForLog() method handles synchronization for tests that need it
+                Task.detached {
+                    await self.logBuffer.push(newValue)
                 }
             }
         }
@@ -745,7 +747,7 @@ public final class LogWriter: LogHandler {
             print("\(printLevel)\(logMessage.date.rfc1123): \(logMessage.message)\(printMetadata)\(debugLog)")
         }
 
-        // Set lastLog which will synchronously push to the buffer
+        // Set lastLog which will asynchronously push to buffer via Task.detached
         lastLog = logMessage
 
         // Force flush stdout to ensure logs appear immediately in containerized environments
