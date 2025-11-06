@@ -53,7 +53,8 @@ test.describe('Cheese Cookbooks Interceptor', () => {
             await expect(errorMessage).toBeVisible();
             await expect(errorMessage).toHaveClass("error");
             await expect(errorMessage).toContainText("incorrect credentials")
-
+            
+            await page.waitForLoadState('networkidle');
             expect(await page.screenshot()).toMatchSnapshot();
         });
     });
@@ -91,6 +92,7 @@ test.describe('Cheese Cookbooks Interceptor', () => {
 
         test('and the screen is the same', async ({page}) => {
             await fillLoginForm(page)
+            await page.waitForLoadState('networkidle');
             expect(await page.screenshot()).toMatchSnapshot();
         });
     });
@@ -114,6 +116,7 @@ test.describe('Cheese Cookbooks Interceptor', () => {
 
             // Firefox do not logout
             await expect(page).toHaveTitle(/Login/);
+            await page.waitForLoadState('networkidle');
             expect(await page.screenshot()).toMatchSnapshot();
 
             // check cookie is gone.

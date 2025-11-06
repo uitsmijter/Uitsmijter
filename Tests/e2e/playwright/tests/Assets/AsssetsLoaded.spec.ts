@@ -20,6 +20,7 @@ test.describe('Assets loading for', () => {
         await app.goto('https://login.example.com/login?for=http://cookbooks.example.com')
         await app.waitForPage(page)
         await expectAssetsLoaded()
+        await page.waitForLoadState('networkidle');
         
         expect(await page.screenshot()).toMatchSnapshot();
     })
@@ -30,6 +31,7 @@ test.describe('Assets loading for', () => {
         await app.goto('https://login.example.com/logout?for=http://cookbooks.example.com')
 
         await expectAssetsLoaded()
+        await page.waitForLoadState('networkidle');
         expect(await page.screenshot()).toMatchSnapshot();
     })
 
@@ -37,6 +39,7 @@ test.describe('Assets loading for', () => {
         await app.goto('https://login.example.com/error')
 
         await expectAssetsLoaded()
+        await page.waitForLoadState('networkidle');
         expect(await page.screenshot()).toMatchSnapshot();
     })
 
@@ -44,6 +47,7 @@ test.describe('Assets loading for', () => {
         await app.goto('https://missing-tenant.example.com')
 
         await expectAssetsLoaded()
+        await page.waitForLoadState('networkidle');
         expect(await page.screenshot()).toMatchSnapshot();
     })
 
