@@ -36,14 +36,18 @@ body {
 @media screen and (max-width: 640px) {
     .background {
         background-image: -webkit-image-set(
+                url("../images/generated/640/landscape.webp") 1x,
                 url("../images/generated/640/landscape.avif") 1x,
                 url("../images/generated/640/landscape.jpg") 1x,
+                url("../images/generated/1280/landscape.webp") 2x,
                 url("../images/generated/1280/landscape.avif") 2x,
                 url("../images/generated/1280/landscape.jpg") 2x
         );
         background-image: image-set(
+                url("../images/generated/640/landscape.webp") type("image/webp") 1x,
                 url("../images/generated/640/landscape.avif") type("image/avif") 1x,
                 url("../images/generated/640/landscape.jpg") type("image/jpeg") 1x,
+                url("../images/generated/1280/landscape.webp") type("image/webp") 2x,
                 url("../images/generated/1280/landscape.avif") type("image/avif") 2x,
                 url("../images/generated/1280/landscape.jpg") type("image/jpeg") 2x
         );
@@ -53,14 +57,18 @@ body {
 @media screen and (min-width: 640px) {
     .background {
         background-image: -webkit-image-set(
+                url("../images/generated/1920/landscape.webp") 1x,
                 url("../images/generated/1920/landscape.avif") 1x,
                 url("../images/generated/1920/landscape.jpg") 1x,
+                url("../images/generated/3840/landscape.webp") 2x,
                 url("../images/generated/3840/landscape.avif") 2x,
                 url("../images/generated/3840/landscape.jpg") 2x
         );
         background-image: image-set(
+                url("../images/generated/1920/landscape.webp") type("image/webp") 1x,
                 url("../images/generated/1920/landscape.avif") type("image/avif") 1x,
                 url("../images/generated/1920/landscape.jpg") type("image/jpeg") 1x,
+                url("../images/generated/3840/landscape.webp") type("image/webp") 2x,
                 url("../images/generated/3840/landscape.avif") type("image/avif") 2x,
                 url("../images/generated/3840/landscape.jpg") type("image/jpeg") 2x
         );
@@ -70,12 +78,15 @@ body {
 @media screen and (min-width: 1920px) {
     .background {
         background-image: -webkit-image-set(
+                url("../images/generated/3840/landscape.webp") 1x,
                 url("../images/generated/3840/landscape.avif") 1x,
                 url("../images/generated/3840/landscape.jpg") 1x,
+                url("../images/generated/3840/landscape.webp") 2x,
                 url("../images/generated/3840/landscape.avif") 2x,
                 url("../images/generated/3840/landscape.jpg") 2x
         );
         background-image: image-set(
+                url("../images/generated/3840/landscape.webp") type("image/webp"),
                 url("../images/generated/3840/landscape.avif") type("image/avif"),
                 url("../images/generated/3840/landscape.jpg") type("image/jpeg")
         );

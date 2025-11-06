@@ -91,6 +91,7 @@ function e2eTests(){
   echo "Running tests:"
 
   status=0
+  SUPPRESS_PACKAGE_WARNINGS="${SUPPRESS_PACKAGE_WARNINGS}" \
   ARGUMENTS="${ARGUMENTS}" GITHUB_ACTION=${GITHUB_ACTION:-} docker compose \
     -f "${PROJECT_DIR}/Deployment/build-compose.yml" \
     --env-file "${PROJECT_DIR}/.env" \
