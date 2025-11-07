@@ -1,5 +1,5 @@
 # 0.10.0
-
+- prerelease
 - Feature: **OpenID Connect Discovery 1.0** endpoint at `/.well-known/openid-configuration` with full multi-tenant support, allowing clients to automatically discover provider capabilities and endpoints
 - Feature: **E2E Test Filtering** - New `--filter` flag for `./tooling.sh e2e` command allows selective test execution for faster development cycles
 - Feature: Enhanced **Kubernetes API** with automatic retry logic for improved reliability when loading tenant and client configurations from CRDs
