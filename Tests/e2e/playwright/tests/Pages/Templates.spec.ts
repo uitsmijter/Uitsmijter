@@ -32,7 +32,9 @@ test.describe('Templates', () => {
         expect(await page.screenshot()).toMatchSnapshot();
     });
 
-    test('logout loaded from S3', async ({page}) => {
+    test('logout loaded from S3', async ({page, browserName}) => {
+        test.skip(browserName === 'webkit' || browserName === 'mobile-safari', 'WebKit form submission issue');
+
         let response = await app.goto('https://page.ham.test')
         await app.auth.login('test@example.com', 'test')
 

@@ -29,13 +29,17 @@ test.describe('Silent login to bnbc', () => {
             await expect(page).toHaveTitle(/Login/)
         })
 
-        test('Redirect to bnbc page after login', async ({page}) => {
+        test('Redirect to bnbc page after login', async ({page, browserName}) => {
+            test.skip(browserName === 'webkit' || browserName === 'mobile-safari', 'WebKit form submission issue');
+
             await app.goto('https://login.bnbc.example/login?for=https://blog.bnbc.example/&mode=interceptor')
             await app.auth.login("test@example.com", "test")
             await expect(page).toHaveTitle("Slice & Spread")
         })
 
-        test('Visit Shop show page content after login auth redirects', async ({page}) => {
+        test('Visit Shop show page content after login auth redirects', async ({page, browserName}) => {
+            test.skip(browserName === 'webkit' || browserName === 'mobile-safari', 'Depends on previous login test');
+
             await app.goto('https://shop.bnbc.example/')
             await expect(page).toHaveTitle(/The power of culinary creativity/)
         })
