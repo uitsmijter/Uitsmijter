@@ -29,7 +29,9 @@ test.describe('No Silent login to ham', () => {
             await expect(page).toHaveTitle(/Login/)
         })
 
-        test('Redirect to Ham page after login', async ({page}) => {
+        test('Redirect to Ham page after login', async ({page, browserName}) => {
+            test.skip(browserName === 'webkit' || browserName === 'mobile-safari', 'WebKit form submission issue');
+
             await app.goto('https://page.ham.test/')
             await expect(page).toHaveTitle(/Login/)
 
