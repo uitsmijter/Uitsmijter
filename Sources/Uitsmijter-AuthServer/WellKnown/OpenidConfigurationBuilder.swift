@@ -170,6 +170,7 @@ actor OpenidConfigurationBuilder {
         let tokenEndpoint = "\(issuer)/token"
         let jwksUri = "\(issuer)/.well-known/jwks.json"
         let userinfoEndpoint = "\(issuer)/token/info"
+        let revocationEndpoint = "\(issuer)/revoke"
 
         // Get policy URLs from tenant information
         let policyUri = tenant.config.informations?.privacy_url
@@ -203,7 +204,7 @@ actor OpenidConfigurationBuilder {
             require_request_uri_registration: false,
             op_policy_uri: policyUri,
             op_tos_uri: nil,
-            revocation_endpoint: nil, // Not currently supported
+            revocation_endpoint: revocationEndpoint,
             userinfo_signing_alg_values_supported: nil,
             userinfo_encryption_alg_values_supported: nil,
             userinfo_encryption_enc_values_supported: nil,

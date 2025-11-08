@@ -1,10 +1,12 @@
 # 0.10.0
 - prerelease
+- Feature: **OAuth 2.0 Token Revocation (RFC 7009)** - New `/revoke` endpoint allows clients to invalidate access tokens and refresh tokens, with cascading revocation support and Prometheus metrics
 - Feature: **OpenID Connect Discovery 1.0** endpoint at `/.well-known/openid-configuration` with full multi-tenant support, allowing clients to automatically discover provider capabilities and endpoints
 - Feature: **E2E Test Filtering** - New `--filter` flag for `./tooling.sh e2e` command allows selective test execution for faster development cycles
 - Feature: Enhanced **Kubernetes API** with automatic retry logic for improved reliability when loading tenant and client configurations from CRDs
 - Feature: Improved **Helm Chart** with default resource limits helper for easier production deployments
 
+- Fix: OpenID Discovery endpoint now includes `revocation_endpoint` field
 - Fix: **Redis connection stability** - Connection pool no longer blocks startup, graceful handling of DNS resolution failures, and improved timeout configuration
 - Fix: **S3 template loading** race condition in multi-tenant environments
 - Fix: **PKCE validation** order in OAuth2 authorization flow

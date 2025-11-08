@@ -23,6 +23,11 @@ nonisolated(unsafe) var metricsOAuthSuccess: PromCounter<Int>?
 /// How many OAuth flows failed over time
 nonisolated(unsafe) var metricsOAuthFailure: PromCounter<Int>?
 
+/// How many token revocations succeeded over time
+nonisolated(unsafe) var metricsRevokeSuccess: PromCounter<Int>?
+/// How many token revocations failed over time
+nonisolated(unsafe) var metricsRevokeFailure: PromCounter<Int>?
+
 // How may tokens are in the store
 nonisolated(unsafe) var metricsTokensStored: PromHistogram<Int>?
 
@@ -134,6 +139,17 @@ struct Prometheus: Sendable {
             forType: Int.self,
             named: "\(Prometheus.metricsPrefix)_oauth_failure",
             helpText: "Counter of failed OAuth token authorizations (all grant types)."
+        )
+
+        metricsRevokeSuccess = client.createCounter(
+            forType: Int.self,
+            named: "\(Prometheus.metricsPrefix)_revoke_success",
+            helpText: "Counter of successful token revocations."
+        )
+        metricsRevokeFailure = client.createCounter(
+            forType: Int.self,
+            named: "\(Prometheus.metricsPrefix)_revoke_failure",
+            helpText: "Counter of failed token revocations (authentication failures)."
         )
 
         metricsTokensStored = client.createHistogram(
