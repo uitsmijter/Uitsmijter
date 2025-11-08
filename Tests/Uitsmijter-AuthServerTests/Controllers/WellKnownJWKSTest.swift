@@ -189,13 +189,14 @@ struct WellKnownJWKSTest {
 
     @Test("JWKS endpoint kid matches format")
     func jwksEndpointKidMatchesFormat() async throws {
-        // Generate a key with date format to ensure at least one exists
-        let dateFormatter = DateFormatter()
-        dateFormatter.dateFormat = "yyyy-MM-dd"
-        let dateKid = dateFormatter.string(from: Date())
-        try await KeyStorage.shared.generateAndStoreKey(kid: dateKid, setActive: false)
-
         try await withApp(configure: configure) { app in
+            // Generate a key with date format AFTER app is created to ensure proper isolation
+            let dateFormatter = DateFormatter()
+            dateFormatter.dateFormat = "yyyy-MM-dd"
+            let dateKid = dateFormatter.string(from: Date())
+            try await KeyStorage.shared.generateAndStoreKey(kid: dateKid, setActive: false)
+
+
             try await app.testing().test(
                 .GET,
                 ".well-known/jwks.json",
