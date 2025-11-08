@@ -4,6 +4,7 @@ import Testing
 import JWTKit
 
 @Suite("SignerManager Tests", .serialized)
+// swiftlint:disable type_body_length
 struct SignerManagerTest {
 
     // MARK: - Initialization Tests
@@ -481,3 +482,4 @@ struct SignerManagerTest {
         }
     }
 }
+// swiftlint:enable type_body_length

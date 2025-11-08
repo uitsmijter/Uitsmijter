@@ -4,6 +4,7 @@ import VaporTesting
 @testable import Uitsmijter_AuthServer
 
 @Suite("JWKS Endpoint Integration Tests", .serialized)
+// swiftlint:disable type_body_length
 struct WellKnownJWKSTest {
     let decoder = JSONDecoder()
 
@@ -58,8 +59,11 @@ struct WellKnownJWKSTest {
 
                     // Parse as raw JSON
                     let body = res.body.string
-                    let data = body.data(using: .utf8)
-                    let json = try JSONSerialization.jsonObject(with: data!) as? [String: Any]
+                    guard let data = body.data(using: .utf8) else {
+                        Issue.record("Failed to encode body as UTF-8")
+                        return
+                    }
+                    let json = try JSONSerialization.jsonObject(with: data) as? [String: Any]
 
                     // Check structure
                     #expect(json?["keys"] != nil)
@@ -73,8 +77,8 @@ struct WellKnownJWKSTest {
                         #expect(firstKey["kty"] as? String == "RSA")
                         #expect(firstKey["use"] as? String == "sig")
                         #expect(firstKey["alg"] as? String == "RS256")
-                        #expect(firstKey["kid"] as? String != nil)
-                        #expect(firstKey["n"] as? String != nil)
+                        #expect(firstKey["kid"] is String)
+                        #expect(firstKey["n"] is String)
                         #expect(firstKey["e"] as? String == "AQAB")
                     }
                 }
@@ -194,12 +198,15 @@ struct WellKnownJWKSTest {
                     let jwkSet = try res.content.decode(JWKSet.self)
 
                     for key in jwkSet.keys {
-                        #expect(key.kid != nil)
-                        #expect(!key.kid!.isEmpty)
+                        guard let kid = key.kid else {
+                            Issue.record("Key missing kid")
+                            continue
+                        }
+                        #expect(!kid.isEmpty)
 
                         // kid should be date format: YYYY-MM-DD
                         let kidPattern = "^[0-9]{4}-[0-9]{2}-[0-9]{2}$"
-                        let kidMatches = key.kid!.range(
+                        let kidMatches = kid.range(
                             of: kidPattern,
                             options: .regularExpression
                         )
@@ -222,8 +229,11 @@ struct WellKnownJWKSTest {
                     #expect(res.status == .ok)
 
                     let body = res.body.string
-                    let data = body.data(using: .utf8)
-                    let json = try JSONSerialization.jsonObject(with: data!) as? [String: Any]
+                    guard let data = body.data(using: .utf8) else {
+                        Issue.record("Failed to encode body as UTF-8")
+                        return
+                    }
+                    let json = try JSONSerialization.jsonObject(with: data) as? [String: Any]
 
                     // RFC 7517 Section 5: JWK Set MUST have "keys" member
                     #expect(json?["keys"] != nil)
@@ -238,12 +248,12 @@ struct WellKnownJWKSTest {
                         #expect(key["kty"] as? String == "RSA")
 
                         // For RSA keys, n and e are REQUIRED
-                        #expect(key["n"] as? String != nil)
-                        #expect(key["e"] as? String != nil)
+                        #expect(key["n"] is String)
+                        #expect(key["e"] is String)
 
                         // use, kid, alg are RECOMMENDED
                         #expect(key["use"] as? String == "sig")
-                        #expect(key["kid"] as? String != nil)
+                        #expect(key["kid"] is String)
                         #expect(key["alg"] as? String == "RS256")
                     }
                 }
@@ -388,13 +398,16 @@ struct WellKnownJWKSTest {
                     #expect(!bodyString.isEmpty)
 
                     // Should be valid JSON
-                    let data = bodyString.data(using: .utf8)
-                    #expect(data != nil)
+                    guard let data = bodyString.data(using: .utf8) else {
+                        Issue.record("Failed to encode body as UTF-8")
+                        return
+                    }
 
-                    let json = try? JSONSerialization.jsonObject(with: data!)
+                    let json = try? JSONSerialization.jsonObject(with: data)
                     #expect(json != nil)
                 }
             )
         }
     }
 }
+// swiftlint:enable type_body_length

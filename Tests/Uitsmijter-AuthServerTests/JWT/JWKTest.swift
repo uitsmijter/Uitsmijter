@@ -3,6 +3,7 @@ import Foundation
 import Testing
 
 @Suite("JWK Data Model Tests")
+// swiftlint:disable type_body_length
 struct JWKTest {
 
     // MARK: - RSAPublicJWK Tests
@@ -108,7 +109,10 @@ struct JWKTest {
         """
 
         let decoder = JSONDecoder()
-        let data = jsonString.data(using: .utf8)!
+        guard let data = jsonString.data(using: .utf8) else {
+            Issue.record("Failed to encode JSON string as UTF-8")
+            return
+        }
         let jwk = try decoder.decode(RSAPublicJWK.self, from: data)
 
         #expect(jwk.kty == "RSA")
@@ -130,7 +134,10 @@ struct JWKTest {
         """
 
         let decoder = JSONDecoder()
-        let data = jsonString.data(using: .utf8)!
+        guard let data = jsonString.data(using: .utf8) else {
+            Issue.record("Failed to encode JSON string as UTF-8")
+            return
+        }
         let jwk = try decoder.decode(RSAPublicJWK.self, from: data)
 
         #expect(jwk.kty == "RSA")
@@ -295,7 +302,10 @@ struct JWKTest {
         """
 
         let decoder = JSONDecoder()
-        let data = jsonString.data(using: .utf8)!
+        guard let data = jsonString.data(using: .utf8) else {
+            Issue.record("Failed to encode JSON string as UTF-8")
+            return
+        }
         let jwkSet = try decoder.decode(JWKSet.self, from: data)
 
         #expect(jwkSet.keys.count == 2)
@@ -441,3 +451,4 @@ struct JWKTest {
         #expect(decoded.keys.count == 100)
     }
 }
+// swiftlint:enable type_body_length
