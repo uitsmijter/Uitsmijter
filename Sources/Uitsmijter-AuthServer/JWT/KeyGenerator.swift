@@ -28,6 +28,10 @@ import JWTKit
 /// - SeeAlso: [RFC 7517 Section 6.3](https://www.rfc-editor.org/rfc/rfc7517#section-6.3)
 actor KeyGenerator {
 
+    /// Shared singleton instance for key generation
+    /// Thread-safe through actor isolation
+    static let shared = KeyGenerator()
+
     /// RSA Key Pair container
     ///
     /// Contains both private and public keys for RSA operations.

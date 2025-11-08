@@ -24,16 +24,13 @@ actor MemoryKeyStorage: KeyStorageProtocol {
     /// The currently active key ID for signing
     private var activeKeyID: String?
 
-    /// Key generator
-    private let generator = KeyGenerator()
-
     /// Initialize in-memory key storage
     init() {}
 
     // MARK: - KeyStorageProtocol
 
     func generateAndStoreKey(kid: String, setActive: Bool = true) async throws {
-        let keyPair = try await generator.generateKeyPair(kid: kid)
+        let keyPair = try await KeyGenerator.shared.generateKeyPair(kid: kid)
 
         keys[kid] = StoredKey(
             keyPair: keyPair,
@@ -86,7 +83,7 @@ actor MemoryKeyStorage: KeyStorageProtocol {
         var jwks: [RSAPublicJWK] = []
 
         for (_, storedKey) in keys {
-            let jwk = try await generator.convertToJWK(keyPair: storedKey.keyPair)
+            let jwk = try await KeyGenerator.shared.convertToJWK(keyPair: storedKey.keyPair)
             jwks.append(jwk)
         }
 
