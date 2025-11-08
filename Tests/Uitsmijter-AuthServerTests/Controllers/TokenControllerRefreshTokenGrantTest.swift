@@ -73,7 +73,7 @@ struct TokenControllerRefreshTokenGrantTest {
             let tokenResponse = try await getToken(app: app, for: code, appIdent: testAppIdent)
 
             // Access token profile test
-            let payload = try jwt_signer.verify(tokenResponse.access_token, as: Payload.self)
+            let payload = try await SignerManager.shared.verify(tokenResponse.access_token, as: Payload.self)
             guard let profile = payload.profile else {
                 Issue.record("Can not get profile")
                 throw TestError.abort
@@ -105,7 +105,7 @@ struct TokenControllerRefreshTokenGrantTest {
             #expect(tokenResponse.access_token != newToken.access_token)
 
             // Refresh token profile test
-            let payloadRefreshed = try jwt_signer.verify(tokenResponse.access_token, as: Payload.self)
+            let payloadRefreshed = try await SignerManager.shared.verify(tokenResponse.access_token, as: Payload.self)
             guard let profileRefreshed = payloadRefreshed.profile else {
                 Issue.record("Can not get profile")
                 throw TestError.abort

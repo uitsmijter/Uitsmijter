@@ -272,8 +272,9 @@ struct JWKTest {
         let jsonString = String(data: data, encoding: .utf8)
 
         #expect(jsonString?.contains("\"keys\"") == true)
-        #expect(jsonString?.contains("\"kty\":\"RSA\"") == true)
-        #expect(jsonString?.contains("\"kid\":\"test-key\"") == true)
+        // prettyPrinted adds spaces around colons
+        #expect(jsonString?.contains("\"kty\" : \"RSA\"") == true)
+        #expect(jsonString?.contains("\"kid\" : \"test-key\"") == true)
     }
 
     @Test("JWKSet decodes from RFC 7517 example")

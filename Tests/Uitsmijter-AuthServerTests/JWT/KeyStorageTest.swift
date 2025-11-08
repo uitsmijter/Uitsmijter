@@ -322,7 +322,8 @@ struct KeyStorageTest {
 
         #expect(jsonString != nil)
         #expect(jsonString?.contains("\"keys\"") == true)
-        #expect(jsonString?.contains("\"kty\":\"RSA\"") == true)
+        // prettyPrinted adds spaces around colons
+        #expect(jsonString?.contains("\"kty\" : \"RSA\"") == true)
     }
 
     @Test("JWK Set contains valid public keys")

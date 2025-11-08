@@ -170,7 +170,7 @@ struct LoginControllerProfileTests {
                 #expect(contentGroups.count == 2)
                 let token = contentGroups[1]
 
-                let payload = try jwt_signer.verify(token, as: Payload.self)
+                let payload = try await SignerManager.shared.verify(token, as: Payload.self)
                 #expect(payload.profile != nil)
                 guard let profile = payload.profile else {
                     Issue.record("Can not get profile")
@@ -275,7 +275,7 @@ struct LoginControllerProfileTests {
                 #expect(contentGroups.count == 2)
                 let token = contentGroups[1]
 
-                let payload = try jwt_signer.verify(token, as: Payload.self)
+                let payload = try await SignerManager.shared.verify(token, as: Payload.self)
                 #expect(payload.profile != nil)
                 guard let profile = payload.profile else {
                     Issue.record("Can not get profile")

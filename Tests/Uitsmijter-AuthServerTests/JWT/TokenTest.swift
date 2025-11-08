@@ -37,13 +37,13 @@ struct TokenTest {
     }
 
     @Test("Token expiration defaults to 2 hours")
-    func tokenDefaultExpiration() throws {
+    func tokenDefaultExpiration() async throws {
         let userProfile = UserProfile(
             role: "user",
             user: "user@example.com"
         )
 
-        let token = try Token(
+        let token = try await Token(
             issuer: IssuerClaim(value: "https://test.example.com"),
             audience: AudienceClaim(value: "test-client"),
             tenantName: "test-tenant",
@@ -63,7 +63,7 @@ struct TokenTest {
     }
 
     @Test("Token includes profile data")
-    func tokenIncludesProfileData() throws {
+    func tokenIncludesProfileData() async throws {
         let profile = CodableProfile.object([
             "firstName": .string("John"),
             "lastName": .string("Doe"),
@@ -77,7 +77,7 @@ struct TokenTest {
             profile: profile
         )
 
-        let token = try Token(
+        let token = try await Token(
             issuer: IssuerClaim(value: "https://test.example.com"),
             audience: AudienceClaim(value: "test-client"),
             tenantName: "test-tenant",
@@ -94,13 +94,13 @@ struct TokenTest {
     }
 
     @Test("Token can be created and verified")
-    func tokenCreationAndVerification() throws {
+    func tokenCreationAndVerification() async throws {
         let userProfile = UserProfile(
             role: "developer",
             user: "dev@example.com"
         )
 
-        let createdToken = try Token(
+        let createdToken = try await Token(
             issuer: IssuerClaim(value: "https://test.example.com"),
             audience: AudienceClaim(value: "test-client"),
             tenantName: "dev-tenant",
@@ -108,8 +108,8 @@ struct TokenTest {
             userProfile: userProfile
         )
 
-        // Create another token from the string value
-        let verifiedToken: Token = Token(stringLiteral: createdToken.value)
+        // Create another token from the string value using async verify
+        let verifiedToken = try await Token.verify(createdToken.value)
 
         // Both should have the same payload data
         #expect(verifiedToken.payload.subject.value == "dev@example.com")
@@ -119,13 +119,13 @@ struct TokenTest {
     }
 
     @Test("Token value is valid JWT format")
-    func tokenValueIsValidJWT() throws {
+    func tokenValueIsValidJWT() async throws {
         let userProfile = UserProfile(
             role: "user",
             user: "user@example.com"
         )
 
-        let token = try Token(
+        let token = try await Token(
             issuer: IssuerClaim(value: "https://test.example.com"),
             audience: AudienceClaim(value: "test-client"),
             tenantName: "test-tenant",
@@ -148,13 +148,13 @@ struct TokenTest {
     }
 
     @Test("Multiple tokens have unique signatures")
-    func multipleTokensAreUnique() throws {
+    func multipleTokensAreUnique() async throws {
         let userProfile = UserProfile(
             role: "user",
             user: "user@example.com"
         )
 
-        let token1 = try Token(
+        let token1 = try await Token(
             issuer: IssuerClaim(value: "https://test.example.com"),
             audience: AudienceClaim(value: "test-client"),
             tenantName: "tenant1",
@@ -162,7 +162,7 @@ struct TokenTest {
             userProfile: userProfile
         )
 
-        let token2 = try Token(
+        let token2 = try await Token(
             issuer: IssuerClaim(value: "https://test.example.com"),
             audience: AudienceClaim(value: "test-client"),
             tenantName: "tenant2",
@@ -179,14 +179,14 @@ struct TokenTest {
     // MARK: - Token Initialization from String Tests
 
     @Test("Initialize token from valid JWT string")
-    func initializeFromValidJWT() throws {
+    func initializeFromValidJWT() async throws {
         // Create a token first
         let userProfile = UserProfile(
             role: "user",
             user: "test@example.com"
         )
 
-        let originalToken = try Token(
+        let originalToken = try await Token(
             issuer: IssuerClaim(value: "https://test.example.com"),
             audience: AudienceClaim(value: "test-client"),
             tenantName: "test-tenant",
@@ -194,8 +194,8 @@ struct TokenTest {
             userProfile: userProfile
         )
 
-        // Initialize from string literal
-        let tokenFromString: Token = Token(stringLiteral: originalToken.value)
+        // Initialize from string using async verify
+        let tokenFromString = try await Token.verify(originalToken.value)
 
         // Should match original
         #expect(tokenFromString.payload.subject.value == "test@example.com")
@@ -218,14 +218,14 @@ struct TokenTest {
     }
 
     @Test("Initialize token from tampered JWT returns error token")
-    func initializeFromTamperedJWT() throws {
+    func initializeFromTamperedJWT() async throws {
         // Create a valid token first
         let userProfile = UserProfile(
             role: "user",
             user: "test@example.com"
         )
 
-        let validToken = try Token(
+        let validToken = try await Token(
             issuer: IssuerClaim(value: "https://test.example.com"),
             audience: AudienceClaim(value: "test-client"),
             tenantName: "test-tenant",
@@ -256,13 +256,13 @@ struct TokenTest {
     // MARK: - Token Expiration Tests
 
     @Test("Token expiration can be read from secondsToExpire")
-    func tokenExpirationSeconds() throws {
+    func tokenExpirationSeconds() async throws {
         let userProfile = UserProfile(
             role: "user",
             user: "user@example.com"
         )
 
-        let token = try Token(
+        let token = try await Token(
             issuer: IssuerClaim(value: "https://test.example.com"),
             audience: AudienceClaim(value: "test-client"),
             tenantName: "test-tenant",
@@ -276,13 +276,13 @@ struct TokenTest {
     }
 
     @Test("Token expiration date is in the future")
-    func tokenExpirationDateInFuture() throws {
+    func tokenExpirationDateInFuture() async throws {
         let userProfile = UserProfile(
             role: "user",
             user: "user@example.com"
         )
 
-        let token = try Token(
+        let token = try await Token(
             issuer: IssuerClaim(value: "https://test.example.com"),
             audience: AudienceClaim(value: "test-client"),
             tenantName: "test-tenant",
@@ -330,13 +330,13 @@ struct TokenTest {
     // MARK: - Token with Different Tenants Tests
 
     @Test("Token with different tenants")
-    func tokenWithDifferentTenants() throws {
+    func tokenWithDifferentTenants() async throws {
         let userProfile = UserProfile(
             role: "user",
             user: "user@example.com"
         )
 
-        let token1 = try Token(
+        let token1 = try await Token(
             issuer: IssuerClaim(value: "https://test.example.com"),
             audience: AudienceClaim(value: "test-client"),
             tenantName: "tenant-a",
@@ -344,7 +344,7 @@ struct TokenTest {
             userProfile: userProfile
         )
 
-        let token2 = try Token(
+        let token2 = try await Token(
             issuer: IssuerClaim(value: "https://test.example.com"),
             audience: AudienceClaim(value: "test-client"),
             tenantName: "tenant-b",
@@ -358,13 +358,13 @@ struct TokenTest {
     }
 
     @Test("Token with empty tenant name")
-    func tokenWithEmptyTenant() throws {
+    func tokenWithEmptyTenant() async throws {
         let userProfile = UserProfile(
             role: "user",
             user: "user@example.com"
         )
 
-        let token = try Token(
+        let token = try await Token(
             issuer: IssuerClaim(value: "https://test.example.com"),
             audience: AudienceClaim(value: "test-client"),
             tenantName: "",
@@ -377,13 +377,13 @@ struct TokenTest {
     }
 
     @Test("Token with special characters in tenant")
-    func tokenWithSpecialCharactersTenant() throws {
+    func tokenWithSpecialCharactersTenant() async throws {
         let userProfile = UserProfile(
             role: "user",
             user: "user@example.com"
         )
 
-        let token = try Token(
+        let token = try await Token(
             issuer: IssuerClaim(value: "https://test.example.com"),
             audience: AudienceClaim(value: "test-client"),
             tenantName: "tenant-with-dashes_underscores.dots",
@@ -397,13 +397,13 @@ struct TokenTest {
     // MARK: - Token with Different Roles Tests
 
     @Test("Token with admin role")
-    func tokenWithAdminRole() throws {
+    func tokenWithAdminRole() async throws {
         let userProfile = UserProfile(
             role: "admin",
             user: "admin@example.com"
         )
 
-        let token = try Token(
+        let token = try await Token(
             issuer: IssuerClaim(value: "https://test.example.com"),
             audience: AudienceClaim(value: "test-client"),
             tenantName: "test-tenant",
@@ -415,13 +415,13 @@ struct TokenTest {
     }
 
     @Test("Token with custom role")
-    func tokenWithCustomRole() throws {
+    func tokenWithCustomRole() async throws {
         let userProfile = UserProfile(
             role: "power-user",
             user: "power@example.com"
         )
 
-        let token = try Token(
+        let token = try await Token(
             issuer: IssuerClaim(value: "https://test.example.com"),
             audience: AudienceClaim(value: "test-client"),
             tenantName: "test-tenant",
@@ -433,13 +433,13 @@ struct TokenTest {
     }
 
     @Test("Token with empty role")
-    func tokenWithEmptyRole() throws {
+    func tokenWithEmptyRole() async throws {
         let userProfile = UserProfile(
             role: "",
             user: "user@example.com"
         )
 
-        let token = try Token(
+        let token = try await Token(
             issuer: IssuerClaim(value: "https://test.example.com"),
             audience: AudienceClaim(value: "test-client"),
             tenantName: "test-tenant",
@@ -453,7 +453,7 @@ struct TokenTest {
     // MARK: - Token with Complex Profiles Tests
 
     @Test("Token with nested profile data")
-    func tokenWithNestedProfile() throws {
+    func tokenWithNestedProfile() async throws {
         let profile = CodableProfile.object([
             "user": .object([
                 "name": .object([
@@ -473,7 +473,7 @@ struct TokenTest {
             profile: profile
         )
 
-        let token = try Token(
+        let token = try await Token(
             issuer: IssuerClaim(value: "https://test.example.com"),
             audience: AudienceClaim(value: "test-client"),
             tenantName: "test-tenant",
@@ -488,7 +488,7 @@ struct TokenTest {
     }
 
     @Test("Token with profile containing arrays")
-    func tokenWithProfileArrays() throws {
+    func tokenWithProfileArrays() async throws {
         let profile = CodableProfile.object([
             "permissions": .array([
                 .string("read"),
@@ -507,7 +507,7 @@ struct TokenTest {
             profile: profile
         )
 
-        let token = try Token(
+        let token = try await Token(
             issuer: IssuerClaim(value: "https://test.example.com"),
             audience: AudienceClaim(value: "test-client"),
             tenantName: "test-tenant",
@@ -523,14 +523,14 @@ struct TokenTest {
     }
 
     @Test("Token with nil profile")
-    func tokenWithNilProfile() throws {
+    func tokenWithNilProfile() async throws {
         let userProfile = UserProfile(
             role: "user",
             user: "user@example.com",
             profile: nil
         )
 
-        let token = try Token(
+        let token = try await Token(
             issuer: IssuerClaim(value: "https://test.example.com"),
             audience: AudienceClaim(value: "test-client"),
             tenantName: "test-tenant",
@@ -544,13 +544,13 @@ struct TokenTest {
     // MARK: - Token with Special Characters Tests
 
     @Test("Token with special characters in subject")
-    func tokenWithSpecialCharactersSubject() throws {
+    func tokenWithSpecialCharactersSubject() async throws {
         let userProfile = UserProfile(
             role: "user",
             user: "user+tag@example.com"
         )
 
-        let token = try Token(
+        let token = try await Token(
             issuer: IssuerClaim(value: "https://test.example.com"),
             audience: AudienceClaim(value: "test-client"),
             tenantName: "test-tenant",
@@ -562,13 +562,13 @@ struct TokenTest {
     }
 
     @Test("Token with unicode characters")
-    func tokenWithUnicodeCharacters() throws {
+    func tokenWithUnicodeCharacters() async throws {
         let userProfile = UserProfile(
             role: "管理者",
             user: "用户@example.com"
         )
 
-        let token = try Token(
+        let token = try await Token(
             issuer: IssuerClaim(value: "https://test.example.com"),
             audience: AudienceClaim(value: "test-client"),
             tenantName: "租户",
@@ -585,7 +585,7 @@ struct TokenTest {
     // MARK: - Round-trip Token Tests
 
     @Test("Token round-trip preserves all data")
-    func tokenRoundTrip() throws {
+    func tokenRoundTrip() async throws {
         let profile = CodableProfile.object([
             "department": .string("Engineering"),
             "level": .integer(5)
@@ -597,7 +597,7 @@ struct TokenTest {
             profile: profile
         )
 
-        let originalToken = try Token(
+        let originalToken = try await Token(
             issuer: IssuerClaim(value: "https://test.example.com"),
             audience: AudienceClaim(value: "test-client"),
             tenantName: "engineering-tenant",
@@ -605,8 +605,8 @@ struct TokenTest {
             userProfile: userProfile
         )
 
-        // Round-trip through string
-        let reconstructedToken: Token = Token(stringLiteral: originalToken.value)
+        // Round-trip through string using async verify
+        let reconstructedToken = try await Token.verify(originalToken.value)
 
         // All data should be preserved
         #expect(reconstructedToken.payload.subject.value == originalToken.payload.subject.value)
@@ -618,13 +618,13 @@ struct TokenTest {
     }
 
     @Test("Token serialization and deserialization")
-    func tokenSerializationDeserialization() throws {
+    func tokenSerializationDeserialization() async throws {
         let userProfile = UserProfile(
             role: "user",
             user: "user@example.com"
         )
 
-        let token = try Token(
+        let token = try await Token(
             issuer: IssuerClaim(value: "https://test.example.com"),
             audience: AudienceClaim(value: "test-client"),
             tenantName: "test-tenant",
@@ -635,8 +635,8 @@ struct TokenTest {
         // Simulate storing token value (e.g., in cookie or database)
         let storedTokenValue = token.value
 
-        // Later, reconstruct token from stored value
-        let retrievedToken: Token = Token(stringLiteral: storedTokenValue)
+        // Later, reconstruct token from stored value using async verify
+        let retrievedToken = try await Token.verify(storedTokenValue)
 
         #expect(retrievedToken.payload.subject.value == "user@example.com")
         #expect(retrievedToken.payload.tenant == "test-tenant")
@@ -658,14 +658,14 @@ struct TokenTest {
     // MARK: - Edge Cases
 
     @Test("Token with very long subject")
-    func tokenWithVeryLongSubject() throws {
+    func tokenWithVeryLongSubject() async throws {
         let longSubject = String(repeating: "a", count: 1000) + "@example.com"
         let userProfile = UserProfile(
             role: "user",
             user: longSubject
         )
 
-        let token = try Token(
+        let token = try await Token(
             issuer: IssuerClaim(value: "https://test.example.com"),
             audience: AudienceClaim(value: "test-client"),
             tenantName: "test-tenant",
@@ -677,14 +677,14 @@ struct TokenTest {
     }
 
     @Test("Token with very long tenant name")
-    func tokenWithVeryLongTenant() throws {
+    func tokenWithVeryLongTenant() async throws {
         let longTenant = String(repeating: "tenant-", count: 100)
         let userProfile = UserProfile(
             role: "user",
             user: "user@example.com"
         )
 
-        let token = try Token(
+        let token = try await Token(
             issuer: IssuerClaim(value: "https://test.example.com"),
             audience: AudienceClaim(value: "test-client"),
             tenantName: longTenant,
@@ -696,7 +696,7 @@ struct TokenTest {
     }
 
     @Test("Multiple tokens created rapidly")
-    func multipleTokensCreatedRapidly() throws {
+    func multipleTokensCreatedRapidly() async throws {
         let userProfile = UserProfile(
             role: "user",
             user: "user@example.com"
@@ -705,7 +705,7 @@ struct TokenTest {
         var tokens: [Token] = []
 
         for i in 0..<100 {
-            let token = try Token(
+            let token = try await Token(
                 issuer: IssuerClaim(value: "https://test.example.com"),
                 audience: AudienceClaim(value: "test-client"),
                 tenantName: "tenant-\(i)",
@@ -722,13 +722,13 @@ struct TokenTest {
     }
 
     @Test("Token payload expiration claim is valid")
-    func tokenPayloadExpirationValid() throws {
+    func tokenPayloadExpirationValid() async throws {
         let userProfile = UserProfile(
             role: "user",
             user: "user@example.com"
         )
 
-        let token = try Token(
+        let token = try await Token(
             issuer: IssuerClaim(value: "https://test.example.com"),
             audience: AudienceClaim(value: "test-client"),
             tenantName: "test-tenant",
@@ -739,11 +739,9 @@ struct TokenTest {
         // Expiration claim should be in the future
         #expect(token.payload.expiration.value > Date())
 
-        // Should be able to verify using JWTKit
-        let signers = JWTSigners()
-        signers.use(jwt_signer)
-        let verified = try signers.verify(token.value, as: Payload.self)
-        #expect(verified.expiration.value > Date())
+        // Should be able to verify using SignerManager
+        let verified = try await Token.verify(token.value)
+        #expect(verified.payload.expiration.value > Date())
     }
 }
 // swiftlint:enable type_body_length

@@ -38,8 +38,9 @@ struct KeyGeneratorTest {
         let generator = KeyGenerator()
         let keyPair = try await generator.generateKeyPair(kid: "format-test")
 
-        #expect(keyPair.privateKeyPEM.hasPrefix("-----BEGIN RSA PRIVATE KEY-----"))
-        #expect(keyPair.privateKeyPEM.hasSuffix("-----END RSA PRIVATE KEY-----\n"))
+        // PKCS#8 format (not PKCS#1)
+        #expect(keyPair.privateKeyPEM.hasPrefix("-----BEGIN PRIVATE KEY-----"))
+        #expect(keyPair.privateKeyPEM.hasSuffix("-----END PRIVATE KEY-----\n"))
         #expect(keyPair.privateKeyPEM.contains("\n"))
     }
 
@@ -48,8 +49,9 @@ struct KeyGeneratorTest {
         let generator = KeyGenerator()
         let keyPair = try await generator.generateKeyPair(kid: "public-test")
 
-        #expect(keyPair.publicKeyPEM.hasPrefix("-----BEGIN RSA PUBLIC KEY-----"))
-        #expect(keyPair.publicKeyPEM.hasSuffix("-----END RSA PUBLIC KEY-----\n"))
+        // SPKI format (not PKCS#1)
+        #expect(keyPair.publicKeyPEM.hasPrefix("-----BEGIN PUBLIC KEY-----"))
+        #expect(keyPair.publicKeyPEM.hasSuffix("-----END PUBLIC KEY-----\n"))
         #expect(keyPair.publicKeyPEM.contains("\n"))
     }
 
@@ -59,7 +61,7 @@ struct KeyGeneratorTest {
         let keyPair = try await generator.generateKeyPair(kid: "jwt-test")
 
         // JWTKit should be able to load the private key PEM
-        let rsaKey = try Insecure.RSA.PrivateKey(pem: keyPair.privateKeyPEM)
+        let rsaKey = try RSAKey.private(pem: keyPair.privateKeyPEM)
         #expect(rsaKey != nil)
     }
 
@@ -233,10 +235,10 @@ struct KeyGeneratorTest {
         )
 
         // Load the private key and sign
-        let rsaKey = try Insecure.RSA.PrivateKey(pem: keyPair.privateKeyPEM)
+        let rsaKey = try RSAKey.private(pem: keyPair.privateKeyPEM)
         let signer = JWTSigner.rs256(key: rsaKey)
         let signers = JWTSigners()
-        signers.use(signer, kid: keyPair.kid, isDefault: true)
+        signers.use(signer, kid: JWKIdentifier(string: keyPair.kid), isDefault: true)
 
         let token = try signers.sign(payload, kid: JWKIdentifier(string: keyPair.kid))
 
@@ -262,17 +264,17 @@ struct KeyGeneratorTest {
         )
 
         // Sign with private key
-        let privateKey = try Insecure.RSA.PrivateKey(pem: keyPair.privateKeyPEM)
+        let privateKey = try RSAKey.private(pem: keyPair.privateKeyPEM)
         let signer = JWTSigner.rs256(key: privateKey)
         let signers = JWTSigners()
-        signers.use(signer, kid: keyPair.kid, isDefault: true)
+        signers.use(signer, kid: JWKIdentifier(string: keyPair.kid), isDefault: true)
         let token = try signers.sign(payload, kid: JWKIdentifier(string: keyPair.kid))
 
         // Verify with public key
-        let publicKey = try Insecure.RSA.PublicKey(pem: keyPair.publicKeyPEM)
+        let publicKey = try RSAKey.public(pem: keyPair.publicKeyPEM)
         let verifier = JWTSigner.rs256(key: publicKey)
         let verifiers = JWTSigners()
-        verifiers.use(verifier, kid: keyPair.kid, isDefault: true)
+        verifiers.use(verifier, kid: JWKIdentifier(string: keyPair.kid), isDefault: true)
 
         let verified = try verifiers.verify(token, as: Payload.self)
         #expect(verified.subject.value == "verify@example.com")

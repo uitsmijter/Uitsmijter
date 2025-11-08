@@ -196,7 +196,7 @@ struct AuthControllerCodePKCEFlowTest {
             #expect(accessToken.token_type == .Bearer)
 
             let jwt = accessToken.access_token
-            let payload = try jwt_signer.verify(jwt, as: Payload.self)
+            let payload = try await SignerManager.shared.verify(jwt, as: Payload.self)
             #expect(payload.user == "holger@mimimi.org")
 
             // There should be a request token, too
@@ -319,7 +319,7 @@ struct AuthControllerCodePKCEFlowTest {
             #expect(accessToken.token_type == .Bearer)
 
             let jwt = accessToken.access_token
-            let payload = try jwt_signer.verify(jwt, as: Payload.self)
+            let payload = try await SignerManager.shared.verify(jwt, as: Payload.self)
             #expect(payload.user == "holger@mimimi.org")
 
             // There should be a request token, too

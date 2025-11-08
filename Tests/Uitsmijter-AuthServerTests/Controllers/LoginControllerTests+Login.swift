@@ -284,7 +284,7 @@ struct LoginControllerLoginTests {
                 let token = contentGroups[1]
                 #expect(token.count > 8)
 
-                let payload = try jwt_signer.verify(token, as: Payload.self)
+                let payload = try await SignerManager.shared.verify(token, as: Payload.self)
                 #expect(payload.subject == "ok_example.com")
                 })
         }
