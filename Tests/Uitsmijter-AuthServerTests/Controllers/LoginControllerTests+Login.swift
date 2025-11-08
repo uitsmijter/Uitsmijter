@@ -3,11 +3,14 @@ import Testing
 import VaporTesting
 
 @Suite("Login Controller Login Tests", .serialized)
-// Note: We don't reset KeyStorage to maintain key consistency
-// between token signing (in app) and verification (in tests).
-// Tests are isolated via separate app instances created by withApp().
 // swiftlint:disable:next type_body_length
 struct LoginControllerLoginTests {
+
+    init() async {
+        // Reset KeyStorage to clear accumulated keys from previous test suites
+        // SignerManager now dynamically accesses KeyStorage.shared, so this is safe
+        await KeyStorage.resetSharedInstance()
+    }
 
     @MainActor
     func setupEntities(app: Application) async throws {

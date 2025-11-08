@@ -5,9 +5,13 @@ import JWTKit
 
 @Suite("SignerManager Tests", .serialized)
 // swiftlint:disable type_body_length
-// Note: We don't reset KeyStorage to maintain key consistency.
-// SignerManager tests use the shared instance to match production behavior.
 struct SignerManagerTest {
+
+    init() async {
+        // Reset KeyStorage to clear accumulated keys from previous test suites
+        // SignerManager now dynamically accesses KeyStorage.shared, so this is safe
+        await KeyStorage.resetSharedInstance()
+    }
 
     // MARK: - Initialization Tests
 

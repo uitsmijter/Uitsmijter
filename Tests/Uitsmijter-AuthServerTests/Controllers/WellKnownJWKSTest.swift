@@ -9,8 +9,9 @@ struct WellKnownJWKSTest {
     let decoder = JSONDecoder()
 
     init() async {
-        // Note: We don't reset KeyStorage here to maintain key consistency.
-        // Tests are isolated via separate app instances created by withApp().
+        // Reset KeyStorage to clear accumulated keys from previous test suites
+        // SignerManager now dynamically accesses KeyStorage.shared, so this is safe
+        await KeyStorage.resetSharedInstance()
     }
 
     // MARK: - JWKS Endpoint Tests

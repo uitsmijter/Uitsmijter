@@ -7,9 +7,13 @@ import Logger
 
 @Suite("JWT Token Tests", .serialized)
 // swiftlint:disable type_body_length
-// Note: We don't reset KeyStorage to maintain key consistency
-// between token signing and verification within tests.
 struct TokenTest {
+
+    init() async {
+        // Reset KeyStorage to clear accumulated keys from previous test suites
+        // SignerManager now dynamically accesses KeyStorage.shared, so this is safe
+        await KeyStorage.resetSharedInstance()
+    }
 
     // MARK: - Token Creation Tests
 

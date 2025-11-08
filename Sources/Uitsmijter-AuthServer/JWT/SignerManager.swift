@@ -66,14 +66,15 @@ actor SignerManager {
     private let hs256Signer: JWTSigner?
 
     /// Key storage for RSA keys
-    private let keyStorage: KeyStorage
+    /// - Note: When nil, dynamically accesses KeyStorage.shared to support test isolation via resetSharedInstance()
+    private let keyStorage: KeyStorage?
 
     /// Initialize the signer manager with optional KeyStorage
     ///
-    /// - Parameter keyStorage: Optional KeyStorage instance. If nil, uses KeyStorage.shared.
+    /// - Parameter keyStorage: Optional KeyStorage instance. If nil, uses KeyStorage.shared dynamically.
     ///   This parameter enables dependency injection for testing while maintaining the singleton pattern for production.
     init(keyStorage: KeyStorage? = nil) {
-        self.keyStorage = keyStorage ?? KeyStorage.shared
+        self.keyStorage = keyStorage
 
         // Determine algorithm from environment (default to HS256 for backwards compatibility)
         let algorithmString = ProcessInfo.processInfo.environment["JWT_ALGORITHM"] ?? "HS256"
@@ -122,11 +123,14 @@ actor SignerManager {
             return (token, nil)
 
         case .rs256:
+            // Get KeyStorage (dynamically access shared if not injected)
+            let storage = keyStorage ?? KeyStorage.shared
+
             // Get the active RSA key PEM
-            let activeKeyPEM = try await keyStorage.getActiveSigningKeyPEM()
+            let activeKeyPEM = try await storage.getActiveSigningKeyPEM()
 
             // Get the active key metadata to retrieve kid
-            let activeKeyPair = try await keyStorage.getActiveKey()
+            let activeKeyPair = try await storage.getActiveKey()
             let kid = activeKeyPair.kid
 
             // Create RSA signer from PEM
@@ -171,8 +175,11 @@ actor SignerManager {
             signers.use(hs256, isDefault: algorithm == .hs256)
         }
 
+        // Get KeyStorage (dynamically access shared if not injected)
+        let storage = keyStorage ?? KeyStorage.shared
+
         // Add all RSA public keys from storage
-        let allKeys = await keyStorage.getAllKeys()
+        let allKeys = await storage.getAllKeys()
         for keyPair in allKeys {
             do {
                 let rsaKey = try RSAKey.public(pem: keyPair.publicKeyPEM)
