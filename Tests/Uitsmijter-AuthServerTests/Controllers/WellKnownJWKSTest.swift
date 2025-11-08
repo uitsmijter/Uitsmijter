@@ -9,9 +9,8 @@ struct WellKnownJWKSTest {
     let decoder = JSONDecoder()
 
     init() async {
-        // Clear all keys from shared storage before running tests
-        // This prevents pollution from other test suites
-        await KeyStorage.shared.removeAllKeys()
+        // Reset KeyStorage to a fresh instance for this test suite
+        KeyStorage.resetSharedInstance()
     }
 
     // MARK: - JWKS Endpoint Tests

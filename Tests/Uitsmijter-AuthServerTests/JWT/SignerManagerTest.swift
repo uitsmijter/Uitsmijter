@@ -7,6 +7,11 @@ import JWTKit
 // swiftlint:disable type_body_length
 struct SignerManagerTest {
 
+    init() async {
+        // Reset KeyStorage to a fresh instance for this test suite
+        KeyStorage.resetSharedInstance()
+    }
+
     // MARK: - Initialization Tests
 
     @Test("SignerManager shared instance is accessible")

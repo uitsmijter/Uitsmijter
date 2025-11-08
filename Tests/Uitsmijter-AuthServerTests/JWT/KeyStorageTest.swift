@@ -6,6 +6,12 @@ import JWTKit
 @Suite("KeyStorage Tests", .serialized)
 struct KeyStorageTest {
 
+    init() async {
+        // Reset KeyStorage to a fresh instance for this test suite
+        // This isolates the suite from parallel tests modifying shared storage
+        KeyStorage.resetSharedInstance()
+    }
+
     // MARK: - Initialization Tests
 
     @Test("KeyStorage shared instance is accessible")

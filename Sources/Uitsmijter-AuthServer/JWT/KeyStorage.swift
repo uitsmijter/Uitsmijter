@@ -52,7 +52,15 @@ struct KeyStorage: KeyStorageProtocol, Sendable {
 
     /// Shared singleton instance using in-memory storage
     /// - Note: This is suitable for development and testing. For production use, configure via `Application.keyStorage`.
-    static let shared = KeyStorage(use: .memory)
+    /// - Important: Marked nonisolated(unsafe) to allow test isolation via resetSharedInstance()
+    nonisolated(unsafe) static var shared = KeyStorage(use: .memory)
+
+    /// Reset the shared instance to use a fresh in-memory storage
+    /// - Note: This is intended for testing purposes only to isolate test suites
+    /// - Warning: Not thread-safe. Only call from test suite init() which runs before tests execute
+    static func resetSharedInstance() {
+        shared = KeyStorage(use: .memory)
+    }
 
     /// The underlying storage implementation that handles actual data persistence.
     private let implementation: KeyStorageProtocol

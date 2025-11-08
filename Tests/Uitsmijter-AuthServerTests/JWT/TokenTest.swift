@@ -9,6 +9,11 @@ import Logger
 // swiftlint:disable type_body_length
 struct TokenTest {
 
+    init() async {
+        // Reset KeyStorage to a fresh instance for this test suite
+        KeyStorage.resetSharedInstance()
+    }
+
     // MARK: - Token Creation Tests
 
     @Test("Create token with user profile")
