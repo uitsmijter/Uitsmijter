@@ -99,8 +99,9 @@ struct KeyStorageTest {
         let pem = try await storage.getActiveSigningKeyPEM()
 
         #expect(!pem.isEmpty)
-        #expect(pem.hasPrefix("-----BEGIN RSA PRIVATE KEY-----"))
-        #expect(pem.hasSuffix("-----END RSA PRIVATE KEY-----\n"))
+        // PKCS#8 format (not PKCS#1)
+        #expect(pem.hasPrefix("-----BEGIN PRIVATE KEY-----"))
+        #expect(pem.hasSuffix("-----END PRIVATE KEY-----\n"))
     }
 
     @Test("Active signing key PEM matches active key")
