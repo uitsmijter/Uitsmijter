@@ -7,6 +7,12 @@ import VaporTesting
 // swiftlint:disable type_body_length
 struct LoginControllerProfileTests {
 
+    init() async {
+        // Ensure at least one key exists for RS256 signing/verification
+        // Don't clear keys - other test suites may be using them
+        _ = try? await KeyStorage.shared.getActiveKey()
+    }
+
     @MainActor
     func setupApp() async throws -> Application {
         let app = try await Application.make(.testing)

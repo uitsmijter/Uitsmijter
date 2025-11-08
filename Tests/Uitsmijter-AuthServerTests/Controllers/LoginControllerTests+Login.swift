@@ -6,6 +6,12 @@ import VaporTesting
 // swiftlint:disable:next type_body_length
 struct LoginControllerLoginTests {
 
+    init() async {
+        // Ensure at least one key exists for RS256 signing/verification
+        // Don't clear keys - other test suites may be using them
+        _ = try? await KeyStorage.shared.getActiveKey()
+    }
+
     @MainActor
     func setupEntities(app: Application) async throws {
         app.entityStorage.tenants.removeAll()
