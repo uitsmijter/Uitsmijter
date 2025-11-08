@@ -1,11 +1,26 @@
 import Foundation
 import JWTKit
+import Vapor
 
-/// Thread-safe storage for RSA key pairs with rotation support
+/// A facade that manages RSA key storage through pluggable backend implementations.
 ///
-/// Manages the lifecycle of RSA keys used for JWT signing, including generation,
-/// storage, and rotation. Keys are identified by their Key ID (kid), typically
-/// formatted as ISO 8601 dates (e.g., "2025-01-08").
+/// `KeyStorage` provides a unified interface for storing and retrieving RSA keys for JWT signing,
+/// abstracting the underlying storage mechanism. It supports multiple backends including Redis (production),
+/// in-memory storage (development/testing), and custom implementations.
+///
+/// ## Overview
+///
+/// The struct acts as a strategy pattern implementation, delegating all operations to a backend that conforms
+/// to ``KeyStorageProtocol``. This design allows for flexible deployment configurations:
+///
+/// - **Production (HPA)**: Redis-backed persistent storage for horizontal pod autoscaling
+/// - **Development/Testing**: Fast in-memory storage
+/// - **Custom**: User-provided storage implementation
+///
+/// ## Thread Safety
+///
+/// All operations are async and thread-safe through Swift's concurrency model. The struct conforms to `Sendable`,
+/// making it safe to pass across concurrency boundaries.
 ///
 /// ## Key Rotation
 ///
@@ -17,7 +32,8 @@ import JWTKit
 /// ## Usage
 ///
 /// ```swift
-/// let storage = KeyStorage.shared
+/// // Initialize with Redis backend (production)
+/// let storage = KeyStorage(use: .redis(redisClient))
 ///
 /// // Generate and store a new key
 /// try await storage.generateAndStoreKey(kid: "2025-01-08")
@@ -29,240 +45,131 @@ import JWTKit
 /// let jwks = try await storage.getAllPublicKeys()
 /// ```
 ///
-/// ## Thread Safety
-///
-/// This actor ensures thread-safe access to keys across concurrent requests.
-///
+/// - SeeAlso: ``KeyStorageProtocol``
 /// - SeeAlso: ``KeyGenerator``
 /// - SeeAlso: ``JWKSet``
-actor KeyStorage {
+struct KeyStorage: KeyStorageProtocol, Sendable {
 
-    /// Shared singleton instance
-    static let shared = KeyStorage()
+    /// Shared singleton instance using in-memory storage
+    /// - Note: This is suitable for development and testing. For production use, configure via `Application.keyStorage`.
+    static let shared = KeyStorage(use: .memory)
 
-    /// Stored key pair with metadata
-    private struct StoredKey: Sendable {
-        let keyPair: KeyGenerator.RSAKeyPair
-        let createdAt: Date
-        let isActive: Bool
+    /// The underlying storage implementation that handles actual data persistence.
+    private let implementation: KeyStorageProtocol
+
+    /// Creates a new key storage with the specified backend implementation.
+    ///
+    /// - Parameter use: The storage backend to use. See ``KeyStorageImplementations`` for available options.
+    ///
+    /// ## Example
+    ///
+    /// ```swift
+    /// // Production: Redis storage
+    /// let storage = KeyStorage(use: .redis(client))
+    ///
+    /// // Development: In-memory storage
+    /// let storage = KeyStorage(use: .memory)
+    ///
+    /// // Custom: User-provided implementation
+    /// let storage = KeyStorage(use: .custom(implementation: myStorage))
+    /// ```
+    init(use: KeyStorageImplementations) {
+        switch use {
+        case .redis(let client):
+            implementation = RedisKeyStorage(client)
+        case .memory:
+            implementation = MemoryKeyStorage()
+        case .custom(implementation: let customImplementation):
+            implementation = customImplementation
+        }
     }
 
-    /// Dictionary of keys indexed by kid
-    private var keys: [String: StoredKey] = [:]
+    // MARK: - KeyStorageProtocol
 
-    /// The currently active key ID for signing
-    private var activeKeyID: String?
-
-    /// Key generator
-    private let generator = KeyGenerator()
-
-    /// Initialize key storage
-    private init() {}
-
-    /// Generate a new RSA key pair and store it
-    ///
-    /// Creates a new RSA key pair with the specified key ID and stores it.
-    /// If `setActive` is true, this key becomes the active signing key.
-    ///
-    /// ## Key ID Format
-    ///
-    /// Recommended format: ISO 8601 date string (YYYY-MM-DD)
-    /// ```swift
-    /// let formatter = ISO8601DateFormatter()
-    /// formatter.formatOptions = [.withFullDate]
-    /// let kid = formatter.string(from: Date()) // "2025-01-08"
-    /// ```
-    ///
-    /// - Parameters:
-    ///   - kid: Unique key identifier
-    ///   - setActive: Whether to set this key as the active signing key (default: true)
-    /// - Throws: KeyGenerationError if key generation fails
     func generateAndStoreKey(kid: String, setActive: Bool = true) async throws {
-        let keyPair = try await generator.generateKeyPair(kid: kid)
-
-        keys[kid] = StoredKey(
-            keyPair: keyPair,
-            createdAt: Date(),
-            isActive: setActive
-        )
-
-        if setActive {
-            // Deactivate all other keys
-            for (otherKid, storedKey) in keys where otherKid != kid {
-                keys[otherKid] = StoredKey(
-                    keyPair: storedKey.keyPair,
-                    createdAt: storedKey.createdAt,
-                    isActive: false
-                )
-            }
-            activeKeyID = kid
-        }
+        try await implementation.generateAndStoreKey(kid: kid, setActive: setActive)
     }
 
-    /// Get the active RSA key for signing
-    ///
-    /// Returns the currently active key pair, or generates a new one if no active key exists.
-    ///
-    /// - Returns: The active RSA key pair
-    /// - Throws: KeyStorageError if no active key exists and generation fails
     func getActiveKey() async throws -> KeyGenerator.RSAKeyPair {
-        // If we have an active key, return it
-        if let activeKid = activeKeyID, let storedKey = keys[activeKid] {
-            return storedKey.keyPair
-        }
-
-        // No active key exists - generate one with current date as kid
-        let formatter = ISO8601DateFormatter()
-        formatter.formatOptions = [.withFullDate]
-        let kid = formatter.string(from: Date())
-
-        try await generateAndStoreKey(kid: kid, setActive: true)
-
-        guard let storedKey = keys[kid] else {
-            throw KeyStorageError.noActiveKey
-        }
-
-        return storedKey.keyPair
+        return try await implementation.getActiveKey()
     }
 
-    /// Get an RSA key by kid
-    ///
-    /// Retrieves a specific key by its key ID. Used during JWT verification
-    /// to match the kid in the JWT header.
-    ///
-    /// - Parameter kid: Key identifier
-    /// - Returns: The key pair if found, nil otherwise
     func getKey(kid: String) async -> KeyGenerator.RSAKeyPair? {
-        return keys[kid]?.keyPair
+        return await implementation.getKey(kid: kid)
     }
 
-    /// Get all stored keys
-    ///
-    /// Returns all key pairs currently in storage. Useful for exposing
-    /// all public keys via the JWKS endpoint.
-    ///
-    /// - Returns: Array of all key pairs
     func getAllKeys() async -> [KeyGenerator.RSAKeyPair] {
-        return keys.values.map { $0.keyPair }
+        return await implementation.getAllKeys()
     }
 
-    /// Get all public keys as JWK Set
-    ///
-    /// Converts all stored keys to JWK format and returns them as a JWK Set
-    /// suitable for the `/.well-known/jwks.json` endpoint.
-    ///
-    /// ## JWKS Endpoint Response
-    ///
-    /// The returned JWKSet can be directly encoded to JSON:
-    /// ```swift
-    /// let jwks = try await storage.getAllPublicKeys()
-    /// return try JSONEncoder().encode(jwks)
-    /// ```
-    ///
-    /// - Returns: JWK Set containing all public keys
-    /// - Throws: ConversionError if JWK conversion fails
     func getAllPublicKeys() async throws -> JWKSet {
-        var jwks: [RSAPublicJWK] = []
-
-        for (_, storedKey) in keys {
-            let jwk = try await generator.convertToJWK(keyPair: storedKey.keyPair)
-            jwks.append(jwk)
-        }
-
-        return JWKSet(keys: jwks)
+        return try await implementation.getAllPublicKeys()
     }
 
-    /// Get the active signing key PEM
-    ///
-    /// Returns the active private key in PEM format.
-    /// Callers can create an RSAKey from this using `RSAKey.private(pem:)`.
-    ///
-    /// ## Usage
-    ///
-    /// ```swift
-    /// let pemString = try await storage.getActiveSigningKeyPEM()
-    /// let rsaKey = try RSAKey.private(pem: pemString)
-    /// ```
-    ///
-    /// - Returns: Private key PEM string
-    /// - Throws: KeyStorageError if no active key exists
     func getActiveSigningKeyPEM() async throws -> String {
-        let activeKeyPair = try await getActiveKey()
-        return activeKeyPair.privateKeyPEM
+        return try await implementation.getActiveSigningKeyPEM()
     }
 
-    /// Remove a key from storage
-    ///
-    /// Removes the key with the specified kid. If this was the active key,
-    /// the active key ID is cleared (a new one will be generated on next access).
-    ///
-    /// ## Warning
-    ///
-    /// Removing keys may invalidate existing JWTs that were signed with those keys.
-    /// Only remove keys after all JWTs signed with them have expired.
-    ///
-    /// - Parameter kid: Key identifier to remove
     func removeKey(kid: String) async {
-        keys.removeValue(forKey: kid)
-        if activeKeyID == kid {
-            activeKeyID = nil
-        }
+        await implementation.removeKey(kid: kid)
     }
 
-    /// Remove all keys older than the specified date
-    ///
-    /// Cleans up old keys to prevent unlimited growth of the key store.
-    /// Does not remove the active key.
-    ///
-    /// ## Recommended Schedule
-    ///
-    /// Run this periodically (e.g., daily) to remove keys older than your
-    /// maximum JWT expiration time plus a safety buffer:
-    /// ```swift
-    /// // Remove keys older than 90 days
-    /// let cutoffDate = Calendar.current.date(byAdding: .day, value: -90, to: Date())!
-    /// await storage.removeKeysOlderThan(cutoffDate)
-    /// ```
-    ///
-    /// - Parameter date: Cutoff date - keys created before this will be removed
-    /// - Returns: Number of keys removed
     @discardableResult
     func removeKeysOlderThan(_ date: Date) async -> Int {
-        var removedCount = 0
-
-        for (kid, storedKey) in keys {
-            // Don't remove the active key
-            guard kid != activeKeyID else { continue }
-
-            if storedKey.createdAt < date {
-                keys.removeValue(forKey: kid)
-                removedCount += 1
-            }
-        }
-
-        return removedCount
+        return await implementation.removeKeysOlderThan(date)
     }
 
-    /// Get key metadata
-    ///
-    /// Returns information about a stored key without exposing the key material.
-    ///
-    /// - Parameter kid: Key identifier
-    /// - Returns: Key metadata (kid, creation date, active status)
     func getKeyMetadata(kid: String) async -> (kid: String, createdAt: Date, isActive: Bool)? {
-        guard let storedKey = keys[kid] else { return nil }
-        return (kid: kid, createdAt: storedKey.createdAt, isActive: storedKey.isActive)
+        return await implementation.getKeyMetadata(kid: kid)
     }
 
-    /// Get all key metadata
-    ///
-    /// Returns metadata for all stored keys. Useful for administrative
-    /// interfaces and monitoring.
-    ///
-    /// - Returns: Array of key metadata
     func getAllKeyMetadata() async -> [(kid: String, createdAt: Date, isActive: Bool)] {
-        return keys.map { kid, storedKey in
-            (kid: kid, createdAt: storedKey.createdAt, isActive: storedKey.isActive)
+        return await implementation.getAllKeyMetadata()
+    }
+
+    func isHealthy() async -> Bool {
+        return await implementation.isHealthy()
+    }
+}
+
+/// A storage key for registering ``KeyStorage`` in Vapor's application storage.
+///
+/// This key enables dependency injection of the key storage throughout
+/// the Vapor application via the storage container pattern.
+struct KeyStorageKey: StorageKey {
+    typealias Value = KeyStorage
+}
+
+/// Vapor application extension providing access to key storage.
+extension Application {
+    /// The key storage instance for this application.
+    ///
+    /// This property provides centralized access to the configured storage backend
+    /// throughout the Vapor application. It's set during application configuration
+    /// based on environment settings.
+    ///
+    /// ## Example
+    ///
+    /// ```swift
+    /// // Configure in configure.swift
+    /// if app.environment == .production {
+    ///     app.keyStorage = KeyStorage(use: .redis(redisClient))
+    /// } else {
+    ///     app.keyStorage = KeyStorage(use: .memory)
+    /// }
+    ///
+    /// // Access in route handlers
+    /// func jwks(req: Request) async throws -> JWKSet {
+    ///     let storage = req.application.keyStorage
+    ///     return try await storage?.getAllPublicKeys() ?? JWKSet(keys: [])
+    /// }
+    /// ```
+    var keyStorage: KeyStorage? {
+        get {
+            storage[KeyStorageKey.self]
+        }
+        set {
+            storage[KeyStorageKey.self] = newValue
         }
     }
 }
@@ -272,6 +179,9 @@ enum KeyStorageError: Error, CustomStringConvertible {
     case noActiveKey
     case keyNotFound(String)
     case keyAlreadyExists(String)
+    case encodingFailed
+    case invalidRedisKey(String)
+    case storageError(String)
 
     var description: String {
         switch self {
@@ -281,6 +191,12 @@ enum KeyStorageError: Error, CustomStringConvertible {
             return "Key not found: \(kid)"
         case .keyAlreadyExists(let kid):
             return "Key already exists: \(kid)"
+        case .encodingFailed:
+            return "Failed to encode key metadata"
+        case .invalidRedisKey(let key):
+            return "Invalid Redis key: \(key)"
+        case .storageError(let message):
+            return "Storage error: \(message)"
         }
     }
 }
