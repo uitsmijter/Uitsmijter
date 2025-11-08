@@ -270,7 +270,7 @@ extension TokenController {
         // Get client_id for audience
         let tokenRequest = try req.content.decode(TokenRequest.self)
 
-        let accessToken = try Token(
+        let accessToken = try await Token(
             issuer: IssuerClaim(value: issuer),
             audience: AudienceClaim(value: tokenRequest.client_id),
             tenantName: tenant.name,
@@ -319,7 +319,7 @@ extension TokenController {
         // Get client_id for audience
         let tokenRequest = try req.content.decode(TokenRequest.self)
 
-        let accessToken = try Token(
+        let accessToken = try await Token(
             issuer: IssuerClaim(value: issuer),
             audience: AudienceClaim(value: tokenRequest.client_id),
             tenantName: tenant.name,
