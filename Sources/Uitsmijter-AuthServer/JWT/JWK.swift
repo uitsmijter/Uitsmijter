@@ -53,14 +53,14 @@ struct RSAPublicJWK: Codable, Sendable {
     ///
     /// The "n" (modulus) parameter contains the modulus value for the RSA
     /// public key. It is represented as a Base64urlUInt-encoded value.
-    let n: String
+    let n: String  // swiftlint:disable:this identifier_name
 
     /// Exponent (REQUIRED for RSA)
     ///
     /// The "e" (exponent) parameter contains the exponent value for the RSA
     /// public key. It is represented as a Base64urlUInt-encoded value.
     /// Commonly "AQAB" which represents 65537.
-    let e: String
+    let e: String  // swiftlint:disable:this identifier_name
 }
 
 /// JWK Set - Collection of JSON Web Keys
