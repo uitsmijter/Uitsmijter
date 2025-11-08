@@ -10,8 +10,8 @@ import Logger
 struct TokenTest {
 
     init() async {
-        // Reset KeyStorage to a fresh instance for this test suite
-        KeyStorage.resetSharedInstance()
+        // Note: We don't reset KeyStorage here to maintain key consistency
+        // between token signing and verification within tests.
     }
 
     // MARK: - Token Creation Tests

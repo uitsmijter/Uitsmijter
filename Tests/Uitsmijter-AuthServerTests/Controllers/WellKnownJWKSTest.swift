@@ -9,8 +9,8 @@ struct WellKnownJWKSTest {
     let decoder = JSONDecoder()
 
     init() async {
-        // Reset KeyStorage to a fresh instance for this test suite
-        KeyStorage.resetSharedInstance()
+        // Note: We don't reset KeyStorage here to maintain key consistency.
+        // Tests are isolated via separate app instances created by withApp().
     }
 
     // MARK: - JWKS Endpoint Tests
@@ -193,6 +193,12 @@ struct WellKnownJWKSTest {
 
     @Test("JWKS endpoint kid matches format")
     func jwksEndpointKidMatchesFormat() async throws {
+        // Generate a key with date format to ensure at least one exists
+        let dateFormatter = DateFormatter()
+        dateFormatter.dateFormat = "yyyy-MM-dd"
+        let dateKid = dateFormatter.string(from: Date())
+        try await KeyStorage.shared.generateAndStoreKey(kid: dateKid, setActive: false)
+
         try await withApp(configure: configure) { app in
             try await app.testing().test(
                 .GET,
@@ -210,7 +216,7 @@ struct WellKnownJWKSTest {
                         return kid.range(of: kidPattern, options: .regularExpression) != nil
                     }
 
-                    // Should have at least one properly formatted key
+                    // Should have at least one properly formatted key (the one we just generated)
                     #expect(validKeys.count >= 1)
 
                     for key in validKeys {

@@ -7,9 +7,10 @@ import JWTKit
 struct KeyStorageTest {
 
     init() async {
-        // Reset KeyStorage to a fresh instance for this test suite
-        // This isolates the suite from parallel tests modifying shared storage
-        KeyStorage.resetSharedInstance()
+        // Note: We don't reset KeyStorage here to maintain key consistency.
+        // Each test generates keys with unique kid values, avoiding conflicts.
+        // SignerManager.shared holds a reference to KeyStorage.shared, so resetting
+        // KeyStorage would break JWT verification for tokens signed before the reset.
     }
 
     // MARK: - Initialization Tests

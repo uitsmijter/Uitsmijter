@@ -188,11 +188,13 @@ struct Token: ExpressibleByStringLiteral {
     /// This is the recommended way to verify tokens in production as it supports
     /// both HS256 and RS256 algorithms with automatic key selection.
     ///
-    /// - Parameter value: The JWT token string to verify
+    /// - Parameters:
+    ///   - value: The JWT token string to verify
+    ///   - signerManager: Optional SignerManager instance for dependency injection (defaults to .shared)
     /// - Returns: Verified Token instance
     /// - Throws: JWTError if verification fails
-    static func verify(_ value: String) async throws -> Token {
-        let manager = SignerManager.shared
+    static func verify(_ value: String, signerManager: SignerManager? = nil) async throws -> Token {
+        let manager = signerManager ?? SignerManager.shared
         let payload = try await manager.verify(value, as: Payload.self)
 
         let expirationDate = payload.expiration.value
@@ -239,6 +241,7 @@ struct Token: ExpressibleByStringLiteral {
     ///   - subject: The subject claim identifying the user
     ///   - userProfile: User profile information including role and metadata
     ///   - authTime: When the user authentication occurred (defaults to current time)
+    ///   - signerManager: Optional SignerManager instance for dependency injection (defaults to .shared)
     /// - Throws: `TokenError.CALCULATE_TIME` if the expiration date cannot be calculated
     ///
     /// ## Example
@@ -258,7 +261,8 @@ struct Token: ExpressibleByStringLiteral {
         tenantName: String,
         subject: SubjectClaim,
         userProfile: UserProfileProtocol,
-        authTime: Date? = nil
+        authTime: Date? = nil,
+        signerManager: SignerManager? = nil
     ) async throws {
         let expirationHours = Int(ProcessInfo.processInfo.environment["TOKEN_EXPIRATION_IN_HOURS"] ?? "2") ?? 2
         let calendar = Calendar.current
@@ -289,7 +293,7 @@ struct Token: ExpressibleByStringLiteral {
         )
 
         // Use SignerManager for signing (supports both HS256 and RS256)
-        let manager = SignerManager.shared
+        let manager = signerManager ?? SignerManager.shared
         let (tokenString, kid) = try await manager.sign(payload)
         value = tokenString
 

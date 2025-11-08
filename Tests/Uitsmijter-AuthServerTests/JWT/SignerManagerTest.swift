@@ -8,8 +8,8 @@ import JWTKit
 struct SignerManagerTest {
 
     init() async {
-        // Reset KeyStorage to a fresh instance for this test suite
-        KeyStorage.resetSharedInstance()
+        // Note: We don't reset KeyStorage here to maintain key consistency.
+        // SignerManager tests use the shared instance to match production behavior.
     }
 
     // MARK: - Initialization Tests

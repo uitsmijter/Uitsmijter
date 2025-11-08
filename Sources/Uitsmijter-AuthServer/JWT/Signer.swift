@@ -4,9 +4,10 @@ import Foundation
 /// The secret key used for JWT signing
 ///
 /// Retrieved from the `JWT_SECRET` environment variable. If not set, a random 64-character string is generated.
+/// This secret is shared between the legacy jwt_signer and SignerManager to ensure consistency.
 /// - Warning: In production, always set the `JWT_SECRET` environment variable
 ///   to ensure consistent token validation across restarts.
-fileprivate let jwtSecret = ProcessInfo.processInfo.environment["JWT_SECRET"] ?? String.random(length: 64)
+let jwtSecret = ProcessInfo.processInfo.environment["JWT_SECRET"] ?? String.random(length: 64)
 
 /// Global JWT signer instance using HMAC-SHA256
 ///

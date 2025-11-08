@@ -8,11 +8,9 @@ import VaporTesting
 struct LoginControllerProfileTests {
 
     init() async {
-        // Reset KeyStorage to a fresh instance for this test suite
-        // This isolates the suite from parallel tests modifying shared storage
-        KeyStorage.resetSharedInstance()
-        // Ensure a key exists for RS256 signing/verification
-        _ = try? await KeyStorage.shared.getActiveKey()
+        // Note: We don't reset KeyStorage here to maintain key consistency
+        // between token signing (in app) and verification (in tests).
+        // Tests are isolated via separate app instances created by withApp().
     }
 
     @MainActor

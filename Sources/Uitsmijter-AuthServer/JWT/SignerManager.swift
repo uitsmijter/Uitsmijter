@@ -66,17 +66,23 @@ actor SignerManager {
     private let hs256Signer: JWTSigner?
 
     /// Key storage for RSA keys
-    private let keyStorage = KeyStorage.shared
+    private let keyStorage: KeyStorage
 
-    /// Initialize the signer manager
-    private init() {
+    /// Initialize the signer manager with optional KeyStorage
+    ///
+    /// - Parameter keyStorage: Optional KeyStorage instance. If nil, uses KeyStorage.shared.
+    ///   This parameter enables dependency injection for testing while maintaining the singleton pattern for production.
+    init(keyStorage: KeyStorage? = nil) {
+        self.keyStorage = keyStorage ?? KeyStorage.shared
+
         // Determine algorithm from environment (default to HS256 for backwards compatibility)
         let algorithmString = ProcessInfo.processInfo.environment["JWT_ALGORITHM"] ?? "HS256"
         self.algorithm = Algorithm(rawValue: algorithmString.uppercased()) ?? .hs256
 
         // Initialize HS256 signer if needed
         if algorithm == .hs256 {
-            let jwtSecret = ProcessInfo.processInfo.environment["JWT_SECRET"] ?? String.random(length: 64)
+            // Use the shared jwtSecret from Signer.swift to ensure consistency
+            // with the legacy jwt_signer global variable
             self.hs256Signer = JWTSigner.hs256(key: jwtSecret)
         } else {
             self.hs256Signer = nil
