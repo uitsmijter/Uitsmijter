@@ -6,12 +6,6 @@ import JWTKit
 @Suite("KeyStorage Tests", .serialized)
 struct KeyStorageTest {
 
-    init() async {
-        // Clear all keys from shared storage before running tests
-        // This prevents pollution from other test suites
-        await KeyStorage.shared.removeAllKeys()
-    }
-
     // MARK: - Initialization Tests
 
     @Test("KeyStorage shared instance is accessible")

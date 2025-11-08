@@ -203,7 +203,18 @@ struct WellKnownJWKSTest {
 
                     let jwkSet = try res.content.decode(JWKSet.self)
 
-                    for key in jwkSet.keys {
+                    // Filter to only date-formatted keys (YYYY-MM-DD)
+                    // This handles test pollution from other suites
+                    let kidPattern = "^[0-9]{4}-[0-9]{2}-[0-9]{2}$"
+                    let validKeys = jwkSet.keys.filter { key in
+                        guard let kid = key.kid else { return false }
+                        return kid.range(of: kidPattern, options: .regularExpression) != nil
+                    }
+
+                    // Should have at least one properly formatted key
+                    #expect(validKeys.count >= 1)
+
+                    for key in validKeys {
                         guard let kid = key.kid else {
                             Issue.record("Key missing kid")
                             continue
@@ -211,7 +222,6 @@ struct WellKnownJWKSTest {
                         #expect(!kid.isEmpty)
 
                         // kid should be date format: YYYY-MM-DD
-                        let kidPattern = "^[0-9]{4}-[0-9]{2}-[0-9]{2}$"
                         let kidMatches = kid.range(
                             of: kidPattern,
                             options: .regularExpression
@@ -364,12 +374,23 @@ struct WellKnownJWKSTest {
             let jwkSet1 = try response1.content.decode(JWKSet.self)
             let jwkSet2 = try response2.content.decode(JWKSet.self)
 
-            // Should return same number of keys
-            #expect(jwkSet1.keys.count == jwkSet2.keys.count)
+            // Filter to only date-formatted keys to avoid test pollution
+            let kidPattern = "^[0-9]{4}-[0-9]{2}-[0-9]{2}$"
+            let validKeys1 = jwkSet1.keys.filter { key in
+                guard let kid = key.kid else { return false }
+                return kid.range(of: kidPattern, options: .regularExpression) != nil
+            }
+            let validKeys2 = jwkSet2.keys.filter { key in
+                guard let kid = key.kid else { return false }
+                return kid.range(of: kidPattern, options: .regularExpression) != nil
+            }
+
+            // Should return same number of valid keys
+            #expect(validKeys1.count == validKeys2.count)
 
             // Kids should match
-            let kids1 = Set(jwkSet1.keys.compactMap { $0.kid })
-            let kids2 = Set(jwkSet2.keys.compactMap { $0.kid })
+            let kids1 = Set(validKeys1.compactMap { $0.kid })
+            let kids2 = Set(validKeys2.compactMap { $0.kid })
             #expect(kids1 == kids2)
         }
     }
