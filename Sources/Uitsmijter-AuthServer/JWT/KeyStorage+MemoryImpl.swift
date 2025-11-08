@@ -134,4 +134,10 @@ actor MemoryKeyStorage: KeyStorageProtocol {
         // In-memory storage is always healthy (no external dependencies)
         return true
     }
+
+    /// Remove all keys from storage (useful for testing)
+    func removeAllKeys() async {
+        keys.removeAll()
+        activeKeyID = nil
+    }
 }

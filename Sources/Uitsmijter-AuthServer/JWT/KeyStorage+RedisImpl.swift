@@ -318,6 +318,25 @@ actor RedisKeyStorage: KeyStorageProtocol {
         }
     }
 
+    /// Remove all keys from storage (useful for testing)
+    func removeAllKeys() async {
+        // Get all key IDs
+        let metadata = await getAllKeyMetadata()
+
+        // Remove each key
+        for (kid, _, _) in metadata {
+            await removeKey(kid: kid)
+        }
+
+        // Clear the active key reference
+        do {
+            let activeKey = try redisKey("\(Self.keyPrefix):active")
+            _ = try? await redis.delete(activeKey).get()
+        } catch {
+            // Ignore errors - key might not exist
+        }
+    }
+
     /// Helper to create a RedisKey safely
     private func redisKey(_ string: String) throws -> RedisKey {
         guard let key = RedisKey(rawValue: string) else {

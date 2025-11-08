@@ -206,6 +206,10 @@ struct WellKnownController: RouteCollection {
 
         // Get all public keys from storage
         let keyStorage = KeyStorage.shared
+
+        // Ensure at least one key exists (auto-generates if empty)
+        _ = try await keyStorage.getActiveKey()
+
         let jwkSet = try await keyStorage.getAllPublicKeys()
 
         Log.debug("JWKS contains \(jwkSet.keys.count) key(s)", requestId: req.id)

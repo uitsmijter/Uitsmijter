@@ -56,4 +56,8 @@ protocol KeyStorageProtocol: Sendable {
     /// Check if the storage backend is healthy and operational
     /// - Returns: true if storage is healthy, false otherwise
     func isHealthy() async -> Bool
+
+    /// Remove all keys from storage (useful for testing)
+    /// - Warning: This operation cannot be undone. Use with caution.
+    func removeAllKeys() async
 }

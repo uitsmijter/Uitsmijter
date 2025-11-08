@@ -8,6 +8,12 @@ import VaporTesting
 struct WellKnownJWKSTest {
     let decoder = JSONDecoder()
 
+    init() async {
+        // Clear all keys from shared storage before running tests
+        // This prevents pollution from other test suites
+        await KeyStorage.shared.removeAllKeys()
+    }
+
     // MARK: - JWKS Endpoint Tests
 
     @Test("GET /.well-known/jwks.json returns JWK Set")

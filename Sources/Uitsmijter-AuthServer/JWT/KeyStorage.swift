@@ -130,6 +130,10 @@ struct KeyStorage: KeyStorageProtocol, Sendable {
     func isHealthy() async -> Bool {
         return await implementation.isHealthy()
     }
+
+    func removeAllKeys() async {
+        await implementation.removeAllKeys()
+    }
 }
 
 /// A storage key for registering ``KeyStorage`` in Vapor's application storage.
