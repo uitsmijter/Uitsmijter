@@ -3,15 +3,10 @@ import Foundation
 import Testing
 import JWTKit
 
+// Tests use unique kid values so they don't interfere with each other
 @Suite("SignerManager Tests", .serialized)
 // swiftlint:disable type_body_length
 struct SignerManagerTest {
-
-    init() async {
-        // Reset KeyStorage to clear accumulated keys from previous test suites
-        // SignerManager now dynamically accesses KeyStorage.shared, so this is safe
-        await KeyStorage.resetSharedInstance()
-    }
 
     // MARK: - Initialization Tests
 

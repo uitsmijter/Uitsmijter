@@ -5,15 +5,10 @@ import Testing
 import JWTKit
 import Logger
 
+// Tests use unique kid values so they don't interfere with each other
 @Suite("JWT Token Tests", .serialized)
 // swiftlint:disable type_body_length
 struct TokenTest {
-
-    init() async {
-        // Reset KeyStorage to clear accumulated keys from previous test suites
-        // SignerManager now dynamically accesses KeyStorage.shared, so this is safe
-        await KeyStorage.resetSharedInstance()
-    }
 
     // MARK: - Token Creation Tests
 

@@ -2,15 +2,10 @@
 import Testing
 import VaporTesting
 
+// Tests use unique kid values so they don't interfere with each other
 @Suite("Login Controller Login Tests", .serialized)
 // swiftlint:disable:next type_body_length
 struct LoginControllerLoginTests {
-
-    init() async {
-        // Reset KeyStorage to clear accumulated keys from previous test suites
-        // SignerManager now dynamically accesses KeyStorage.shared, so this is safe
-        await KeyStorage.resetSharedInstance()
-    }
 
     @MainActor
     func setupEntities(app: Application) async throws {

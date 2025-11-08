@@ -3,14 +3,9 @@ import Foundation
 import Testing
 import JWTKit
 
+// Tests use unique kid values so they don't interfere with each other
 @Suite("KeyStorage Tests", .serialized)
 struct KeyStorageTest {
-
-    init() async {
-        // Reset KeyStorage to clear accumulated keys from previous test suites
-        // SignerManager now dynamically accesses KeyStorage.shared, so this is safe
-        await KeyStorage.resetSharedInstance()
-    }
 
     // MARK: - Initialization Tests
 
