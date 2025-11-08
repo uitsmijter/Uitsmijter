@@ -219,6 +219,8 @@ struct RevokeController: RouteCollection {
             [.accessToken, .refreshToken]
         }
 
+        // Note: Cannot use for-where here because we need early return on success
+        // swiftlint:disable for_where
         for strategy in typesToTry {
             if await tryRevokeToken(
                 token: token,
@@ -231,6 +233,7 @@ struct RevokeController: RouteCollection {
                 return
             }
         }
+        // swiftlint:enable for_where
 
         // Token not found or already revoked - this is not an error per RFC 7009
         Log.debug("Token not found or already revoked", requestId: req.id)
@@ -322,6 +325,7 @@ struct RevokeController: RouteCollection {
             ("token_type", "access_token")
         ])
 
+        // swiftlint:disable:next todo
         // TODO: Future enhancement - implement token blacklist or reduce token lifetimes
         // For now, just return success
         return true
@@ -367,8 +371,9 @@ struct RevokeController: RouteCollection {
         // AudienceClaim.value is an array [String], so check if it contains the client_id
         let audienceValues = payload.audience.value
         guard audienceValues.contains(client.name) else {
+            let audiences = audienceValues.joined(separator: ",")
             Log.warning(
-                "Token ownership validation failed: refresh token belongs to '\(audienceValues.joined(separator: ","))', " +
+                "Token ownership validation failed: refresh token belongs to '\(audiences)', " +
                 "but client '\(client.name)' tried to revoke it",
                 requestId: req.id
             )
