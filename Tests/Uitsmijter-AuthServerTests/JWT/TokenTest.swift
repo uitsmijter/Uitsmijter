@@ -12,13 +12,13 @@ struct TokenTest {
     // MARK: - Token Creation Tests
 
     @Test("Create token with user profile")
-    func createTokenWithUserProfile() throws {
+    func createTokenWithUserProfile() async throws {
         let userProfile = UserProfile(
             role: "admin",
             user: "admin@example.com"
         )
 
-        let token = try Token(
+        let token = try await Token(
             issuer: IssuerClaim(value: "https://test.example.com"),
             audience: AudienceClaim(value: "test-client"),
             tenantName: "test-tenant",
