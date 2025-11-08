@@ -1,10 +1,11 @@
 # 0.10.0
-- prerelease
 - Feature: **OpenID Connect Discovery 1.0** endpoint at `/.well-known/openid-configuration` with full multi-tenant support, allowing clients to automatically discover provider capabilities and endpoints
 - Feature: **E2E Test Filtering** - New `--filter` flag for `./tooling.sh e2e` command allows selective test execution for faster development cycles
 - Feature: Enhanced **Kubernetes API** with automatic retry logic for improved reliability when loading tenant and client configurations from CRDs
 - Feature: Improved **Helm Chart** with default resource limits helper for easier production deployments
 
+- Fix: **OpenID Discovery endpoint** now includes `end_session_endpoint` field pointing to `/logout` for RP-initiated logout support
+- Fix: **JSON output formatting** - URLs in `.well-known/openid-configuration` no longer have escaped forward slashes for better compatibility with strict parsers
 - Fix: **Redis connection stability** - Connection pool no longer blocks startup, graceful handling of DNS resolution failures, and improved timeout configuration
 - Fix: **S3 template loading** race condition in multi-tenant environments
 - Fix: **PKCE validation** order in OAuth2 authorization flow

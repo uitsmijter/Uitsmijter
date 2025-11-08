@@ -128,7 +128,7 @@ struct WellKnownController: RouteCollection {
 
         // Encode the configuration to JSON
         let encoder = JSONEncoder()
-        encoder.outputFormatting = [.prettyPrinted, .sortedKeys]
+        encoder.outputFormatting = [.prettyPrinted, .sortedKeys, .withoutEscapingSlashes]
 
         guard let jsonData = try? encoder.encode(configuration),
               let jsonString = String(data: jsonData, encoding: .utf8) else {

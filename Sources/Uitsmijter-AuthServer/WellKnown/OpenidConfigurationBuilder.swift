@@ -170,6 +170,7 @@ actor OpenidConfigurationBuilder {
         let tokenEndpoint = "\(issuer)/token"
         let jwksUri = "\(issuer)/.well-known/jwks.json"
         let userinfoEndpoint = "\(issuer)/token/info"
+        let endSessionEndpoint = "\(issuer)/logout"
 
         // Get policy URLs from tenant information
         let policyUri = tenant.config.informations?.privacy_url
@@ -180,6 +181,7 @@ actor OpenidConfigurationBuilder {
             authorization_endpoint: authorizationEndpoint,
             token_endpoint: tokenEndpoint,
             jwks_uri: jwksUri,
+            end_session_endpoint: endSessionEndpoint,
             response_types_supported: Self.defaultResponseTypes,
             subject_types_supported: Self.defaultSubjectTypes,
             id_token_signing_alg_values_supported: Self.defaultIdTokenSigningAlgorithms,

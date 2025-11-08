@@ -379,6 +379,23 @@ struct OpenidConfigurationBuilderTest {
         #expect(config.claims_supported?.contains("tenant") == true)
     }
 
+    @Test("Builder includes end session endpoint")
+    func builderIncludesEndSessionEndpoint() async throws {
+        let app = try await createTestApp()
+        defer { Task { try? await app.asyncShutdown() } }
+
+        let tenant = createTestTenant(name: "LogoutTenant", hosts: ["logout.example.com"])
+        app.entityStorage.tenants.insert(tenant)
+
+        let builder = OpenidConfigurationBuilder()
+        let request = createMockRequest(app: app, host: "logout.example.com")
+
+        let config = await builder.build(for: tenant, request: request, storage: app.entityStorage)
+
+        let expectedEndSessionEndpoint = "https://logout.example.com/logout"
+        #expect(config.end_session_endpoint == expectedEndSessionEndpoint)
+    }
+
     // MARK: - Deduplication Tests
 
     @Test("Builder deduplicates scopes from multiple clients")
