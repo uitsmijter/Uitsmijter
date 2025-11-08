@@ -5,13 +5,10 @@ import VaporTesting
 
 @Suite("Login Controller Profile Tests", .serialized)
 // swiftlint:disable type_body_length
+// Note: We don't reset KeyStorage to maintain key consistency
+// between token signing (in app) and verification (in tests).
+// Tests are isolated via separate app instances created by withApp().
 struct LoginControllerProfileTests {
-
-    init() async {
-        // Note: We don't reset KeyStorage here to maintain key consistency
-        // between token signing (in app) and verification (in tests).
-        // Tests are isolated via separate app instances created by withApp().
-    }
 
     @MainActor
     func setupApp() async throws -> Application {

@@ -4,14 +4,11 @@ import Testing
 import JWTKit
 
 @Suite("KeyStorage Tests", .serialized)
+// Note: We don't reset KeyStorage to maintain key consistency.
+// Each test generates keys with unique kid values, avoiding conflicts.
+// SignerManager.shared holds a reference to KeyStorage.shared, so resetting
+// KeyStorage would break JWT verification for tokens signed before the reset.
 struct KeyStorageTest {
-
-    init() async {
-        // Note: We don't reset KeyStorage here to maintain key consistency.
-        // Each test generates keys with unique kid values, avoiding conflicts.
-        // SignerManager.shared holds a reference to KeyStorage.shared, so resetting
-        // KeyStorage would break JWT verification for tokens signed before the reset.
-    }
 
     // MARK: - Initialization Tests
 
