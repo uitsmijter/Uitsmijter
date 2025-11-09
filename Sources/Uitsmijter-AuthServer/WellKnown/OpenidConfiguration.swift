@@ -73,6 +73,17 @@ struct OpenidConfiguration: Codable, Sendable {
     /// ```
     let jwks_uri: String
 
+    /// OPTIONAL. URL at the OP to which an RP can perform a redirect to request that the End-User be logged out.
+    ///
+    /// This endpoint is used for RP-initiated logout as specified in OpenID Connect Session Management.
+    ///
+    /// ## Example
+    ///
+    /// ```
+    /// "https://auth.example.com/logout"
+    /// ```
+    let end_session_endpoint: String?
+
     /// REQUIRED. JSON array containing a list of the OAuth 2.0 response_type values that this OP supports.
     ///
     /// Dynamic OpenID Providers MUST support the `code`, `id_token`, and `token id_token` response types.
@@ -400,6 +411,7 @@ struct OpenidConfiguration: Codable, Sendable {
     ///   - authorization_endpoint: REQUIRED. Authorization endpoint URL
     ///   - token_endpoint: Token endpoint URL (required unless only using Implicit Flow)
     ///   - jwks_uri: REQUIRED. JWK Set document URL
+    ///   - end_session_endpoint: OPTIONAL. End session (logout) endpoint URL
     ///   - response_types_supported: REQUIRED. Supported response types
     ///   - subject_types_supported: REQUIRED. Supported subject identifier types
     ///   - id_token_signing_alg_values_supported: REQUIRED. Supported ID Token signing algorithms
@@ -438,6 +450,7 @@ struct OpenidConfiguration: Codable, Sendable {
         authorization_endpoint: String,
         token_endpoint: String?,
         jwks_uri: String,
+        end_session_endpoint: String? = nil,
         response_types_supported: [String],
         subject_types_supported: [String],
         id_token_signing_alg_values_supported: [String],
@@ -476,6 +489,7 @@ struct OpenidConfiguration: Codable, Sendable {
         self.authorization_endpoint = authorization_endpoint
         self.token_endpoint = token_endpoint
         self.jwks_uri = jwks_uri
+        self.end_session_endpoint = end_session_endpoint
         self.response_types_supported = response_types_supported
         self.subject_types_supported = subject_types_supported
         self.id_token_signing_alg_values_supported = id_token_signing_alg_values_supported

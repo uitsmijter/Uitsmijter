@@ -181,6 +181,7 @@ actor OpenidConfigurationBuilder {
             authorization_endpoint: authorizationEndpoint,
             token_endpoint: tokenEndpoint,
             jwks_uri: jwksUri,
+            end_session_endpoint: endSessionEndpoint,
             response_types_supported: Self.defaultResponseTypes,
             subject_types_supported: Self.defaultSubjectTypes,
             id_token_signing_alg_values_supported: Self.defaultIdTokenSigningAlgorithms,
