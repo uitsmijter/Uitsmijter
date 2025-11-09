@@ -170,6 +170,7 @@ actor OpenidConfigurationBuilder {
         let tokenEndpoint = "\(issuer)/token"
         let jwksUri = "\(issuer)/.well-known/jwks.json"
         let userinfoEndpoint = "\(issuer)/token/info"
+        let endSessionEndpoint = "\(issuer)/logout"
         let revocationEndpoint = "\(issuer)/revoke"
 
         // Get policy URLs from tenant information
