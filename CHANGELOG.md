@@ -1,5 +1,5 @@
 # 0.10.0
-- prerelease
+
 - Feature: **RFC 7517 (JSON Web Key)** - Full implementation of JWKS endpoint at `/.well-known/jwks.json` with RSA public key distribution, supporting RS256 JWT signing algorithm with automatic key rotation and `kid` header support
 - Feature: **RS256 JWT Signing** - Asymmetric RSA-2048 signature algorithm support with seamless migration path from HS256, configurable via `JWT_ALGORITHM` environment variable
 - Feature: **OpenID Connect Discovery 1.0** endpoint at `/.well-known/openid-configuration` with full multi-tenant support, allowing clients to automatically discover provider capabilities and endpoints
