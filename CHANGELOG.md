@@ -7,6 +7,8 @@
 - Feature: Enhanced **Kubernetes API** with automatic retry logic for improved reliability when loading tenant and client configurations from CRDs
 - Feature: Improved **Helm Chart** with default resource limits helper for easier production deployments
 
+- Fix: **OpenID Discovery endpoint** now includes `end_session_endpoint` field pointing to `/logout` for RP-initiated logout support
+- Fix: **JSON output formatting** - URLs in `.well-known/openid-configuration` no longer have escaped forward slashes for better compatibility with strict parsers
 - Fix: **Redis connection stability** - Connection pool no longer blocks startup, graceful handling of DNS resolution failures, and improved timeout configuration
 - Fix: **S3 template loading** race condition in multi-tenant environments
 - Fix: **PKCE validation** order in OAuth2 authorization flow
