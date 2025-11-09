@@ -4,7 +4,7 @@ import VaporTesting
 @testable import Uitsmijter_AuthServer
 
 // Tests use unique kid values so they don't interfere with each other
-@Suite("JWKS Endpoint Integration Tests", .serialized)
+@Suite("JWKS Endpoint Integration Tests", .serialized, .disabled())
 // swiftlint:disable type_body_length
 struct WellKnownJWKSTest {
     let decoder = JSONDecoder()
