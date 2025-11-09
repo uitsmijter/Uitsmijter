@@ -80,10 +80,14 @@ actor MemoryKeyStorage: KeyStorageProtocol {
     }
 
     func getAllPublicKeys() async throws -> JWKSet {
-        var jwks: [RSAPublicJWK] = []
+        // Extract all key pairs from actor context first to avoid actor reentrancy deadlock
+        // This prevents calling KeyGenerator actor while holding MemoryKeyStorage actor lock
+        let keyPairs = keys.values.map { $0.keyPair }
 
-        for (_, storedKey) in keys {
-            let jwk = try await KeyGenerator.shared.convertToJWK(keyPair: storedKey.keyPair)
+        // Convert to JWK outside actor context - prevents deadlock with concurrent requests
+        var jwks: [RSAPublicJWK] = []
+        for keyPair in keyPairs {
+            let jwk = try await KeyGenerator.shared.convertToJWK(keyPair: keyPair)
             jwks.append(jwk)
         }
 

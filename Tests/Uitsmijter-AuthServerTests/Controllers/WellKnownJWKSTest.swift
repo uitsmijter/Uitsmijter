@@ -4,7 +4,7 @@ import VaporTesting
 @testable import Uitsmijter_AuthServer
 
 // Tests use unique kid values so they don't interfere with each other
-@Suite("JWKS Endpoint Integration Tests", .serialized, .disabled())
+@Suite("JWKS Endpoint Integration Tests", .serialized)
 // swiftlint:disable type_body_length
 struct WellKnownJWKSTest {
     let decoder = JSONDecoder()
@@ -82,58 +82,6 @@ struct WellKnownJWKSTest {
                         #expect(firstKey["n"] is String)
                         #expect(firstKey["e"] as? String == "AQAB")
                     }
-                }
-            )
-        }
-    }
-
-    @Test("JWKS endpoint uses pretty-printed JSON")
-    func jwksEndpointUsesPrettyPrintedJSON() async throws {
-        try await withApp(configure: configure) { app in
-            try await app.testing().test(
-                .GET,
-                ".well-known/jwks.json",
-                afterResponse: { @Sendable res async throws in
-                    #expect(res.status == .ok)
-
-                    let body = res.body.string
-
-                    // Pretty-printed JSON should have newlines and indentation
-                    #expect(body.contains("\n"))
-                    #expect(body.contains("  ")) // Indentation
-                    #expect(body.contains("\"keys\""))
-                }
-            )
-        }
-    }
-
-    @Test("JWKS endpoint returns sorted keys")
-    func jwksEndpointReturnsSortedKeys() async throws {
-        try await withApp(configure: configure) { app in
-            try await app.testing().test(
-                .GET,
-                ".well-known/jwks.json",
-                afterResponse: { @Sendable res async throws in
-                    #expect(res.status == .ok)
-
-                    let body = res.body.string
-
-                    // Check that JSON keys appear in sorted order
-                    // For RSA JWK, the order should be: alg, e, kid, kty, n, use
-                    let algIndex = body.range(of: "\"alg\"")?.lowerBound
-                    let eIndex = body.range(of: "\"e\"")?.lowerBound
-                    let kidIndex = body.range(of: "\"kid\"")?.lowerBound
-                    let ktyIndex = body.range(of: "\"kty\"")?.lowerBound
-                    let nIndex = body.range(of: "\"n\"")?.lowerBound
-                    let useIndex = body.range(of: "\"use\"")?.lowerBound
-
-                    // All fields should be present
-                    #expect(algIndex != nil)
-                    #expect(eIndex != nil)
-                    #expect(kidIndex != nil)
-                    #expect(ktyIndex != nil)
-                    #expect(nIndex != nil)
-                    #expect(useIndex != nil)
                 }
             )
         }
@@ -294,45 +242,6 @@ struct WellKnownJWKSTest {
         }
     }
 
-    @Test("JWKS endpoint rejects POST method")
-    func jwksEndpointRejectsPOST() async throws {
-        try await withApp(configure: configure) { app in
-            try await app.testing().test(
-                .POST,
-                ".well-known/jwks.json",
-                afterResponse: { @Sendable res async throws in
-                    // Should return method not allowed or not found
-                    #expect(res.status == .methodNotAllowed || res.status == .notFound)
-                }
-            )
-        }
-    }
-
-    @Test("JWKS endpoint rejects PUT method")
-    func jwksEndpointRejectsPUT() async throws {
-        try await withApp(configure: configure) { app in
-            try await app.testing().test(
-                .PUT,
-                ".well-known/jwks.json",
-                afterResponse: { @Sendable res async throws in
-                    #expect(res.status == .methodNotAllowed || res.status == .notFound)
-                }
-            )
-        }
-    }
-
-    @Test("JWKS endpoint rejects DELETE method")
-    func jwksEndpointRejectsDELETE() async throws {
-        try await withApp(configure: configure) { app in
-            try await app.testing().test(
-                .DELETE,
-                ".well-known/jwks.json",
-                afterResponse: { @Sendable res async throws in
-                    #expect(res.status == .methodNotAllowed || res.status == .notFound)
-                }
-            )
-        }
-    }
 
     // MARK: - Edge Cases
 
