@@ -39,4 +39,5 @@ func routes(_ app: Application) throws {
     try app.register(collection: WellKnownController())
     try app.register(collection: AuthorizeController())
     try app.register(collection: TokenController())
+    try app.register(collection: RevokeController())
 }
