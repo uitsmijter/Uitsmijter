@@ -110,8 +110,8 @@ struct InterceptorController: RouteCollection {
     /// ## Metrics
     ///
     /// Records either:
-    /// - `metricsInterceptorSuccess` with tenant and requested host
-    /// - `metricsInterceptorFailure` with tenant, requested host, and failure reason
+    /// - `Prometheus.main.interceptorSuccess` with tenant and requested host
+    /// - `Prometheus.main.interceptorFailure` with tenant, requested host, and failure reason
     ///
     /// - Parameter req: The forwarded request from Traefik with X-Forwarded-* headers.
     /// - Returns: HTTP 200 response if authenticated, HTTP 307 redirect if not.
@@ -132,7 +132,7 @@ struct InterceptorController: RouteCollection {
 
         guard clientInfo.validPayload != nil else {
             Log.info("Token is not valid for \(clientInfo.requested.description)", requestId: req.id)
-            metricsInterceptorFailure?.inc(1, [
+            Prometheus.main.interceptorFailure?.inc(1, [
                 ("requested_host", clientInfo.requested.host),
                 ("tenant", tenant.name),
                 ("reason", "INVALID_TOKEN")
@@ -152,7 +152,7 @@ struct InterceptorController: RouteCollection {
 
         // -- OK --
         Log.info("Token is valid for \(clientInfo.requested.description)", requestId: req.id)
-        metricsInterceptorSuccess?.inc(1, [
+        Prometheus.main.interceptorSuccess?.inc(1, [
             ("requested_host", clientInfo.requested.host),
             ("tenant", tenant.name)
         ])
@@ -183,7 +183,7 @@ struct InterceptorController: RouteCollection {
         let isEnabled = tenant.config.interceptor?.enabled ?? true
         if isEnabled == false {
             Log.info("Tenant \(tenant.name) is not allowed for interceptor mode.")
-            metricsInterceptorFailure?.inc(1, [
+            Prometheus.main.interceptorFailure?.inc(1, [
                 ("tenant", tenant.name),
                 ("reason", "TENANT_NOT_ALLOWED")
             ])

@@ -132,7 +132,7 @@ final class EntityStorage {
 
         }
         didSet {
-            metricsCountTenants?.set(tenants.count)
+            Prometheus.main.countTenants?.set(tenants.count)
             let newTenants = tenants.symmetricDifference(oldValue)
             guard let newTenant = newTenants.first else {
                 return
@@ -205,7 +205,7 @@ final class EntityStorage {
             Log.debug("Reset global clients")
         }
         didSet {
-            metricsCountClients?.set(clients.count)
+            Prometheus.main.countClients?.set(clients.count)
             #if DEBUG
             if let newClient = clients.last {
                 hook?(.client, newClient)

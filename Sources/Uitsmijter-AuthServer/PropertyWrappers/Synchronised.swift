@@ -1,9 +1,11 @@
 import Foundation
+import Synchronization
 
-/// Property wrapper providing thread-safe access to a value using NSLock
+/// Property wrapper providing thread-safe access to a value using Swift 6 Mutex
 ///
 /// Wraps any value type with automatic locking to ensure thread-safe read and write access.
-/// Uses NSLock internally to synchronize access from multiple threads.
+/// Uses Swift 6's cross-platform Mutex internally to synchronize access from multiple threads.
+/// Mutex provides compile-time safety guarantees and works across macOS, Linux, and Windows.
 ///
 /// ## Example
 /// ```swift
@@ -15,35 +17,29 @@ import Foundation
 ///     }
 /// }
 /// ```
-@propertyWrapper struct Synchronised<T> {
-    private let lock = NSLock()
-
-    private var _wrappedValue: T
+///
+/// ## Implementation Note
+/// Uses a class-based wrapper to hold the noncopyable Mutex, allowing the property wrapper
+/// itself to be used in stored properties while maintaining thread-safety guarantees.
+@propertyWrapper final class Synchronised<T: Sendable>: @unchecked Sendable {
+    private let mutex: Mutex<T>
 
     /// The wrapped value with thread-safe access
     ///
-    /// Reading and writing this property is automatically protected by a lock.
+    /// Reading and writing this property is automatically protected by a mutex.
     var wrappedValue: T {
         get {
-            lock.lock()
-            defer {
-                lock.unlock()
-            }
-            return _wrappedValue
+            mutex.withLock { $0 }
         }
         set {
-            lock.lock()
-            defer {
-                lock.unlock()
-            }
-            _wrappedValue = newValue
+            mutex.withLock { $0 = newValue }
         }
     }
 
     /// Creates a new synchronized property wrapper
     ///
     /// - Parameter wrappedValue: The initial value to wrap with thread-safe access
-    init(wrappedValue: T) {
-        self._wrappedValue = wrappedValue
+    init(wrappedValue: sending T) {
+        self.mutex = Mutex(wrappedValue)
     }
 }

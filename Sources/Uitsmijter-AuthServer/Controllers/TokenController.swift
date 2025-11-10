@@ -93,7 +93,7 @@ struct TokenController: RouteCollection, OAuthControllerProtocol {
 
         let client = try await client(for: tokenRequest, request: req)
         if client.config.secret != nil && client.config.secret != tokenRequest.client_secret {
-            metricsOAuthFailure?.inc(1, [
+            Prometheus.main.oauthFailure?.inc(1, [
                 ("tenant", client.config.tenantname),
                 ("client", client.name),
                 ("grant_type", tokenRequest.grant_type.rawValue),
@@ -111,7 +111,7 @@ struct TokenController: RouteCollection, OAuthControllerProtocol {
                     by client \(client.name): [\(grantTypesDescriptions ?? "no_grant_types")]
                     """, requestId: req.id)
 
-            metricsOAuthFailure?.inc(1, [
+            Prometheus.main.oauthFailure?.inc(1, [
                 ("tenant", client.config.tenantname),
                 ("client", client.name),
                 ("grant_type", tokenRequest.grant_type.rawValue),
@@ -133,7 +133,7 @@ struct TokenController: RouteCollection, OAuthControllerProtocol {
                 on: req,
                 scopes: allowedScopes(on: client, for: tokenRequest)
             )
-            metricsOAuthSuccess?.inc(1, [
+            Prometheus.main.oauthSuccess?.inc(1, [
                 ("tenant", tenant.name),
                 ("client", client.name),
                 ("grant_type", tokenRequest.grant_type.rawValue),
@@ -142,7 +142,7 @@ struct TokenController: RouteCollection, OAuthControllerProtocol {
 
             return tokenResponse
         } catch {
-            metricsOAuthFailure?.inc(1, [
+            Prometheus.main.oauthFailure?.inc(1, [
                 ("tenant", client.config.tenantname),
                 ("client", client.name),
                 ("grant_type", tokenRequest.grant_type.rawValue),
