@@ -48,8 +48,8 @@ protocol EntityLoaderProtocol {
     /// This method should be called when shutting down the application to ensure
     /// proper cleanup of file monitors, network connections, or other resources.
     ///
-    /// - Note: This method is `nonisolated` to allow cleanup from any context
-    nonisolated func shutdown()
+    /// - Note: Implementations may be MainActor-isolated if needed for their resources
+    func shutdown()
 }
 
 // MARK: - Entity Loader Functions

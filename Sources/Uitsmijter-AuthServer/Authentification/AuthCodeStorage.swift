@@ -127,7 +127,7 @@ struct AuthCodeStorage: AuthCodeStorageProtocol, Sendable {
             Task {
                 let countKeysInStorage = await count()
                 Log.debug("Found \(countKeysInStorage) keys in AuthStorage")
-                metricsTokensStored?.observe(countKeysInStorage)
+                Prometheus.main.tokensStored?.observe(countKeysInStorage)
             }
         }
         thread.main()

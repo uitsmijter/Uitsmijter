@@ -111,7 +111,7 @@ struct RevokeController: RouteCollection {
         ) else {
             // Per RFC 7009 Section 2.2.1: If client authentication fails,
             // the authorization server MUST return an error response
-            metricsRevokeFailure?.inc(1, [
+            Prometheus.main.revokeFailure?.inc(1, [
                 ("tenant", tenant.name),
                 ("reason", "invalid_client")
             ])
@@ -319,7 +319,7 @@ struct RevokeController: RouteCollection {
         )
 
         // Track successful revocation metric
-        metricsRevokeSuccess?.inc(1, [
+        Prometheus.main.revokeSuccess?.inc(1, [
             ("tenant", parsedToken.payload.tenant),
             ("client", client.name),
             ("token_type", "access_token")
@@ -403,7 +403,7 @@ struct RevokeController: RouteCollection {
             Log.debug("Cascaded revocation: authorization code also deleted", requestId: req.id)
 
             // Track successful revocation metric
-            metricsRevokeSuccess?.inc(1, [
+            Prometheus.main.revokeSuccess?.inc(1, [
                 ("tenant", payload.tenant),
                 ("client", client.name),
                 ("token_type", "refresh_token")
@@ -414,7 +414,7 @@ struct RevokeController: RouteCollection {
             Log.error("Failed to revoke refresh token: \(error)", requestId: req.id)
 
             // Track failure metric
-            metricsRevokeFailure?.inc(1, [
+            Prometheus.main.revokeFailure?.inc(1, [
                 ("tenant", payload.tenant),
                 ("client", client.name),
                 ("reason", "storage_error")

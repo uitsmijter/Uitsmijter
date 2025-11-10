@@ -13,19 +13,19 @@ struct PrometheusMetricsTest {
         _ = Prometheus.main
 
         // Test with different values
-        #expect(metricsLoginAttempts != nil)
-        metricsLoginAttempts?.observe(0)
-        metricsLoginAttempts?.observe(1)
-        metricsLoginAttempts?.observe(100)
-        metricsLoginAttempts?.observe(1000)
+        #expect(Prometheus.main.loginAttempts != nil)
+        Prometheus.main.loginAttempts?.observe(0)
+        Prometheus.main.loginAttempts?.observe(1)
+        Prometheus.main.loginAttempts?.observe(100)
+        Prometheus.main.loginAttempts?.observe(1000)
 
-        #expect(metricsAuthorizeAttempts != nil)
-        metricsAuthorizeAttempts?.observe(0)
-        metricsAuthorizeAttempts?.observe(50)
+        #expect(Prometheus.main.authorizeAttempts != nil)
+        Prometheus.main.authorizeAttempts?.observe(0)
+        Prometheus.main.authorizeAttempts?.observe(50)
 
-        #expect(metricsTokensStored != nil)
-        metricsTokensStored?.observe(0)
-        metricsTokensStored?.observe(500)
+        #expect(Prometheus.main.tokensStored != nil)
+        Prometheus.main.tokensStored?.observe(0)
+        Prometheus.main.tokensStored?.observe(500)
     }
 
     // MARK: - Counter Tests
@@ -35,29 +35,29 @@ struct PrometheusMetricsTest {
         _ = Prometheus.main
 
         // Test counters
-        #expect(metricsLoginSuccess != nil)
-        metricsLoginSuccess?.inc()
-        metricsLoginSuccess?.inc(5)
+        #expect(Prometheus.main.loginSuccess != nil)
+        Prometheus.main.loginSuccess?.inc()
+        Prometheus.main.loginSuccess?.inc(5)
 
-        #expect(metricsLoginFailure != nil)
-        metricsLoginFailure?.inc()
-        metricsLoginFailure?.inc(10)
+        #expect(Prometheus.main.loginFailure != nil)
+        Prometheus.main.loginFailure?.inc()
+        Prometheus.main.loginFailure?.inc(10)
 
-        #expect(metricsLogout != nil)
-        metricsLogout?.inc()
-        metricsLogout?.inc(3)
+        #expect(Prometheus.main.logout != nil)
+        Prometheus.main.logout?.inc()
+        Prometheus.main.logout?.inc(3)
 
-        #expect(metricsInterceptorSuccess != nil)
-        metricsInterceptorSuccess?.inc()
+        #expect(Prometheus.main.interceptorSuccess != nil)
+        Prometheus.main.interceptorSuccess?.inc()
 
-        #expect(metricsInterceptorFailure != nil)
-        metricsInterceptorFailure?.inc()
+        #expect(Prometheus.main.interceptorFailure != nil)
+        Prometheus.main.interceptorFailure?.inc()
 
-        #expect(metricsOAuthSuccess != nil)
-        metricsOAuthSuccess?.inc()
+        #expect(Prometheus.main.oauthSuccess != nil)
+        Prometheus.main.oauthSuccess?.inc()
 
-        #expect(metricsOAuthFailure != nil)
-        metricsOAuthFailure?.inc()
+        #expect(Prometheus.main.oauthFailure != nil)
+        Prometheus.main.oauthFailure?.inc()
     }
 
     // MARK: - Gauge Tests
@@ -66,15 +66,15 @@ struct PrometheusMetricsTest {
     func gaugeMetricsSetValue() {
         _ = Prometheus.main
 
-        #expect(metricsCountTenants != nil)
-        metricsCountTenants?.set(0)
-        metricsCountTenants?.set(1)
-        metricsCountTenants?.set(100)
+        #expect(Prometheus.main.countTenants != nil)
+        Prometheus.main.countTenants?.set(0)
+        Prometheus.main.countTenants?.set(1)
+        Prometheus.main.countTenants?.set(100)
 
-        #expect(metricsCountClients != nil)
-        metricsCountClients?.set(0)
-        metricsCountClients?.set(50)
-        metricsCountClients?.set(1000)
+        #expect(Prometheus.main.countClients != nil)
+        Prometheus.main.countClients?.set(0)
+        Prometheus.main.countClients?.set(50)
+        Prometheus.main.countClients?.set(1000)
     }
 
     // MARK: - Practical Usage Tests
@@ -84,21 +84,21 @@ struct PrometheusMetricsTest {
         _ = Prometheus.main
 
         // Simulate a login attempt
-        #expect(metricsLoginAttempts != nil)
-        metricsLoginAttempts?.observe(1)
+        #expect(Prometheus.main.loginAttempts != nil)
+        Prometheus.main.loginAttempts?.observe(1)
 
         // Simulate success
-        #expect(metricsLoginSuccess != nil)
-        metricsLoginSuccess?.inc()
+        #expect(Prometheus.main.loginSuccess != nil)
+        Prometheus.main.loginSuccess?.inc()
 
         // Simulate another attempt that fails
-        metricsLoginAttempts?.observe(1)
-        #expect(metricsLoginFailure != nil)
-        metricsLoginFailure?.inc()
+        Prometheus.main.loginAttempts?.observe(1)
+        #expect(Prometheus.main.loginFailure != nil)
+        Prometheus.main.loginFailure?.inc()
 
         // Simulate logout
-        #expect(metricsLogout != nil)
-        metricsLogout?.inc()
+        #expect(Prometheus.main.logout != nil)
+        Prometheus.main.logout?.inc()
     }
 
     @Test("Simulate OAuth flow with metrics")
@@ -106,17 +106,17 @@ struct PrometheusMetricsTest {
         _ = Prometheus.main
 
         // Simulate authorization attempts
-        #expect(metricsAuthorizeAttempts != nil)
-        metricsAuthorizeAttempts?.observe(1)
+        #expect(Prometheus.main.authorizeAttempts != nil)
+        Prometheus.main.authorizeAttempts?.observe(1)
 
         // Simulate successful OAuth flow
-        #expect(metricsOAuthSuccess != nil)
-        metricsOAuthSuccess?.inc()
+        #expect(Prometheus.main.oauthSuccess != nil)
+        Prometheus.main.oauthSuccess?.inc()
 
         // Simulate failed OAuth flow
-        metricsAuthorizeAttempts?.observe(1)
-        #expect(metricsOAuthFailure != nil)
-        metricsOAuthFailure?.inc()
+        Prometheus.main.authorizeAttempts?.observe(1)
+        #expect(Prometheus.main.oauthFailure != nil)
+        Prometheus.main.oauthFailure?.inc()
     }
 
     @Test("Simulate interceptor flow with metrics")
@@ -124,14 +124,14 @@ struct PrometheusMetricsTest {
         _ = Prometheus.main
 
         // Simulate successful interceptor checks
-        #expect(metricsInterceptorSuccess != nil)
-        metricsInterceptorSuccess?.inc()
-        metricsInterceptorSuccess?.inc()
-        metricsInterceptorSuccess?.inc()
+        #expect(Prometheus.main.interceptorSuccess != nil)
+        Prometheus.main.interceptorSuccess?.inc()
+        Prometheus.main.interceptorSuccess?.inc()
+        Prometheus.main.interceptorSuccess?.inc()
 
         // Simulate failed interceptor check
-        #expect(metricsInterceptorFailure != nil)
-        metricsInterceptorFailure?.inc()
+        #expect(Prometheus.main.interceptorFailure != nil)
+        Prometheus.main.interceptorFailure?.inc()
     }
 
     @Test("Simulate entity management with metrics")
@@ -139,24 +139,24 @@ struct PrometheusMetricsTest {
         _ = Prometheus.main
 
         // Start with no entities
-        #expect(metricsCountTenants != nil)
-        metricsCountTenants?.set(0)
+        #expect(Prometheus.main.countTenants != nil)
+        Prometheus.main.countTenants?.set(0)
 
-        #expect(metricsCountClients != nil)
-        metricsCountClients?.set(0)
+        #expect(Prometheus.main.countClients != nil)
+        Prometheus.main.countClients?.set(0)
 
         // Add tenants
-        metricsCountTenants?.inc()
-        metricsCountTenants?.inc()
+        Prometheus.main.countTenants?.inc()
+        Prometheus.main.countTenants?.inc()
 
         // Add clients
-        metricsCountClients?.inc(5)
+        Prometheus.main.countClients?.inc(5)
 
         // Remove a tenant
-        metricsCountTenants?.dec()
+        Prometheus.main.countTenants?.dec()
 
         // Remove clients
-        metricsCountClients?.dec(2)
+        Prometheus.main.countClients?.dec(2)
     }
 
     @Test("Simulate token storage tracking")
@@ -164,12 +164,12 @@ struct PrometheusMetricsTest {
         _ = Prometheus.main
 
         // Track token counts over time
-        #expect(metricsTokensStored != nil)
-        metricsTokensStored?.observe(0)
-        metricsTokensStored?.observe(10)
-        metricsTokensStored?.observe(25)
-        metricsTokensStored?.observe(50)
-        metricsTokensStored?.observe(45) // Some tokens expired
-        metricsTokensStored?.observe(40)
+        #expect(Prometheus.main.tokensStored != nil)
+        Prometheus.main.tokensStored?.observe(0)
+        Prometheus.main.tokensStored?.observe(10)
+        Prometheus.main.tokensStored?.observe(25)
+        Prometheus.main.tokensStored?.observe(50)
+        Prometheus.main.tokensStored?.observe(45) // Some tokens expired
+        Prometheus.main.tokensStored?.observe(40)
     }
 }

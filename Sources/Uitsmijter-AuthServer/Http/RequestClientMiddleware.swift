@@ -506,7 +506,7 @@ final class RequestClientMiddleware: AsyncMiddleware {
     private func getTenant(on payload: Payload, request: Request) throws -> Tenant {
         guard let tenant = Tenant.find(in: request.application.entityStorage, name: payload.tenant) else {
             Log.info("No tenant for name \(payload.tenant) found")
-            metricsInterceptorFailure?.inc(1, [
+            Prometheus.main.interceptorFailure?.inc(1, [
                 ("requested_tenant", payload.tenant),
                 ("reason", "NO_TENANT")
             ])
@@ -526,7 +526,7 @@ final class RequestClientMiddleware: AsyncMiddleware {
     private func getTenant(for requestedHost: String, request: Request) throws -> Tenant {
         guard let tenant = Tenant.find(in: request.application.entityStorage, forHost: requestedHost) else {
             Log.info("No tenant for host \(requestedHost) found")
-            metricsInterceptorFailure?.inc(1, [
+            Prometheus.main.interceptorFailure?.inc(1, [
                 ("requested_host", requestedHost),
                 ("reason", "NO_TENANT")
             ])
@@ -554,7 +554,7 @@ final class RequestClientMiddleware: AsyncMiddleware {
                      User: \(user ?? "-")
                      """)
 
-            metricsInterceptorFailure?.inc(1, [
+            Prometheus.main.interceptorFailure?.inc(1, [
                 ("requested_host", host),
                 ("tenant", tenant.name),
                 ("reason", "TENANT_MISMATCH")

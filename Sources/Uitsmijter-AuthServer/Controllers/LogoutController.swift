@@ -99,7 +99,7 @@ struct LogoutController: RouteCollection {
 
         // Log, metrics and return
         Log.info("Logout succeeded \(jwt.user) for \(tenant.name), redirect to \(locationRedirect)", requestId: req.id)
-        metricsLogout?.inc(1, [
+        Prometheus.main.logout?.inc(1, [
             ("redirect", locationRedirect),
             ("mode", req.clientInfo?.mode.rawValue ?? "unknown"),
             ("tenant", tenant.name)
