@@ -184,13 +184,15 @@ public func configure(_ app: Application) throws {
             app.sessions.use(.redis(delegate: AuthSessionDelegate()))
             // Store OAuth authorization codes in Redis for distributed deployments
             app.authCodeStorage = .init(use: .redis(client: app.redis))
-            // Note: RSA keys use KeyStorage.shared singleton (not app.keyStorage)
+            // Store RSA keys in Redis for distributed deployments (supports HPA/multi-pod)
+            app.keyStorage = KeyStorage(use: .redis(client: app.redis))
         } catch {
             // If Redis connection fails, fall back to in-memory storage to keep the application running
             app.logger.error("Failed to configure Redis: \(error). Falling back to in-memory session storage.")
             app.sessions.use(.memory)
             app.authCodeStorage = .init(use: .memory)
-            // Note: RSA keys use KeyStorage.shared singleton (not app.keyStorage)
+            // Fallback to in-memory key storage
+            app.keyStorage = KeyStorage(use: .memory)
         }
     } else {
         // Development mode: use in-memory storage (sessions lost on restart)
@@ -199,7 +201,8 @@ public func configure(_ app: Application) throws {
         )
         app.sessions.use(.memory)
         app.authCodeStorage = .init(use: .memory)
-        // Note: RSA keys use KeyStorage.shared singleton (not app.keyStorage)
+        // Use in-memory key storage for development
+        app.keyStorage = KeyStorage(use: .memory)
     }
 
     // Configure session cookie settings for security and expiration
@@ -222,7 +225,8 @@ public func configure(_ app: Application) throws {
 
     // Load tenant and client entity configurations from files or Kubernetes CRDs
     // This must happen before route registration to ensure entities are available
-    try EntityLoader(storage: app.entityStorage)
+    // Store the entity loader so it can be properly shut down during app lifecycle
+    app.entityLoader = try EntityLoader(storage: app.entityStorage)
 
     // Register all HTTP routes and controllers
     try routes(app)

@@ -3,16 +3,28 @@ import Foundation
 import Testing
 import JWTKit
 
-// Tests use unique kid values so they don't interfere with each other
+/// KeyStorage test suite with proper isolation using independent storage instance
+///
+/// Each test uses an isolated in-memory KeyStorage instance to prevent interference
+/// with other test suites that might also use KeyStorage (e.g., WellKnownJWKSTest).
 @Suite("KeyStorage Tests", .serialized)
 struct KeyStorageTest {
 
+    // ISOLATED: Each test suite instance gets its own independent KeyStorage
+    // This prevents race conditions when running in parallel with other suites
+    let storage: KeyStorage
+
+    /// Initialize test suite with isolated KeyStorage instance
+    init() {
+        // Create independent in-memory storage for this test suite
+        storage = KeyStorage(use: .memory)
+    }
+
     // MARK: - Initialization Tests
 
-    @Test("KeyStorage shared instance is accessible")
-    func keyStorageSharedInstance() {
-        let storage = KeyStorage.shared
-        // Verify shared instance exists (non-optional type)
+    @Test("KeyStorage instance is accessible")
+    func keyStorageInstanceAccessible() {
+        // Verify storage instance exists (non-optional type)
         _ = storage
         #expect(true)
     }
@@ -21,8 +33,6 @@ struct KeyStorageTest {
 
     @Test("Generate and store a new key")
     func generateAndStoreKey() async throws {
-        let storage = KeyStorage.shared
-
         try await storage.generateAndStoreKey(kid: "test-key-001", setActive: true)
 
         let activeKey = try await storage.getActiveKey()
@@ -31,8 +41,6 @@ struct KeyStorageTest {
 
     @Test("Generate multiple keys")
     func generateMultipleKeys() async throws {
-        let storage = KeyStorage.shared
-
         try await storage.generateAndStoreKey(kid: "multi-key-001", setActive: false)
         try await storage.generateAndStoreKey(kid: "multi-key-002", setActive: true)
 
@@ -42,7 +50,6 @@ struct KeyStorageTest {
 
     @Test("Set active key during generation")
     func setActiveKeyDuringGeneration() async throws {
-        let storage = KeyStorage.shared
 
         try await storage.generateAndStoreKey(kid: "active-001", setActive: false)
         try await storage.generateAndStoreKey(kid: "active-002", setActive: true)
@@ -53,7 +60,6 @@ struct KeyStorageTest {
 
     @Test("Replace active key")
     func replaceActiveKey() async throws {
-        let storage = KeyStorage.shared
 
         try await storage.generateAndStoreKey(kid: "replace-001", setActive: true)
         let firstKey = try await storage.getActiveKey()
@@ -68,7 +74,6 @@ struct KeyStorageTest {
 
     @Test("Get active key when no key exists throws error")
     func getActiveKeyNoKeyThrows() async throws {
-        let storage = KeyStorage.shared
 
         // Clear all keys first (using private method via reflection would be complex)
         // Instead, we test that after generating a key and removing old ones, we can still get it
@@ -79,7 +84,6 @@ struct KeyStorageTest {
 
     @Test("Get active key returns correct key")
     func getActiveKeyReturnsCorrect() async throws {
-        let storage = KeyStorage.shared
 
         try await storage.generateAndStoreKey(kid: "correct-001", setActive: true)
         let activeKey = try await storage.getActiveKey()
@@ -94,7 +98,6 @@ struct KeyStorageTest {
 
     @Test("Get active signing key PEM")
     func getActiveSigningKeyPEM() async throws {
-        let storage = KeyStorage.shared
 
         try await storage.generateAndStoreKey(kid: "pem-001", setActive: true)
         let pem = try await storage.getActiveSigningKeyPEM()
@@ -107,7 +110,6 @@ struct KeyStorageTest {
 
     @Test("Active signing key PEM matches active key")
     func activeSigningKeyPEMMatches() async throws {
-        let storage = KeyStorage.shared
 
         try await storage.generateAndStoreKey(kid: "match-001", setActive: true)
 
@@ -121,7 +123,6 @@ struct KeyStorageTest {
 
     @Test("Get all public keys as JWK Set")
     func getAllPublicKeysAsJWKSet() async throws {
-        let storage = KeyStorage.shared
 
         try await storage.generateAndStoreKey(kid: "all-001", setActive: false)
         try await storage.generateAndStoreKey(kid: "all-002", setActive: true)
@@ -139,7 +140,6 @@ struct KeyStorageTest {
 
     @Test("Public keys in JWK Set have correct format")
     func publicKeysHaveCorrectFormat() async throws {
-        let storage = KeyStorage.shared
 
         try await storage.generateAndStoreKey(kid: "format-001", setActive: true)
 
@@ -158,7 +158,6 @@ struct KeyStorageTest {
 
     @Test("Remove keys older than date")
     func removeKeysOlderThanDate() async throws {
-        let storage = KeyStorage.shared
 
         // Generate a key
         try await storage.generateAndStoreKey(kid: "old-001", setActive: false)
@@ -177,7 +176,6 @@ struct KeyStorageTest {
 
     @Test("Remove old keys keeps recent keys")
     func removeOldKeepsRecent() async throws {
-        let storage = KeyStorage.shared
 
         // Generate a recent key
         try await storage.generateAndStoreKey(kid: "recent-001", setActive: true)
@@ -196,7 +194,6 @@ struct KeyStorageTest {
 
     @Test("Key rotation scenario")
     func keyRotationScenario() async throws {
-        let storage = KeyStorage.shared
 
         // Day 1: Generate initial key
         try await storage.generateAndStoreKey(kid: "2024-01-01", setActive: true)
@@ -218,7 +215,6 @@ struct KeyStorageTest {
 
     @Test("Concurrent key generation")
     func concurrentKeyGeneration() async throws {
-        let storage = KeyStorage.shared
 
         // Generate keys concurrently
         await withTaskGroup(of: Void.self) { group in
@@ -239,7 +235,6 @@ struct KeyStorageTest {
 
     @Test("Concurrent reads and writes")
     func concurrentReadsAndWrites() async throws {
-        let storage = KeyStorage.shared
 
         try await storage.generateAndStoreKey(kid: "rw-initial", setActive: true)
 
@@ -271,7 +266,6 @@ struct KeyStorageTest {
 
     @Test("Generate key with empty kid")
     func generateKeyWithEmptyKid() async throws {
-        let storage = KeyStorage.shared
 
         try await storage.generateAndStoreKey(kid: "", setActive: true)
         let activeKey = try await storage.getActiveKey()
@@ -280,7 +274,6 @@ struct KeyStorageTest {
 
     @Test("Generate key with very long kid")
     func generateKeyWithLongKid() async throws {
-        let storage = KeyStorage.shared
 
         let longKid = String(repeating: "a", count: 256)
         try await storage.generateAndStoreKey(kid: longKid, setActive: true)
@@ -291,7 +284,6 @@ struct KeyStorageTest {
 
     @Test("Generate many keys sequentially")
     func generateManyKeysSequentially() async throws {
-        let storage = KeyStorage.shared
 
         for i in 0..<10 {
             try await storage.generateAndStoreKey(
@@ -311,7 +303,6 @@ struct KeyStorageTest {
 
     @Test("JWK Set can be encoded to JSON")
     func jwkSetEncodesToJSON() async throws {
-        let storage = KeyStorage.shared
 
         try await storage.generateAndStoreKey(kid: "json-001", setActive: true)
 
@@ -330,7 +321,6 @@ struct KeyStorageTest {
 
     @Test("JWK Set contains valid public keys")
     func jwkSetContainsValidKeys() async throws {
-        let storage = KeyStorage.shared
 
         try await storage.generateAndStoreKey(kid: "valid-001", setActive: true)
 
@@ -350,7 +340,6 @@ struct KeyStorageTest {
 
     @Test("Get specific key by kid")
     func getSpecificKeyByKid() async throws {
-        let storage = KeyStorage.shared
 
         try await storage.generateAndStoreKey(kid: "specific-001", setActive: false)
         try await storage.generateAndStoreKey(kid: "specific-002", setActive: true)
@@ -366,7 +355,6 @@ struct KeyStorageTest {
 
     @Test("JWK Set maintains order")
     func jwkSetMaintainsOrder() async throws {
-        let storage = KeyStorage.shared
 
         try await storage.generateAndStoreKey(kid: "order-001", setActive: false)
         try await storage.generateAndStoreKey(kid: "order-002", setActive: false)

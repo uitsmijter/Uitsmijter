@@ -3,17 +3,15 @@ import Testing
 import VaporTesting
 @testable import Uitsmijter_AuthServer
 
-// Tests use unique kid values so they don't interfere with each other
+/// JWKS Endpoint Integration Tests with isolated app instances
+///
+/// Each test creates a fresh Vapor application via withApp(), which initializes
+/// its own independent KeyStorage instance through app.keyStorage in configure.swift.
+/// This ensures complete test isolation without shared state pollution.
 @Suite("JWKS Endpoint Integration Tests", .serialized)
 // swiftlint:disable type_body_length
 struct WellKnownJWKSTest {
     let decoder = JSONDecoder()
-
-    // Clean up shared KeyStorage before running this test suite to prevent
-    // state pollution from other test suites when running in parallel
-    init() async throws {
-        await KeyStorage.shared.removeAllKeys()
-    }
 
     // MARK: - JWKS Endpoint Tests
 
@@ -285,7 +283,11 @@ struct WellKnownJWKSTest {
         try await withApp(configure: configure) { app in
             // Generate a unique test key to ensure we have at least one key to verify
             let testKid = "test-consistent-\(UUID().uuidString.prefix(8))"
-            try await KeyStorage.shared.generateAndStoreKey(kid: testKid, setActive: false)
+            guard let keyStorage = app.keyStorage else {
+                Issue.record("app.keyStorage not initialized")
+                return
+            }
+            try await keyStorage.generateAndStoreKey(kid: testKid, setActive: false)
 
             // Make two requests
             let response1 = try await app.sendRequest(.GET, ".well-known/jwks.json")

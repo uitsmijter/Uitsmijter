@@ -204,8 +204,8 @@ struct WellKnownController: RouteCollection {
     func getJWKS(req: Request) async throws -> Response {
         Log.info("JWKS requested", requestId: req.id)
 
-        // Get all public keys from storage
-        let keyStorage = KeyStorage.shared
+        // Get KeyStorage from application (injected), fallback to shared singleton
+        let keyStorage = req.application.keyStorage ?? KeyStorage.shared
 
         // Ensure at least one key exists (auto-generates if empty)
         _ = try await keyStorage.getActiveKey()
