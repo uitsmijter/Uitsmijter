@@ -2,6 +2,7 @@
 import Foundation
 import Logging
 import FoundationExtensions
+import Synchronization
 
 /// A custom log handler implementation that provides formatted logging output and maintains a history of log messages.
 ///
@@ -38,15 +39,23 @@ import FoundationExtensions
 ///
 /// ## Thread Safety
 ///
-/// All mutable properties are protected by an NSLock to ensure thread-safe access from any isolation domain.
+/// All mutable properties are protected by Swift 6's Mutex to ensure thread-safe access from any isolation domain.
+/// Mutex provides cross-platform synchronization (macOS, Linux, Windows) with compile-time safety guarantees.
 /// The class is marked as `@unchecked Sendable` because thread-safety is manually guaranteed through
-/// the lock. In practice, logging operations are typically serialized by the Swift Logging framework.
+/// the mutex. In practice, logging operations are typically serialized by the Swift Logging framework.
 ///
 /// - Note: This handler is primarily designed for use with the Swift Logging API's `LoggingSystem.bootstrap()` method.
 public final class LogWriter: @unchecked Sendable, LogHandler {
 
-    /// Lock for thread-safe property access
-    private let lock = NSLock()
+    /// Internal state protected by Swift 6 Mutex for thread-safe property access
+    private struct State: ~Copyable {
+        var metadata: Logger.Metadata
+        var logLevel: Logger.Level
+        var logFormat: LogFormat
+        var lastLog: LogMessage?
+    }
+
+    private let state: Mutex<State>
 
     /// Messages that should be silently filtered and not logged.
     ///
@@ -84,9 +93,12 @@ public final class LogWriter: @unchecked Sendable, LogHandler {
     /// )
     /// ```
     public init(metadata: Logger.Metadata, logLevel: Logger.Level, logFormat: LogFormat) {
-        self._metadata = metadata
-        self._logLevel = logLevel
-        self._logFormat = logFormat
+        self.state = Mutex(State(
+            metadata: metadata,
+            logLevel: logLevel,
+            logFormat: logFormat,
+            lastLog: nil
+        ))
         JSONEncoder.main.dateEncodingStrategy = .iso8601
     }
 
@@ -250,9 +262,6 @@ public final class LogWriter: @unchecked Sendable, LogHandler {
     /// - SeeAlso: ``lastLog`` for accessing only the most recent log message
     public let logBuffer = CircularBuffer<LogMessage>(capacity: 250)
 
-    /// Internal storage for the last log message.
-    private var _lastLog: LogMessage?
-
     /// The most recently written log message.
     ///
     /// This property stores the last log message that was processed by this `LogWriter` instance.
@@ -288,14 +297,10 @@ public final class LogWriter: @unchecked Sendable, LogHandler {
     /// - SeeAlso: ``pushToBuffer(_:)`` for the synchronous buffer push implementation
     nonisolated public var lastLog: LogMessage? {
         get {
-            lock.lock()
-            defer { lock.unlock() }
-            return _lastLog
+            state.withLock { $0.lastLog }
         }
         set {
-            lock.lock()
-            _lastLog = newValue
-            lock.unlock()
+            state.withLock { $0.lastLog = newValue }
 
             if let newValue {
                 // Push to buffer using a detached task to avoid blocking any executor
@@ -490,14 +495,10 @@ public final class LogWriter: @unchecked Sendable, LogHandler {
     /// - Returns: The metadata value for the given key, or `nil` if no value exists.
     nonisolated public subscript(metadataKey metadataKey: String) -> Logger.Metadata.Value? {
         get {
-            lock.lock()
-            defer { lock.unlock() }
-            return _metadata[metadataKey]
+            state.withLock { $0.metadata[metadataKey] }
         }
         set(newValue) {
-            lock.lock()
-            defer { lock.unlock() }
-            _metadata[metadataKey] = newValue
+            state.withLock { $0.metadata[metadataKey] = newValue }
         }
     }
 
@@ -539,18 +540,12 @@ public final class LogWriter: @unchecked Sendable, LogHandler {
     ///
     /// - Note: Metadata keys and values should be chosen to facilitate log analysis. Common examples
     ///         include service names, request IDs, user IDs, and environment identifiers.
-    private var _metadata: Logger.Metadata
-
     nonisolated public var metadata: Logger.Metadata {
         get {
-            lock.lock()
-            defer { lock.unlock() }
-            return _metadata
+            state.withLock { $0.metadata }
         }
         set {
-            lock.lock()
-            defer { lock.unlock() }
-            _metadata = newValue
+            state.withLock { $0.metadata = newValue }
         }
     }
 
@@ -591,18 +586,12 @@ public final class LogWriter: @unchecked Sendable, LogHandler {
     ///
     /// - Note: It is acceptable for the logging system to provide a global log level override that
     ///         supersedes this per-handler setting.
-    private var _logLevel: Logger.Level
-
     nonisolated public var logLevel: Logger.Level {
         get {
-            lock.lock()
-            defer { lock.unlock() }
-            return _logLevel
+            state.withLock { $0.logLevel }
         }
         set {
-            lock.lock()
-            defer { lock.unlock() }
-            _logLevel = newValue
+            state.withLock { $0.logLevel = newValue }
         }
     }
 
@@ -641,18 +630,12 @@ public final class LogWriter: @unchecked Sendable, LogHandler {
     /// ```
     ///
     /// - SeeAlso: ``LogFormat`` for detailed format specifications
-    private var _logFormat: LogFormat
-
     nonisolated public var logFormat: LogFormat {
         get {
-            lock.lock()
-            defer { lock.unlock() }
-            return _logFormat
+            state.withLock { $0.logFormat }
         }
         set {
-            lock.lock()
-            defer { lock.unlock() }
-            _logFormat = newValue
+            state.withLock { $0.logFormat = newValue }
         }
     }
 
@@ -726,11 +709,8 @@ public final class LogWriter: @unchecked Sendable, LogHandler {
         if messagesSkipping.contains(message.description) {
             return
         }
-        // local mutable copy of metadata - protected by lock
-        lock.lock()
-        let handlerMetadata = self._metadata
-        let currentLogFormat = self._logFormat
-        lock.unlock()
+        // local mutable copy of metadata - protected by mutex
+        let (handlerMetadata, currentLogFormat) = state.withLock { ($0.metadata, $0.logFormat) }
 
         var localMetadata = metadata
         localMetadata?.merge(handlerMetadata) { localValue, globalValue in

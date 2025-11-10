@@ -5,7 +5,7 @@ import PackageDescription
 let package = Package(
         name: "Uitsmijter",
         platforms: [
-            .macOS(.v13)
+            .macOS(.v15)
         ],
         products: [
             .executable(name: "Uitsmijter", targets: ["Uitsmijter"])
