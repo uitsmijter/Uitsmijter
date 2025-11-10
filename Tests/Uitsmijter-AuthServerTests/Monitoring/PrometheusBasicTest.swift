@@ -47,28 +47,28 @@ struct PrometheusBasicTest {
 
     // MARK: - Login Metrics Tests
 
-    @Test("metricsLoginAttempts histogram is initialized")
+    @Test("Prometheus.main.loginAttempts histogram is initialized")
     func loginAttemptsInitialized() {
         _ = Prometheus.main
-        #expect(metricsLoginAttempts != nil)
+        #expect(Prometheus.main.loginAttempts != nil)
     }
 
-    @Test("metricsLoginSuccess counter is initialized")
+    @Test("Prometheus.main.loginSuccess counter is initialized")
     func loginSuccessInitialized() {
         _ = Prometheus.main
-        #expect(metricsLoginSuccess != nil)
+        #expect(Prometheus.main.loginSuccess != nil)
     }
 
-    @Test("metricsLoginFailure counter is initialized")
+    @Test("Prometheus.main.loginFailure counter is initialized")
     func loginFailureInitialized() {
         _ = Prometheus.main
-        #expect(metricsLoginFailure != nil)
+        #expect(Prometheus.main.loginFailure != nil)
     }
 
-    @Test("metricsLogout counter is initialized")
+    @Test("Prometheus.main.logout counter is initialized")
     func logoutInitialized() {
         _ = Prometheus.main
-        #expect(metricsLogout != nil)
+        #expect(Prometheus.main.logout != nil)
     }
 
     @Test("Login metrics can be observed")
@@ -76,136 +76,136 @@ struct PrometheusBasicTest {
         _ = Prometheus.main
 
         // Verify metrics are initialized and can be called
-        #expect(metricsLoginAttempts != nil)
-        metricsLoginAttempts?.observe(1)
+        #expect(Prometheus.main.loginAttempts != nil)
+        Prometheus.main.loginAttempts?.observe(1)
 
-        #expect(metricsLoginSuccess != nil)
-        metricsLoginSuccess?.inc()
+        #expect(Prometheus.main.loginSuccess != nil)
+        Prometheus.main.loginSuccess?.inc()
 
-        #expect(metricsLoginFailure != nil)
-        metricsLoginFailure?.inc()
+        #expect(Prometheus.main.loginFailure != nil)
+        Prometheus.main.loginFailure?.inc()
 
-        #expect(metricsLogout != nil)
-        metricsLogout?.inc()
+        #expect(Prometheus.main.logout != nil)
+        Prometheus.main.logout?.inc()
     }
 
     // MARK: - Interceptor Metrics Tests
 
-    @Test("metricsInterceptorSuccess counter is initialized")
+    @Test("Prometheus.main.interceptorSuccess counter is initialized")
     func interceptorSuccessInitialized() {
         _ = Prometheus.main
-        #expect(metricsInterceptorSuccess != nil)
+        #expect(Prometheus.main.interceptorSuccess != nil)
     }
 
-    @Test("metricsInterceptorFailure counter is initialized")
+    @Test("Prometheus.main.interceptorFailure counter is initialized")
     func interceptorFailureInitialized() {
         _ = Prometheus.main
-        #expect(metricsInterceptorFailure != nil)
+        #expect(Prometheus.main.interceptorFailure != nil)
     }
 
     @Test("Interceptor metrics can be observed")
     func interceptorMetricsObservable() {
         _ = Prometheus.main
 
-        #expect(metricsInterceptorSuccess != nil)
-        metricsInterceptorSuccess?.inc()
+        #expect(Prometheus.main.interceptorSuccess != nil)
+        Prometheus.main.interceptorSuccess?.inc()
 
-        #expect(metricsInterceptorFailure != nil)
-        metricsInterceptorFailure?.inc()
+        #expect(Prometheus.main.interceptorFailure != nil)
+        Prometheus.main.interceptorFailure?.inc()
     }
 
     // MARK: - OAuth Metrics Tests
 
-    @Test("metricsAuthorizeAttempts histogram is initialized")
+    @Test("Prometheus.main.authorizeAttempts histogram is initialized")
     func authorizeAttemptsInitialized() {
         _ = Prometheus.main
-        #expect(metricsAuthorizeAttempts != nil)
+        #expect(Prometheus.main.authorizeAttempts != nil)
     }
 
-    @Test("metricsOAuthSuccess counter is initialized")
+    @Test("Prometheus.main.oauthSuccess counter is initialized")
     func oauthSuccessInitialized() {
         _ = Prometheus.main
-        #expect(metricsOAuthSuccess != nil)
+        #expect(Prometheus.main.oauthSuccess != nil)
     }
 
-    @Test("metricsOAuthFailure counter is initialized")
+    @Test("Prometheus.main.oauthFailure counter is initialized")
     func oauthFailureInitialized() {
         _ = Prometheus.main
-        #expect(metricsOAuthFailure != nil)
+        #expect(Prometheus.main.oauthFailure != nil)
     }
 
     @Test("OAuth metrics can be observed")
     func oauthMetricsObservable() {
         _ = Prometheus.main
 
-        #expect(metricsAuthorizeAttempts != nil)
-        metricsAuthorizeAttempts?.observe(1)
+        #expect(Prometheus.main.authorizeAttempts != nil)
+        Prometheus.main.authorizeAttempts?.observe(1)
 
-        #expect(metricsOAuthSuccess != nil)
-        metricsOAuthSuccess?.inc()
+        #expect(Prometheus.main.oauthSuccess != nil)
+        Prometheus.main.oauthSuccess?.inc()
 
-        #expect(metricsOAuthFailure != nil)
-        metricsOAuthFailure?.inc()
+        #expect(Prometheus.main.oauthFailure != nil)
+        Prometheus.main.oauthFailure?.inc()
     }
 
     // MARK: - Token Storage Metrics Tests
 
-    @Test("metricsTokensStored histogram is initialized")
+    @Test("Prometheus.main.tokensStored histogram is initialized")
     func tokensStoredInitialized() {
         _ = Prometheus.main
-        #expect(metricsTokensStored != nil)
+        #expect(Prometheus.main.tokensStored != nil)
     }
 
     @Test("Token storage metrics can be observed")
     func tokenStorageMetricsObservable() {
         _ = Prometheus.main
 
-        #expect(metricsTokensStored != nil)
-        metricsTokensStored?.observe(1)
-        metricsTokensStored?.observe(5)
-        metricsTokensStored?.observe(10)
+        #expect(Prometheus.main.tokensStored != nil)
+        Prometheus.main.tokensStored?.observe(1)
+        Prometheus.main.tokensStored?.observe(5)
+        Prometheus.main.tokensStored?.observe(10)
     }
 
     // MARK: - Entity Count Metrics Tests
 
-    @Test("metricsCountTenants gauge is initialized")
+    @Test("Prometheus.main.countTenants gauge is initialized")
     func countTenantsInitialized() {
         _ = Prometheus.main
-        #expect(metricsCountTenants != nil)
+        #expect(Prometheus.main.countTenants != nil)
     }
 
-    @Test("metricsCountClients gauge is initialized")
+    @Test("Prometheus.main.countClients gauge is initialized")
     func countClientsInitialized() {
         _ = Prometheus.main
-        #expect(metricsCountClients != nil)
+        #expect(Prometheus.main.countClients != nil)
     }
 
     @Test("Entity count metrics can be set")
     func entityCountMetricsSettable() {
         _ = Prometheus.main
 
-        #expect(metricsCountTenants != nil)
-        metricsCountTenants?.set(5)
+        #expect(Prometheus.main.countTenants != nil)
+        Prometheus.main.countTenants?.set(5)
 
-        #expect(metricsCountClients != nil)
-        metricsCountClients?.set(20)
+        #expect(Prometheus.main.countClients != nil)
+        Prometheus.main.countClients?.set(20)
     }
 
     @Test("Entity count gauge can be incremented and decremented")
     func entityCountGaugeOperations() {
         _ = Prometheus.main
 
-        #expect(metricsCountTenants != nil)
-        metricsCountTenants?.inc()
-        metricsCountTenants?.inc(10)
-        metricsCountTenants?.dec()
-        metricsCountTenants?.dec(5)
+        #expect(Prometheus.main.countTenants != nil)
+        Prometheus.main.countTenants?.inc()
+        Prometheus.main.countTenants?.inc(10)
+        Prometheus.main.countTenants?.dec()
+        Prometheus.main.countTenants?.dec(5)
 
-        #expect(metricsCountClients != nil)
-        metricsCountClients?.inc()
-        metricsCountClients?.inc(15)
-        metricsCountClients?.dec()
-        metricsCountClients?.dec(10)
+        #expect(Prometheus.main.countClients != nil)
+        Prometheus.main.countClients?.inc()
+        Prometheus.main.countClients?.inc(15)
+        Prometheus.main.countClients?.dec()
+        Prometheus.main.countClients?.dec(10)
     }
 
     // MARK: - All Metrics Initialized Test
@@ -215,25 +215,25 @@ struct PrometheusBasicTest {
         _ = Prometheus.main
 
         // Login metrics
-        #expect(metricsLoginAttempts != nil)
-        #expect(metricsLoginSuccess != nil)
-        #expect(metricsLoginFailure != nil)
-        #expect(metricsLogout != nil)
+        #expect(Prometheus.main.loginAttempts != nil)
+        #expect(Prometheus.main.loginSuccess != nil)
+        #expect(Prometheus.main.loginFailure != nil)
+        #expect(Prometheus.main.logout != nil)
 
         // Interceptor metrics
-        #expect(metricsInterceptorSuccess != nil)
-        #expect(metricsInterceptorFailure != nil)
+        #expect(Prometheus.main.interceptorSuccess != nil)
+        #expect(Prometheus.main.interceptorFailure != nil)
 
         // OAuth metrics
-        #expect(metricsAuthorizeAttempts != nil)
-        #expect(metricsOAuthSuccess != nil)
-        #expect(metricsOAuthFailure != nil)
+        #expect(Prometheus.main.authorizeAttempts != nil)
+        #expect(Prometheus.main.oauthSuccess != nil)
+        #expect(Prometheus.main.oauthFailure != nil)
 
         // Token storage metrics
-        #expect(metricsTokensStored != nil)
+        #expect(Prometheus.main.tokensStored != nil)
 
         // Entity count metrics
-        #expect(metricsCountTenants != nil)
-        #expect(metricsCountClients != nil)
+        #expect(Prometheus.main.countTenants != nil)
+        #expect(Prometheus.main.countClients != nil)
     }
 }

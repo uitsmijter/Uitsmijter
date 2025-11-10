@@ -287,7 +287,7 @@ struct LoginController: RouteCollection {
             requestId: req.id
         )
 
-        metricsLoginFailure?.inc(1, [
+        Prometheus.main.loginFailure?.inc(1, [
             ("forward_host", req.forwardInfo?.location.host ?? "unknown"),
             ("mode", clientInfo.mode.rawValue),
             ("tenant", clientInfo.tenant?.name ?? "unknown")
@@ -481,7 +481,7 @@ struct LoginController: RouteCollection {
         }
         Log.info("Attempting login \(loginForm.username)", requestId: req.id)
 
-        metricsLoginAttempts?.observe(1, .init([
+        Prometheus.main.loginAttempts?.observe(1, .init([
             ("forward_host", req.forwardInfo?.location.host ?? "unknown"),
             ("mode", clientInfo.mode.rawValue),
             ("tenant", tenant.name)
@@ -582,7 +582,7 @@ struct LoginController: RouteCollection {
         )
         Log.audit.info("\(providedSubject.subject) on \(cookie.domain ?? "-")")
 
-        metricsLoginSuccess?.inc(1, [
+        Prometheus.main.loginSuccess?.inc(1, [
             ("forward_host", req.forwardInfo?.location.host ?? "unknown"),
             ("mode", clientInfo.mode.rawValue),
             ("tenant", tenant.name)

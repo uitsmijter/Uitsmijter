@@ -19,4 +19,7 @@ fileprivate let jwtSecret = ProcessInfo.processInfo.environment["JWT_SECRET"] ??
 /// let verifiedPayload = try jwt_signer.verify(tokenString, as: Payload.self)
 /// ```
 ///  ## MARKED Feature rollig secrets
-nonisolated(unsafe) let jwt_signer = JWTSigner.hs256(key: jwtSecret)
+///
+/// - Note: This is an immutable global constant that is safe for concurrent access.
+///   JWTKit is imported with @preconcurrency to handle concurrency compatibility.
+let jwt_signer: JWTSigner = JWTSigner.hs256(key: jwtSecret)

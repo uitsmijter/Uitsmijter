@@ -237,7 +237,7 @@ struct AuthorizeController: RouteCollection, OAuthControllerProtocol {
                  got scopes: \(scopes.joined(separator: ","))
                  """, requestId: request.id)
 
-        metricsAuthorizeAttempts?.observe(1, [
+        Prometheus.main.authorizeAttempts?.observe(1, [
             ("client", client.name),
             ("tenant", tenant.name),
             ("type", "insecure")
@@ -294,7 +294,7 @@ struct AuthorizeController: RouteCollection, OAuthControllerProtocol {
                  User \(request.clientInfo?.subject ?? "-") got scopes: \(scopes.joined(separator: ","))
                  """, requestId: request.id)
 
-        metricsAuthorizeAttempts?.observe(1, [
+        Prometheus.main.authorizeAttempts?.observe(1, [
             ("client", client.name),
             ("tenant", tenant.name),
             ("type", "pkce")

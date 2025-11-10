@@ -28,29 +28,29 @@ struct PrometheusAdvancedTest {
         _ = Prometheus.main
 
         // Verify metrics are initialized
-        #expect(metricsLoginAttempts != nil)
-        #expect(metricsLoginSuccess != nil)
-        #expect(metricsOAuthSuccess != nil)
-        #expect(metricsAuthorizeAttempts != nil)
-        #expect(metricsInterceptorSuccess != nil)
-        #expect(metricsCountTenants != nil)
+        #expect(Prometheus.main.loginAttempts != nil)
+        #expect(Prometheus.main.loginSuccess != nil)
+        #expect(Prometheus.main.oauthSuccess != nil)
+        #expect(Prometheus.main.authorizeAttempts != nil)
+        #expect(Prometheus.main.interceptorSuccess != nil)
+        #expect(Prometheus.main.countTenants != nil)
 
         await withTaskGroup(of: Void.self) { group in
             // Multiple tasks updating different metrics
             for _ in 0..<5 {
                 group.addTask {
-                    metricsLoginAttempts?.observe(1)
-                    metricsLoginSuccess?.inc()
+                    Prometheus.main.loginAttempts?.observe(1)
+                    Prometheus.main.loginSuccess?.inc()
                 }
 
                 group.addTask {
-                    metricsOAuthSuccess?.inc()
-                    metricsAuthorizeAttempts?.observe(1)
+                    Prometheus.main.oauthSuccess?.inc()
+                    Prometheus.main.authorizeAttempts?.observe(1)
                 }
 
                 group.addTask {
-                    metricsInterceptorSuccess?.inc()
-                    metricsCountTenants?.inc()
+                    Prometheus.main.interceptorSuccess?.inc()
+                    Prometheus.main.countTenants?.inc()
                 }
             }
         }
@@ -62,78 +62,78 @@ struct PrometheusAdvancedTest {
     func metricsHandleZeroValues() {
         _ = Prometheus.main
 
-        #expect(metricsLoginAttempts != nil)
-        metricsLoginAttempts?.observe(0)
+        #expect(Prometheus.main.loginAttempts != nil)
+        Prometheus.main.loginAttempts?.observe(0)
 
-        #expect(metricsAuthorizeAttempts != nil)
-        metricsAuthorizeAttempts?.observe(0)
+        #expect(Prometheus.main.authorizeAttempts != nil)
+        Prometheus.main.authorizeAttempts?.observe(0)
 
-        #expect(metricsTokensStored != nil)
-        metricsTokensStored?.observe(0)
+        #expect(Prometheus.main.tokensStored != nil)
+        Prometheus.main.tokensStored?.observe(0)
 
-        #expect(metricsCountTenants != nil)
-        metricsCountTenants?.set(0)
+        #expect(Prometheus.main.countTenants != nil)
+        Prometheus.main.countTenants?.set(0)
 
-        #expect(metricsCountClients != nil)
-        metricsCountClients?.set(0)
+        #expect(Prometheus.main.countClients != nil)
+        Prometheus.main.countClients?.set(0)
     }
 
     @Test("Metrics can handle large values")
     func metricsHandleLargeValues() {
         _ = Prometheus.main
 
-        #expect(metricsLoginAttempts != nil)
-        metricsLoginAttempts?.observe(1_000_000)
+        #expect(Prometheus.main.loginAttempts != nil)
+        Prometheus.main.loginAttempts?.observe(1_000_000)
 
-        #expect(metricsAuthorizeAttempts != nil)
-        metricsAuthorizeAttempts?.observe(1_000_000)
+        #expect(Prometheus.main.authorizeAttempts != nil)
+        Prometheus.main.authorizeAttempts?.observe(1_000_000)
 
-        #expect(metricsTokensStored != nil)
-        metricsTokensStored?.observe(1_000_000)
+        #expect(Prometheus.main.tokensStored != nil)
+        Prometheus.main.tokensStored?.observe(1_000_000)
 
-        #expect(metricsLoginSuccess != nil)
-        metricsLoginSuccess?.inc(1_000_000)
+        #expect(Prometheus.main.loginSuccess != nil)
+        Prometheus.main.loginSuccess?.inc(1_000_000)
 
-        #expect(metricsOAuthSuccess != nil)
-        metricsOAuthSuccess?.inc(1_000_000)
+        #expect(Prometheus.main.oauthSuccess != nil)
+        Prometheus.main.oauthSuccess?.inc(1_000_000)
 
-        #expect(metricsCountTenants != nil)
-        metricsCountTenants?.set(10_000)
+        #expect(Prometheus.main.countTenants != nil)
+        Prometheus.main.countTenants?.set(10_000)
 
-        #expect(metricsCountClients != nil)
-        metricsCountClients?.set(100_000)
+        #expect(Prometheus.main.countClients != nil)
+        Prometheus.main.countClients?.set(100_000)
     }
 
     @Test("Counters can be incremented by custom amounts")
     func countersCustomIncrements() {
         _ = Prometheus.main
 
-        #expect(metricsLoginSuccess != nil)
-        metricsLoginSuccess?.inc(1)
-        metricsLoginSuccess?.inc(5)
-        metricsLoginSuccess?.inc(10)
-        metricsLoginSuccess?.inc(100)
+        #expect(Prometheus.main.loginSuccess != nil)
+        Prometheus.main.loginSuccess?.inc(1)
+        Prometheus.main.loginSuccess?.inc(5)
+        Prometheus.main.loginSuccess?.inc(10)
+        Prometheus.main.loginSuccess?.inc(100)
 
-        #expect(metricsOAuthSuccess != nil)
-        metricsOAuthSuccess?.inc(25)
+        #expect(Prometheus.main.oauthSuccess != nil)
+        Prometheus.main.oauthSuccess?.inc(25)
 
-        #expect(metricsInterceptorSuccess != nil)
-        metricsInterceptorSuccess?.inc(50)
+        #expect(Prometheus.main.interceptorSuccess != nil)
+        Prometheus.main.interceptorSuccess?.inc(50)
     }
 
     @Test("Gauges can be decremented by custom amounts")
     func gaugesCustomDecrements() {
         _ = Prometheus.main
 
-        #expect(metricsCountTenants != nil)
-        metricsCountTenants?.set(100)
-        metricsCountTenants?.dec(1)
-        metricsCountTenants?.dec(5)
-        metricsCountTenants?.dec(10)
+        #expect(Prometheus.main.countTenants != nil)
+        Prometheus.main.countTenants?.set(100)
+        Prometheus.main.countTenants?.dec(1)
+        Prometheus.main.countTenants?.dec(5)
+        Prometheus.main.countTenants?.dec(10)
 
-        #expect(metricsCountClients != nil)
-        metricsCountClients?.set(500)
-        metricsCountClients?.dec(25)
-        metricsCountClients?.dec(50)
+        #expect(Prometheus.main.countClients != nil)
+        Prometheus.main.countClients?.set(500)
+        Prometheus.main.countClients?.dec(25)
+        Prometheus.main.countClients?.dec(50)
     }
 }

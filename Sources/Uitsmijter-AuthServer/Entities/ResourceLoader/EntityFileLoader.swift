@@ -1,5 +1,5 @@
 import Foundation
-import FileMonitor
+@preconcurrency import FileMonitor
 import Logger
 #if os(Linux)
 import Glibc
@@ -112,8 +112,8 @@ class EntityFileLoaderClientChangedHandler: @unchecked Sendable, FileDidChangeDe
 struct EntityFileLoader: EntityLoaderProtocol {
     var delegate: EntityLoaderProtocolFunctions?
 
-    nonisolated(unsafe) let clientFileMonitor: FileMonitor?
-    nonisolated(unsafe) let tenantFileMonitor: FileMonitor?
+    let clientFileMonitor: FileMonitor?
+    let tenantFileMonitor: FileMonitor?
 
     init(handler: EntityLoaderProtocolFunctions?) throws {
         guard let tenantPath = URL(string: resourcePath)?
@@ -209,7 +209,7 @@ struct EntityFileLoader: EntityLoaderProtocol {
     ///
     /// Halts all file monitoring operations and releases associated resources.
     /// This should be called during application shutdown to ensure clean termination.
-    nonisolated func shutdown() {
+    func shutdown() {
         clientFileMonitor?.stop()
         tenantFileMonitor?.stop()
     }
