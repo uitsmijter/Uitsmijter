@@ -4,6 +4,10 @@ import VaporTesting
 import CryptoSwift
 @testable import Uitsmijter_AuthServer
 
+/// OAuth 2.0 PKCE (Proof Key for Code Exchange) Flow Test Suite
+///
+/// Tests the complete PKCE flow as specified in RFC 7636.
+/// Each test creates an isolated Vapor application via withApp(), ensuring no shared state.
 /// https://www.oauth.com/oauth2-servers/pkce/
 ///
 @Suite("Auth Controller Code PKCE Flow Test", .serialized)
@@ -45,7 +49,7 @@ struct AuthControllerCodePKCEFlowTest {
     /// Special symbols (indices 62-63):
     @Test("Code verifier SHA256 format validation")
     func testCodeVerifierH256() throws {
-        try codeVerifierSHA256B64.groups(regex: "^[A-Za-z0-9+-_]+$")
+        _ = try codeVerifierSHA256B64.groups(regex: "^[A-Za-z0-9+-_]+$")
     }
 
     @Test("Valid users code flow PKCE plain missing code challenge")

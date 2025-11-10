@@ -3,6 +3,10 @@ import Foundation
 import Testing
 import JWTKit
 
+/// KeyGenerator test suite for RSA key pair generation and JWK conversion
+///
+/// Tests the KeyGenerator actor which creates RSA key pairs and converts them to JWK format.
+/// These tests are stateless and don't share any global state, making them safe to run in parallel.
 @Suite("KeyGenerator Tests", .serialized)
 struct KeyGeneratorTest {
 
@@ -61,7 +65,7 @@ struct KeyGeneratorTest {
         let keyPair = try await generator.generateKeyPair(kid: "jwt-test")
 
         // JWTKit should be able to load the private key PEM
-        let rsaKey = try RSAKey.private(pem: keyPair.privateKeyPEM)
+        let rsaKey = try? RSAKey.private(pem: keyPair.privateKeyPEM)
         #expect(rsaKey != nil)
     }
 
