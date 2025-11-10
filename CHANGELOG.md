@@ -2,7 +2,6 @@
 
 - Feature: **RFC 7517 (JSON Web Key)** - Full implementation of JWKS endpoint at `/.well-known/jwks.json` with RSA public key distribution, supporting RS256 JWT signing algorithm with automatic key rotation and `kid` header support
 - Feature: **RS256 JWT Signing** - Asymmetric RSA-2048 signature algorithm support with seamless migration path from HS256, configurable via `JWT_ALGORITHM` environment variable
-- prerelease
 - Feature: **OAuth 2.0 Token Revocation (RFC 7009)** - New `/revoke` endpoint allows clients to invalidate access tokens and refresh tokens, with cascading revocation support and Prometheus metrics
 - Feature: **OpenID Connect Discovery 1.0** endpoint at `/.well-known/openid-configuration` with full multi-tenant support, allowing clients to automatically discover provider capabilities and endpoints
 - Feature: **E2E Test Filtering** - New `--filter` flag for `./tooling.sh e2e` command allows selective test execution for faster development cycles
