@@ -280,7 +280,8 @@ extension TokenController {
                 user: passwordTokenRequest.username,
                 profile: profile
             ),
-            authTime: Date()
+            authTime: Date(),
+            algorithmString: tenant.config.effectiveJwtAlgorithm
         )
         return TokenResponse(
             access_token: accessToken.value,
@@ -325,7 +326,8 @@ extension TokenController {
             tenantName: tenant.name,
             subject: payload.subject,
             userProfile: profile,
-            authTime: payload.authTime.value
+            authTime: payload.authTime.value,
+            algorithmString: tenant.config.effectiveJwtAlgorithm
         )
         let refreshToken: Code = Code()
 

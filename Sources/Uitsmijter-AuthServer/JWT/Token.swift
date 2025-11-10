@@ -241,6 +241,7 @@ struct Token: ExpressibleByStringLiteral {
     ///   - subject: The subject claim identifying the user
     ///   - userProfile: User profile information including role and metadata
     ///   - authTime: When the user authentication occurred (defaults to current time)
+    ///   - algorithmString: Optional JWT algorithm override (HS256 or RS256)
     ///   - signerManager: Optional SignerManager instance for dependency injection (defaults to .shared)
     /// - Throws: `TokenError.CALCULATE_TIME` if the expiration date cannot be calculated
     ///
@@ -252,7 +253,8 @@ struct Token: ExpressibleByStringLiteral {
     ///     tenantName: "example-tenant",
     ///     subject: SubjectClaim(value: "user@example.com"),
     ///     userProfile: userProfile,
-    ///     authTime: Date()
+    ///     authTime: Date(),
+    ///     algorithmString: "RS256"
     /// )
     /// ```
     init(
@@ -262,6 +264,7 @@ struct Token: ExpressibleByStringLiteral {
         subject: SubjectClaim,
         userProfile: UserProfileProtocol,
         authTime: Date? = nil,
+        algorithmString: String? = nil,
         signerManager: SignerManager? = nil
     ) async throws {
         let expirationHours = Int(ProcessInfo.processInfo.environment["TOKEN_EXPIRATION_IN_HOURS"] ?? "2") ?? 2
@@ -294,7 +297,15 @@ struct Token: ExpressibleByStringLiteral {
 
         // Use SignerManager for signing (supports both HS256 and RS256)
         let manager = signerManager ?? SignerManager.shared
-        let (tokenString, kid) = try await manager.sign(payload)
+
+        // Use provided algorithm or fall back to global default
+        let effectiveAlgorithm = algorithmString ??
+            ProcessInfo.processInfo.environment["JWT_ALGORITHM"] ?? "HS256"
+
+        let (tokenString, kid) = try await manager.sign(
+            payload,
+            algorithmString: effectiveAlgorithm
+        )
         value = tokenString
 
         // Log the kid if RS256 is used

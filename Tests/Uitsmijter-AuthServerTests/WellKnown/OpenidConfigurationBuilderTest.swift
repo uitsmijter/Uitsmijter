@@ -81,7 +81,8 @@ struct OpenidConfigurationBuilderTest {
         #expect(config.jwks_uri == "https://auth.example.com/.well-known/jwks.json")
         #expect(config.response_types_supported == ["code"])
         #expect(config.subject_types_supported == ["public"])
-        #expect(config.id_token_signing_alg_values_supported == ["RS256"])
+        // Default algorithm is HS256 when tenant has no jwt_algorithm configured
+        #expect(config.id_token_signing_alg_values_supported == ["HS256"])
     }
 
     @Test("Builder uses correct scheme from request")

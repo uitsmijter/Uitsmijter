@@ -59,11 +59,8 @@ actor SignerManager {
         case rs256 = "RS256"
     }
 
-    /// Current algorithm (from environment)
-    private let algorithm: Algorithm
-
-    /// HS256 signer (for legacy support)
-    private let hs256Signer: JWTSigner?
+    /// HS256 signer (always initialized for backward compatibility and verification)
+    private let hs256Signer: JWTSigner
 
     /// Key storage for RSA keys
     /// - Note: When nil, dynamically accesses KeyStorage.shared
@@ -76,24 +73,14 @@ actor SignerManager {
     init(keyStorage: KeyStorage? = nil) {
         self.keyStorage = keyStorage
 
-        // Determine algorithm from environment (default to HS256 for backwards compatibility)
-        let algorithmString = ProcessInfo.processInfo.environment["JWT_ALGORITHM"] ?? "HS256"
-        self.algorithm = Algorithm(rawValue: algorithmString.uppercased()) ?? .hs256
-
-        // Initialize HS256 signer if needed
-        if algorithm == .hs256 {
-            // Use the shared jwtSecret from Signer.swift to ensure consistency
-            // with the legacy jwt_signer global variable
-            self.hs256Signer = JWTSigner.hs256(key: jwtSecret)
-        } else {
-            self.hs256Signer = nil
-        }
+        // Always initialize HS256 signer (for verification and legacy support)
+        self.hs256Signer = JWTSigner.hs256(key: jwtSecret)
     }
 
-    /// Sign a payload with the configured algorithm
+    /// Sign a payload with the specified algorithm
     ///
     /// Creates a signed JWT token using either HS256 or RS256 based on the
-    /// `JWT_ALGORITHM` environment variable.
+    /// provided algorithm parameter.
     ///
     /// ## HS256 Signing
     ///
@@ -106,19 +93,20 @@ actor SignerManager {
     /// - Returns the kid of the signing key
     /// - Automatically generates a key if none exists
     ///
-    /// - Parameter payload: The JWT payload to sign
+    /// - Parameters:
+    ///   - payload: The JWT payload to sign
+    ///   - algorithm: The algorithm to use (HS256 or RS256)
     /// - Returns: Tuple of (signed JWT string, optional kid)
     /// - Throws: JWTError if signing fails
-    func sign<Payload: JWTPayload>(_ payload: Payload) async throws -> (token: String, kid: String?) {
+    func sign<Payload: JWTPayload>(
+        _ payload: Payload,
+        algorithm: Algorithm
+    ) async throws -> (token: String, kid: String?) {
         switch algorithm {
         case .hs256:
-            guard let signer = hs256Signer else {
-                throw SignerError.signerNotInitialized
-            }
-
             // Sign with HS256 (no kid)
             let signers = JWTSigners()
-            signers.use(signer)
+            signers.use(hs256Signer)
             let token = try signers.sign(payload)
             return (token, nil)
 
@@ -143,6 +131,42 @@ actor SignerManager {
             let token = try signers.sign(payload, kid: JWKIdentifier(string: kid))
             return (token, kid)
         }
+    }
+
+    /// Sign a payload with default algorithm from environment
+    ///
+    /// Convenience method that uses the JWT_ALGORITHM environment variable to determine
+    /// the signing algorithm. Falls back to HS256 if not set.
+    ///
+    /// - Parameter payload: The JWT payload to sign
+    /// - Returns: Tuple of (signed JWT string, optional kid)
+    /// - Throws: JWTError if signing fails
+    func sign<Payload: JWTPayload>(
+        _ payload: Payload
+    ) async throws -> (token: String, kid: String?) {
+        let algorithmString = ProcessInfo.processInfo.environment["JWT_ALGORITHM"] ?? "HS256"
+        let algorithm = Algorithm(rawValue: algorithmString.uppercased()) ?? .hs256
+        return try await sign(payload, algorithm: algorithm)
+    }
+
+    /// Sign a payload with algorithm specified as string
+    ///
+    /// Convenience method that accepts algorithm as a string (e.g., "HS256" or "RS256")
+    /// and delegates to the main sign method.
+    ///
+    /// - Parameters:
+    ///   - payload: The JWT payload to sign
+    ///   - algorithmString: "HS256" or "RS256"
+    /// - Returns: Tuple of (signed JWT string, optional kid)
+    /// - Throws: SignerError if algorithm is invalid, JWTError if signing fails
+    func sign<Payload: JWTPayload>(
+        _ payload: Payload,
+        algorithmString: String
+    ) async throws -> (token: String, kid: String?) {
+        guard let algorithm = Algorithm(rawValue: algorithmString.uppercased()) else {
+            throw SignerError.algorithmNotSupported(algorithmString)
+        }
+        return try await sign(payload, algorithm: algorithm)
     }
 
     /// Verify a JWT token and extract its payload
@@ -170,10 +194,8 @@ actor SignerManager {
     func verify<Payload: JWTPayload>(_ token: String, as payloadType: Payload.Type) async throws -> Payload {
         let signers = JWTSigners()
 
-        // Add HS256 signer if configured
-        if let hs256 = hs256Signer {
-            signers.use(hs256, isDefault: algorithm == .hs256)
-        }
+        // Add HS256 signer (always available for verification)
+        signers.use(hs256Signer)
 
         // Get KeyStorage (dynamically access shared if not injected)
         let storage = keyStorage ?? KeyStorage.shared
@@ -184,7 +206,7 @@ actor SignerManager {
             do {
                 let rsaKey = try RSAKey.public(pem: keyPair.publicKeyPEM)
                 let rsaSigner = JWTSigner.rs256(key: rsaKey)
-                signers.use(rsaSigner, kid: JWKIdentifier(string: keyPair.kid), isDefault: algorithm == .rs256)
+                signers.use(rsaSigner, kid: JWKIdentifier(string: keyPair.kid))
             } catch {
                 // Skip keys that fail to load
                 continue
@@ -195,12 +217,6 @@ actor SignerManager {
         return try signers.verify(token, as: payloadType)
     }
 
-    /// Get the current algorithm
-    ///
-    /// - Returns: The configured signing algorithm
-    func getCurrentAlgorithm() -> Algorithm {
-        return algorithm
-    }
 }
 
 /// Signer errors
