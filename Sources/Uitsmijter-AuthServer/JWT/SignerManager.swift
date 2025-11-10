@@ -66,7 +66,7 @@ actor SignerManager {
     private let hs256Signer: JWTSigner?
 
     /// Key storage for RSA keys
-    /// - Note: When nil, dynamically accesses KeyStorage.shared to support test isolation via resetSharedInstance()
+    /// - Note: When nil, dynamically accesses KeyStorage.shared
     private let keyStorage: KeyStorage?
 
     /// Initialize the signer manager with optional KeyStorage

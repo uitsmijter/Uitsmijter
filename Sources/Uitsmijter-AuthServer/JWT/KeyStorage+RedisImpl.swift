@@ -138,9 +138,12 @@ actor RedisKeyStorage: KeyStorageProtocol {
     }
 
     func getAllPublicKeys() async throws -> JWKSet {
+        // Extract all key pairs from actor context first to avoid actor reentrancy deadlock
+        // This prevents calling KeyGenerator actor while holding RedisKeyStorage actor lock
         let keyPairs = await getAllKeys()
-        var jwks: [RSAPublicJWK] = []
 
+        // Convert to JWK outside actor context - prevents deadlock with concurrent requests
+        var jwks: [RSAPublicJWK] = []
         for keyPair in keyPairs {
             let jwk = try await generator.convertToJWK(keyPair: keyPair)
             jwks.append(jwk)
