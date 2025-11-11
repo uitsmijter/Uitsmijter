@@ -73,7 +73,7 @@ struct OpenidConfigurationBuilderTest {
         let builder = OpenidConfigurationBuilder()
         let request = createMockRequest(app: app, host: "auth.example.com")
 
-        let config = await builder.build(for: tenant, request: request, storage: app.entityStorage)
+        let config = builder.build(for: tenant, request: request, storage: app.entityStorage)
 
         #expect(config.issuer == "https://auth.example.com")
         #expect(config.authorization_endpoint == "https://auth.example.com/authorize")
@@ -96,7 +96,7 @@ struct OpenidConfigurationBuilderTest {
         let builder = OpenidConfigurationBuilder()
         let httpRequest = createMockRequest(app: app, host: "example.com", scheme: "http")
 
-        let config = await builder.build(for: tenant, request: httpRequest, storage: app.entityStorage)
+        let config = builder.build(for: tenant, request: httpRequest, storage: app.entityStorage)
 
         #expect(config.issuer.hasPrefix("http://"))
     }
@@ -112,7 +112,7 @@ struct OpenidConfigurationBuilderTest {
         let builder = OpenidConfigurationBuilder()
         let request = createMockRequest(app: app, host: "example.com")
 
-        let config = await builder.build(for: tenant, request: request, storage: app.entityStorage)
+        let config = builder.build(for: tenant, request: request, storage: app.entityStorage)
 
         #expect(config.scopes_supported?.contains("openid") == true)
         #expect(config.scopes_supported?.contains("profile") == true)
@@ -130,7 +130,7 @@ struct OpenidConfigurationBuilderTest {
         let builder = OpenidConfigurationBuilder()
         let request = createMockRequest(app: app, host: "example.com")
 
-        let config = await builder.build(for: tenant, request: request, storage: app.entityStorage)
+        let config = builder.build(for: tenant, request: request, storage: app.entityStorage)
 
         #expect(config.grant_types_supported?.contains("authorization_code") == true)
         #expect(config.grant_types_supported?.contains("refresh_token") == true)
@@ -163,7 +163,7 @@ struct OpenidConfigurationBuilderTest {
         let builder = OpenidConfigurationBuilder()
         let request = createMockRequest(app: app, host: "multi.example.com")
 
-        let config = await builder.build(for: tenant, request: request, storage: app.entityStorage)
+        let config = builder.build(for: tenant, request: request, storage: app.entityStorage)
 
         // Should contain default scopes plus client-specific scopes
         #expect(config.scopes_supported?.contains("openid") == true)
@@ -200,7 +200,7 @@ struct OpenidConfigurationBuilderTest {
         let builder = OpenidConfigurationBuilder()
         let request = createMockRequest(app: app, host: "grant.example.com")
 
-        let config = await builder.build(for: tenant, request: request, storage: app.entityStorage)
+        let config = builder.build(for: tenant, request: request, storage: app.entityStorage)
 
         // Should contain default grant types plus client-specific grant types
         #expect(config.grant_types_supported?.contains("authorization_code") == true)
@@ -220,7 +220,7 @@ struct OpenidConfigurationBuilderTest {
         let builder = OpenidConfigurationBuilder()
         let request = createMockRequest(app: app, host: "empty.example.com")
 
-        let config = await builder.build(for: tenant, request: request, storage: app.entityStorage)
+        let config = builder.build(for: tenant, request: request, storage: app.entityStorage)
 
         // Should still return default scopes and grant types
         #expect(config.scopes_supported?.contains("openid") == true)
@@ -256,8 +256,8 @@ struct OpenidConfigurationBuilderTest {
         let request1 = createMockRequest(app: app, host: "tenant1.example.com")
         let request2 = createMockRequest(app: app, host: "tenant2.example.com")
 
-        let config1 = await builder.build(for: tenant1, request: request1, storage: app.entityStorage)
-        let config2 = await builder.build(for: tenant2, request: request2, storage: app.entityStorage)
+        let config1 = builder.build(for: tenant1, request: request1, storage: app.entityStorage)
+        let config2 = builder.build(for: tenant2, request: request2, storage: app.entityStorage)
 
         // Different issuers
         #expect(config1.issuer == "https://tenant1.example.com")
@@ -294,7 +294,7 @@ struct OpenidConfigurationBuilderTest {
         let builder = OpenidConfigurationBuilder()
         let request = createMockRequest(app: app, host: "info.example.com")
 
-        let config = await builder.build(for: tenant, request: request, storage: app.entityStorage)
+        let config = builder.build(for: tenant, request: request, storage: app.entityStorage)
 
         #expect(config.op_policy_uri == "https://example.com/privacy")
         #expect(config.service_documentation == "https://example.com/imprint")
@@ -311,7 +311,7 @@ struct OpenidConfigurationBuilderTest {
         let builder = OpenidConfigurationBuilder()
         let request = createMockRequest(app: app, host: "noinfo.example.com")
 
-        let config = await builder.build(for: tenant, request: request, storage: app.entityStorage)
+        let config = builder.build(for: tenant, request: request, storage: app.entityStorage)
 
         #expect(config.op_policy_uri == nil)
         #expect(config.service_documentation == nil)
@@ -330,7 +330,7 @@ struct OpenidConfigurationBuilderTest {
         let builder = OpenidConfigurationBuilder()
         let request = createMockRequest(app: app, host: "auth.example.com")
 
-        let config = await builder.build(for: tenant, request: request, storage: app.entityStorage)
+        let config = builder.build(for: tenant, request: request, storage: app.entityStorage)
 
         let expectedIssuer = "https://auth.example.com"
         #expect(config.issuer == expectedIssuer)
@@ -351,7 +351,7 @@ struct OpenidConfigurationBuilderTest {
         let builder = OpenidConfigurationBuilder()
         let request = createMockRequest(app: app, host: "pkce.example.com")
 
-        let config = await builder.build(for: tenant, request: request, storage: app.entityStorage)
+        let config = builder.build(for: tenant, request: request, storage: app.entityStorage)
 
         #expect(config.code_challenge_methods_supported?.contains("S256") == true)
         #expect(config.code_challenge_methods_supported?.contains("plain") == true)
@@ -368,7 +368,7 @@ struct OpenidConfigurationBuilderTest {
         let builder = OpenidConfigurationBuilder()
         let request = createMockRequest(app: app, host: "claims.example.com")
 
-        let config = await builder.build(for: tenant, request: request, storage: app.entityStorage)
+        let config = builder.build(for: tenant, request: request, storage: app.entityStorage)
 
         #expect(config.claims_supported?.contains("sub") == true)
         #expect(config.claims_supported?.contains("iss") == true)
@@ -391,7 +391,7 @@ struct OpenidConfigurationBuilderTest {
         let builder = OpenidConfigurationBuilder()
         let request = createMockRequest(app: app, host: "logout.example.com")
 
-        let config = await builder.build(for: tenant, request: request, storage: app.entityStorage)
+        let config = builder.build(for: tenant, request: request, storage: app.entityStorage)
 
         let expectedEndSessionEndpoint = "https://logout.example.com/logout"
         #expect(config.end_session_endpoint == expectedEndSessionEndpoint)
@@ -424,7 +424,7 @@ struct OpenidConfigurationBuilderTest {
         let builder = OpenidConfigurationBuilder()
         let request = createMockRequest(app: app, host: "dedupe.example.com")
 
-        let config = await builder.build(for: tenant, request: request, storage: app.entityStorage)
+        let config = builder.build(for: tenant, request: request, storage: app.entityStorage)
 
         // Count occurrences - each scope should appear only once
         let scopes = config.scopes_supported ?? []
@@ -456,7 +456,7 @@ struct OpenidConfigurationBuilderTest {
         let builder = OpenidConfigurationBuilder()
         let request = createMockRequest(app: app, host: "sort.example.com")
 
-        let config = await builder.build(for: tenant, request: request, storage: app.entityStorage)
+        let config = builder.build(for: tenant, request: request, storage: app.entityStorage)
 
         let scopes = config.scopes_supported ?? []
 

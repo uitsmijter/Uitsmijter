@@ -11,7 +11,7 @@ struct LoginControllerProfileTests {
     @MainActor
     func setupApp() async throws -> Application {
         let app = try await Application.make(.testing)
-        try? await configure(app)
+        try? configure(app)
 
         app.entityStorage.tenants.removeAll()
         app.entityStorage.clients.removeAll()
@@ -58,7 +58,7 @@ struct LoginControllerProfileTests {
                 """
         )
         let tenant = Tenant(name: "Test Tenant", config: tenantConfig)
-        let (inserted, _) = await app.entityStorage.tenants.insert(tenant)
+        let (inserted, _) = app.entityStorage.tenants.insert(tenant)
         #expect(inserted)
 
         let client = Client(

@@ -45,7 +45,7 @@ struct LoginControllerLoginTests {
         )
         let tenant = Tenant(name: "Test Tenant", config: tenantConfig)
 
-        let (inserted, _) = await app.entityStorage.tenants.insert(tenant)
+        let (inserted, _) = app.entityStorage.tenants.insert(tenant)
         #expect(inserted)
 
         let client = Client(
