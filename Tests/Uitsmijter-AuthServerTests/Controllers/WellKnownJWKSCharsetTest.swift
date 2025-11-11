@@ -9,7 +9,7 @@ import VaporTesting
 struct WellKnownJWKSCharsetTest {
     let decoder = JSONDecoder()
 
-    @Test("JWKS endpoint charset is UTF-8", .disabled("Investigating hang issue"))
+    @Test("JWKS endpoint charset is UTF-8")
     func jwksEndpointCharsetIsUTF8() async throws {
         try await withApp(configure: configure) { app in
             try await app.testing().test(
@@ -24,7 +24,7 @@ struct WellKnownJWKSCharsetTest {
             )
         }
     }
-    
+
     @Test("JWKS endpoint body is valid UTF-8")
     func jwksEndpointBodyIsValidUTF8() async throws {
         try await withApp(configure: configure) { app in

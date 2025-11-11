@@ -39,7 +39,9 @@ struct SignerManagerAlgorithmTest {
 
         #expect(!token.isEmpty)
         #expect(kid != nil)
-        #expect(!kid!.isEmpty)
+        if let kid {
+            #expect(!kid.isEmpty)
+        }
 
         let parts = token.split(separator: ".")
         #expect(parts.count == 3)
@@ -153,10 +155,20 @@ struct SignerManagerAlgorithmTest {
         let (token, _) = try await manager.sign(payload, algorithm: .hs256)
 
         let headerPart = String(token.split(separator: ".")[0])
-        let headerData = Data(base64Encoded: headerPart.padding(toLength: ((headerPart.count + 3) / 4) * 4,
-                                                                  withPad: "=",
-                                                                  startingAt: 0))!
-        let header = try JSONSerialization.jsonObject(with: headerData) as! [String: Any]
+        guard let headerData = Data(
+            base64Encoded: headerPart.padding(
+                toLength: ((headerPart.count + 3) / 4) * 4,
+                withPad: "=",
+                startingAt: 0
+            )
+        ) else {
+            Issue.record("Failed to decode base64 header")
+            return
+        }
+        guard let header = try JSONSerialization.jsonObject(with: headerData) as? [String: Any] else {
+            Issue.record("Failed to parse header as JSON object")
+            return
+        }
 
         #expect(header["alg"] as? String == "HS256")
         #expect(header["kid"] == nil)
@@ -171,10 +183,20 @@ struct SignerManagerAlgorithmTest {
         let (token, kid) = try await manager.sign(payload, algorithm: .rs256)
 
         let headerPart = String(token.split(separator: ".")[0])
-        let headerData = Data(base64Encoded: headerPart.padding(toLength: ((headerPart.count + 3) / 4) * 4,
-                                                                  withPad: "=",
-                                                                  startingAt: 0))!
-        let header = try JSONSerialization.jsonObject(with: headerData) as! [String: Any]
+        guard let headerData = Data(
+            base64Encoded: headerPart.padding(
+                toLength: ((headerPart.count + 3) / 4) * 4,
+                withPad: "=",
+                startingAt: 0
+            )
+        ) else {
+            Issue.record("Failed to decode base64 header")
+            return
+        }
+        guard let header = try JSONSerialization.jsonObject(with: headerData) as? [String: Any] else {
+            Issue.record("Failed to parse header as JSON object")
+            return
+        }
 
         #expect(header["alg"] as? String == "RS256")
         #expect(header["kid"] != nil)

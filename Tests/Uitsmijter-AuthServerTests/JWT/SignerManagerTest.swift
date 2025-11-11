@@ -12,8 +12,9 @@ struct SignerManagerTest {
 
     @Test("Sign payload with HS256")
     func signWithHS256() async throws {
-        // Note: This test assumes JWT_ALGORITHM is not set or is set to HS256
-        let manager = SignerManager.shared
+        // Create isolated KeyStorage for this test to prevent state pollution
+        let storage = KeyStorage(use: .memory)
+        let manager = SignerManager(keyStorage: storage)
 
         let payload = Payload(
             issuer: IssuerClaim(value: "https://test.example.com"),
@@ -41,7 +42,8 @@ struct SignerManagerTest {
 
     @Test("Verify HS256 signed token")
     func verifyHS256Token() async throws {
-        let manager = SignerManager.shared
+        let storage = KeyStorage(use: .memory)
+        let manager = SignerManager(keyStorage: storage)
 
         let payload = Payload(
             issuer: IssuerClaim(value: "https://test.example.com"),
@@ -67,7 +69,8 @@ struct SignerManagerTest {
 
     @Test("Sign multiple payloads")
     func signMultiplePayloads() async throws {
-        let manager = SignerManager.shared
+        let storage = KeyStorage(use: .memory)
+        let manager = SignerManager(keyStorage: storage)
 
         var tokens: [String] = []
 
@@ -97,7 +100,8 @@ struct SignerManagerTest {
 
     @Test("Sign and verify round-trip")
     func signAndVerifyRoundTrip() async throws {
-        let manager = SignerManager.shared
+        let storage = KeyStorage(use: .memory)
+        let manager = SignerManager(keyStorage: storage)
 
         let profile = CodableProfile.object([
             "firstName": .string("John"),
@@ -132,7 +136,8 @@ struct SignerManagerTest {
 
     @Test("Verify rejects tampered tokens")
     func verifyRejectsTamperedTokens() async throws {
-        let manager = SignerManager.shared
+        let storage = KeyStorage(use: .memory)
+        let manager = SignerManager(keyStorage: storage)
 
         let payload = Payload(
             issuer: IssuerClaim(value: "https://test.example.com"),
@@ -165,7 +170,8 @@ struct SignerManagerTest {
 
     @Test("Verify rejects invalid JWT format")
     func verifyRejectsInvalidFormat() async throws {
-        let manager = SignerManager.shared
+        let storage = KeyStorage(use: .memory)
+        let manager = SignerManager(keyStorage: storage)
 
         await #expect(throws: Error.self) {
             try await manager.verify("invalid.jwt", as: Payload.self)
@@ -174,7 +180,8 @@ struct SignerManagerTest {
 
     @Test("Verify rejects empty token")
     func verifyRejectsEmptyToken() async throws {
-        let manager = SignerManager.shared
+        let storage = KeyStorage(use: .memory)
+        let manager = SignerManager(keyStorage: storage)
 
         await #expect(throws: Error.self) {
             try await manager.verify("", as: Payload.self)
@@ -185,7 +192,8 @@ struct SignerManagerTest {
 
     @Test("Concurrent signing operations")
     func concurrentSigning() async throws {
-        let manager = SignerManager.shared
+        let storage = KeyStorage(use: .memory)
+        let manager = SignerManager(keyStorage: storage)
 
         await withTaskGroup(of: String?.self) { group in
             for i in 0..<10 {
@@ -224,7 +232,8 @@ struct SignerManagerTest {
 
     @Test("Concurrent verification operations")
     func concurrentVerification() async throws {
-        let manager = SignerManager.shared
+        let storage = KeyStorage(use: .memory)
+        let manager = SignerManager(keyStorage: storage)
 
         // Create a token first
         let payload = Payload(
@@ -266,7 +275,8 @@ struct SignerManagerTest {
 
     @Test("Concurrent sign and verify operations")
     func concurrentSignAndVerify() async throws {
-        let manager = SignerManager.shared
+        let storage = KeyStorage(use: .memory)
+        let manager = SignerManager(keyStorage: storage)
 
         await withTaskGroup(of: Bool.self) { group in
             for i in 0..<10 {
@@ -307,7 +317,8 @@ struct SignerManagerTest {
 
     @Test("Sign payload with empty tenant")
     func signWithEmptyTenant() async throws {
-        let manager = SignerManager.shared
+        let storage = KeyStorage(use: .memory)
+        let manager = SignerManager(keyStorage: storage)
 
         let payload = Payload(
             issuer: IssuerClaim(value: "https://test.example.com"),
@@ -329,7 +340,8 @@ struct SignerManagerTest {
 
     @Test("Sign payload with special characters")
     func signWithSpecialCharacters() async throws {
-        let manager = SignerManager.shared
+        let storage = KeyStorage(use: .memory)
+        let manager = SignerManager(keyStorage: storage)
 
         let payload = Payload(
             issuer: IssuerClaim(value: "https://test.example.com"),
@@ -353,7 +365,8 @@ struct SignerManagerTest {
 
     @Test("Sign payload with unicode characters")
     func signWithUnicodeCharacters() async throws {
-        let manager = SignerManager.shared
+        let storage = KeyStorage(use: .memory)
+        let manager = SignerManager(keyStorage: storage)
 
         let payload = Payload(
             issuer: IssuerClaim(value: "https://test.example.com"),
@@ -378,7 +391,8 @@ struct SignerManagerTest {
 
     @Test("Sign payload with complex profile")
     func signWithComplexProfile() async throws {
-        let manager = SignerManager.shared
+        let storage = KeyStorage(use: .memory)
+        let manager = SignerManager(keyStorage: storage)
 
         let profile = CodableProfile.object([
             "user": .object([
@@ -424,7 +438,8 @@ struct SignerManagerTest {
 
     @Test("Signed token has correct algorithm in header")
     func signedTokenHasCorrectAlgorithm() async throws {
-        let manager = SignerManager.shared
+        let storage = KeyStorage(use: .memory)
+        let manager = SignerManager(keyStorage: storage)
 
         let payload = Payload(
             issuer: IssuerClaim(value: "https://test.example.com"),

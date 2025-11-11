@@ -367,7 +367,7 @@ struct TenantSpec: Codable, Sendable {
     /// ```yaml
     /// jwt_algorithm: RS256
     /// ```
-    var jwt_algorithm: String? = nil
+    var jwt_algorithm: String?
 
     /// Get the effective JWT algorithm for this tenant.
     ///

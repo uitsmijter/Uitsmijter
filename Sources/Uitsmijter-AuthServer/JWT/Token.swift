@@ -57,12 +57,6 @@ struct Token: ExpressibleByStringLiteral {
 
     typealias StringLiteralType = String
 
-    /// Signer manager for JWT signing and verification.
-    ///
-    /// Uses SignerManager which supports both HS256 (legacy) and RS256 (recommended).
-    /// The algorithm is determined by the JWT_ALGORITHM environment variable.
-    let signerManager = SignerManager.shared
-
     /// The date and time when this token expires.
     ///
     /// After this date, the token is no longer valid and should not be accepted

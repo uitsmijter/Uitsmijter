@@ -148,7 +148,6 @@ struct WellKnownJWKSTest {
             let dateKid = dateFormatter.string(from: Date())
             try await KeyStorage.shared.generateAndStoreKey(kid: dateKid, setActive: false)
 
-
             try await app.testing().test(
                 .GET,
                 ".well-known/jwks.json",
@@ -246,7 +245,6 @@ struct WellKnownJWKSTest {
         }
     }
 
-
     // MARK: - Edge Cases
 
     @Test("JWKS endpoint handles multiple concurrent requests")
@@ -278,10 +276,7 @@ struct WellKnownJWKSTest {
         }
     }
 
-    @Test(
-        "JWKS endpoint returns consistent results for same key",
-        .disabled("Intermittent timeout (70% failure rate) due to KeyStorage.shared singleton issue - see /tmp/keystorage-actor-isolation-analysis.md")
-    )
+    @Test("JWKS endpoint returns consistent results for same key")
     func jwksEndpointReturnsConsistentResultsForSameKey() async throws {
         try await withApp(configure: configure) { app in
             // Generate a unique test key to ensure we have at least one key to verify
