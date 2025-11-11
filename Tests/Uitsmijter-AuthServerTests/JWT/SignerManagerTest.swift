@@ -8,16 +8,6 @@ import JWTKit
 // swiftlint:disable type_body_length
 struct SignerManagerTest {
 
-    // MARK: - Initialization Tests
-
-    @Test("SignerManager shared instance is accessible")
-    func signerManagerSharedInstance() {
-        let manager = SignerManager.shared
-        // Verify shared instance exists (non-optional type)
-        _ = manager
-        #expect(true)
-    }
-
     // MARK: - HS256 Algorithm Tests
 
     @Test("Sign payload with HS256")

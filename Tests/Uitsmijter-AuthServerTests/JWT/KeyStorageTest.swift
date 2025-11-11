@@ -20,15 +20,6 @@ struct KeyStorageTest {
         storage = KeyStorage(use: .memory)
     }
 
-    // MARK: - Initialization Tests
-
-    @Test("KeyStorage instance is accessible")
-    func keyStorageInstanceAccessible() {
-        // Verify storage instance exists (non-optional type)
-        _ = storage
-        #expect(true)
-    }
-
     // MARK: - Key Generation and Storage Tests
 
     @Test("Generate and store a new key")
