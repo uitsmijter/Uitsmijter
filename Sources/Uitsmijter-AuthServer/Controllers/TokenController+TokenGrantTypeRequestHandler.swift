@@ -270,7 +270,7 @@ extension TokenController {
         // Get client_id for audience
         let tokenRequest = try req.content.decode(TokenRequest.self)
 
-        let accessToken = try Token(
+        let accessToken = try await Token(
             issuer: IssuerClaim(value: issuer),
             audience: AudienceClaim(value: tokenRequest.client_id),
             tenantName: tenant.name,
@@ -280,7 +280,8 @@ extension TokenController {
                 user: passwordTokenRequest.username,
                 profile: profile
             ),
-            authTime: Date()
+            authTime: Date(),
+            algorithmString: tenant.config.effectiveJwtAlgorithm
         )
         return TokenResponse(
             access_token: accessToken.value,
@@ -319,13 +320,14 @@ extension TokenController {
         // Get client_id for audience
         let tokenRequest = try req.content.decode(TokenRequest.self)
 
-        let accessToken = try Token(
+        let accessToken = try await Token(
             issuer: IssuerClaim(value: issuer),
             audience: AudienceClaim(value: tokenRequest.client_id),
             tenantName: tenant.name,
             subject: payload.subject,
             userProfile: profile,
-            authTime: payload.authTime.value
+            authTime: payload.authTime.value,
+            algorithmString: tenant.config.effectiveJwtAlgorithm
         )
         let refreshToken: Code = Code()
 

@@ -351,6 +351,38 @@ struct TenantSpec: Codable, Sendable {
     /// Set to `false` to always show the login form, even for authenticated users.
     var silent_login: Bool? = true
 
+    /// JWT signing algorithm for this tenant.
+    ///
+    /// Controls whether tokens for this tenant are signed with HS256 (symmetric)
+    /// or RS256 (asymmetric RSA). If not set, falls back to the global
+    /// JWT_ALGORITHM environment variable.
+    ///
+    /// ## Allowed values
+    ///
+    /// - `HS256`: HMAC with SHA-256 (symmetric, uses JWT_SECRET)
+    /// - `RS256`: RSA with SHA-256 (asymmetric, uses KeyStorage)
+    ///
+    /// ## Example YAML
+    ///
+    /// ```yaml
+    /// jwt_algorithm: RS256
+    /// ```
+    var jwt_algorithm: String? = nil
+
+    /// Get the effective JWT algorithm for this tenant.
+    ///
+    /// Returns the tenant-specific algorithm if set, otherwise falls back to
+    /// the global JWT_ALGORITHM environment variable, defaulting to HS256.
+    ///
+    /// - Returns: "HS256" or "RS256"
+    var effectiveJwtAlgorithm: String {
+        if let tenantAlgo = jwt_algorithm?.uppercased(),
+           tenantAlgo == "HS256" || tenantAlgo == "RS256" {
+            return tenantAlgo
+        }
+        return ProcessInfo.processInfo.environment["JWT_ALGORITHM"]?.uppercased() ?? "HS256"
+    }
+
     /// Initialize a tenant specification.
     ///
     /// - Parameters:
@@ -360,13 +392,15 @@ struct TenantSpec: Codable, Sendable {
     ///   - providers: List of provider file paths
     ///   - templates: Optional S3 template configuration
     ///   - silent_login: Whether silent login is enabled (defaults to true)
+    ///   - jwt_algorithm: JWT signing algorithm (HS256 or RS256, defaults to global setting)
     init(
         hosts: [String],
         informations: TenantInformations? = nil,
         interceptor: TenantInterceptorSettings? = nil,
         providers: [String] = [],
         templates: TenantTemplatesSettings? = nil,
-        silent_login: Bool? = true
+        silent_login: Bool? = true,
+        jwt_algorithm: String? = nil
     ) {
         self.hosts = hosts
         self.informations = informations
@@ -374,6 +408,7 @@ struct TenantSpec: Codable, Sendable {
         self.providers = providers
         self.templates = templates
         self.silent_login = silent_login
+        self.jwt_algorithm = jwt_algorithm
     }
 }
 

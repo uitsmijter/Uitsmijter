@@ -11,9 +11,9 @@ struct InterceptorControllerTest {
     func interceptorWithoutValidTokenShouldForwardToLogin() async throws {
         try await withApp(configure: configure) { app in
             await generateTestClient(in: app.entityStorage, uuid: testAppIdent)
-            guard let tenant = await app.entityStorage.clients
+            guard (await app.entityStorage.clients
                 .first(where: { $0.config.ident == testAppIdent })?
-                .config.tenant(in: app.entityStorage)
+                .config.tenant(in: app.entityStorage)) != nil
             else {
                 Issue.record("Can not get tenant.")
                 return

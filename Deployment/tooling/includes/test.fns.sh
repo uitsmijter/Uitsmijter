@@ -22,7 +22,7 @@ function unitTests() {
   local dockerComposeBuildParameter=${1}
   local optionalFilter=${2}
   ARGUMENTS="${ARGUMENTS:-}" GITHUB_ACTION="${GITHUB_ACTION:-}" \
-  SUPPRESS_PACKAGE_WARNINGS="${SUPPRESS_PACKAGE_WARNINGS}" \
+  SUPPRESS_PACKAGE_WARNINGS="${SUPPRESS_PACKAGE_WARNINGS}" RUNTIME_IMAGE="${RUNTIME_IMAGE}" \
   FILTER_TEST="${optionalFilter}" \
   docker compose \
     -f "${PROJECT_DIR}/Deployment/build-compose.yml" \

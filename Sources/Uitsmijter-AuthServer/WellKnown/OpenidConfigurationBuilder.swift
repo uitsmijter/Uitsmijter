@@ -52,7 +52,9 @@ actor OpenidConfigurationBuilder {
     /// Default supported ID token signing algorithms.
     ///
     /// Based on the JWT signing capabilities in the system.
-    private static let defaultIdTokenSigningAlgorithms = ["RS256"]
+    /// Note: This default is used as a fallback, but the actual value should be
+    /// determined by the tenant's jwt_algorithm configuration.
+    private static let defaultIdTokenSigningAlgorithms = ["HS256", "RS256"]
 
     /// Default supported scopes.
     ///
@@ -177,6 +179,9 @@ actor OpenidConfigurationBuilder {
         let policyUri = tenant.config.informations?.privacy_url
         let imprintUri = tenant.config.informations?.imprint_url
 
+        // Determine supported signing algorithms based on tenant configuration
+        let signingAlgorithms = [tenant.config.effectiveJwtAlgorithm]
+
         return OpenidConfiguration(
             issuer: issuer,
             authorization_endpoint: authorizationEndpoint,
@@ -185,7 +190,7 @@ actor OpenidConfigurationBuilder {
             end_session_endpoint: endSessionEndpoint,
             response_types_supported: Self.defaultResponseTypes,
             subject_types_supported: Self.defaultSubjectTypes,
-            id_token_signing_alg_values_supported: Self.defaultIdTokenSigningAlgorithms,
+            id_token_signing_alg_values_supported: signingAlgorithms,
             userinfo_endpoint: userinfoEndpoint,
             registration_endpoint: nil, // Not currently supported
             scopes_supported: aggregatedScopes,

@@ -57,10 +57,11 @@ struct Token: ExpressibleByStringLiteral {
 
     typealias StringLiteralType = String
 
-    /// JWT signers instance for signing and verifying tokens.
+    /// Signer manager for JWT signing and verification.
     ///
-    /// This instance is configured with the global ``jwt_signer`` using HS256 algorithm.
-    let signers = JWTSigners()
+    /// Uses SignerManager which supports both HS256 (legacy) and RS256 (recommended).
+    /// The algorithm is determined by the JWT_ALGORITHM environment variable.
+    let signerManager = SignerManager.shared
 
     /// The date and time when this token expires.
     ///
@@ -153,7 +154,12 @@ struct Token: ExpressibleByStringLiteral {
     /// - Note: Consider checking `secondsToExpire > 0` to verify the token is not expired.
     init(stringLiteral value: Self.StringLiteralType) {
         self.value = value
+
+        // For string literal initialization, we need to use the legacy jwt_signer
+        // for synchronous verification. Async verification via SignerManager
+        // should be used in production code.
         do {
+            let signers = JWTSigners()
             signers.use(jwt_signer)
             payload = try signers.verify(self.value, as: Payload.self)
             expirationDate = payload.expiration.value
@@ -175,6 +181,39 @@ struct Token: ExpressibleByStringLiteral {
             expirationDate = Date()
             secondsToExpire = 0
         }
+    }
+
+    /// Verify a JWT token string asynchronously using SignerManager
+    ///
+    /// This is the recommended way to verify tokens in production as it supports
+    /// both HS256 and RS256 algorithms with automatic key selection.
+    ///
+    /// - Parameters:
+    ///   - value: The JWT token string to verify
+    ///   - signerManager: Optional SignerManager instance for dependency injection (defaults to .shared)
+    /// - Returns: Verified Token instance
+    /// - Throws: JWTError if verification fails
+    static func verify(_ value: String, signerManager: SignerManager? = nil) async throws -> Token {
+        let manager = signerManager ?? SignerManager.shared
+        let payload = try await manager.verify(value, as: Payload.self)
+
+        let expirationDate = payload.expiration.value
+        let secondsToExpire = expirationDate.millisecondsSinceNow / 1000
+
+        return Token(
+            value: value,
+            payload: payload,
+            expirationDate: expirationDate,
+            secondsToExpire: secondsToExpire
+        )
+    }
+
+    /// Private initializer for creating verified tokens
+    private init(value: String, payload: Payload, expirationDate: Date, secondsToExpire: Int) {
+        self.value = value
+        self.payload = payload
+        self.expirationDate = expirationDate
+        self.secondsToExpire = secondsToExpire
     }
 
     /// Creates a new JWT token for an authenticated user
@@ -202,6 +241,8 @@ struct Token: ExpressibleByStringLiteral {
     ///   - subject: The subject claim identifying the user
     ///   - userProfile: User profile information including role and metadata
     ///   - authTime: When the user authentication occurred (defaults to current time)
+    ///   - algorithmString: Optional JWT algorithm override (HS256 or RS256)
+    ///   - signerManager: Optional SignerManager instance for dependency injection (defaults to .shared)
     /// - Throws: `TokenError.CALCULATE_TIME` if the expiration date cannot be calculated
     ///
     /// ## Example
@@ -212,7 +253,8 @@ struct Token: ExpressibleByStringLiteral {
     ///     tenantName: "example-tenant",
     ///     subject: SubjectClaim(value: "user@example.com"),
     ///     userProfile: userProfile,
-    ///     authTime: Date()
+    ///     authTime: Date(),
+    ///     algorithmString: "RS256"
     /// )
     /// ```
     init(
@@ -221,8 +263,10 @@ struct Token: ExpressibleByStringLiteral {
         tenantName: String,
         subject: SubjectClaim,
         userProfile: UserProfileProtocol,
-        authTime: Date? = nil
-    ) throws {
+        authTime: Date? = nil,
+        algorithmString: String? = nil,
+        signerManager: SignerManager? = nil
+    ) async throws {
         let expirationHours = Int(ProcessInfo.processInfo.environment["TOKEN_EXPIRATION_IN_HOURS"] ?? "2") ?? 2
         let calendar = Calendar.current
         let now = Date()
@@ -251,7 +295,22 @@ struct Token: ExpressibleByStringLiteral {
             profile: userProfile.profile
         )
 
-        signers.use(jwt_signer)
-        value = try signers.sign(payload)
+        // Use SignerManager for signing (supports both HS256 and RS256)
+        let manager = signerManager ?? SignerManager.shared
+
+        // Use provided algorithm or fall back to global default
+        let effectiveAlgorithm = algorithmString ??
+            ProcessInfo.processInfo.environment["JWT_ALGORITHM"] ?? "HS256"
+
+        let (tokenString, kid) = try await manager.sign(
+            payload,
+            algorithmString: effectiveAlgorithm
+        )
+        value = tokenString
+
+        // Log the kid if RS256 is used
+        if let kid = kid {
+            Log.debug("Signed token with RS256 using kid: \(kid)")
+        }
     }
 }

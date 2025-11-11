@@ -19,6 +19,7 @@ import Logger
 /// ## Routes
 ///
 /// - `GET /.well-known/openid-configuration` - Returns OIDC discovery metadata
+/// - `GET /.well-known/jwks.json` - Returns JSON Web Key Set (JWKS)
 ///
 /// ## Discovery Metadata
 ///
@@ -63,13 +64,16 @@ struct WellKnownController: RouteCollection {
 
     /// Registers well-known routes with the application.
     ///
-    /// Registers the `/.well-known/openid-configuration` endpoint for OIDC Discovery.
+    /// Registers the OIDC Discovery and JWKS endpoints:
+    /// - `/.well-known/openid-configuration` - OIDC Discovery metadata
+    /// - `/.well-known/jwks.json` - JSON Web Key Set
     ///
     /// - Parameter routes: The routes builder to register endpoints with.
     /// - Throws: Routing configuration errors.
     func boot(routes: RoutesBuilder) throws {
         let wellKnown = routes.grouped(".well-known")
         wellKnown.get("openid-configuration", use: getConfiguration)
+        wellKnown.get("jwks.json", use: getJWKS)
     }
 
     /// Returns OpenID Provider Metadata for the tenant associated with the request.
@@ -143,6 +147,90 @@ struct WellKnownController: RouteCollection {
         headers.add(name: "X-Content-Type-Options", value: "nosniff")
 
         Log.info("Returning OpenID configuration for tenant: \(tenant.name)", requestId: req.id)
+
+        return Response(
+            status: .ok,
+            headers: headers,
+            body: .init(string: jsonString)
+        )
+    }
+
+    /// Returns JSON Web Key Set (JWKS) for JWT verification.
+    ///
+    /// This endpoint implements RFC 7517 (JSON Web Key) and is referenced by the
+    /// `jwks_uri` field in the OpenID Provider Metadata. Clients use this endpoint
+    /// to retrieve public keys for verifying JWT signatures.
+    ///
+    /// ## Response Format
+    ///
+    /// - **Content-Type**: `application/json; charset=utf-8`
+    /// - **Status**: 200 OK
+    /// - **Cache-Control**: Public, max-age=3600 (1 hour)
+    ///
+    /// ## Example Response
+    ///
+    /// ```json
+    /// {
+    ///   "keys": [
+    ///     {
+    ///       "kty": "RSA",
+    ///       "use": "sig",
+    ///       "kid": "2025-01-08",
+    ///       "alg": "RS256",
+    ///       "n": "0vx7agoebGcQSuuPiLJXZptN9nndrQmbXEps2aiAFbWhM78...",
+    ///       "e": "AQAB"
+    ///     }
+    ///   ]
+    /// }
+    /// ```
+    ///
+    /// ## Key Rotation
+    ///
+    /// The endpoint may return multiple keys to support key rotation.
+    /// Clients should use the `kid` parameter from the JWT header to select
+    /// the correct key for verification.
+    ///
+    /// ## Caching
+    ///
+    /// Clients should cache the JWKS response for up to 1 hour to reduce load.
+    /// The `Cache-Control` header provides caching guidance.
+    ///
+    /// - Parameter req: The incoming HTTP request
+    /// - Returns: The JWKS as JSON
+    /// - Throws: `Abort(.internalServerError)` if JWKS generation fails
+    ///
+    /// - SeeAlso: [RFC 7517 Section 5](https://www.rfc-editor.org/rfc/rfc7517#section-5)
+    @Sendable
+    func getJWKS(req: Request) async throws -> Response {
+        Log.info("JWKS requested", requestId: req.id)
+
+        // Get KeyStorage from application (injected), fallback to shared singleton
+        let keyStorage = req.application.keyStorage ?? KeyStorage.shared
+
+        // Ensure at least one key exists (auto-generates if empty)
+        _ = try await keyStorage.getActiveKey()
+
+        let jwkSet = try await keyStorage.getAllPublicKeys()
+
+        Log.debug("JWKS contains \(jwkSet.keys.count) key(s)", requestId: req.id)
+
+        // Encode the JWKS to JSON
+        let encoder = JSONEncoder()
+        encoder.outputFormatting = [.prettyPrinted, .sortedKeys]
+
+        guard let jsonData = try? encoder.encode(jwkSet),
+              let jsonString = String(data: jsonData, encoding: .utf8) else {
+            Log.error("Failed to encode JWKS to JSON", requestId: req.id)
+            throw Abort(.internalServerError, reason: "Failed to generate JWKS")
+        }
+
+        // Create response with appropriate headers
+        var headers = HTTPHeaders()
+        headers.add(name: .contentType, value: "application/json; charset=utf-8")
+        headers.add(name: .cacheControl, value: "public, max-age=3600")
+        headers.add(name: "X-Content-Type-Options", value: "nosniff")
+
+        Log.info("Returning JWKS with \(jwkSet.keys.count) key(s)", requestId: req.id)
 
         return Response(
             status: .ok,

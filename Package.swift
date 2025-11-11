@@ -12,7 +12,7 @@ let package = Package(
         ],
         dependencies: [
             .package(url: "https://github.com/apple/swift-log.git", from: "1.0.0"),
-            .package(url: "https://github.com/vapor/vapor.git", from: "4.106.1"),
+            .package(url: "https://github.com/vapor/vapor.git", from: "4.119.0"),
             .package(url: "https://github.com/vapor/redis.git", from: "4.0.0"),
             .package(url: "https://github.com/vapor/leaf.git", from: "4.0.0"),
             .package(url: "https://github.com/vapor/jwt.git", from: "4.1.0"),

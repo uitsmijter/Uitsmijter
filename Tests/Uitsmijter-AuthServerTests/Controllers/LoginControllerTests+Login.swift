@@ -2,6 +2,7 @@
 import Testing
 import VaporTesting
 
+// Tests use unique kid values so they don't interfere with each other
 @Suite("Login Controller Login Tests", .serialized)
 // swiftlint:disable:next type_body_length
 struct LoginControllerLoginTests {
@@ -44,7 +45,7 @@ struct LoginControllerLoginTests {
         )
         let tenant = Tenant(name: "Test Tenant", config: tenantConfig)
 
-        let (inserted, _) = await app.entityStorage.tenants.insert(tenant)
+        let (inserted, _) = app.entityStorage.tenants.insert(tenant)
         #expect(inserted)
 
         let client = Client(
@@ -284,7 +285,7 @@ struct LoginControllerLoginTests {
                 let token = contentGroups[1]
                 #expect(token.count > 8)
 
-                let payload = try jwt_signer.verify(token, as: Payload.self)
+                let payload = try await SignerManager.shared.verify(token, as: Payload.self)
                 #expect(payload.subject == "ok_example.com")
                 })
         }

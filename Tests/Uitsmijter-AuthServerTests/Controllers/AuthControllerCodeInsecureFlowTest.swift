@@ -77,9 +77,9 @@ struct AuthControllerCodeInsecureFlowTest {
                         req.headers.contentType = .json
                         })
                     #expect(response.status == .ok)
-                    let accessToken = try response.content.decode(TokenResponse.self)
-                    #expect(accessToken.access_token != nil)
-                    #expect(accessToken.refresh_token != nil)
+                    let accessToken = try? response.content.decode(TokenResponse.self)
+                    #expect(accessToken?.access_token != nil)
+                    #expect(accessToken?.refresh_token != nil)
                 }
             )
         }

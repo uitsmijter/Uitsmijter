@@ -65,7 +65,7 @@ struct TokenControllerAuthorisationCodeGrantTest {
             let jwt = tokenResponse.access_token
             #expect(tokenResponse.scope == "")
 
-            let payload = try jwt_signer.verify(jwt, as: Payload.self)
+            let payload = try await SignerManager.shared.verify(jwt, as: Payload.self)
             #expect(payload.user == "valid_user")
             #expect(payload.role == "default")
         }
@@ -111,7 +111,7 @@ struct TokenControllerAuthorisationCodeGrantTest {
             #expect(tokenResponse.scope?.contains("list") == true)
             #expect(tokenResponse.scope?.contains("read") == true)
 
-            let payload = try jwt_signer.verify(jwt, as: Payload.self)
+            let payload = try await SignerManager.shared.verify(jwt, as: Payload.self)
             #expect(payload.user == "valid_user")
             #expect(payload.role == "default")
         }

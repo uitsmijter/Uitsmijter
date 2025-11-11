@@ -134,11 +134,11 @@ test.describe('OpenID Connect Discovery', () => {
             expect(config.subject_types_supported).toContain('public');
         });
 
-        test('should support RS256 signing algorithm', async ({page}) => {
+        test('should support HS256 signing algorithm', async ({page}) => {
             const response = await page.goto('https://id.example.com/.well-known/openid-configuration');
             const config = await response.json();
 
-            expect(config.id_token_signing_alg_values_supported).toContain('RS256');
+            expect(config.id_token_signing_alg_values_supported).toContain('HS256');
         });
     });
 

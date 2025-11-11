@@ -27,7 +27,7 @@ import Logger
 /// - Important: Only one EntityLoader should be created per application instance.
 /// - SeeAlso: ``EntityLoaderProtocol``, ``EntityStorage``
 @MainActor
-final class EntityLoader: EntityLoaderProtocolFunctions {
+public final class EntityLoader: EntityLoaderProtocolFunctions {
 
     /// All registered entity loader implementations.
     ///
@@ -83,7 +83,7 @@ final class EntityLoader: EntityLoaderProtocolFunctions {
     /// shut down before the EntityLoader is deallocated.
     ///
     /// - Note: This method is MainActor-isolated to safely access the loaders.
-    func shutdown() {
+    public func shutdown() {
         entityLoaders.forEach { loader in
             loader.shutdown()
         }
