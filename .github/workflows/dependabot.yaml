@@ -1,4 +1,4 @@
-name: Dependabot Helper
+name: Dependabot
 
 on:
   workflow_dispatch:
