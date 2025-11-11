@@ -76,7 +76,7 @@ struct KeyGeneratorTest {
         let generator = KeyGenerator()
         let keyPair = try await generator.generateKeyPair(kid: "jwk-test")
 
-        let jwk = try await generator.convertToJWK(keyPair: keyPair)
+        let jwk = try generator.convertToJWK(keyPair: keyPair)
 
         #expect(jwk.kty == "RSA")
         #expect(jwk.use == "sig")
@@ -91,7 +91,7 @@ struct KeyGeneratorTest {
         let generator = KeyGenerator()
         let keyPair = try await generator.generateKeyPair(kid: "exp-test")
 
-        let jwk = try await generator.convertToJWK(keyPair: keyPair)
+        let jwk = try generator.convertToJWK(keyPair: keyPair)
 
         // Standard exponent is 65537 which encodes to "AQAB" in base64url
         #expect(jwk.e == "AQAB")
@@ -102,7 +102,7 @@ struct KeyGeneratorTest {
         let generator = KeyGenerator()
         let keyPair = try await generator.generateKeyPair(kid: "mod-test")
 
-        let jwk = try await generator.convertToJWK(keyPair: keyPair)
+        let jwk = try generator.convertToJWK(keyPair: keyPair)
 
         // Base64url uses alphanumeric, -, and _ only (no padding)
         let validChars = CharacterSet.alphanumerics.union(CharacterSet(charactersIn: "-_"))
@@ -123,8 +123,8 @@ struct KeyGeneratorTest {
         let keyPair1 = try await generator.generateKeyPair(kid: "jwk-1")
         let keyPair2 = try await generator.generateKeyPair(kid: "jwk-2")
 
-        let jwk1 = try await generator.convertToJWK(keyPair: keyPair1)
-        let jwk2 = try await generator.convertToJWK(keyPair: keyPair2)
+        let jwk1 = try generator.convertToJWK(keyPair: keyPair1)
+        let jwk2 = try generator.convertToJWK(keyPair: keyPair2)
 
         #expect(jwk1.kid != jwk2.kid)
         #expect(jwk1.n != jwk2.n)
@@ -135,7 +135,7 @@ struct KeyGeneratorTest {
     func jwkEncodesToJSON() async throws {
         let generator = KeyGenerator()
         let keyPair = try await generator.generateKeyPair(kid: "json-test")
-        let jwk = try await generator.convertToJWK(keyPair: keyPair)
+        let jwk = try generator.convertToJWK(keyPair: keyPair)
 
         let encoder = JSONEncoder()
         let jsonData = try encoder.encode(jwk)
@@ -152,7 +152,7 @@ struct KeyGeneratorTest {
     func jwkRoundTrip() async throws {
         let generator = KeyGenerator()
         let keyPair = try await generator.generateKeyPair(kid: "roundtrip-test")
-        let originalJWK = try await generator.convertToJWK(keyPair: keyPair)
+        let originalJWK = try generator.convertToJWK(keyPair: keyPair)
 
         let encoder = JSONEncoder()
         let jsonData = try encoder.encode(originalJWK)

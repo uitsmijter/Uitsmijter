@@ -185,14 +185,15 @@ public func configure(_ app: Application) throws {
             // Store OAuth authorization codes in Redis for distributed deployments
             app.authCodeStorage = .init(use: .redis(client: app.redis))
             // Store RSA keys in Redis for distributed deployments (supports HPA/multi-pod)
-            app.keyStorage = KeyStorage(use: .redis(client: app.redis))
+            // Use isolated generator to avoid contention in parallel test execution
+            app.keyStorage = KeyStorage(use: .redis(client: app.redis), generator: KeyGenerator())
         } catch {
             // If Redis connection fails, fall back to in-memory storage to keep the application running
             app.logger.error("Failed to configure Redis: \(error). Falling back to in-memory session storage.")
             app.sessions.use(.memory)
             app.authCodeStorage = .init(use: .memory)
-            // Fallback to in-memory key storage
-            app.keyStorage = KeyStorage(use: .memory)
+            // Fallback to in-memory key storage with isolated generator for testing
+            app.keyStorage = KeyStorage(use: .memory, generator: KeyGenerator())
         }
     } else {
         // Development mode: use in-memory storage (sessions lost on restart)
@@ -201,8 +202,8 @@ public func configure(_ app: Application) throws {
         )
         app.sessions.use(.memory)
         app.authCodeStorage = .init(use: .memory)
-        // Use in-memory key storage for development
-        app.keyStorage = KeyStorage(use: .memory)
+        // Use in-memory key storage for development with isolated generator
+        app.keyStorage = KeyStorage(use: .memory, generator: KeyGenerator())
     }
 
     // Configure session cookie settings for security and expiration

@@ -208,8 +208,8 @@ actor KeyGenerator {
     func convertToJWKSet(_ keyPairs: [RSAKeyPair]) async throws -> JWKSet {
         var jwks: [RSAPublicJWK] = []
         for keyPair in keyPairs {
-            // Call synchronous version - we're already inside the actor
-            let jwk = try await convertToJWK(keyPair: keyPair)
+            // Call synchronous version - we're already inside the actor (no await needed)
+            let jwk = try convertToJWK(keyPair: keyPair)
             jwks.append(jwk)
         }
         return JWKSet(keys: jwks)
@@ -234,7 +234,9 @@ actor KeyGenerator {
     /// - Parameter keyPair: The key pair to extract public key from
     /// - Returns: JWK representation suitable for JWKS endpoint
     /// - Throws: ConversionError if key extraction fails
-    func convertToJWK(keyPair: RSAKeyPair) async throws -> RSAPublicJWK {
+    /// - Important: This method is nonisolated and synchronous since it doesn't access actor state,
+    ///              preventing unnecessary actor suspensions during JWK conversion.
+    nonisolated func convertToJWK(keyPair: RSAKeyPair) throws -> RSAPublicJWK {
         // Parse the public key PEM to extract components
         guard let pkey = try loadPublicKeyPEM(pem: keyPair.publicKeyPEM) else {
             throw ConversionError.extractionFailed("Failed to load public key PEM")
@@ -285,7 +287,7 @@ actor KeyGenerator {
     /// - Parameter pem: PEM-encoded public key
     /// - Returns: EVP_PKEY pointer (caller must free)
     /// - Throws: ConversionError if loading fails
-    private func loadPublicKeyPEM(pem: String) throws -> OpaquePointer? {
+    nonisolated private func loadPublicKeyPEM(pem: String) throws -> OpaquePointer? {
         let pemData = [UInt8](pem.utf8)
         return try pemData.withUnsafeBytes { buffer in
             guard let bio = CJWTKitBoringSSL_BIO_new_mem_buf(buffer.baseAddress, buffer.count) else {
@@ -310,7 +312,7 @@ actor KeyGenerator {
     ///
     /// - Parameter data: Data to encode
     /// - Returns: Base64URL-encoded string
-    private func base64URLEncode(_ data: Data) -> String {
+    nonisolated private func base64URLEncode(_ data: Data) -> String {
         var base64 = data.base64EncodedString()
 
         // Convert to base64url (RFC 4648 Section 5)

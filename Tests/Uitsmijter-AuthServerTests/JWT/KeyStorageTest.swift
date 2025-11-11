@@ -286,7 +286,7 @@ struct KeyStorageTest {
 
         let longKid = String(repeating: "a", count: 256)
         try await storage.generateAndStoreKey(kid: longKid, setActive: true)
-
+        await Task.yield()
         let activeKey = try await storage.getActiveKey()
         #expect(activeKey.kid == longKid)
     }

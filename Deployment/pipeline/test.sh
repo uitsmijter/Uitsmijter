@@ -25,13 +25,12 @@ LIBS=$(pkg-config --libs javascriptcoregtk-4.1 2>/dev/null | sed 's/-l/ -Xlinker
 # Debug: Show filter if set
 if [ -n "${FILTER_TEST}" ]; then
   echo "Test filter: ${FILTER_TEST}"
-else
-  echo "No test filter set - running all tests"
 fi
 
 # Configure output filtering based on SUPPRESS_PACKAGE_WARNINGS environment variable
 if [ "${SUPPRESS_PACKAGE_WARNINGS:-false}" = "true" ]; then
   # Filter out package manifest warnings from dependencies
+  echo "with suppressed package warnings."
   DISABLE_FILE_MONITORING=true swift test --scratch-path .build --num-workers ${CPU_COUNT} --parallel ${EXTRA} \
     --enable-code-coverage \
     --xunit-output .build/testresults/xunit.xml \
@@ -50,8 +49,10 @@ fi
 
 sleep 1
 
-cat "$(swift test --show-codecov-path)" | jq "del(.data[].files[].segments[])" >.build/testresults/coverage.json
-java -jar Deployment/Coverify-1.0-SNAPSHOT.jar .build/testresults/coverage.json >.build/testresults/coverage.xml
+if [ -f "$(swift test --show-codecov-path)" ]; then
+    cat "$(swift test --show-codecov-path)" | jq "del(.data[].files[].segments[])" >.build/testresults/coverage.json
+    java -jar Deployment/Coverify-1.0-SNAPSHOT.jar .build/testresults/coverage.json >.build/testresults/coverage.xml
+fi
 
 echo "Checking Project Requirements..."
 TEST_FAILS=$(cat .build/testresults/xunit.xml | grep "failure" | grep -v 'failures="0"' | wc -l)
