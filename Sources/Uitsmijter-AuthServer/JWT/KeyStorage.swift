@@ -1,6 +1,7 @@
 import Foundation
 import JWTKit
 import Vapor
+import Logger
 
 /// A facade that manages RSA key storage through pluggable backend implementations.
 ///
@@ -55,6 +56,9 @@ struct KeyStorage: KeyStorageProtocol, Sendable {
     /// - Important: Thread-safe through actor isolation of underlying MemoryKeyStorage implementation
     static let shared = KeyStorage(use: .memory)
 
+    /// Unique identifier for this KeyStorage instance (for debugging)
+    let instanceID: String = UUID().uuidString.prefix(8).description
+
     /// The underlying storage implementation that handles actual data persistence.
     private let implementation: KeyStorageProtocol
 
@@ -88,10 +92,12 @@ struct KeyStorage: KeyStorageProtocol, Sendable {
     // MARK: - KeyStorageProtocol
 
     func generateAndStoreKey(kid: String, setActive: Bool = true) async throws {
+        Log.debug("KeyStorage[\(instanceID)] generateAndStoreKey(kid: \(kid), setActive: \(setActive))")
         try await implementation.generateAndStoreKey(kid: kid, setActive: setActive)
     }
 
     func getActiveKey() async throws -> KeyGenerator.RSAKeyPair {
+        Log.debug("KeyStorage[\(instanceID)] getActiveKey()")
         return try await implementation.getActiveKey()
     }
 
@@ -104,7 +110,10 @@ struct KeyStorage: KeyStorageProtocol, Sendable {
     }
 
     func getAllPublicKeys() async throws -> JWKSet {
-        return try await implementation.getAllPublicKeys()
+        Log.debug("KeyStorage[\(instanceID)] getAllPublicKeys()")
+        let result = try await implementation.getAllPublicKeys()
+        Log.debug("KeyStorage[\(instanceID)] getAllPublicKeys() returned \(result.keys.count) keys")
+        return result
     }
 
     func getActiveSigningKeyPEM() async throws -> String {

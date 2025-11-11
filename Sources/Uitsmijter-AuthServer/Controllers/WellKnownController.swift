@@ -204,8 +204,14 @@ struct WellKnownController: RouteCollection {
     func getJWKS(req: Request) async throws -> Response {
         Log.info("JWKS requested", requestId: req.id)
 
-        // Get KeyStorage from application (injected), fallback to shared singleton
-        let keyStorage = req.application.keyStorage ?? KeyStorage.shared
+        // Get KeyStorage from application (injected)
+        // IMPORTANT: No fallback to KeyStorage.shared to ensure test isolation
+        guard let keyStorage = req.application.keyStorage else {
+            Log.error("KeyStorage not configured in application", requestId: req.id)
+            throw Abort(.internalServerError, reason: "Key storage not configured")
+        }
+
+        Log.debug("Using KeyStorage[\(keyStorage.instanceID)]", requestId: req.id)
 
         // Ensure at least one key exists (auto-generates if empty)
         _ = try await keyStorage.getActiveKey()
