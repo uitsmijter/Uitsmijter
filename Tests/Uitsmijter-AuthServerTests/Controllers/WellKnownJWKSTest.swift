@@ -9,7 +9,6 @@ import VaporTesting
 /// its own independent KeyStorage instance through app.keyStorage in configure.swift.
 /// This ensures complete test isolation without shared state pollution.
 @Suite("JWKS Endpoint Integration Tests", .serialized)
-// swiftlint:disable type_body_length
 struct WellKnownJWKSTest {
     let decoder = JSONDecoder()
 
@@ -360,4 +359,3 @@ struct WellKnownJWKSTest {
         }
     }
 }
-// swiftlint:enable type_body_length
