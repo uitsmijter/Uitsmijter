@@ -185,6 +185,36 @@ actor KeyGenerator {
         return pemString
     }
 
+    /// Convert multiple key pairs to a JWK Set in a single actor call
+    ///
+    /// This method processes all key pairs within the actor's isolation boundary,
+    /// preventing cross-actor deadlocks that occur when calling convertToJWK
+    /// repeatedly from another actor.
+    ///
+    /// ## Deadlock Prevention
+    ///
+    /// When KeyStorage (actor) calls convertToJWK multiple times, each call
+    /// requires entering the KeyGenerator actor. If multiple KeyStorage instances
+    /// run concurrently, they can deadlock waiting for each other's actor access.
+    ///
+    /// This batched method solves the problem by:
+    /// 1. Taking all key pairs at once (no actor reentrancy)
+    /// 2. Processing them synchronously within KeyGenerator's actor
+    /// 3. Returning the complete JWK Set in one response
+    ///
+    /// - Parameter keyPairs: Array of key pairs to convert
+    /// - Returns: JWK Set containing all converted public keys
+    /// - Throws: ConversionError if any key conversion fails
+    func convertToJWKSet(_ keyPairs: [RSAKeyPair]) async throws -> JWKSet {
+        var jwks: [RSAPublicJWK] = []
+        for keyPair in keyPairs {
+            // Call synchronous version - we're already inside the actor
+            let jwk = try await convertToJWK(keyPair: keyPair)
+            jwks.append(jwk)
+        }
+        return JWKSet(keys: jwks)
+    }
+
     /// Convert public key to JWK format
     ///
     /// Extracts the RSA public key components (modulus and exponent) and encodes
@@ -195,6 +225,11 @@ actor KeyGenerator {
     /// JWK requires Base64url encoding (not standard Base64):
     /// - Uses `-` and `_` instead of `+` and `/`
     /// - No padding (`=`) characters
+    ///
+    /// ## Note for Multiple Keys
+    ///
+    /// If converting multiple key pairs, prefer `convertToJWKSet(_:)` to avoid
+    /// actor reentrancy issues when called from another actor.
     ///
     /// - Parameter keyPair: The key pair to extract public key from
     /// - Returns: JWK representation suitable for JWKS endpoint

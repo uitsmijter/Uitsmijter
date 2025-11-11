@@ -81,23 +81,13 @@ actor MemoryKeyStorage: KeyStorageProtocol {
 
     func getAllPublicKeys() async throws -> JWKSet {
         // Extract all key pairs from actor context BEFORE any await calls
-        // This prevents actor reentrancy deadlock with KeyGenerator actor
+        // This prevents holding the MemoryKeyStorage actor lock during KeyGenerator calls
         let keyPairs = keys.values.map { $0.keyPair }
 
-        // CRITICAL: Convert keys outside actor context to prevent deadlock
-        // When multiple concurrent requests access both MemoryKeyStorage and KeyGenerator actors
-        return try await Self.convertKeysToJWKSet(keyPairs)
-    }
-
-    /// Convert key pairs to JWK Set outside of actor isolation
-    /// This prevents deadlock when calling KeyGenerator actor from MemoryKeyStorage actor
-    nonisolated private static func convertKeysToJWKSet(_ keyPairs: [KeyGenerator.RSAKeyPair]) async throws -> JWKSet {
-        var jwks: [RSAPublicJWK] = []
-        for keyPair in keyPairs {
-            let jwk = try await KeyGenerator.shared.convertToJWK(keyPair: keyPair)
-            jwks.append(jwk)
-        }
-        return JWKSet(keys: jwks)
+        // CRITICAL: Use batched conversion to prevent actor reentrancy deadlock
+        // The batched method processes all keys in ONE KeyGenerator actor call,
+        // preventing circular waits when multiple KeyStorage instances run concurrently
+        return try await KeyGenerator.shared.convertToJWKSet(keyPairs)
     }
 
     func getActiveSigningKeyPEM() async throws -> String {
