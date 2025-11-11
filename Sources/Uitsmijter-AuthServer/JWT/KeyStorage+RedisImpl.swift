@@ -38,14 +38,20 @@ actor RedisKeyStorage: KeyStorageProtocol {
     /// Injected Redis client
     let redis: RedisClient
 
-    /// Key generator
-    private let generator = KeyGenerator()
+    /// Key generator for RSA key pair generation
+    /// - Note: Injected to allow isolated instances in tests, preventing cross-test contention
+    private let generator: KeyGenerator
 
     /// Redis key prefix
     private static let keyPrefix = "uitsmijter:jwks"
 
-    init(_ client: RedisClient) {
+    /// Initialize Redis key storage
+    /// - Parameters:
+    ///   - client: Redis client instance
+    ///   - generator: KeyGenerator instance to use. Defaults to shared singleton for production.
+    init(_ client: RedisClient, generator: KeyGenerator = KeyGenerator.shared) {
         redis = client
+        self.generator = generator
     }
 
     // MARK: - KeyStorageProtocol
