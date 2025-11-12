@@ -147,9 +147,9 @@ actor RedisKeyStorage: KeyStorageProtocol {
         // Extract all key pairs from actor context first
         let keyPairs = await getAllKeys()
 
-        // Use batched conversion to avoid cross-actor deadlock
-        // Single actor call prevents reentrancy issues under parallel load
-        return try await generator.convertToJWKSet(keyPairs)
+        // Use batched conversion - now nonisolated so no actor hop needed
+        // This prevents deadlocks since convertToJWKSet doesn't require actor isolation
+        return try generator.convertToJWKSet(keyPairs)
     }
 
     func getActiveSigningKeyPEM() async throws -> String {

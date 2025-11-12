@@ -185,30 +185,27 @@ actor KeyGenerator {
         return pemString
     }
 
-    /// Convert multiple key pairs to a JWK Set in a single actor call
+    /// Convert multiple key pairs to a JWK Set
     ///
-    /// This method processes all key pairs within the actor's isolation boundary,
-    /// preventing cross-actor deadlocks that occur when calling convertToJWK
-    /// repeatedly from another actor.
+    /// This method processes all key pairs without requiring actor isolation,
+    /// since it only calls nonisolated methods and doesn't access actor state.
     ///
     /// ## Deadlock Prevention
     ///
-    /// When KeyStorage (actor) calls convertToJWK multiple times, each call
-    /// requires entering the KeyGenerator actor. If multiple KeyStorage instances
-    /// run concurrently, they can deadlock waiting for each other's actor access.
+    /// By marking this method as nonisolated, we avoid unnecessary actor hops
+    /// when called from other actors (like MemoryKeyStorage). This prevents
+    /// potential deadlocks that can occur when multiple actors try to acquire
+    /// each other's executors.
     ///
-    /// This batched method solves the problem by:
-    /// 1. Taking all key pairs at once (no actor reentrancy)
-    /// 2. Processing them synchronously within KeyGenerator's actor
-    /// 3. Returning the complete JWK Set in one response
+    /// Since convertToJWK is nonisolated and this method doesn't access any
+    /// actor state, there's no need for actor isolation.
     ///
     /// - Parameter keyPairs: Array of key pairs to convert
     /// - Returns: JWK Set containing all converted public keys
     /// - Throws: ConversionError if any key conversion fails
-    func convertToJWKSet(_ keyPairs: [RSAKeyPair]) async throws -> JWKSet {
+    nonisolated func convertToJWKSet(_ keyPairs: [RSAKeyPair]) throws -> JWKSet {
         var jwks: [RSAPublicJWK] = []
         for keyPair in keyPairs {
-            // Call synchronous version - we're already inside the actor (no await needed)
             let jwk = try convertToJWK(keyPair: keyPair)
             jwks.append(jwk)
         }
@@ -228,8 +225,8 @@ actor KeyGenerator {
     ///
     /// ## Note for Multiple Keys
     ///
-    /// If converting multiple key pairs, prefer `convertToJWKSet(_:)` to avoid
-    /// actor reentrancy issues when called from another actor.
+    /// If converting multiple key pairs, prefer `convertToJWKSet(_:)` for
+    /// convenience and cleaner code.
     ///
     /// - Parameter keyPair: The key pair to extract public key from
     /// - Returns: JWK representation suitable for JWKS endpoint
