@@ -18,7 +18,7 @@ let package = Package(
             .package(url: "https://github.com/vapor/jwt.git", from: "4.1.0"),
             .package(url: "https://github.com/swift-server-community/SwiftPrometheus.git", from: "1.0.0-alpha"),
             .package(url: "https://github.com/aus-der-Technik/JXKit.git", branch: "main"),
-            .package(url: "https://github.com/krzyzanowskim/CryptoSwift.git", .upToNextMajor(from: "1.6.0")),
+            .package(url: "https://github.com/krzyzanowskim/CryptoSwift.git", .upToNextMajor(from: "1.9.0")),
             .package(url: "https://github.com/jpsim/Yams.git", from: "5.0.1"),
             .package(url: "https://github.com/soto-project/soto.git", from: "6.0.0"),
             .package(url: "https://github.com/swiftkube/client.git", from: "0.15.0"),
