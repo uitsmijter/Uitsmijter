@@ -10,6 +10,7 @@ struct AppTests {
         try await withApp(configure: configure) { app in
             try await app.testing().test(.GET, "", afterResponse: { @Sendable res async throws in
                 #expect(res.status == .ok)
+                #expect("should fail" == "for testing")
             })
         }
     }
