@@ -20,7 +20,7 @@ extension JSFunctions {
     /// - Returns: a nil value
     ///
     func say(_ level: LogLevels? = .info) -> JXValue {
-        JXValue(newFunctionIn: ctx) { context, _, arguments in
+        JXValue(newFunctionIn: ctx) { [logWriter] context, _, arguments in
             let toSay = arguments.compactMap { arg -> String? in
                 // Convert all types to strings
                 if let str = arg.stringValue {
@@ -32,11 +32,40 @@ extension JSFunctions {
                 }
                 return arg.stringValue  // Fallback for other types
             }
-            switch level {
-            case .error:
-                Log.error("|js|\(ctx.ident): \(toSay.joined(separator: " "))")
-            default:
-                Log.info("|js|\(ctx.ident): \(toSay.joined(separator: " "))")
+            let message = "|js|\(ctx.ident): \(toSay.joined(separator: " "))"
+
+            // Use isolated logWriter if provided, otherwise use global Log
+            if let logWriter {
+                switch level {
+                case .error:
+                    logWriter.log(
+                        level: .error,
+                        message: .init(stringLiteral: message),
+                        metadata: nil,
+                        source: "JSFunctions",
+                        file: #fileID,
+                        function: #function,
+                        line: #line
+                    )
+                default:
+                    logWriter.log(
+                        level: .info,
+                        message: .init(stringLiteral: message),
+                        metadata: nil,
+                        source: "JSFunctions",
+                        file: #fileID,
+                        function: #function,
+                        line: #line
+                    )
+                }
+            } else {
+                // Fallback to global Log singleton
+                switch level {
+                case .error:
+                    Log.error(message)
+                default:
+                    Log.info(message)
+                }
             }
             return JXValue(nullIn: context)
         }

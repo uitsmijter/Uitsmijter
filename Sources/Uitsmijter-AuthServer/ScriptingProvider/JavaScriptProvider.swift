@@ -24,6 +24,13 @@ actor JavaScriptProvider: JSFunctionsDelegate {
     ///
     private let ctx: JXContext
 
+    /// Optional LogWriter for test isolation. If nil, uses global Log singleton.
+    ///
+    /// This allows tests to use isolated LogWriter instances instead of the shared global logger,
+    /// preventing race conditions and log buffer collisions during parallel test execution.
+    ///
+    private let logWriter: LogWriter?
+
     /// Continuation for async/await coordination with JavaScript commit callback.
     /// This replaces the DispatchGroup pattern with proper Swift concurrency.
     ///
@@ -83,14 +90,20 @@ actor JavaScriptProvider: JSFunctionsDelegate {
 
     /// Creates a new empty JavaScriptProvider with an isolated javascript context
     ///
-    init() {
+    /// - Parameter logWriter: Optional LogWriter for test isolation. If nil, JavaScript logging
+    ///                        functions will use the global Log singleton. Providing a LogWriter
+    ///                        creates an isolated logging context for this provider instance.
+    ///
+    init(logWriter: LogWriter? = nil) {
+        self.logWriter = logWriter
+
         // javascript context
         ctx = JXContext()
         ctx.exceptionHandler = exceptionHandler
 
         // Bind function implementation to the context
         // @see JSFunctions
-        var functions = JSFunctions(bind: ctx, delegate: self)
+        var functions = JSFunctions(bind: ctx, delegate: self, logWriter: logWriter)
         // convenience call to be swift likely (readability)
         functions.delegate = self
     }

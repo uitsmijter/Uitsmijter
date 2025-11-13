@@ -3,6 +3,7 @@ import Foundation
 import FoundationNetworking
 #endif
 import JXKit
+import Logger
 
 /// A delegation protocol to receive messages from javascript when a value is committed
 protocol JSFunctionsDelegate {
@@ -31,6 +32,13 @@ struct JSFunctions {
     ///
     var delegate: JSFunctionsDelegate?
 
+    /// Optional LogWriter for test isolation. If nil, logging functions use global Log singleton.
+    ///
+    /// This allows tests to use isolated LogWriter instances, preventing race conditions
+    /// during parallel test execution.
+    ///
+    let logWriter: LogWriter?
+
     /// Decoder to decode structs into json
     let encoder = JSONEncoder()
 
@@ -42,11 +50,13 @@ struct JSFunctions {
     /// - Parameters:
     ///   - ctx: The javascript context to where the functions applied to
     ///   - delegate: A delegate that receive messages from javascript
+    ///   - logWriter: Optional LogWriter for isolated logging. If nil, uses global Log singleton.
     ///
     @discardableResult
-    init(bind ctx: JXContext, delegate: JSFunctionsDelegate) {
+    init(bind ctx: JXContext, delegate: JSFunctionsDelegate, logWriter: LogWriter? = nil) {
         self.ctx = ctx
         self.delegate = delegate
+        self.logWriter = logWriter
 
         ctx.global["say"] = say()
         ctx.global["console"]["log"] = say(.info)
