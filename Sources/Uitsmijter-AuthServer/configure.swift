@@ -2,6 +2,7 @@ import Vapor
 import Leaf
 import Redis
 import JWT
+import JWTKit
 import Metrics
 import Prometheus
 import Logging
@@ -94,7 +95,7 @@ import Logger
 /// - SeeAlso: ``EntityLoader`` for tenant and client entity loading
 /// - SeeAlso: ``configureLeafTags(_:)`` for custom template tag registration
 @MainActor
-public func configure(_ app: Application) throws {
+public func configure(_ app: Application) async throws {
     // Initialize application logger with the shared logger instance
     app.logger = Log.shared
 
@@ -135,8 +136,10 @@ public func configure(_ app: Application) throws {
     // Initialize Prometheus metrics client for application monitoring
     _ = Prometheus.main.getClient()
 
-    // Configure JWT token signing with the application's signer
-    app.jwt.signers.use(jwt_signer)
+    // Configure JWT signing and verification keys for Vapor's JWT middleware
+    // The HS256 key is always available, RSA keys are added dynamically from KeyStorage
+    let hmacKey = HMACKey(from: [UInt8](jwtSecret.utf8))
+    await app.jwt.keys.add(hmac: hmacKey, digestAlgorithm: .sha256)
 
     // Configure JSON encoding/decoding strategies
     // This encoder is used for HTTP responses with the .json content type
@@ -185,14 +188,14 @@ public func configure(_ app: Application) throws {
             // Store OAuth authorization codes in Redis for distributed deployments
             app.authCodeStorage = .init(use: .redis(client: app.redis))
             // Store RSA keys in Redis for distributed deployments (supports HPA/multi-pod)
-            // Use isolated generator to avoid contention in parallel test execution
+            // Use isolated generator instance to avoid cross-test contention
             app.keyStorage = KeyStorage(use: .redis(client: app.redis), generator: KeyGenerator())
         } catch {
             // If Redis connection fails, fall back to in-memory storage to keep the application running
             app.logger.error("Failed to configure Redis: \(error). Falling back to in-memory session storage.")
             app.sessions.use(.memory)
             app.authCodeStorage = .init(use: .memory)
-            // Fallback to in-memory key storage with isolated generator for testing
+            // Fallback to in-memory key storage with isolated generator
             app.keyStorage = KeyStorage(use: .memory, generator: KeyGenerator())
         }
     } else {

@@ -62,7 +62,7 @@ import Redis
 
         let app = try await Application.make(.testing)
         app.directory.resourcesDirectory = temporaryDirectory.absoluteString
-        try? configure(app)
+        try? await configure(app)
 
         let mock = RedisMock()
         let storage = AuthCodeStorage(use: .redis(client: mock))

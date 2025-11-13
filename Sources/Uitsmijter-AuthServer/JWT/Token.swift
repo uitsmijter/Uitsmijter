@@ -149,13 +149,20 @@ struct Token: ExpressibleByStringLiteral {
     init(stringLiteral value: Self.StringLiteralType) {
         self.value = value
 
-        // For string literal initialization, we need to use the legacy jwt_signer
-        // for synchronous verification. Async verification via SignerManager
-        // should be used in production code.
+        // jwt-kit v5 migration: JWTKeyCollection is async, so we can't verify here.
+        // For string literal initialization, we decode without verification.
+        // Production code should use SignerManager.verify() for proper verification.
         do {
-            let signers = JWTSigners()
-            signers.use(jwt_signer)
-            payload = try signers.verify(self.value, as: Payload.self)
+            // Decode JWT without verification (unsafe, for convenience only)
+            let parts = value.split(separator: ".")
+            guard parts.count == 3,
+                  let payloadData = Data(base64URLEncoded: String(parts[1])) else {
+                throw TokenError.invalidFormat
+            }
+
+            let decoder = JSONDecoder()
+            decoder.dateDecodingStrategy = .secondsSince1970
+            payload = try decoder.decode(Payload.self, from: payloadData)
             expirationDate = payload.expiration.value
             secondsToExpire = expirationDate.millisecondsSinceNow / 1000
         } catch {
@@ -175,6 +182,11 @@ struct Token: ExpressibleByStringLiteral {
             expirationDate = Date()
             secondsToExpire = 0
         }
+    }
+
+    enum TokenError: Error {
+        case invalidFormat
+        case CALCULATE_TIME
     }
 
     /// Verify a JWT token string asynchronously using SignerManager
@@ -306,5 +318,20 @@ struct Token: ExpressibleByStringLiteral {
         if let kid = kid {
             Log.debug("Signed token with RS256 using kid: \(kid)")
         }
+    }
+}
+
+/// Extension to support base64URL decoding
+extension Data {
+    init?(base64URLEncoded string: String) {
+        var base64 = string
+            .replacingOccurrences(of: "-", with: "+")
+            .replacingOccurrences(of: "_", with: "/")
+
+        // Add padding if needed
+        let paddingLength = (4 - base64.count % 4) % 4
+        base64 += String(repeating: "=", count: paddingLength)
+
+        self.init(base64Encoded: base64)
     }
 }

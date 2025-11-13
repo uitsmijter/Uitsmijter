@@ -29,7 +29,7 @@ struct AuthControllerCodeInsecureFlowTest {
                     + "&scope=test"
                     + "&state=123",
                 beforeRequest: { @Sendable req async throws in
-                    req.headers.bearerAuthorization = try validAuthorisation(for: tenant, in: app)
+                    req.headers.bearerAuthorization = try await validAuthorisation(for: tenant, in: app)
                 },
                 afterResponse: { @Sendable res async throws in
                     let contentLength = res.headers["content-length"].first
@@ -135,7 +135,7 @@ struct AuthControllerCodeInsecureFlowTest {
                     + "&state=123"
                     + "&code_challenge_method=none",
                 beforeRequest: { @Sendable req async throws in
-                    req.headers.bearerAuthorization = try validAuthorisation(for: tenant, in: app)
+                    req.headers.bearerAuthorization = try await validAuthorisation(for: tenant, in: app)
                 },
                 afterResponse: { @Sendable res async throws in
                     let contentLength = res.headers["content-length"].first

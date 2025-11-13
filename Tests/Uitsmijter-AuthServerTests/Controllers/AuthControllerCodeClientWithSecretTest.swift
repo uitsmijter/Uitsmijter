@@ -32,7 +32,7 @@ struct AuthControllerCodeClientWithSecretTest {
                     + "&scope=test"
                     + "&state=123",
                 beforeRequest: { @Sendable req async throws in
-                    req.headers.bearerAuthorization = try validAuthorisation(for: tenant, in: app)
+                    req.headers.bearerAuthorization = try await validAuthorisation(for: tenant, in: app)
                 },
                 afterResponse: { @Sendable res async throws in
                     #expect(res.status == .seeOther)
@@ -61,7 +61,7 @@ struct AuthControllerCodeClientWithSecretTest {
                     + "&scope=test"
                     + "&state=123",
                 beforeRequest: { @Sendable req async throws in
-                    req.headers.bearerAuthorization = try validAuthorisation(for: tenant, in: app)
+                    req.headers.bearerAuthorization = try await validAuthorisation(for: tenant, in: app)
                 },
                 afterResponse: { @Sendable res async throws in
                     #expect(res.status == .unauthorized)
@@ -90,7 +90,7 @@ struct AuthControllerCodeClientWithSecretTest {
                     + "&scope=test"
                     + "&state=123",
                 beforeRequest: { @Sendable req async throws in
-                    req.headers.bearerAuthorization = try validAuthorisation(for: tenant, in: app)
+                    req.headers.bearerAuthorization = try await validAuthorisation(for: tenant, in: app)
                 },
                 afterResponse: { @Sendable res async throws in
                     #expect(res.status == .unauthorized)
@@ -123,7 +123,7 @@ struct AuthControllerCodeClientWithSecretTest {
                     + "&code_challenge_method=plain"
                     + "&code_challenge=hello-world",
                 beforeRequest: { @Sendable req async throws in
-                    req.headers.bearerAuthorization = try validAuthorisation(for: tenant, in: app)
+                    req.headers.bearerAuthorization = try await validAuthorisation(for: tenant, in: app)
                 },
                 afterResponse: { @Sendable res async throws in
                     #expect(res.status == .seeOther)
@@ -153,7 +153,7 @@ struct AuthControllerCodeClientWithSecretTest {
                     + "&code_challenge_method=plain"
                     + "&code_challenge=hello-world",
                 beforeRequest: { @Sendable req async throws in
-                    req.headers.bearerAuthorization = try validAuthorisation(for: tenant, in: app)
+                    req.headers.bearerAuthorization = try await validAuthorisation(for: tenant, in: app)
                 },
                 afterResponse: { @Sendable res async throws in
                     #expect(res.status == .unauthorized)
@@ -184,7 +184,7 @@ struct AuthControllerCodeClientWithSecretTest {
                     + "&code_challenge_method=plain"
                     + "&code_challenge=hello-world",
                 beforeRequest: { @Sendable req async throws in
-                    req.headers.bearerAuthorization = try validAuthorisation(for: tenant, in: app)
+                    req.headers.bearerAuthorization = try await validAuthorisation(for: tenant, in: app)
                 },
                 afterResponse: { @Sendable res async throws in
                     #expect(res.status == .unauthorized)

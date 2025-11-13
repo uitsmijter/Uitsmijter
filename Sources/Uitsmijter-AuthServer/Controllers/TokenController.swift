@@ -78,8 +78,8 @@ struct TokenController: RouteCollection, OAuthControllerProtocol {
         auth.post(use: { @Sendable (req: Request) async throws -> TokenResponse in
             try await self.requestToken(req: req)
         })
-        auth.get(["info"], use: { @Sendable (req: Request) throws -> Response in
-            try self.getTokenInfo(req: req)
+        auth.get(["info"], use: { @Sendable (req: Request) async throws -> Response in
+            try await self.getTokenInfo(req: req)
         })
     }
 
@@ -157,9 +157,9 @@ struct TokenController: RouteCollection, OAuthControllerProtocol {
     /// - Parameter req: Vapor Request
     /// - Returns: A `Response` with a json encoded profile
     /// - Throws: An error if the user is not authenticated, or something wend wrong with the serialisation.
-    @Sendable func getTokenInfo(req: Request) throws -> Response {
+    @Sendable func getTokenInfo(req: Request) async throws -> Response {
         do {
-            let payload = try? req.jwt.verify(as: Payload.self)
+            let payload = try? await req.jwt.verify(as: Payload.self)
             guard let payload else {
                 Log.warning("Invalid token in token info request", requestId: req.id)
                 throw Abort(.unauthorized, reason: "ERRORS.INVALID_TOKEN")

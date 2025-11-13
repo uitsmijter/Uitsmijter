@@ -29,7 +29,7 @@ struct LogoutController: RouteCollection {
     @Sendable func startLogoutRefresh(req: Request) async throws -> View {
         let post_logout_redirect_uri: String? = try? req.query.get(at: "post_logout_redirect_uri")
 
-        let jwt = try? req.jwt.verify(as: Payload.self)
+        let jwt = try? await req.jwt.verify(as: Payload.self)
         var tenant: Tenant?
         if let jwt {
             let tenantName = jwt.tenant
@@ -58,7 +58,7 @@ struct LogoutController: RouteCollection {
         let locationRedirect: String = try req.query.get(at: "location") ?? "/"
 
         // to logout a user must have a valid token
-        let jwt = try req.jwt.verify(as: Payload.self)
+        let jwt = try await req.jwt.verify(as: Payload.self)
 
         // The tenant with whom the user is registered
         let tenantName = jwt.tenant

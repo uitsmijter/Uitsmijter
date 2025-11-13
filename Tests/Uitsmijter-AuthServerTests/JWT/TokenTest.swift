@@ -300,7 +300,7 @@ struct TokenTest {
     }
 
     @Test("Expired token is detected on initialization")
-    func expiredTokenDetection() throws {
+    func expiredTokenDetection() async throws {
         // Create a token with expired date
         let expiredDate = Date(timeIntervalSinceNow: -3600) // 1 hour ago
         let payload = Payload(
@@ -315,9 +315,7 @@ struct TokenTest {
             user: "expired@example.com"
         )
 
-        let signers = JWTSigners()
-        signers.use(jwt_signer)
-        let expiredTokenString = try signers.sign(payload)
+        let (expiredTokenString, _) = try await SignerManager.shared.sign(payload)
 
         // Initialize token from expired string
         let token: Token = Token(stringLiteral: expiredTokenString)

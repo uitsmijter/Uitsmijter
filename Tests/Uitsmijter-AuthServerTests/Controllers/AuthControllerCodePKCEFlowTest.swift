@@ -75,7 +75,7 @@ struct AuthControllerCodePKCEFlowTest {
                     + "&state=123&"
                     + "&code_challenge_method=plain",
                 beforeRequest: { @Sendable req async throws in
-                    req.headers.bearerAuthorization = try validAuthorisation(for: tenant, in: app)
+                    req.headers.bearerAuthorization = try await validAuthorisation(for: tenant, in: app)
                 }
             )
             #expect(response.status == .badRequest)

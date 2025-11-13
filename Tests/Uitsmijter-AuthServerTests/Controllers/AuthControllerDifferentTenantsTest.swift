@@ -39,7 +39,7 @@ struct AuthControllerDifferentTenantsTest {
                     + "&scope=test"
                     + "&state=123",
                 beforeRequest: { @Sendable req async throws in
-                    req.headers.bearerAuthorization = try validAuthorisation(for: tenant, in: app)
+                    req.headers.bearerAuthorization = try await validAuthorisation(for: tenant, in: app)
                 }
             )
             #expect(response.status == .seeOther)
@@ -68,7 +68,7 @@ struct AuthControllerDifferentTenantsTest {
                     + "&code_challenge=aem5AeKo"
                     + "&code_challenge_method=plain",
                 beforeRequest: { @Sendable req async throws in
-                    req.headers.bearerAuthorization = try validAuthorisation(for: tenant, in: app)
+                    req.headers.bearerAuthorization = try await validAuthorisation(for: tenant, in: app)
                 })
             #expect(response.status == .seeOther)
         }
@@ -94,7 +94,7 @@ struct AuthControllerDifferentTenantsTest {
                     + "&client_id=\(testAppIdent2.uuidString)"
                     + "&redirect_uri=http://localhost/&scope=test&state=123",
                 beforeRequest: { @Sendable req async throws in
-                    req.headers.bearerAuthorization = try validAuthorisation(for: tenant, in: app)
+                    req.headers.bearerAuthorization = try await validAuthorisation(for: tenant, in: app)
                 }
             )
             #expect(response.status == .forbidden)
@@ -125,7 +125,7 @@ struct AuthControllerDifferentTenantsTest {
                     + "&code_challenge=aem5AeKo"
                     + "&code_challenge_method=plain",
                 beforeRequest: { @Sendable req async throws in
-                    req.headers.bearerAuthorization = try validAuthorisation(for: tenant, in: app)
+                    req.headers.bearerAuthorization = try await validAuthorisation(for: tenant, in: app)
                 })
             #expect(response.status == .forbidden)
         }

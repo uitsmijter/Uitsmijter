@@ -11,7 +11,7 @@ struct LoginControllerProfileTests {
     @MainActor
     func setupApp() async throws -> Application {
         let app = try await Application.make(.testing)
-        try? configure(app)
+        try? await configure(app)
 
         app.entityStorage.tenants.removeAll()
         app.entityStorage.clients.removeAll()

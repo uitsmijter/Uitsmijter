@@ -12,13 +12,13 @@ func routes(_ app: Application) throws {
     app.middleware.use(RequestClientMiddleware())
 
     // Default route for serving `GET /`
-    app.get { req in
-        req.view.render(
+    app.get { req async throws in
+        try await req.view.render(
             Template.getPath(page: "index", request: req),
             PageProperties(
                 title: "\(Constants.APPLICATION)",
                 serviceUrl: "//" + (req.headers["host"].first ?? Constants.PUBLIC_DOMAIN),
-                payload: try? req.jwt.verify(as: Payload.self)
+                payload: try? await req.jwt.verify(as: Payload.self)
             )
         )
     }
