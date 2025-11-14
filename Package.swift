@@ -97,7 +97,7 @@ let package = Package(
             .testTarget(name: "Uitsmijter-AuthServerTests", dependencies: [
                 .target(name: "Uitsmijter-AuthServer"),
                 .product(name: "VaporTesting", package: "vapor"),
-            ], exclude: ["Entities/Loader/Stubs"]),
+            ], exclude: ["Entities/ResourceLoader/Stubs"]),
 
             // EXECUTE
             .executableTarget(
