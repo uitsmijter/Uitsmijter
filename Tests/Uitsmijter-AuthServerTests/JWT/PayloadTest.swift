@@ -199,12 +199,6 @@ struct PayloadTest {
         #expect(decodedPayload.user == originalPayload.user)
     }
 
-    // Note: The Payload.verify(using:) method tests have been removed.
-    // That method exists only to satisfy the JWTPayload protocol requirement from jwt-kit v5.
-    // Since the method only checks expiration (algorithm parameter is unused) and isn't called
-    // in production code, the verification logic is adequately tested through integration tests
-    // and TokenTest.swift which tests full JWT verification flows.
-
     @Test("Payload conforms to SubjectProtocol")
     func conformsToSubjectProtocol() {
         let payload = Payload(
