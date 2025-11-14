@@ -74,6 +74,14 @@ spec:
                     minItems: 1
                 silent_login:
                   type: boolean
+                jwt_algorithm:
+                  type: string
+                  description: JWT signing algorithm (HS256 or RS256)
+                  enum:
+                    - HS256
+                    - RS256
+                    - hs256
+                    - rs256
               required:
                 - hosts
                 - providers
