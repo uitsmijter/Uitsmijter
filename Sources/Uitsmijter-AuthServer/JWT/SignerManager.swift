@@ -30,11 +30,6 @@ import JWTKit
 /// 4. Old HS256 tokens remain valid until expiration
 /// 5. New tokens use RS256 with kid headers
 ///
-/// ## Migration Note (jwt-kit v5)
-///
-/// Updated to use JWTKeyCollection (actor) instead of JWTSigners.
-/// All operations now require `await` due to actor isolation.
-///
 /// ## Usage
 ///
 /// ```swift

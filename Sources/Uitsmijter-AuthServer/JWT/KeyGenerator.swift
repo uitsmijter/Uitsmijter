@@ -7,12 +7,6 @@ import JWTKit
 /// Generates RSA key pairs for asymmetric JWT signing according to RFC 7517.
 /// Keys are generated with 2048-bit modulus for security and performance balance.
 ///
-/// ## Migration Note
-///
-/// Migrated from BoringSSL to SwiftCrypto's _CryptoExtras for better compatibility
-/// and to resolve module conflicts. The API remains identical but now uses native
-/// Swift cryptography primitives.
-///
 /// ## Usage
 ///
 /// ```swift
