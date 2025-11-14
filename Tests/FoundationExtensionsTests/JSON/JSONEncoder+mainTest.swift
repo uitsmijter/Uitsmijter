@@ -1,5 +1,5 @@
 import Foundation
-@testable import Uitsmijter_AuthServer
+@testable import FoundationExtensions
 import Testing
 
 /// Tests for JSONEncoder+main extension

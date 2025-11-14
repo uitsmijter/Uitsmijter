@@ -33,7 +33,8 @@ let package = Package(
             .target(
                     name: "FoundationExtensions",
                     dependencies: [
-                        "CryptoSwift"
+                        "CryptoSwift",
+                        .product(name: "_CryptoExtras", package: "swift-crypto")
                     ],
                     swiftSettings: [
                         .unsafeFlags(["-warnings-as-errors"])
@@ -87,6 +88,8 @@ let package = Package(
             // TESTS
             .testTarget(name: "FoundationExtensionsTests", dependencies: [
                 .target(name: "FoundationExtensions"),
+                "CryptoSwift",
+                .product(name: "_CryptoExtras", package: "swift-crypto")
             ]),
             .testTarget(name: "LoggerTests", dependencies: [
                 .target(name: "Logger"),

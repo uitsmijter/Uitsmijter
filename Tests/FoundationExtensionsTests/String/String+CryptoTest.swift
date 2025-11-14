@@ -1,5 +1,5 @@
 import Testing
-@testable import Uitsmijter_AuthServer
+@testable import FoundationExtensions
 
 @Suite("String Crypto Extension Tests")
 struct StringCryptoTest {

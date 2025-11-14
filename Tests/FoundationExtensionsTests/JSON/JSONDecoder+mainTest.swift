@@ -1,5 +1,5 @@
 import Foundation
-@testable import Uitsmijter_AuthServer
+@testable import FoundationExtensions
 import Testing
 
 @Suite("JSONDecoder Main Extension Tests", .serialized)
