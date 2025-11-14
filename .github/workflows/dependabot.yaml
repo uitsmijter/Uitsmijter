@@ -10,7 +10,6 @@ on:
         type: choice
         options:
           - info
-          - rebase-all-prs
           - list-prs
 
 jobs:
@@ -53,38 +52,6 @@ jobs:
               echo ""
               echo "   # Recreate a Dependabot PR"
               echo "   gh pr comment <PR-NUMBER> --body '@dependabot recreate'"
-              echo ""
-              echo "3. Via this workflow:"
-              echo "   Run this workflow with action 'rebase-all-prs' to trigger"
-              echo "   updates for all existing Dependabot PRs"
-              ;;
-
-            "rebase-all-prs")
-              echo "## Rebasing all Dependabot PRs"
-              echo ""
-
-              # Get all open Dependabot PRs
-              PRS=$(gh pr list --repo "$REPO" --author "app/dependabot" --state open --json number --jq '.[].number')
-
-              if [ -z "$PRS" ]; then
-                echo "No open Dependabot PRs found."
-                echo ""
-                echo "To trigger new dependency checks, visit:"
-                echo "https://github.com/$REPO/network/updates"
-              else
-                echo "Found Dependabot PRs: $PRS"
-                echo ""
-
-                for PR in $PRS; do
-                  echo "Triggering rebase for PR #$PR..."
-                  gh pr comment "$PR" --repo "$REPO" --body "@dependabot rebase" || echo "Failed to comment on PR #$PR"
-                  sleep 2
-                done
-
-                echo ""
-                echo "✅ Rebase triggered for all Dependabot PRs!"
-                echo "This will cause Dependabot to check for new updates."
-              fi
               ;;
 
             "list-prs")
@@ -106,19 +73,10 @@ jobs:
               echo "**Option 1: GitHub UI** (Recommended)" >> $GITHUB_STEP_SUMMARY
               echo "Visit: https://github.com/${{ github.repository }}/network/updates" >> $GITHUB_STEP_SUMMARY
               echo "" >> $GITHUB_STEP_SUMMARY
-              echo "**Option 2: Rebase existing PRs**" >> $GITHUB_STEP_SUMMARY
-              echo "Run this workflow with action 'rebase-all-prs'" >> $GITHUB_STEP_SUMMARY
-              echo "" >> $GITHUB_STEP_SUMMARY
-              echo "**Option 3: GitHub CLI**" >> $GITHUB_STEP_SUMMARY
+              echo "**Option 2: GitHub CLI**" >> $GITHUB_STEP_SUMMARY
               echo '```bash' >> $GITHUB_STEP_SUMMARY
               echo 'gh pr comment <PR-NUMBER> --body "@dependabot rebase"' >> $GITHUB_STEP_SUMMARY
               echo '```' >> $GITHUB_STEP_SUMMARY
-              ;;
-
-            "rebase-all-prs")
-              echo "✅ Triggered rebase for all open Dependabot PRs" >> $GITHUB_STEP_SUMMARY
-              echo "" >> $GITHUB_STEP_SUMMARY
-              echo "Dependabot will now check for updates and update the PRs accordingly." >> $GITHUB_STEP_SUMMARY
               ;;
 
             "list-prs")
