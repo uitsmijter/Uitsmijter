@@ -42,10 +42,6 @@ import JWTKit
 /// let payload = try await manager.verify(tokenString, as: Payload.self)
 /// ```
 ///
-/// ## Thread Safety
-///
-/// This actor ensures thread-safe access to signers and keys across concurrent requests.
-///
 /// - SeeAlso: ``KeyStorage``
 /// - SeeAlso: ``Token``
 actor SignerManager {

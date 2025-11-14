@@ -21,10 +21,6 @@ import JWTKit
 /// - **Public Exponent**: 65537 (0x10001, RSA_F4)
 /// - **Usage**: JWT signature generation and verification
 ///
-/// ## Thread Safety
-///
-/// This actor ensures thread-safe key generation operations.
-///
 /// - SeeAlso: [RFC 7517 Section 6.3](https://www.rfc-editor.org/rfc/rfc7517#section-6.3)
 actor KeyGenerator {
 

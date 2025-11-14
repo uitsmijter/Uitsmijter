@@ -18,11 +18,6 @@ import Logger
 /// - **Development/Testing**: Fast in-memory storage
 /// - **Custom**: User-provided storage implementation
 ///
-/// ## Thread Safety
-///
-/// All operations are async and thread-safe through Swift's concurrency model. The struct conforms to `Sendable`,
-/// making it safe to pass across concurrency boundaries.
-///
 /// ## Topics
 ///
 /// ### Creating a Storage Instance

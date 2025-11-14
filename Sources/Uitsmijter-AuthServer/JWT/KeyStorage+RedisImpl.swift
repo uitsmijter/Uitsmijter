@@ -25,11 +25,6 @@ import JWTKit
 /// - Only generates a new key if no key exists in Redis
 /// - If active key is older than MAX_KEY_AGE_DAYS, generates a new key
 /// - Uses distributed locking to prevent race conditions across pods
-///
-/// ## Thread Safety
-///
-/// Actor isolation ensures thread-safe access across concurrent requests within a single pod.
-/// Redis provides consistency across multiple pods.
 actor RedisKeyStorage: KeyStorageProtocol {
 
     /// Maximum age of active key before rotation (in days)

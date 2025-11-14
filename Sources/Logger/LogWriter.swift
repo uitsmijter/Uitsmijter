@@ -329,10 +329,6 @@ public final class LogWriter: @unchecked Sendable, LogHandler {
     /// The search is O(n) where n is the number of entries in the buffer (up to capacity of 250).
     /// The method is optimized to return early when a match is found.
     ///
-    /// ## Thread Safety
-    ///
-    /// This method is async to safely access the actor-isolated buffer.
-    ///
     /// ## Usage
     ///
     /// ```swift
@@ -405,12 +401,6 @@ public final class LogWriter: @unchecked Sendable, LogHandler {
     /// // Later, when the log is written, the waiting task automatically resumes
     /// Log.info("Test message test-uuid-123")
     /// ```
-    ///
-    /// ## Thread Safety
-    ///
-    /// This method is thread-safe through actor isolation of the underlying circular buffer.
-    /// Multiple concurrent calls are safe and will not interfere with each other.
-    ///
     /// - Parameters:
     ///   - searchString: The substring to search for in log messages (case-sensitive)
     ///   - timeout: Maximum time to wait in seconds (default: 5 seconds)
