@@ -15,7 +15,7 @@ updates:
       - "dependencies"
       - "swift"
     commit-message:
-      prefix: "chore(deps)"
+      prefix: "(Update: Swift) "
       include: "scope"
     reviewers:
       - "KrisSimon"
@@ -43,7 +43,7 @@ updates:
       - "dependencies"
       - "docker"
     commit-message:
-      prefix: "chore(deps)"
+      prefix: "(Update: Docker)"
       include: "scope"
     reviewers:
       - "KrisSimon"
@@ -62,7 +62,7 @@ updates:
       - "dependencies"
       - "github-actions"
     commit-message:
-      prefix: "chore(deps)"
+      prefix: "(Update: Actions)"
       include: "scope"
     reviewers:
       - "KrisSimon"
@@ -82,7 +82,7 @@ updates:
       - "npm"
       - "e2e-tests"
     commit-message:
-      prefix: "chore(deps)"
+      prefix: "(Update: npm)"
       include: "scope"
     reviewers:
       - "kris"
@@ -118,7 +118,7 @@ updates:
       - "dependencies"
       - "helm"
     commit-message:
-      prefix: "chore(deps)"
+      prefix: "(Update: Docker)"
       include: "scope"
     reviewers:
       - "KrisSimon"
