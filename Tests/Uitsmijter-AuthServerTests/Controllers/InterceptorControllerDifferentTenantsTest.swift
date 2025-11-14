@@ -26,7 +26,7 @@ struct InterceptorControllerDifferentTenantsTest {
                 return
             }
             try await app.testing().test(.GET, "interceptor", beforeRequest: { @Sendable req async throws in
-                req.headers.bearerAuthorization = try validAuthorisation(for: tenant1, in: app)
+                req.headers.bearerAuthorization = try await validAuthorisation(for: tenant1, in: app)
                 req.headers.replaceOrAdd(name: "X-Forwarded-Proto", value: "http")
                 req.headers.replaceOrAdd(name: "X-Forwarded-Host", value: tenant2.config.hosts.first ?? "_ERROR_")
                 req.headers.replaceOrAdd(name: "X-Forwarded-Uri", value: "/test")

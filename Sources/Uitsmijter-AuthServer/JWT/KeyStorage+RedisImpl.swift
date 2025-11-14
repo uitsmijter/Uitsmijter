@@ -25,11 +25,6 @@ import JWTKit
 /// - Only generates a new key if no key exists in Redis
 /// - If active key is older than MAX_KEY_AGE_DAYS, generates a new key
 /// - Uses distributed locking to prevent race conditions across pods
-///
-/// ## Thread Safety
-///
-/// Actor isolation ensures thread-safe access across concurrent requests within a single pod.
-/// Redis provides consistency across multiple pods.
 actor RedisKeyStorage: KeyStorageProtocol {
 
     /// Maximum age of active key before rotation (in days)
@@ -38,14 +33,20 @@ actor RedisKeyStorage: KeyStorageProtocol {
     /// Injected Redis client
     let redis: RedisClient
 
-    /// Key generator
-    private let generator = KeyGenerator()
+    /// Key generator for RSA key pair generation
+    /// - Note: Injected to allow isolated instances in tests, preventing cross-test contention
+    private let generator: KeyGenerator
 
     /// Redis key prefix
     private static let keyPrefix = "uitsmijter:jwks"
 
-    init(_ client: RedisClient) {
+    /// Initialize Redis key storage
+    /// - Parameters:
+    ///   - client: Redis client instance
+    ///   - generator: KeyGenerator instance to use. Defaults to shared singleton for production.
+    init(_ client: RedisClient, generator: KeyGenerator = KeyGenerator.shared) {
         redis = client
+        self.generator = generator
     }
 
     // MARK: - KeyStorageProtocol
@@ -138,18 +139,12 @@ actor RedisKeyStorage: KeyStorageProtocol {
     }
 
     func getAllPublicKeys() async throws -> JWKSet {
-        // Extract all key pairs from actor context first to avoid actor reentrancy deadlock
-        // This prevents calling KeyGenerator actor while holding RedisKeyStorage actor lock
+        // Extract all key pairs from actor context first
         let keyPairs = await getAllKeys()
 
-        // Convert to JWK outside actor context - prevents deadlock with concurrent requests
-        var jwks: [RSAPublicJWK] = []
-        for keyPair in keyPairs {
-            let jwk = try await generator.convertToJWK(keyPair: keyPair)
-            jwks.append(jwk)
-        }
-
-        return JWKSet(keys: jwks)
+        // Use batched conversion - now nonisolated so no actor hop needed
+        // This prevents deadlocks since convertToJWKSet doesn't require actor isolation
+        return try generator.convertToJWKSet(keyPairs)
     }
 
     func getActiveSigningKeyPEM() async throws -> String {

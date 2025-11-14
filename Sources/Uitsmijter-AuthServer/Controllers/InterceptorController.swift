@@ -229,7 +229,7 @@ struct InterceptorController: RouteCollection {
                     Log.info("Refresh token for user \(clientInfo.validPayload?.user ?? "-").", requestId: request.id)
                     payload.expiration.value = expirationDate
 
-                    let refreshToken = try request.jwt.sign(payload)
+                    let refreshToken = try await request.jwt.sign(payload)
                     response.headers.bearerAuthorization = BearerAuthorization(token: refreshToken)
 
                     response.cookies[Constants.COOKIE.NAME] = HTTPCookies.Value.defaultCookie(

@@ -563,7 +563,7 @@ struct LoginController: RouteCollection {
             user: loginForm.username,
             profile: profile
         )
-        let token = try req.jwt.sign(payload)
+        let token = try await req.jwt.sign(payload)
 
         Log.info("Redirect to \(redirectTargetLocation)", requestId: req.id)
         let response = req.redirect(to: redirectTargetLocation, redirectType: .normal)

@@ -20,7 +20,7 @@ struct InterceptorControllerNotConfiguredInClientTest {
             }
 
             try await app.testing().test(.GET, "interceptor", beforeRequest: { @Sendable req async throws in
-                req.headers.bearerAuthorization = try validAuthorisation(for: tenant, in: app)
+                req.headers.bearerAuthorization = try await validAuthorisation(for: tenant, in: app)
                 req.headers.replaceOrAdd(name: "X-Forwarded-Proto", value: "http")
                 if let hostHeaderValue = tenant.config.hosts.first {
                     req.headers.replaceOrAdd(name: "X-Forwarded-Host", value: hostHeaderValue)
@@ -50,7 +50,7 @@ struct InterceptorControllerNotConfiguredInClientTest {
             }
 
             try await app.testing().test(.GET, "interceptor", beforeRequest: { @Sendable req async throws in
-                req.headers.bearerAuthorization = try validAuthorisation(for: tenant, in: app)
+                req.headers.bearerAuthorization = try await validAuthorisation(for: tenant, in: app)
                 req.headers.replaceOrAdd(name: "X-Forwarded-Proto", value: "http")
                 if let hostHeaderValue = tenant.config.interceptor?.domain {
                     req.headers.replaceOrAdd(name: "X-Forwarded-Host", value: hostHeaderValue)
@@ -76,7 +76,7 @@ struct InterceptorControllerNotConfiguredInClientTest {
             }
 
             try await app.testing().test(.GET, "interceptor", beforeRequest: { @Sendable req async throws in
-                req.headers.bearerAuthorization = try validAuthorisation(for: tenant, in: app)
+                req.headers.bearerAuthorization = try await validAuthorisation(for: tenant, in: app)
                 req.headers.replaceOrAdd(name: "X-Forwarded-Proto", value: "http")
                 if let hostHeaderValue = tenant.config.hosts.first {
                     req.headers.replaceOrAdd(name: "X-Forwarded-Host", value: hostHeaderValue)

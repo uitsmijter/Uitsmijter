@@ -15,10 +15,11 @@ let package = Package(
             .package(url: "https://github.com/vapor/vapor.git", from: "4.119.0"),
             .package(url: "https://github.com/vapor/redis.git", from: "4.0.0"),
             .package(url: "https://github.com/vapor/leaf.git", from: "4.0.0"),
-            .package(url: "https://github.com/vapor/jwt.git", from: "4.1.0"),
+            .package(url: "https://github.com/vapor/jwt.git", from: "5.0.0"),
+            .package(url: "https://github.com/apple/swift-crypto.git", from: "3.0.0"),
             .package(url: "https://github.com/swift-server-community/SwiftPrometheus.git", from: "1.0.0-alpha"),
             .package(url: "https://github.com/aus-der-Technik/JXKit.git", branch: "main"),
-            .package(url: "https://github.com/krzyzanowskim/CryptoSwift.git", .upToNextMajor(from: "1.6.0")),
+            .package(url: "https://github.com/krzyzanowskim/CryptoSwift.git", .upToNextMajor(from: "1.9.0")),
             .package(url: "https://github.com/jpsim/Yams.git", from: "5.0.1"),
             .package(url: "https://github.com/soto-project/soto.git", from: "6.0.0"),
             .package(url: "https://github.com/swiftkube/client.git", from: "0.15.0"),
@@ -32,7 +33,8 @@ let package = Package(
             .target(
                     name: "FoundationExtensions",
                     dependencies: [
-                        
+                        "CryptoSwift",
+                        .product(name: "_CryptoExtras", package: "swift-crypto")
                     ],
                     swiftSettings: [
                         .unsafeFlags(["-warnings-as-errors"])
@@ -61,6 +63,7 @@ let package = Package(
                         .product(name: "Redis", package: "redis"),
                         .product(name: "Leaf", package: "leaf"),
                         .product(name: "JWT", package: "jwt"),
+                        .product(name: "_CryptoExtras", package: "swift-crypto"),
                         "CryptoSwift",
                         .product(name: "SotoS3", package: "soto"),
                         "SwiftPrometheus",
@@ -85,6 +88,8 @@ let package = Package(
             // TESTS
             .testTarget(name: "FoundationExtensionsTests", dependencies: [
                 .target(name: "FoundationExtensions"),
+                "CryptoSwift",
+                .product(name: "_CryptoExtras", package: "swift-crypto")
             ]),
             .testTarget(name: "LoggerTests", dependencies: [
                 .target(name: "Logger"),
@@ -92,7 +97,7 @@ let package = Package(
             .testTarget(name: "Uitsmijter-AuthServerTests", dependencies: [
                 .target(name: "Uitsmijter-AuthServer"),
                 .product(name: "VaporTesting", package: "vapor"),
-            ], exclude: ["Entities/Loader/Stubs"]),
+            ], exclude: ["Entities/ResourceLoader/Stubs"]),
 
             // EXECUTE
             .executableTarget(

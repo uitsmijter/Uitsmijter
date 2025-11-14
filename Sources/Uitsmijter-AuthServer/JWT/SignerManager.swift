@@ -42,10 +42,6 @@ import JWTKit
 /// let payload = try await manager.verify(tokenString, as: Payload.self)
 /// ```
 ///
-/// ## Thread Safety
-///
-/// This actor ensures thread-safe access to signers and keys across concurrent requests.
-///
 /// - SeeAlso: ``KeyStorage``
 /// - SeeAlso: ``Token``
 actor SignerManager {
@@ -59,8 +55,8 @@ actor SignerManager {
         case rs256 = "RS256"
     }
 
-    /// HS256 signer (always initialized for backward compatibility and verification)
-    private let hs256Signer: JWTSigner
+    /// HS256 secret key
+    private let hs256Secret: [UInt8]
 
     /// Key storage for RSA keys
     /// - Note: When nil, dynamically accesses KeyStorage.shared
@@ -72,9 +68,7 @@ actor SignerManager {
     ///   This parameter enables dependency injection for testing while maintaining the singleton pattern for production.
     init(keyStorage: KeyStorage? = nil) {
         self.keyStorage = keyStorage
-
-        // Always initialize HS256 signer (for verification and legacy support)
-        self.hs256Signer = JWTSigner.hs256(key: jwtSecret)
+        self.hs256Secret = [UInt8](jwtSecret.utf8)
     }
 
     /// Sign a payload with the specified algorithm
@@ -105,9 +99,9 @@ actor SignerManager {
         switch algorithm {
         case .hs256:
             // Sign with HS256 (no kid)
-            let signers = JWTSigners()
-            signers.use(hs256Signer)
-            let token = try signers.sign(payload)
+            let keys = JWTKeyCollection()
+            await keys.add(hmac: .init(from: hs256Secret), digestAlgorithm: .sha256)
+            let token = try await keys.sign(payload)
             return (token, nil)
 
         case .rs256:
@@ -121,14 +115,13 @@ actor SignerManager {
             let activeKeyPair = try await storage.getActiveKey()
             let kid = activeKeyPair.kid
 
-            // Create RSA signer from PEM
-            let rsaKey = try RSAKey.private(pem: activeKeyPEM)
-            let rsaSigner = JWTSigner.rs256(key: rsaKey)
+            // Create RSA private key from PEM
+            let rsaKey = try Insecure.RSA.PrivateKey(pem: activeKeyPEM)
 
             // Sign with RS256 (include kid)
-            let signers = JWTSigners()
-            signers.use(rsaSigner, kid: JWKIdentifier(string: kid), isDefault: true)
-            let token = try signers.sign(payload, kid: JWKIdentifier(string: kid))
+            let keys = JWTKeyCollection()
+            await keys.add(rsa: rsaKey, digestAlgorithm: .sha256, kid: JWKIdentifier(string: kid))
+            let token = try await keys.sign(payload, kid: JWKIdentifier(string: kid))
             return (token, kid)
         }
     }
@@ -192,10 +185,10 @@ actor SignerManager {
     /// - Returns: The decoded payload
     /// - Throws: JWTError if verification fails
     func verify<Payload: JWTPayload>(_ token: String, as payloadType: Payload.Type) async throws -> Payload {
-        let signers = JWTSigners()
+        let keys = JWTKeyCollection()
 
-        // Add HS256 signer (always available for verification)
-        signers.use(hs256Signer)
+        // Add HS256 key (always available for verification)
+        await keys.add(hmac: .init(from: hs256Secret), digestAlgorithm: .sha256)
 
         // Get KeyStorage (dynamically access shared if not injected)
         let storage = keyStorage ?? KeyStorage.shared
@@ -204,9 +197,8 @@ actor SignerManager {
         let allKeys = await storage.getAllKeys()
         for keyPair in allKeys {
             do {
-                let rsaKey = try RSAKey.public(pem: keyPair.publicKeyPEM)
-                let rsaSigner = JWTSigner.rs256(key: rsaKey)
-                signers.use(rsaSigner, kid: JWKIdentifier(string: keyPair.kid))
+                let rsaKey = try Insecure.RSA.PublicKey(pem: keyPair.publicKeyPEM)
+                await keys.add(rsa: rsaKey, digestAlgorithm: .sha256, kid: JWKIdentifier(string: keyPair.kid))
             } catch {
                 // Skip keys that fail to load
                 continue
@@ -214,7 +206,7 @@ actor SignerManager {
         }
 
         // JWTKit will automatically select the correct signer based on alg and kid
-        return try signers.verify(token, as: payloadType)
+        return try await keys.verify(token, as: payloadType)
     }
 
 }

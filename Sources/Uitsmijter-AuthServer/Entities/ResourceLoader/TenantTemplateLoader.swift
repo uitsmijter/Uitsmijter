@@ -26,11 +26,6 @@ import Logger
 /// Templates are stored in a tenant-specific directory named after the tenant's slug, allowing
 /// multiple tenants to coexist with isolated template customizations.
 ///
-/// ## Thread Safety
-///
-/// All operations are actor-isolated, ensuring safe concurrent access from multiple threads.
-/// The loader can handle parallel tenant creation and removal without race conditions.
-///
 /// ## Usage Example
 ///
 /// ```swift
@@ -124,11 +119,6 @@ actor TenantTemplateLoader {
     /// // Remove templates for a tenant
     /// await loader.operate(operation: .remove(tenant: oldTenant))
     /// ```
-    ///
-    /// ## Thread Safety
-    ///
-    /// This method is actor-isolated and safe to call from multiple concurrent contexts.
-    /// Operations are serialized by the actor to prevent race conditions.
     ///
     /// ## Error Handling
     ///
@@ -292,11 +282,6 @@ actor TenantTemplateLoader {
     /// - Logs errors if the views directory cannot be located
     /// - Logs errors if the tenant slug is missing
     /// - Logs errors if directory removal fails (e.g., permission issues)
-    ///
-    /// ## Thread Safety
-    ///
-    /// The method is actor-isolated and safe to call concurrently. The views path is fetched
-    /// from the MainActor to ensure thread-safe access to global state.
     ///
     /// - Parameter tenant: The tenant whose templates should be removed.
     private func remove(tenant: Tenant) async {

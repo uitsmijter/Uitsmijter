@@ -334,7 +334,7 @@ func validAuthorisation(
     for tenant: Tenant,
     in app: Application,
     now date: Date? = Date()
-) throws -> BearerAuthorization {
+) async throws -> BearerAuthorization {
     let calendar = Calendar.current
     guard let expirationDate = calendar.date(
             byAdding: .day,
@@ -355,8 +355,8 @@ func validAuthorisation(
         role: "default",
         user: "holger@mimimi.org"
     )
-    let token = try app.jwt.signers.sign(payload)
-    return BearerAuthorization(token: token)
+    let (tokenString, _) = try await SignerManager.shared.sign(payload)
+    return BearerAuthorization(token: tokenString)
 }
 
 /// Helper function to get a valid token
@@ -403,7 +403,7 @@ func getCode(
         + "&code_challenge=\(challenge)"
         + "&code_challenge_method=\(method.rawValue)"
     let response = try await app.sendRequest(.GET, url, beforeRequest: { @Sendable req async throws in
-        req.headers.bearerAuthorization = try validAuthorisation(for: tenant, in: app)
+        req.headers.bearerAuthorization = try await validAuthorisation(for: tenant, in: app)
     })
 
     // check status

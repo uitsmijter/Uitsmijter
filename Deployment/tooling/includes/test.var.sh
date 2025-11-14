@@ -28,4 +28,4 @@ TEST_HOSTS='api.example.com
   glair.egg.example.com
   '
 
-SUPPRESS_PACKAGE_WARNINGS=true
+SUPPRESS_PACKAGE_WARNINGS=${SUPPRESS_PACKAGE_WARNINGS:-true}

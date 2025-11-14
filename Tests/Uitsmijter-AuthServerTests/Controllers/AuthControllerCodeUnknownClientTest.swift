@@ -29,7 +29,7 @@ struct AuthControllerCodeUnknownClientTest {
                     + "&scope=test"
                     + "&state=123",
                 beforeRequest: { @Sendable req async throws in
-                    req.headers.bearerAuthorization = try validAuthorisation(for: tenant, in: app)
+                    req.headers.bearerAuthorization = try await validAuthorisation(for: tenant, in: app)
                 },
                 afterResponse: { @Sendable res async throws in
                     #expect(res.status == .seeOther)
@@ -61,7 +61,7 @@ struct AuthControllerCodeUnknownClientTest {
                     + "&scope=test"
                     + "&state=123",
                 beforeRequest: { @Sendable req async throws in
-                    req.headers.bearerAuthorization = try validAuthorisation(for: tenant, in: app)
+                    req.headers.bearerAuthorization = try await validAuthorisation(for: tenant, in: app)
                 },
                 afterResponse: { @Sendable res async throws in
                     #expect(res.headers.contentType == HTTPMediaType.json)
@@ -98,7 +98,7 @@ struct AuthControllerCodeUnknownClientTest {
                     + "&state=123",
                 beforeRequest: { @Sendable req async throws in
                     req.headers.add(name: "Accept", value: "text/html")
-                    req.headers.bearerAuthorization = try validAuthorisation(for: tenant, in: app)
+                    req.headers.bearerAuthorization = try await validAuthorisation(for: tenant, in: app)
                 },
                 afterResponse: { @Sendable res async throws in
                     #expect(res.headers.contentType == HTTPMediaType.html)

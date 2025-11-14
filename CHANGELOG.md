@@ -29,6 +29,7 @@
 - Update: **Buildbox to 4.1.1** with improved Swift 6.2 support
 - Update: **SwiftLint** to latest version with auto-fix capabilities
 - Update: **FileMonitor to 1.2.1** with Swift 6.2 concurrency fixes
+- Update: **CryptoSwift to 1.9.0** with improved performance and Swift 6 compatibility
 
 - Improvement: **Logging system** - Complete rewrite as independent module with NDJSON format support, improved error messages, spelling and grammar fixes
 - Improvement: **JavaScript Provider** converted to actor for thread-safe script execution
@@ -37,7 +38,6 @@
 - Improvement: Comprehensive **DocC documentation** added throughout codebase
 - Improvement: **Test infrastructure** - Fixed flaky tests caused by parallel execution, improved test filtering, and added comprehensive test coverage
 - Improvement: **Tooling script** documentation with detailed function descriptions
-- Improvement: Code quality with zero SwiftLint violations and zero compiler warnings
 
 # 0.9.7
 

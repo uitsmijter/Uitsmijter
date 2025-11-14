@@ -271,11 +271,6 @@ public actor CircularBuffer<Element: Sendable> {
     /// await buffer.push("This is a test message")
     /// ```
     ///
-    /// ## Thread Safety
-    ///
-    /// This method is thread-safe through actor isolation. Multiple tasks can wait simultaneously
-    /// for different predicates, and each will be notified independently when matching elements arrive.
-    ///
     /// - Parameter predicate: A closure that tests each element. Return `true` to match.
     /// - Returns: The most recent element that matches the predicate (either existing or newly pushed).
     public func waitForElement(where predicate: @escaping (Element) -> Bool) async -> Element {
@@ -299,10 +294,6 @@ public actor CircularBuffer<Element: Sendable> {
     /// Elements are returned in chronological order (oldest to newest), which is the same order
     /// they would be returned if using `pop`. This is a read-only operation that does not modify
     /// the buffer state.
-    ///
-    /// ## Thread Safety
-    ///
-    /// This method is thread-safe through actor isolation.
     ///
     /// - Returns: An array of all elements currently in the buffer, or an empty array if the buffer is empty.
     ///            Elements are ordered from oldest (first) to newest (last).

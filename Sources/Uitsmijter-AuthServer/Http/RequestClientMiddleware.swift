@@ -114,7 +114,7 @@ final class RequestClientMiddleware: AsyncMiddleware {
 
         var clientInfo = getLoginClientInfo(on: request)
 
-        let payload = try? request.jwt.verify(as: Payload.self)
+        let payload = try? await request.jwt.verify(as: Payload.self)
         if let payload {
             Log.debug("Enrich clientInfo on request with payload.", requestId: request.id)
             clientInfo = try await enrichClientInfo(on: request, with: payload, info: clientInfo)

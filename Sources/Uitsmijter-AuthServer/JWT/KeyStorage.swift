@@ -18,11 +18,6 @@ import Logger
 /// - **Development/Testing**: Fast in-memory storage
 /// - **Custom**: User-provided storage implementation
 ///
-/// ## Thread Safety
-///
-/// All operations are async and thread-safe through Swift's concurrency model. The struct conforms to `Sendable`,
-/// making it safe to pass across concurrency boundaries.
-///
 /// ## Key Rotation
 ///
 /// The storage maintains multiple active keys to support gradual rotation:
@@ -64,26 +59,34 @@ struct KeyStorage: KeyStorageProtocol, Sendable {
 
     /// Creates a new key storage with the specified backend implementation.
     ///
-    /// - Parameter use: The storage backend to use. See ``KeyStorageImplementations`` for available options.
+    /// - Parameters:
+    ///   - use: The storage backend to use. See ``KeyStorageImplementations`` for available options.
+    ///   - generator: Optional KeyGenerator instance. If nil, uses KeyGenerator.shared (suitable for production).
+    ///                For testing, pass an isolated instance to prevent cross-test contention.
     ///
     /// ## Example
     ///
     /// ```swift
-    /// // Production: Redis storage
+    /// // Production: Redis storage with shared generator
     /// let storage = KeyStorage(use: .redis(client))
     ///
     /// // Development: In-memory storage
     /// let storage = KeyStorage(use: .memory)
     ///
+    /// // Testing: Isolated generator to prevent deadlocks
+    /// let generator = KeyGenerator()
+    /// let storage = KeyStorage(use: .memory, generator: generator)
+    ///
     /// // Custom: User-provided implementation
     /// let storage = KeyStorage(use: .custom(implementation: myStorage))
     /// ```
-    init(use: KeyStorageImplementations) {
+    init(use: KeyStorageImplementations, generator: KeyGenerator? = nil) {
+        let keyGenerator = generator ?? KeyGenerator.shared
         switch use {
         case .redis(let client):
-            implementation = RedisKeyStorage(client)
+            implementation = RedisKeyStorage(client, generator: keyGenerator)
         case .memory:
-            implementation = MemoryKeyStorage()
+            implementation = MemoryKeyStorage(generator: keyGenerator)
         case .custom(implementation: let customImplementation):
             implementation = customImplementation
         }

@@ -2,6 +2,7 @@ import Foundation
 @testable import Uitsmijter_AuthServer
 import Testing
 import JWTKit
+import _CryptoExtras
 
 /// KeyGenerator test suite for RSA key pair generation and JWK conversion
 ///
@@ -65,7 +66,7 @@ struct KeyGeneratorTest {
         let keyPair = try await generator.generateKeyPair(kid: "jwt-test")
 
         // JWTKit should be able to load the private key PEM
-        let rsaKey = try? RSAKey.private(pem: keyPair.privateKeyPEM)
+        let rsaKey = try? _RSA.Signing.PrivateKey(pemRepresentation: keyPair.privateKeyPEM)
         #expect(rsaKey != nil)
     }
 
@@ -76,7 +77,7 @@ struct KeyGeneratorTest {
         let generator = KeyGenerator()
         let keyPair = try await generator.generateKeyPair(kid: "jwk-test")
 
-        let jwk = try await generator.convertToJWK(keyPair: keyPair)
+        let jwk = try generator.convertToJWK(keyPair: keyPair)
 
         #expect(jwk.kty == "RSA")
         #expect(jwk.use == "sig")
@@ -91,7 +92,7 @@ struct KeyGeneratorTest {
         let generator = KeyGenerator()
         let keyPair = try await generator.generateKeyPair(kid: "exp-test")
 
-        let jwk = try await generator.convertToJWK(keyPair: keyPair)
+        let jwk = try generator.convertToJWK(keyPair: keyPair)
 
         // Standard exponent is 65537 which encodes to "AQAB" in base64url
         #expect(jwk.e == "AQAB")
@@ -102,7 +103,7 @@ struct KeyGeneratorTest {
         let generator = KeyGenerator()
         let keyPair = try await generator.generateKeyPair(kid: "mod-test")
 
-        let jwk = try await generator.convertToJWK(keyPair: keyPair)
+        let jwk = try generator.convertToJWK(keyPair: keyPair)
 
         // Base64url uses alphanumeric, -, and _ only (no padding)
         let validChars = CharacterSet.alphanumerics.union(CharacterSet(charactersIn: "-_"))
@@ -123,8 +124,8 @@ struct KeyGeneratorTest {
         let keyPair1 = try await generator.generateKeyPair(kid: "jwk-1")
         let keyPair2 = try await generator.generateKeyPair(kid: "jwk-2")
 
-        let jwk1 = try await generator.convertToJWK(keyPair: keyPair1)
-        let jwk2 = try await generator.convertToJWK(keyPair: keyPair2)
+        let jwk1 = try generator.convertToJWK(keyPair: keyPair1)
+        let jwk2 = try generator.convertToJWK(keyPair: keyPair2)
 
         #expect(jwk1.kid != jwk2.kid)
         #expect(jwk1.n != jwk2.n)
@@ -135,7 +136,7 @@ struct KeyGeneratorTest {
     func jwkEncodesToJSON() async throws {
         let generator = KeyGenerator()
         let keyPair = try await generator.generateKeyPair(kid: "json-test")
-        let jwk = try await generator.convertToJWK(keyPair: keyPair)
+        let jwk = try generator.convertToJWK(keyPair: keyPair)
 
         let encoder = JSONEncoder()
         let jsonData = try encoder.encode(jwk)
@@ -152,7 +153,7 @@ struct KeyGeneratorTest {
     func jwkRoundTrip() async throws {
         let generator = KeyGenerator()
         let keyPair = try await generator.generateKeyPair(kid: "roundtrip-test")
-        let originalJWK = try await generator.convertToJWK(keyPair: keyPair)
+        let originalJWK = try generator.convertToJWK(keyPair: keyPair)
 
         let encoder = JSONEncoder()
         let jsonData = try encoder.encode(originalJWK)
@@ -239,12 +240,11 @@ struct KeyGeneratorTest {
         )
 
         // Load the private key and sign
-        let rsaKey = try RSAKey.private(pem: keyPair.privateKeyPEM)
-        let signer = JWTSigner.rs256(key: rsaKey)
-        let signers = JWTSigners()
-        signers.use(signer, kid: JWKIdentifier(string: keyPair.kid), isDefault: true)
+        let rsaKey = try Insecure.RSA.PrivateKey(pem: keyPair.privateKeyPEM)
+        let keyCollection = JWTKeyCollection()
+        await keyCollection.add(rsa: rsaKey, digestAlgorithm: .sha256, kid: JWKIdentifier(string: keyPair.kid))
 
-        let token = try signers.sign(payload, kid: JWKIdentifier(string: keyPair.kid))
+        let token = try await keyCollection.sign(payload, kid: JWKIdentifier(string: keyPair.kid))
 
         #expect(!token.isEmpty)
         #expect(token.split(separator: ".").count == 3)
@@ -268,19 +268,17 @@ struct KeyGeneratorTest {
         )
 
         // Sign with private key
-        let privateKey = try RSAKey.private(pem: keyPair.privateKeyPEM)
-        let signer = JWTSigner.rs256(key: privateKey)
-        let signers = JWTSigners()
-        signers.use(signer, kid: JWKIdentifier(string: keyPair.kid), isDefault: true)
-        let token = try signers.sign(payload, kid: JWKIdentifier(string: keyPair.kid))
+        let privateKey = try Insecure.RSA.PrivateKey(pem: keyPair.privateKeyPEM)
+        let signKeyCollection = JWTKeyCollection()
+        await signKeyCollection.add(rsa: privateKey, digestAlgorithm: .sha256, kid: JWKIdentifier(string: keyPair.kid))
+        let token = try await signKeyCollection.sign(payload, kid: JWKIdentifier(string: keyPair.kid))
 
         // Verify with public key
-        let publicKey = try RSAKey.public(pem: keyPair.publicKeyPEM)
-        let verifier = JWTSigner.rs256(key: publicKey)
-        let verifiers = JWTSigners()
-        verifiers.use(verifier, kid: JWKIdentifier(string: keyPair.kid), isDefault: true)
+        let publicKey = try Insecure.RSA.PublicKey(pem: keyPair.publicKeyPEM)
+        let verifyKeyCollection = JWTKeyCollection()
+        await verifyKeyCollection.add(rsa: publicKey, digestAlgorithm: .sha256, kid: JWKIdentifier(string: keyPair.kid))
 
-        let verified = try verifiers.verify(token, as: Payload.self)
+        let verified = try await verifyKeyCollection.verify(token, as: Payload.self)
         #expect(verified.subject.value == "verify@example.com")
         #expect(verified.tenant == "test-tenant")
     }

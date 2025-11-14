@@ -10,17 +10,8 @@ struct SignerTest {
     // MARK: - jwt_signer Initialization Tests
 
     @Test("jwt_signer is initialized and available")
-    func jwtSignerIsInitialized() {
-        // Verify jwt_signer is accessible and can be added to signers
-        let signers = JWTSigners()
-        signers.use(jwt_signer)
-        // Verify the signer was added by checking we can get it back
-        let retrievedSigner = signers.get()
-        #expect(retrievedSigner != nil)
-    }
-
-    @Test("jwt_signer can sign a simple payload")
-    func jwtSignerCanSign() throws {
+    func jwtSignerIsInitialized() async throws {
+        // Verify SignerManager.shared is accessible
         let payload = Payload(
             issuer: IssuerClaim(value: "https://test.example.com"),
             subject: "test@example.com",
@@ -33,19 +24,35 @@ struct SignerTest {
             user: "test@example.com"
         )
 
-        let signers = JWTSigners()
-        signers.use(jwt_signer)
-        let token = try signers.sign(payload)
+        let (tokenString, _) = try await SignerManager.shared.sign(payload)
+        #expect(!tokenString.isEmpty)
+    }
+
+    @Test("jwt_signer can sign a simple payload")
+    func jwtSignerCanSign() async throws {
+        let payload = Payload(
+            issuer: IssuerClaim(value: "https://test.example.com"),
+            subject: "test@example.com",
+            audience: AudienceClaim(value: "test-client"),
+            expiration: ExpirationClaim(value: Date(timeIntervalSinceNow: 3600)),
+            issuedAt: IssuedAtClaim(value: Date()),
+            authTime: AuthTimeClaim(value: Date()),
+            tenant: "test-tenant",
+            role: "user",
+            user: "test@example.com"
+        )
+
+        let (tokenString, _) = try await SignerManager.shared.sign(payload)
 
         // Verify token is generated
-        #expect(!token.isEmpty)
+        #expect(!tokenString.isEmpty)
         // JWT tokens have three parts separated by dots
-        let parts = token.split(separator: ".")
+        let parts = tokenString.split(separator: ".")
         #expect(parts.count == 3)
     }
 
     @Test("jwt_signer can verify a signed payload")
-    func jwtSignerCanVerify() throws {
+    func jwtSignerCanVerify() async throws {
         let expirationDate = Date(timeIntervalSinceNow: 3600)
         let payload = Payload(
             issuer: IssuerClaim(value: "https://test.example.com"),
@@ -59,14 +66,11 @@ struct SignerTest {
             user: "verify@example.com"
         )
 
-        let signers = JWTSigners()
-        signers.use(jwt_signer)
-
         // Sign the payload
-        let token = try signers.sign(payload)
+        let (tokenString, _) = try await SignerManager.shared.sign(payload)
 
         // Verify and decode the token
-        let verifiedPayload = try signers.verify(token, as: Payload.self)
+        let verifiedPayload = try await SignerManager.shared.verify(tokenString, as: Payload.self)
 
         // Check that payload matches
         #expect(verifiedPayload.subject.value == "verify@example.com")
@@ -76,7 +80,7 @@ struct SignerTest {
     }
 
     @Test("jwt_signer rejects tampered tokens")
-    func jwtSignerRejectsTamperedTokens() throws {
+    func jwtSignerRejectsTamperedTokens() async throws {
         let payload = Payload(
             issuer: IssuerClaim(value: "https://test.example.com"),
             subject: "tamper@example.com",
@@ -89,12 +93,10 @@ struct SignerTest {
             user: "tamper@example.com"
         )
 
-        let signers = JWTSigners()
-        signers.use(jwt_signer)
-        let token = try signers.sign(payload)
+        let (tokenString, _) = try await SignerManager.shared.sign(payload)
 
         // Tamper with the token (change a character in the payload section)
-        let parts = token.split(separator: ".")
+        let parts = tokenString.split(separator: ".")
         guard parts.count == 3 else {
             Issue.record("Token doesn't have 3 parts")
             return
@@ -113,13 +115,13 @@ struct SignerTest {
         let tamperedToken = "\(parts[0]).\(tamperedPayload).\(parts[2])"
 
         // Verification should fail
-        #expect(throws: Error.self) {
-            try signers.verify(tamperedToken, as: Payload.self)
+        await #expect(throws: Error.self) {
+            try await SignerManager.shared.verify(tamperedToken, as: Payload.self)
         }
     }
 
     @Test("jwt_signer uses HS256 algorithm")
-    func jwtSignerUsesHS256() throws {
+    func jwtSignerUsesHS256() async throws {
         let payload = Payload(
             issuer: IssuerClaim(value: "https://test.example.com"),
             subject: "hs256@example.com",
@@ -132,12 +134,10 @@ struct SignerTest {
             user: "hs256@example.com"
         )
 
-        let signers = JWTSigners()
-        signers.use(jwt_signer)
-        let token = try signers.sign(payload)
+        let (tokenString, _) = try await SignerManager.shared.sign(payload)
 
         // Decode the header to check algorithm
-        let parts = token.split(separator: ".")
+        let parts = tokenString.split(separator: ".")
         #expect(parts.count == 3)
 
         // Decode base64url header
@@ -165,7 +165,7 @@ struct SignerTest {
     }
 
     @Test("jwt_signer produces consistent signatures")
-    func jwtSignerConsistentSignatures() throws {
+    func jwtSignerConsistentSignatures() async throws {
         let expirationDate = Date(timeIntervalSinceNow: 3600)
         let payload = Payload(
             issuer: IssuerClaim(value: "https://test.example.com"),
@@ -179,18 +179,15 @@ struct SignerTest {
             user: "consistent@example.com"
         )
 
-        let signers = JWTSigners()
-        signers.use(jwt_signer)
-
         // Sign the same payload twice
-        let token1 = try signers.sign(payload)
-        let token2 = try signers.sign(payload)
+        let (tokenString1, _) = try await SignerManager.shared.sign(payload)
+        let (tokenString2, _) = try await SignerManager.shared.sign(payload)
 
         // Both tokens should be valid and decode to equivalent payloads
         // Note: In Swift 6, dictionary encoding order is not guaranteed, so byte-for-byte
         // equality is not reliable. Instead, verify both tokens are valid and semantically equal.
-        let decoded1 = try signers.verify(token1, as: Payload.self)
-        let decoded2 = try signers.verify(token2, as: Payload.self)
+        let decoded1 = try await SignerManager.shared.verify(tokenString1, as: Payload.self)
+        let decoded2 = try await SignerManager.shared.verify(tokenString2, as: Payload.self)
 
         #expect(decoded1.subject == decoded2.subject)
         #expect(decoded1.tenant == decoded2.tenant)
@@ -203,7 +200,7 @@ struct SignerTest {
     }
 
     @Test("jwt_signer handles payload with optional fields")
-    func jwtSignerHandlesOptionalFields() throws {
+    func jwtSignerHandlesOptionalFields() async throws {
         let profile = CodableProfile.object([
             "firstName": .string("John"),
             "lastName": .string("Doe")
@@ -223,19 +220,17 @@ struct SignerTest {
             profile: profile
         )
 
-        let signers = JWTSigners()
-        signers.use(jwt_signer)
-        let token = try signers.sign(payload)
+        let (tokenString, _) = try await SignerManager.shared.sign(payload)
 
         // Verify and decode
-        let verified = try signers.verify(token, as: Payload.self)
+        let verified = try await SignerManager.shared.verify(tokenString, as: Payload.self)
         #expect(verified.responsibility == "admin-domain")
         #expect(verified.profile != nil)
         #expect(verified.profile?.object?["firstName"]?.string == "John")
     }
 
     @Test("jwt_signer can verify tokens with different expiration times")
-    func jwtSignerDifferentExpirations() throws {
+    func jwtSignerDifferentExpirations() async throws {
         let shortExpiration = Date(timeIntervalSinceNow: 60) // 1 minute
         let longExpiration = Date(timeIntervalSinceNow: 86_400) // 24 hours
 
@@ -263,22 +258,19 @@ struct SignerTest {
             user: "long@example.com"
         )
 
-        let signers = JWTSigners()
-        signers.use(jwt_signer)
-
-        let token1 = try signers.sign(payload1)
-        let token2 = try signers.sign(payload2)
+        let (tokenString1, _) = try await SignerManager.shared.sign(payload1)
+        let (tokenString2, _) = try await SignerManager.shared.sign(payload2)
 
         // Both should verify successfully
-        let verified1 = try signers.verify(token1, as: Payload.self)
-        let verified2 = try signers.verify(token2, as: Payload.self)
+        let verified1 = try await SignerManager.shared.verify(tokenString1, as: Payload.self)
+        let verified2 = try await SignerManager.shared.verify(tokenString2, as: Payload.self)
 
         #expect(verified1.subject.value == "short@example.com")
         #expect(verified2.subject.value == "long@example.com")
     }
 
     @Test("jwt_signer handles empty strings in payload")
-    func jwtSignerHandlesEmptyStrings() throws {
+    func jwtSignerHandlesEmptyStrings() async throws {
         let payload = Payload(
             issuer: IssuerClaim(value: "https://test.example.com"),
             subject: "",
@@ -291,11 +283,8 @@ struct SignerTest {
             user: ""
         )
 
-        let signers = JWTSigners()
-        signers.use(jwt_signer)
-
-        let token = try signers.sign(payload)
-        let verified = try signers.verify(token, as: Payload.self)
+        let (tokenString, _) = try await SignerManager.shared.sign(payload)
+        let verified = try await SignerManager.shared.verify(tokenString, as: Payload.self)
 
         #expect(verified.subject.value == "")
         #expect(verified.tenant == "")
@@ -304,7 +293,7 @@ struct SignerTest {
     }
 
     @Test("jwt_signer handles special characters in payload")
-    func jwtSignerHandlesSpecialCharacters() throws {
+    func jwtSignerHandlesSpecialCharacters() async throws {
         let payload = Payload(
             issuer: IssuerClaim(value: "https://test.example.com"),
             subject: "user+test@example.com",
@@ -317,11 +306,8 @@ struct SignerTest {
             user: "user@example.com (John Doe)"
         )
 
-        let signers = JWTSigners()
-        signers.use(jwt_signer)
-
-        let token = try signers.sign(payload)
-        let verified = try signers.verify(token, as: Payload.self)
+        let (tokenString, _) = try await SignerManager.shared.sign(payload)
+        let verified = try await SignerManager.shared.verify(tokenString, as: Payload.self)
 
         #expect(verified.subject.value == "user+test@example.com")
         #expect(verified.tenant == "tenant-with-dashes_and_underscores")
@@ -330,7 +316,7 @@ struct SignerTest {
     }
 
     @Test("jwt_signer handles unicode characters")
-    func jwtSignerHandlesUnicode() throws {
+    func jwtSignerHandlesUnicode() async throws {
         let payload = Payload(
             issuer: IssuerClaim(value: "https://test.example.com"),
             subject: "用户@example.com",
@@ -343,11 +329,8 @@ struct SignerTest {
             user: "用户名"
         )
 
-        let signers = JWTSigners()
-        signers.use(jwt_signer)
-
-        let token = try signers.sign(payload)
-        let verified = try signers.verify(token, as: Payload.self)
+        let (tokenString, _) = try await SignerManager.shared.sign(payload)
+        let verified = try await SignerManager.shared.verify(tokenString, as: Payload.self)
 
         #expect(verified.subject.value == "用户@example.com")
         #expect(verified.tenant == "租户-テナント")
@@ -356,7 +339,7 @@ struct SignerTest {
     }
 
     @Test("jwt_signer token format is valid JWT")
-    func jwtSignerProducesValidJWTFormat() throws {
+    func jwtSignerProducesValidJWTFormat() async throws {
         let payload = Payload(
             issuer: IssuerClaim(value: "https://test.example.com"),
             subject: "format@example.com",
@@ -369,12 +352,10 @@ struct SignerTest {
             user: "format@example.com"
         )
 
-        let signers = JWTSigners()
-        signers.use(jwt_signer)
-        let token = try signers.sign(payload)
+        let (tokenString, _) = try await SignerManager.shared.sign(payload)
 
         // JWT format: header.payload.signature
-        let parts = token.split(separator: ".")
+        let parts = tokenString.split(separator: ".")
         #expect(parts.count == 3)
 
         // Each part should be base64url encoded (alphanumeric plus - and _)
@@ -386,10 +367,7 @@ struct SignerTest {
     }
 
     @Test("jwt_signer can sign multiple payloads sequentially")
-    func jwtSignerMultipleSequentialSigns() throws {
-        let signers = JWTSigners()
-        signers.use(jwt_signer)
-
+    func jwtSignerMultipleSequentialSigns() async throws {
         var tokens: [String] = []
 
         for i in 0..<10 {
@@ -405,8 +383,8 @@ struct SignerTest {
                 user: "user\(i)@example.com"
             )
 
-            let token = try signers.sign(payload)
-            tokens.append(token)
+            let (tokenString, _) = try await SignerManager.shared.sign(payload)
+            tokens.append(tokenString)
         }
 
         // All tokens should be unique
@@ -415,7 +393,7 @@ struct SignerTest {
 
         // All tokens should verify
         for (i, token) in tokens.enumerated() {
-            let verified = try signers.verify(token, as: Payload.self)
+            let verified = try await SignerManager.shared.verify(token, as: Payload.self)
             #expect(verified.subject.value == "user\(i)@example.com")
         }
     }

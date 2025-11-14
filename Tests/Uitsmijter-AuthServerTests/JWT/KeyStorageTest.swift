@@ -10,10 +10,15 @@ import JWTKit
 @Suite("KeyStorage Tests", .serialized)
 struct KeyStorageTest {
 
-    /// Creates a fresh KeyStorage instance for each test
-    /// This prevents state accumulation when running 22+ tests sequentially
+    /// Creates a fresh KeyStorage instance with isolated KeyGenerator for each test
+    /// This prevents:
+    /// - State accumulation when running 22+ tests sequentially
+    /// - Cross-test contention on the shared KeyGenerator.shared singleton
+    /// - Actor reentrancy deadlocks during parallel operations
     private func createStorage() -> KeyStorage {
-        KeyStorage(use: .memory)
+        // Create isolated KeyGenerator to prevent cross-test contention
+        let generator = KeyGenerator()
+        return KeyStorage(use: .memory, generator: generator)
     }
 
     // MARK: - Key Generation and Storage Tests
@@ -281,7 +286,7 @@ struct KeyStorageTest {
 
         let longKid = String(repeating: "a", count: 256)
         try await storage.generateAndStoreKey(kid: longKid, setActive: true)
-
+        await Task.yield()
         let activeKey = try await storage.getActiveKey()
         #expect(activeKey.kid == longKid)
     }

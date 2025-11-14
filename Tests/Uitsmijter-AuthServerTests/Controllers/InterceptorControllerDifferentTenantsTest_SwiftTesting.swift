@@ -30,7 +30,7 @@ struct InterceptorDifferentTenantsSwiftTest {
                 .GET,
                 "interceptor",
                 beforeRequest: { @Sendable req async throws in
-                    req.headers.bearerAuthorization = try validAuthorisation(for: tenant1, in: app)
+                    req.headers.bearerAuthorization = try await validAuthorisation(for: tenant1, in: app)
                     req.headers.replaceOrAdd(name: "X-Forwarded-Proto", value: "http")
                     req.headers.replaceOrAdd(
                         name: "X-Forwarded-Host",

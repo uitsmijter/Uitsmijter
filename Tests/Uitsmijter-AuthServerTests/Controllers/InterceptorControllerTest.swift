@@ -47,7 +47,7 @@ struct InterceptorControllerTest {
             }
 
             try await app.testing().test(.GET, "interceptor", beforeRequest: { @Sendable req async throws in
-                req.headers.bearerAuthorization = try validAuthorisation(for: tenant, in: app)
+                req.headers.bearerAuthorization = try await validAuthorisation(for: tenant, in: app)
                 req.headers.replaceOrAdd(name: "X-Forwarded-Proto", value: "http")
                 req.headers.replaceOrAdd(name: "X-Forwarded-Host", value: "10.0.0.1")
                 req.headers.replaceOrAdd(name: "X-Forwarded-Uri", value: "/test")
@@ -70,7 +70,7 @@ struct InterceptorControllerTest {
             }
 
             try await app.testing().test(.GET, "interceptor", beforeRequest: { @Sendable req async throws in
-                req.headers.bearerAuthorization = try validAuthorisation(for: tenant, in: app)
+                req.headers.bearerAuthorization = try await validAuthorisation(for: tenant, in: app)
                 req.headers.replaceOrAdd(name: "X-Forwarded-Proto", value: "http")
                 req.headers.replaceOrAdd(name: "X-Forwarded-Host", value: tenant.config.hosts.first ?? "_ERROR_")
                 req.headers.replaceOrAdd(name: "X-Forwarded-Uri", value: "/test")
@@ -103,7 +103,7 @@ struct InterceptorControllerTest {
                 )
 
                 #expect(Date() > (dateInPast ?? Date()))
-                req.headers.bearerAuthorization = try validAuthorisation(for: tenant, in: app, now: dateInPast)
+                req.headers.bearerAuthorization = try await validAuthorisation(for: tenant, in: app, now: dateInPast)
                 req.headers.replaceOrAdd(name: "X-Forwarded-Proto", value: "http")
                 req.headers.replaceOrAdd(name: "X-Forwarded-Host", value: tenant.config.hosts.first ?? "_ERROR_")
                 req.headers.replaceOrAdd(name: "X-Forwarded-Uri", value: "/test")

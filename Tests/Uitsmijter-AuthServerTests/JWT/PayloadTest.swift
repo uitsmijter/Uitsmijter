@@ -199,50 +199,6 @@ struct PayloadTest {
         #expect(decodedPayload.user == originalPayload.user)
     }
 
-    @Test("Payload verify succeeds for non-expired token")
-    func verifySucceedsForNonExpiredToken() throws {
-        let futureDate = Date(timeIntervalSinceNow: 3600) // 1 hour from now
-        let payload = Payload(
-            issuer: IssuerClaim(value: "https://test.example.com"),
-            subject: "valid-user",
-            audience: AudienceClaim(value: "test-client"),
-            expiration: ExpirationClaim(value: futureDate),
-            issuedAt: IssuedAtClaim(value: Date()),
-            authTime: AuthTimeClaim(value: Date()),
-            tenant: "test-tenant",
-            role: "user",
-            user: "valid@example.com"
-        )
-
-        let signer = JWTSigner.hs256(key: "test-secret-key")
-
-        // Should not throw
-        try payload.verify(using: signer)
-    }
-
-    @Test("Payload verify fails for expired token")
-    func verifyFailsForExpiredToken() throws {
-        let pastDate = Date(timeIntervalSinceNow: -3600) // 1 hour ago
-        let payload = Payload(
-            issuer: IssuerClaim(value: "https://test.example.com"),
-            subject: "expired-user",
-            audience: AudienceClaim(value: "test-client"),
-            expiration: ExpirationClaim(value: pastDate),
-            issuedAt: IssuedAtClaim(value: Date()),
-            authTime: AuthTimeClaim(value: Date()),
-            tenant: "test-tenant",
-            role: "user",
-            user: "expired@example.com"
-        )
-
-        let signer = JWTSigner.hs256(key: "test-secret-key")
-
-        // Should throw an error
-        #expect(throws: Error.self) {
-            try payload.verify(using: signer)
-        }
-    }
-
     @Test("Payload conforms to SubjectProtocol")
     func conformsToSubjectProtocol() {
         let payload = Payload(

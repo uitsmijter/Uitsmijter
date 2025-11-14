@@ -1,0 +1,85 @@
+name: Dependabot
+
+on:
+  workflow_dispatch:
+    inputs:
+      action:
+        description: 'Action to perform'
+        required: true
+        default: 'info'
+        type: choice
+        options:
+          - info
+          - list-prs
+
+jobs:
+  dependabot-helper:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+
+    steps:
+      - name: Dependabot Helper
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          ACTION: ${{ inputs.action }}
+        run: |
+          REPO="${{ github.repository }}"
+
+          case "$ACTION" in
+            "info")
+              echo "## Dependabot Information"
+              echo ""
+              echo "Dependabot is configured with the following ecosystems:"
+              echo "- Swift Package Manager (weekly, Monday 03:00)"
+              echo "- Docker (weekly, Monday 03:00)"
+              echo "- GitHub Actions (weekly, Monday 03:00)"
+              echo "- NPM/Playwright (weekly, Monday 03:00)"
+              echo ""
+              echo "### How to manually trigger Dependabot:"
+              echo ""
+              echo "1. Via GitHub UI:"
+              echo "   Go to: https://github.com/$REPO/network/updates"
+              echo "   Click 'Check for updates' for each package manager"
+              echo ""
+              echo "2. Via GitHub CLI:"
+              echo "   # List existing Dependabot PRs"
+              echo "   gh pr list --author 'app/dependabot'"
+              echo ""
+              echo "   # Rebase a specific Dependabot PR"
+              echo "   gh pr comment <PR-NUMBER> --body '@dependabot rebase'"
+              echo ""
+              echo "   # Recreate a Dependabot PR"
+              echo "   gh pr comment <PR-NUMBER> --body '@dependabot recreate'"
+              ;;
+
+            "list-prs")
+              echo "## Open Dependabot Pull Requests"
+              echo ""
+              gh pr list --repo "$REPO" --author "app/dependabot" --state open || echo "No open Dependabot PRs found."
+              ;;
+          esac
+
+      - name: Summary
+        run: |
+          echo "## Dependabot Helper - ${{ inputs.action }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+
+          case "${{ inputs.action }}" in
+            "info")
+              echo "### Manual Trigger Options" >> $GITHUB_STEP_SUMMARY
+              echo "" >> $GITHUB_STEP_SUMMARY
+              echo "**Option 1: GitHub UI** (Recommended)" >> $GITHUB_STEP_SUMMARY
+              echo "Visit: https://github.com/${{ github.repository }}/network/updates" >> $GITHUB_STEP_SUMMARY
+              echo "" >> $GITHUB_STEP_SUMMARY
+              echo "**Option 2: GitHub CLI**" >> $GITHUB_STEP_SUMMARY
+              echo '```bash' >> $GITHUB_STEP_SUMMARY
+              echo 'gh pr comment <PR-NUMBER> --body "@dependabot rebase"' >> $GITHUB_STEP_SUMMARY
+              echo '```' >> $GITHUB_STEP_SUMMARY
+              ;;
+
+            "list-prs")
+              echo "Check the workflow logs for the list of Dependabot PRs." >> $GITHUB_STEP_SUMMARY
+              ;;
+          esac

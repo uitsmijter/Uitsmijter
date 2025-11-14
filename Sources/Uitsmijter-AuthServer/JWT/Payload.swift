@@ -155,9 +155,11 @@ struct Payload: JWTPayload, SubjectProtocol, UserProfileProtocol, Sendable {
     ///
     /// Checks the expiration claim against the current date to ensure the token is still valid.
     ///
-    /// - Parameter signer: The JWT signer to use for verification (unused, but required by protocol)
     /// - Throws: `JWTError.claimVerificationFailure` if the token has expired
-    func verify(using signer: JWTSigner) throws {
+    ///
+    /// Note: This method only verifies expiration, not the JWT signature.
+    /// Signature verification is handled by the JWTKeyCollection during token parsing.
+    func verify(using algorithm: some JWTAlgorithm) async throws {
         try expiration.verifyNotExpired()
     }
 }

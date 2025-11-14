@@ -14,7 +14,7 @@ let env = try Environment.detect()
 let app = try await Application.make(env)
 
 do {
-    try configure(app)
+    try await configure(app)
     try await app.execute()
     app.entityLoader?.shutdown()
     try await app.asyncShutdown()
