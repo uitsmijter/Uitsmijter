@@ -17,7 +17,7 @@ storageClassName: ""
 redis:
   image:
     repository: redis
-    tag: "8.2.2"
+    tag: "8.2.3"
   replicas: 3  # Testing with single instance to verify replication lag hypothesis
 
 installCRD: true
