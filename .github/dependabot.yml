@@ -105,7 +105,6 @@ updates:
     # But always create PRs for security updates
     allow:
       - dependency-type: "all"
-        update-types: ["security"]
 
   # Helm chart dependencies
   - package-ecosystem: "docker"
