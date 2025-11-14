@@ -27,7 +27,9 @@ updates:
         patterns:
           - "*"
         update-types:
-          - "security"
+          - major
+          - minor
+          - patch
 
   # Docker dependencies
   - package-ecosystem: "docker"
@@ -92,7 +94,10 @@ updates:
         patterns:
           - "*"
         update-types:
-          - "security"
+          - major
+          - minor
+          - patch
+
     # Ignore dev dependencies for non-security updates to reduce noise
     ignore:
       - dependency-name: "*"
