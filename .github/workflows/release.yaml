@@ -20,7 +20,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Check out the repo
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
       - uses: ./.github/actions/step-lint
         if: ${{ env.RUN_LINTER != 'false' }}
 
@@ -29,7 +29,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Check out the repo
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
       - uses: ./.github/actions/step-unittest
         if: ${{ env.RUN_UNITTESTS != 'false' }}
 
@@ -43,7 +43,7 @@ jobs:
       - name: Delete huge unnecessary tools folder
         run: rm -rf /opt/hostedtoolcache    
       - name: Check out the repo
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           lfs: true
       - uses: ./.github/actions/step-build
@@ -61,7 +61,7 @@ jobs:
       - name: Delete huge unnecessary tools folder
         run: rm -rf /opt/hostedtoolcache    
       - name: Check out the repo
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           lfs: true
 
@@ -79,7 +79,7 @@ jobs:
       contents: write
     steps:
       - name: Check out the repo
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         if: ${{ env.RUN_HELM != 'false' }}
       - uses: ./.github/actions/step-helm
         with:
@@ -96,7 +96,7 @@ jobs:
       - build-helm
     steps:
       - name: Check out the repo
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         if: ${{ env.RUN_PUBLISH != 'false' }}
       - uses: ./.github/actions/step-publish
         if: ${{ env.RUN_PUBLISH != 'false' }}
