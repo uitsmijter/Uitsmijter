@@ -1,7 +1,7 @@
 import Foundation
 
 /// Extension providing a shared JSONEncoder instance
-extension JSONEncoder {
+public extension JSONEncoder {
     /// Shared JSONEncoder instance for application-wide use
     ///
     /// Provides a single, reusable encoder instance to avoid creating new instances repeatedly.

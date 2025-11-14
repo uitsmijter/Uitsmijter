@@ -3,7 +3,7 @@ import Foundation
 /// Extends a `String` with wildcard pattern matching
 ///
 /// - Important: Swift 5.5 does not have a build in regex, as swift 5.6 do
-extension String {
+public extension String {
 
     /// Checks if the string matches a wildcard pattern
     ///

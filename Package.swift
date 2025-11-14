@@ -33,7 +33,7 @@ let package = Package(
             .target(
                     name: "FoundationExtensions",
                     dependencies: [
-                        
+                        "CryptoSwift"
                     ],
                     swiftSettings: [
                         .unsafeFlags(["-warnings-as-errors"])

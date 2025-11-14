@@ -7,7 +7,7 @@ extension String {
     /// Character set used for building a random string
     ///
     /// Defines the set of characters that can be used when generating random strings.
-    struct RandomCharacterSet {
+    public struct RandomCharacterSet {
         /// Type alias for the character set value
         typealias Value = String
 
@@ -18,7 +18,7 @@ extension String {
         ///
         /// Contains lowercase letters, uppercase letters, and digits.
         /// - Returns: A `RandomCharacterSet` with alphanumeric characters
-        static var aZ09: RandomCharacterSet {
+        @usableFromInline static var aZ09: RandomCharacterSet {
             get {
                 RandomCharacterSet(value: "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789")
             }
@@ -29,7 +29,7 @@ extension String {
         /// Contains alphanumeric characters plus hyphen, period, underscore, and tilde,
         /// as specified in RFC 7636 for PKCE code verifiers.
         /// - Returns: A `RandomCharacterSet` suitable for OAuth PKCE code verifiers
-        static var codeVerifier: RandomCharacterSet {
+        @usableFromInline static var codeVerifier: RandomCharacterSet {
             get {
                 RandomCharacterSet(value: "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-._~")
             }
@@ -58,7 +58,8 @@ extension String {
     /// let randomToken = String.random(length: 32)
     /// let customRandom = String.random(length: 16, of: .codeVerifier)
     /// ```
-    static func random(length: Int, of letterSet: RandomCharacterSet = RandomCharacterSet.aZ09) -> String {
+    ///
+    public static func random(length: Int, of letterSet: RandomCharacterSet = RandomCharacterSet.aZ09) -> String {
         let letters = letterSet.value
         return String((0..<length).compactMap { _ in
             letters.randomElement()

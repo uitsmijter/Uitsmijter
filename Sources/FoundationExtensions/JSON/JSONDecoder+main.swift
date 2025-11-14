@@ -1,7 +1,7 @@
 import Foundation
 
 /// Extension providing a shared JSONDecoder instance
-extension JSONDecoder {
+public extension JSONDecoder {
     /// Shared JSONDecoder instance for application-wide use
     ///
     /// Provides a single, reusable decoder instance to avoid creating new instances repeatedly.
