@@ -8,6 +8,7 @@ x-shared_environment: &shared_environment
   SWIFT_VERSION: "${SWIFT_VERSION}"
   TAG: ${TAG:-latest}
   RUNTIME_IMAGE: "${IMAGENAME}-runtime:latest"
+  SUPPRESS_PACKAGE_WARNINGS: ${SUPPRESS_PACKAGE_WARNINGS}
 
 x-shared_job: &shared_job
   image: ghcr.io/uitsmijter/buildbox:${BUILDBOX}
@@ -43,7 +44,6 @@ services:
     <<: *shared_job
     environment:
       <<: *shared_environment
-      SUPPRESS_PACKAGE_WARNINGS: ${SUPPRESS_PACKAGE_WARNINGS}
     command:
       - /bin/bash
       - -c
@@ -70,7 +70,6 @@ services:
     environment:
       <<: *shared_environment
       FILTER_TEST: ${FILTER_TEST}
-      SUPPRESS_PACKAGE_WARNINGS: ${SUPPRESS_PACKAGE_WARNINGS}
     command:
       - /bin/bash
       - -c
@@ -84,7 +83,6 @@ services:
     <<: *shared_job
     environment:
       <<: *shared_environment
-      SUPPRESS_PACKAGE_WARNINGS: ${SUPPRESS_PACKAGE_WARNINGS}
       FILTER_TEST: ${FILTER_TEST}
     command:
       - /bin/bash
