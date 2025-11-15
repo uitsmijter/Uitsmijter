@@ -11,6 +11,7 @@ TEST_HOSTS='api.example.com
   id-rs256.example.com
   api-rs256.example.com
   login.example.com
+  login-rs256.example.com
   missing-tenant.example.com
   id.ham.test
   login.ham.test
