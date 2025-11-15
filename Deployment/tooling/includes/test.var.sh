@@ -8,6 +8,8 @@ TEST_HOSTS='api.example.com
   toast.example.com
   spa.example.net
   id.example.com
+  id-rs256.example.com
+  api-rs256.example.com
   login.example.com
   missing-tenant.example.com
   id.ham.test

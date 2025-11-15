@@ -1,0 +1,48 @@
+---
+apiVersion: "uitsmijter.io/v1"
+kind: Tenant
+metadata:
+  name: cheese-rs256
+  namespace: cheese
+spec:
+  hosts:
+    - id-rs256.example.com
+    - api-rs256.example.com
+  informations:
+    imprint_url: https://example.com/imprint
+    privacy_url: https://example.com/privacy
+    register_url: https://example.com/register
+  interceptor:
+    enabled: true
+    domain: login-rs256.example.com
+    cookie: .example.com
+  jwt_algorithm: RS256
+  providers:
+    # Allows all @example.com emails
+    - |
+      class UserLoginProvider {
+        auth = false;
+        constructor(credentials) {
+          this.auth = credentials.username.endsWith("@example.com");
+          if(credentials.username.startsWith("delayed-login@")){
+            let d = new Date();
+            while(d.getTime() + 5000 > new Date().getTime()){ /* wait 5s */ }
+            commit(true);
+          } else {
+            commit(true);
+          }
+        }
+        get canLogin() { return this.auth; }
+        get userProfile() { return { name: "Test User RS256" }; }
+        get role() { return "user"; }
+      }
+    - |
+      class UserValidationProvider {
+        valid = false;
+        constructor(args) {
+          this.valid = args.username.endsWith("@example.com") == true
+            && args.username.startsWith("nosecondtime@") == false;
+          commit(true);
+        }
+        get isValid() { return this.valid; }
+      }
