@@ -36,6 +36,8 @@ jobs:
   build:
     name: Build Uitsmijter
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     needs:
       - lint
       - unittest
