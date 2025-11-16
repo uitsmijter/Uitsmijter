@@ -1,4 +1,6 @@
 name: Feature
+permissions:
+  contents: read
 on:
   push:
     branches:
