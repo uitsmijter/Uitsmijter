@@ -81,6 +81,8 @@ jobs:
   e2etest:
     name: Run E2E-Tests
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     needs:
       - build
     steps:
