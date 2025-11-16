@@ -17,6 +17,8 @@ jobs:
   # Lint
   lint:
     name: Run Linter checks
+    permissions:
+      contents: read
     runs-on: ubuntu-latest
     steps:
       - name: Check out the repo
