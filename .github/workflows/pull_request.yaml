@@ -6,6 +6,8 @@ on:
       - reopened
       - ready_for_review
 
+permissions:
+  contents: read
 env:
   STORE_ARTEFACTS: true
   RUN_LINTER: true
