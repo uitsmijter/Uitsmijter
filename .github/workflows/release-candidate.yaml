@@ -44,6 +44,8 @@ jobs:
     needs:
       - lint
       - unittest
+    permissions:
+      contents: read
     steps:
       - name: Delete huge unnecessary tools folder
         run: rm -rf /opt/hostedtoolcache    
