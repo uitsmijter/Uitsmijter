@@ -1,4 +1,6 @@
 name: Issues
+permissions:
+  contents: read
 on:
   issues:
     types:

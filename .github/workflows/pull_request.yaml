@@ -6,6 +6,8 @@ on:
       - reopened
       - ready_for_review
 
+permissions:
+  contents: read
 env:
   STORE_ARTEFACTS: true
   RUN_LINTER: true
@@ -36,6 +38,8 @@ jobs:
   build:
     name: Build Uitsmijter
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     needs:
       - lint
       - unittest
@@ -49,6 +53,8 @@ jobs:
 
   e2etest:
     name: Run E2E-Tests
+    permissions:
+      contents: read
     runs-on: ubuntu-latest
     needs:
       - build
