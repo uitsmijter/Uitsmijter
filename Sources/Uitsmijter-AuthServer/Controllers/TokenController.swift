@@ -158,12 +158,17 @@ struct TokenController: RouteCollection, OAuthControllerProtocol {
     /// - Returns: A `Response` with a json encoded profile
     /// - Throws: An error if the user is not authenticated, or something wend wrong with the serialisation.
     @Sendable func getTokenInfo(req: Request) async throws -> Response {
+        // Extract Bearer token from Authorization header
+        guard let authHeader = req.headers[.authorization].first,
+              authHeader.hasPrefix("Bearer "),
+              let tokenString = authHeader.split(separator: " ", maxSplits: 1).last.map(String.init) else {
+            Log.warning("Missing or invalid Authorization header in token info request", requestId: req.id)
+            throw Abort(.unauthorized, reason: "ERRORS.INVALID_TOKEN")
+        }
+
         do {
-            let payload = try? await req.jwt.verify(as: Payload.self)
-            guard let payload else {
-                Log.warning("Invalid token in token info request", requestId: req.id)
-                throw Abort(.unauthorized, reason: "ERRORS.INVALID_TOKEN")
-            }
+            // Use SignerManager to verify token (supports both HS256 and RS256)
+            let payload = try await SignerManager.shared.verify(tokenString, as: Payload.self)
 
             do {
                 try payload.expiration.verifyNotExpired(currentDate: Date())
@@ -185,8 +190,8 @@ struct TokenController: RouteCollection, OAuthControllerProtocol {
 
             return response
         } catch {
-            Log.error("ERRORS.ENCODE_PAYLOAD_ERROR", requestId: req.id)
-            throw Abort(.internalServerError, reason: "ERRORS.ENCODE_PAYLOAD_ERROR")
+            Log.error("Token verification failed: \(error)", requestId: req.id)
+            throw Abort(.unauthorized, reason: "ERRORS.INVALID_TOKEN")
         }
     }
 }
