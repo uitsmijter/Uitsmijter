@@ -1,0 +1,19 @@
+---
+apiVersion: "uitsmijter.io/v1"
+kind: Client
+metadata:
+  name: cheese-api-insecure-rs256
+  namespace: cheese
+spec:
+  ident: 9F8E7D6C-5B4A-3210-FEDC-BA9876543210
+  tenantname: cheese/cheese-rs256
+  redirect_urls:
+    - 'https?://api-rs256\.example\.com(:8080)?/?(.+)?'
+  grant_types:
+    - password
+    - authorization_code
+    - refresh_token
+  scopes:
+    - access
+    - update
+    - delete
