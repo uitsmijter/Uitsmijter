@@ -1,6 +1,6 @@
 
 #
-name: "CodeQL Advanced"
+name: "CodeQL"
 
 on:
   push:
@@ -38,7 +38,9 @@ jobs:
           build-mode: none
         - language: javascript-typescript
           build-mode: none
-        # swift not ready for Version 6.2 in codeql
+        - language: swift
+          build-mode: autobuild
+
     steps:
     - name: Checkout repository
       uses: actions/checkout@v4
