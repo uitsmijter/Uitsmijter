@@ -38,8 +38,7 @@ jobs:
           build-mode: none
         - language: javascript-typescript
           build-mode: none
-        - language: swift
-          build-mode: none          
+        # swift not ready for Version 6.2 in codeql
     steps:
     - name: Checkout repository
       uses: actions/checkout@v4
