@@ -31,24 +31,25 @@ updates:
           - minor
           - patch
 
-  # Docker dependencies
-  - package-ecosystem: "docker"
-    directory: "/Deployment"
-    schedule:
-      interval: "weekly"
-      day: "monday"
-      time: "03:00"
-    open-pull-requests-limit: 5
-    labels:
-      - "dependencies"
-      - "docker"
-    commit-message:
-      prefix: "(Update: Docker)"
-      include: "scope"
-    reviewers:
-      - "KrisSimon"
-    assignees:
-      - "KrisSimon"
+  # Docker dependencies - DISABLED: Docker ecosystem is no longer supported by Dependabot
+  # See: https://github.com/dependabot/dependabot-core/issues/2178
+  # - package-ecosystem: "docker"
+  #   directory: "/Deployment"
+  #   schedule:
+  #     interval: "weekly"
+  #     day: "monday"
+  #     time: "03:00"
+  #   open-pull-requests-limit: 5
+  #   labels:
+  #     - "dependencies"
+  #     - "docker"
+  #   commit-message:
+  #     prefix: "(Update: Docker)"
+  #     include: "scope"
+  #   reviewers:
+  #     - "KrisSimon"
+  #   assignees:
+  #     - "KrisSimon"
 
   # GitHub Actions
   - package-ecosystem: "github-actions"
@@ -106,21 +107,22 @@ updates:
     allow:
       - dependency-type: "all"
 
-  # Helm chart dependencies
-  - package-ecosystem: "docker"
-    directory: "/Deployment/helm/uitsmijter"
-    schedule:
-      interval: "weekly"
-      day: "monday"
-      time: "03:00"
-    open-pull-requests-limit: 5
-    labels:
-      - "dependencies"
-      - "helm"
-    commit-message:
-      prefix: "(Update: Docker)"
-      include: "scope"
-    reviewers:
-      - "KrisSimon"
-    assignees:
-      - "KrisSimon"
+  # Helm chart dependencies - DISABLED: Docker ecosystem is no longer supported by Dependabot
+  # See: https://github.com/dependabot/dependabot-core/issues/2178
+  # - package-ecosystem: "docker"
+  #   directory: "/Deployment/helm/uitsmijter"
+  #   schedule:
+  #     interval: "weekly"
+  #     day: "monday"
+  #     time: "03:00"
+  #   open-pull-requests-limit: 5
+  #   labels:
+  #     - "dependencies"
+  #     - "helm"
+  #   commit-message:
+  #     prefix: "(Update: Docker)"
+  #     include: "scope"
+  #   reviewers:
+  #     - "KrisSimon"
+  #   assignees:
+  #     - "KrisSimon"
