@@ -39,7 +39,7 @@ jobs:
         - language: javascript-typescript
           build-mode: none
         - language: swift
-          build-mode: autobuild
+          build-mode: manual
 
     steps:
     - name: Checkout repository
@@ -51,3 +51,14 @@ jobs:
       with:
         languages: ${{ matrix.language }}
         build-mode: ${{ matrix.build-mode }}
+
+    # Manual build step for Swift
+    - name: Build Swift project
+      if: matrix.language == 'swift'
+      run: |
+        swift build
+
+    - name: Perform CodeQL Analysis
+      uses: github/codeql-action/analyze@v4
+      with:
+        category: "/language:${{matrix.language}}"
