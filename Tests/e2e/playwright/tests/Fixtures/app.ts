@@ -4,7 +4,7 @@ import {Authentication} from "./authentication";
 export class Application {
     auth: Authentication
 
-    constructor(public readonly page: Page, public timeout?: number) {
+    constructor(public readonly page: Page, timeout?: number) {
         this.timeout = typeof timeout !== "undefined" ? timeout : 60 / 2 * 1000
         this.auth = new Authentication(this)
     }
