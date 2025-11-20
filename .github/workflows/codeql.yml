@@ -5,8 +5,16 @@ name: "CodeQL"
 on:
   push:
     branches: [ "main" ]
+    paths:
+      - 'Sources/**'
+      - '.github/workflows/codeql.yml'
+      - 'codeql-config.yml'
   pull_request:
     branches: [ "main" ]
+    paths:
+      - 'Sources/**'
+      - '.github/workflows/codeql.yml'
+      - 'codeql-config.yml'
   schedule:
     - cron: '45 14 * * 2'
 
@@ -58,6 +66,7 @@ jobs:
       with:
         languages: ${{ matrix.language }}
         build-mode: ${{ matrix.build-mode }}
+        config-file: .github/codeql-config.yml
 
     # Manual build step for Swift
     - name: Build Swift project

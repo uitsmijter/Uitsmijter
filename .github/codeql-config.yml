@@ -1,0 +1,16 @@
+name: "CodeQL Config"
+
+paths-ignore:
+  - '.build/**'
+  - 'build/**'
+  - '**/build/**'
+  - 'Tests/**'
+  - 'Deployment/**'
+  - 'Resources/**'
+
+paths:
+  - 'Sources/**'
+
+# Query configuration
+queries:
+  - uses: security-and-quality
