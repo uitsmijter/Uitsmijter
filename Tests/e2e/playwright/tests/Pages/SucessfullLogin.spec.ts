@@ -1,6 +1,5 @@
 import {test, expect} from '@playwright/test';
 import {Application} from "../Fixtures/app";
-import {Authentication} from "../Fixtures/authentication";
 
 test.describe('OAuth - login', () => {
 
