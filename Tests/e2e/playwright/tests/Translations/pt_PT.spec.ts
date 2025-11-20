@@ -48,7 +48,7 @@ test.describe('Languages - PT', () => {
         const app = new Application(page)
         testInfo.fail(); // This test fails due to missing translations for this page -> UIT-299
 
-        let response = await page.goto('https://uitsmijter.localhost/pageNotFound');
+        await page.goto('https://uitsmijter.localhost/pageNotFound');
         await app.waitForPage();
 
         const field = await page.locator(".error-headline h1");
