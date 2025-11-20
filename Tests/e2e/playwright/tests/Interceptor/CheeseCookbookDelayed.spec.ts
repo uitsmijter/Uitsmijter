@@ -1,5 +1,4 @@
 import {test, expect, Page} from '@playwright/test';
-import {Application} from "../Fixtures/app";
 import {Authentication} from "../Fixtures/authentication";
 
 test.describe('Cheese Cookbooks Interceptor Delayed Login', () => {
