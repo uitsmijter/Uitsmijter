@@ -245,6 +245,4 @@ struct WellKnownController: RouteCollection {
         )
     }
 
-    // MARK: - Helper Methods
-
 }

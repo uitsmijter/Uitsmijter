@@ -22,7 +22,7 @@ function unitTests() {
   local dockerComposeBuildParameter=${1}
   local optionalFilter=${2}
   ARGUMENTS="${ARGUMENTS:-}" GITHUB_ACTION="${GITHUB_ACTION:-}" \
-  SUPPRESS_PACKAGE_WARNINGS="${SUPPRESS_PACKAGE_WARNINGS}" RUNTIME_IMAGE="${RUNTIME_IMAGE}" \
+  SUPPRESS_PACKAGE_WARNINGS="${SUPPRESS_PACKAGE_WARNINGS:-}" RUNTIME_IMAGE="${RUNTIME_IMAGE}" \
   FILTER_TEST="${optionalFilter}" \
   docker compose \
     -f "${PROJECT_DIR}/Deployment/build-compose.yml" \
@@ -49,7 +49,7 @@ function unitTestsList() {
   local dockerComposeBuildParameter=${1}
   local optionalFilter=${2}
   ARGUMENTS="${ARGUMENTS:-}" GITHUB_ACTION="${GITHUB_ACTION:-}" \
-  SUPPRESS_PACKAGE_WARNINGS="${SUPPRESS_PACKAGE_WARNINGS}" \
+  SUPPRESS_PACKAGE_WARNINGS="${SUPPRESS_PACKAGE_WARNINGS:-}" \
   FILTER_TEST="${optionalFilter}" \
   docker compose \
     -f "${PROJECT_DIR}/Deployment/build-compose.yml" \
@@ -91,7 +91,7 @@ function e2eTests(){
   echo "Running tests:"
 
   status=0
-  SUPPRESS_PACKAGE_WARNINGS="${SUPPRESS_PACKAGE_WARNINGS}" \
+  SUPPRESS_PACKAGE_WARNINGS="${SUPPRESS_PACKAGE_WARNINGS:-}" \
   ARGUMENTS="${ARGUMENTS}" GITHUB_ACTION=${GITHUB_ACTION:-} docker compose \
     -f "${PROJECT_DIR}/Deployment/build-compose.yml" \
     --env-file "${PROJECT_DIR}/.env" \
