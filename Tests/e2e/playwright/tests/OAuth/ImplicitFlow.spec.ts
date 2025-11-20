@@ -1,7 +1,6 @@
 import {test, expect} from '@playwright/test';
 import {Application} from "../Fixtures/app";
 import {
-    authorizeApiRequest,
     getTokenForAuthorisationCode,
     getTokenInfo,
 } from "./AuthorizeRequests";
