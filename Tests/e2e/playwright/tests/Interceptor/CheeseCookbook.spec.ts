@@ -108,7 +108,6 @@ test.describe('Cheese Cookbooks Interceptor', () => {
             await logoutButton.click();
             await app.waitForPage()
 
-            const content = await page.content();
             await page.waitForTimeout(5000);
 
             await page.reload();
