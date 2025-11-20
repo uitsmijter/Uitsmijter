@@ -1,7 +1,7 @@
 import {test, expect, Cookie} from '@playwright/test'
 import {Application} from "../Fixtures/app"
 import {
-    authorizeApiRequest, authorizeApiRequestOnPage, authorizeApiRequestWithPage,
+    authorizeApiRequest, authorizeApiRequestOnPage,
     loginAuthorizeFormRequest
 } from "./AuthorizeRequests"
 import { createCodeChallenge, generateCodeVerifier } from './Pkce'
