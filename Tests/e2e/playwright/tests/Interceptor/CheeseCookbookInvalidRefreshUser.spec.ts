@@ -1,6 +1,5 @@
 import {test, expect, Page, Cookie} from '@playwright/test';
 import {Application} from "../Fixtures/app";
-import {Authentication} from "../Fixtures/authentication";
 import {decodeJwt, encodeJwt} from "../OAuth/AuthorizeRequests";
 
 
