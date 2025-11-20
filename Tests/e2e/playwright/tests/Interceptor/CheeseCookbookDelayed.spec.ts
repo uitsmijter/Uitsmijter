@@ -1,6 +1,5 @@
 import {test} from '@playwright/test';
 import {Application} from "../Fixtures/app";
-import {Authentication} from "../Fixtures/authentication";
 
 test.describe('Cheese Cookbooks Interceptor Delayed Login', () => {
     test.setTimeout(10000); // 5s delay in test, set timeout to 2x
