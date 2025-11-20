@@ -1,15 +1,11 @@
 name: "CodeQL Config"
 
+# Exclude build artifacts and non-source directories from all analyses
 paths-ignore:
   - '.build/**'
   - 'build/**'
   - '**/build/**'
-  - 'Tests/**'
-  - 'Deployment/**'
-  - 'Resources/**'
-
-paths:
-  - 'Sources/**'
+  - 'DerivedData/**'
 
 # Query configuration
 queries:

@@ -7,14 +7,14 @@ on:
     branches: [ "main" ]
     paths:
       - 'Sources/**'
-      - '.github/workflows/codeql.yml'
-      - 'codeql-config.yml'
+      - '.github/workflows/**'
+      - '.github/codeql-config.yml'
   pull_request:
     branches: [ "main" ]
     paths:
       - 'Sources/**'
-      - '.github/workflows/codeql.yml'
-      - 'codeql-config.yml'
+      - '.github/workflows/**'
+      - '.github/codeql-config.yml'
   schedule:
     - cron: '45 14 * * 2'
 
