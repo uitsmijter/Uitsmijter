@@ -1,6 +1,6 @@
 import {test, expect, Page} from '@playwright/test';
 import {Application} from "../Fixtures/app";
-import {Authentication} from "../Fixtures/authentication";
+
 
 const timeout = 60 / 2 * 1000;
 
