@@ -3,7 +3,6 @@ import {Application} from "../Fixtures/app";
 import {
     authorizeFormRequest,
     getTokenForAuthorisationCode,
-    getTokenInfo,
     loginAuthorizeFormRequest
 } from "./AuthorizeRequests";
 import { createCodeChallenge, generateCodeVerifier } from './Pkce';
