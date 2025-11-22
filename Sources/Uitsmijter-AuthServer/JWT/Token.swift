@@ -304,9 +304,8 @@ struct Token: ExpressibleByStringLiteral {
         // Use SignerManager for signing (supports both HS256 and RS256)
         let manager = signerManager ?? SignerManager.shared
 
-        // Use provided algorithm or fall back to global default
-        let effectiveAlgorithm = algorithmString ??
-            ProcessInfo.processInfo.environment["JWT_ALGORITHM"] ?? "HS256"
+        // Use provided algorithm or fall back to HS256 default
+        let effectiveAlgorithm = algorithmString ?? "HS256"
 
         let (tokenString, kid) = try await manager.sign(
             payload,

@@ -354,12 +354,11 @@ struct TenantSpec: Codable, Sendable {
     /// JWT signing algorithm for this tenant.
     ///
     /// Controls whether tokens for this tenant are signed with HS256 (symmetric)
-    /// or RS256 (asymmetric RSA). If not set, falls back to the global
-    /// JWT_ALGORITHM environment variable.
+    /// or RS256 (asymmetric RSA). If not set, defaults to HS256.
     ///
     /// ## Allowed values
     ///
-    /// - `HS256`: HMAC with SHA-256 (symmetric, uses JWT_SECRET)
+    /// - `HS256`: HMAC with SHA-256 (symmetric, uses JWT_SECRET) - default
     /// - `RS256`: RSA with SHA-256 (asymmetric, uses KeyStorage)
     ///
     /// ## Example YAML
@@ -371,8 +370,7 @@ struct TenantSpec: Codable, Sendable {
 
     /// Get the effective JWT algorithm for this tenant.
     ///
-    /// Returns the tenant-specific algorithm if set, otherwise falls back to
-    /// the global JWT_ALGORITHM environment variable, defaulting to HS256.
+    /// Returns the tenant-specific algorithm if set, otherwise defaults to HS256.
     ///
     /// - Returns: "HS256" or "RS256"
     var effectiveJwtAlgorithm: String {
@@ -380,7 +378,7 @@ struct TenantSpec: Codable, Sendable {
            tenantAlgo == "HS256" || tenantAlgo == "RS256" {
             return tenantAlgo
         }
-        return ProcessInfo.processInfo.environment["JWT_ALGORITHM"]?.uppercased() ?? "HS256"
+        return "HS256"
     }
 
     /// Initialize a tenant specification.
@@ -392,7 +390,7 @@ struct TenantSpec: Codable, Sendable {
     ///   - providers: List of provider file paths
     ///   - templates: Optional S3 template configuration
     ///   - silent_login: Whether silent login is enabled (defaults to true)
-    ///   - jwt_algorithm: JWT signing algorithm (HS256 or RS256, defaults to global setting)
+    ///   - jwt_algorithm: JWT signing algorithm (HS256 or RS256, defaults to HS256)
     init(
         hosts: [String],
         informations: TenantInformations? = nil,

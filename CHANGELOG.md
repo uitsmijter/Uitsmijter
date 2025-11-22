@@ -1,3 +1,7 @@
+# 0.10.1
+
+- Change: **JWT Algorithm Configuration** - Removed `JWT_ALGORITHM` environment variable in favor of tenant-specific configuration. JWT signing algorithm is now exclusively controlled via `jwt_algorithm` field in tenant YAML configuration, defaulting to HS256 if not specified. This change provides better multi-tenant flexibility where different tenants can use different signing algorithms (HS256 or RS256) independently.
+
 # 0.10.0
 
 - Feature: **RFC 7517 (JSON Web Key)** - Full implementation of JWKS endpoint at `/.well-known/jwks.json` with RSA public key distribution, supporting RS256 JWT signing algorithm with automatic key rotation and `kid` header support
