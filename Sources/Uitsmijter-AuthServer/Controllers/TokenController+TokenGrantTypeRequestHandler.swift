@@ -281,7 +281,8 @@ extension TokenController {
                 profile: profile
             ),
             authTime: Date(),
-            algorithmString: tenant.config.effectiveJwtAlgorithm
+            algorithmString: tenant.config.effectiveJwtAlgorithm,
+            signerManager: req.application.signerManager
         )
         return TokenResponse(
             access_token: accessToken.value,
@@ -327,7 +328,8 @@ extension TokenController {
             subject: payload.subject,
             userProfile: profile,
             authTime: payload.authTime.value,
-            algorithmString: tenant.config.effectiveJwtAlgorithm
+            algorithmString: tenant.config.effectiveJwtAlgorithm,
+            signerManager: req.application.signerManager
         )
         let refreshToken: Code = Code()
 

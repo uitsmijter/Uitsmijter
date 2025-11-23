@@ -1,5 +1,6 @@
 import Foundation
 import JWTKit
+import Vapor
 
 /// Manages JWT signing with support for both HS256 and RS256 algorithms.
 ///
@@ -220,6 +221,40 @@ enum SignerError: Error, CustomStringConvertible {
             return "JWT signer not initialized"
         case .algorithmNotSupported(let alg):
             return "JWT algorithm not supported: \(alg)"
+        }
+    }
+}
+
+/// A storage key for registering ``SignerManager`` in Vapor's application storage.
+///
+/// This key enables dependency injection of the signer manager throughout
+/// the Vapor application via the storage container pattern.
+struct SignerManagerKey: StorageKey {
+    typealias Value = SignerManager
+}
+
+/// Vapor application extension providing access to signer manager.
+extension Application {
+    /// The signer manager instance for this application.
+    ///
+    /// This property provides centralized access to the configured SignerManager
+    /// throughout the Vapor application. It's set during application configuration.
+    ///
+    /// ## Example
+    ///
+    /// ```swift
+    /// // Configure in configure.swift
+    /// app.signerManager = SignerManager(keyStorage: app.keyStorage)
+    ///
+    /// // Access in route handlers
+    /// let signerManager = req.application.signerManager ?? SignerManager.shared
+    /// ```
+    var signerManager: SignerManager? {
+        get {
+            storage[SignerManagerKey.self]
+        }
+        set {
+            storage[SignerManagerKey.self] = newValue
         }
     }
 }

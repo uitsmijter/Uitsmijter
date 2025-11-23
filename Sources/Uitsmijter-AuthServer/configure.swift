@@ -188,15 +188,20 @@ public func configure(_ app: Application) async throws {
             // Store OAuth authorization codes in Redis for distributed deployments
             app.authCodeStorage = .init(use: .redis(client: app.redis))
             // Store RSA keys in Redis for distributed deployments (supports HPA/multi-pod)
-            // Use isolated generator instance to avoid cross-test contention
-            app.keyStorage = KeyStorage(use: .redis(client: app.redis), generator: KeyGenerator())
+            // IMPORTANT: Use shared KeyGenerator to avoid unnecessary instances
+            let keyStorage = KeyStorage(use: .redis(client: app.redis))
+            app.keyStorage = keyStorage
+            // Configure SignerManager to use the same KeyStorage instance
+            app.signerManager = SignerManager(keyStorage: keyStorage)
         } catch {
             // If Redis connection fails, fall back to in-memory storage to keep the application running
             app.logger.error("Failed to configure Redis: \(error). Falling back to in-memory session storage.")
             app.sessions.use(.memory)
             app.authCodeStorage = .init(use: .memory)
-            // Fallback to in-memory key storage with isolated generator
-            app.keyStorage = KeyStorage(use: .memory, generator: KeyGenerator())
+            // Fallback to in-memory key storage
+            let keyStorage = KeyStorage(use: .memory)
+            app.keyStorage = keyStorage
+            app.signerManager = SignerManager(keyStorage: keyStorage)
         }
     } else {
         // Development mode: use in-memory storage (sessions lost on restart)
@@ -205,8 +210,10 @@ public func configure(_ app: Application) async throws {
         )
         app.sessions.use(.memory)
         app.authCodeStorage = .init(use: .memory)
-        // Use in-memory key storage for development with isolated generator
-        app.keyStorage = KeyStorage(use: .memory, generator: KeyGenerator())
+        // Use in-memory key storage for development
+        let keyStorage = KeyStorage(use: .memory)
+        app.keyStorage = keyStorage
+        app.signerManager = SignerManager(keyStorage: keyStorage)
     }
 
     // Configure session cookie settings for security and expiration
