@@ -238,13 +238,35 @@ actor RedisKeyStorage: KeyStorageProtocol {
         }
     }
 
-    // MARK: - Private Helper Methods
+    /// Remove all keys from storage (useful for testing)
+    func removeAllKeys() async {
+        // Get all key IDs
+        let metadata = await getAllKeyMetadata()
+
+        // Remove each key
+        for (kid, _, _) in metadata {
+            await removeKey(kid: kid)
+        }
+
+        // Clear the active key reference
+        do {
+            let activeKey = try redisKey("\(Self.keyPrefix):active")
+            _ = try? await redis.delete(activeKey).get()
+        } catch {
+            // Ignore errors - key might not exist
+        }
+    }
+}
+
+// MARK: - Private Helper Methods
+
+private extension RedisKeyStorage {
 
     /// Generate a new active key with current date as kid
     ///
     /// Uses a distributed lock to prevent multiple pods from generating different keys
     /// with the same kid simultaneously (race condition prevention).
-    private func generateNewActiveKey() async throws -> KeyGenerator.RSAKeyPair {
+    func generateNewActiveKey() async throws -> KeyGenerator.RSAKeyPair {
         let formatter = ISO8601DateFormatter()
         formatter.formatOptions = [.withFullDate]
         let kid = formatter.string(from: Date())
@@ -313,7 +335,7 @@ actor RedisKeyStorage: KeyStorageProtocol {
     }
 
     /// Fetch a key pair from Redis
-    private func fetchKey(kid: String) async throws -> KeyGenerator.RSAKeyPair? {
+    func fetchKey(kid: String) async throws -> KeyGenerator.RSAKeyPair? {
         let privateKeyKey = try redisKey("\(Self.keyPrefix):keys:\(kid):private")
         let publicKeyKey = try redisKey("\(Self.keyPrefix):keys:\(kid):public")
 
@@ -333,7 +355,7 @@ actor RedisKeyStorage: KeyStorageProtocol {
     }
 
     /// Fetch metadata for a key
-    private func fetchMetadata(kid: String) async throws -> KeyMetadata? {
+    func fetchMetadata(kid: String) async throws -> KeyMetadata? {
         let metadataKey = try redisKey("\(Self.keyPrefix):keys:\(kid):metadata")
 
         guard let value = try? await redis.get(metadataKey).get(),
@@ -346,7 +368,7 @@ actor RedisKeyStorage: KeyStorageProtocol {
     }
 
     /// Get all key IDs from the index
-    private func getAllKids() async throws -> [String] {
+    func getAllKids() async throws -> [String] {
         let indexKey = try redisKey("\(Self.keyPrefix):index")
 
         let result = try await redis.zrange(
@@ -358,7 +380,7 @@ actor RedisKeyStorage: KeyStorageProtocol {
     }
 
     /// Deactivate all keys except the specified one
-    private func deactivateOtherKeys(except activeKid: String) async throws {
+    func deactivateOtherKeys(except activeKid: String) async throws {
         let kids = try await getAllKids()
 
         for kid in kids where kid != activeKid {
@@ -373,27 +395,8 @@ actor RedisKeyStorage: KeyStorageProtocol {
         }
     }
 
-    /// Remove all keys from storage (useful for testing)
-    func removeAllKeys() async {
-        // Get all key IDs
-        let metadata = await getAllKeyMetadata()
-
-        // Remove each key
-        for (kid, _, _) in metadata {
-            await removeKey(kid: kid)
-        }
-
-        // Clear the active key reference
-        do {
-            let activeKey = try redisKey("\(Self.keyPrefix):active")
-            _ = try? await redis.delete(activeKey).get()
-        } catch {
-            // Ignore errors - key might not exist
-        }
-    }
-
     /// Helper to create a RedisKey safely
-    private func redisKey(_ string: String) throws -> RedisKey {
+    func redisKey(_ string: String) throws -> RedisKey {
         guard let key = RedisKey(rawValue: string) else {
             throw KeyStorageError.invalidRedisKey(string)
         }
