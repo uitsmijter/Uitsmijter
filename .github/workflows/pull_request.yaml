@@ -83,7 +83,8 @@ jobs:
       packages: write
       contents: read
     needs:
-      - build-helm
+      - build
+      - e2etest
     steps:
       - name: Check out the repo
         uses: actions/checkout@v5
