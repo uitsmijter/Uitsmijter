@@ -4,7 +4,8 @@
 
 - Fix: **RS256 Token Signature Verification** - Fixed critical bug where JWT tokens signed with RS256 would fail signature verification against JWKS public keys. SignerManager now uses the application's configured KeyStorage instance instead of a separate in-memory singleton, ensuring consistent key usage across token signing and JWKS endpoints.
 - Fix: **RSA Key Generation Race Condition** - Implemented distributed locking using Redis SETNX to prevent multiple pods from simultaneously generating different RSA key pairs with identical key IDs in horizontal scaling scenarios. Pods now coordinate key generation with automatic retry and exponential backoff.
-- Fix: **JWT Validation Test Timing** - Added 5-second clock skew tolerance to JWT timestamp validation tests to handle timing variations between test execution and token issuance, following industry best practices for JWT validation.
+
+- Improvement: **JWT Validation Test Timing** - Added 5-second clock skew tolerance to JWT timestamp validation tests to handle timing variations between test execution and token issuance, following industry best practices for JWT validation.
 
 # 0.10.0
 
