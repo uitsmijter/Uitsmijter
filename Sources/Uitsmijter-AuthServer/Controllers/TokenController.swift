@@ -168,7 +168,8 @@ struct TokenController: RouteCollection, OAuthControllerProtocol {
 
         do {
             // Use SignerManager to verify token (supports both HS256 and RS256)
-            let payload = try await SignerManager.shared.verify(tokenString, as: Payload.self)
+            let signerManager = req.application.signerManager ?? SignerManager.shared
+            let payload = try await signerManager.verify(tokenString, as: Payload.self)
 
             do {
                 try payload.expiration.verifyNotExpired(currentDate: Date())
