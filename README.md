@@ -23,6 +23,7 @@ installation, configuration and implementation to go-live.
 - **Multi-Tenant Architecture** - Support multiple organizations with custom login templates
 - **Traefik2 Integration** - Drop-in forward auth middleware
 - **Kubernetes-Native** - Custom Resource Definitions (CRDs) for configuration
+- **RS256** and **HS256** token signing
 - **Redis-Backed Sessions** - Scalable session management with Redis support
 - **Prometheus Metrics** - Built-in monitoring and observability
 - **Zero Database Migration** - Works with your existing user storage
