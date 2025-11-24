@@ -51,7 +51,7 @@ jobs:
 
     steps:
     - name: Checkout repository
-      uses: actions/checkout@v4
+      uses: actions/checkout@v6
 
     # Install Swift 6.2 for Swift language analysis
     - name: Setup Swift 6.2

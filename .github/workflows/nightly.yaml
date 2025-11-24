@@ -22,7 +22,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Check out the repo
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
       - uses: ./.github/actions/step-clear-cache
         with:
           volume: uitsmijter_build
@@ -40,7 +40,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Check out the repo
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
       - uses: ./.github/actions/step-lint
         if: ${{ env.RUN_LINTER != 'false' }}
   unittest:
@@ -50,7 +50,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Check out the repo
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
       - uses: ./.github/actions/step-unittest
         if: ${{ env.RUN_UNITTESTS != 'false' }}
 
@@ -67,7 +67,7 @@ jobs:
       - name: Delete huge unnecessary tools folder
         run: rm -rf /opt/hostedtoolcache
       - name: Check out the repo
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
         with:
           lfs: true
           fetch-depth: 0
@@ -89,7 +89,7 @@ jobs:
       - name: Delete huge unnecessary tools folder
         run: rm -rf /opt/hostedtoolcache    
       - name: Check out the repo
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
         with:
           lfs: true
       - uses: ./.github/actions/step-e2e
@@ -108,7 +108,7 @@ jobs:
       - e2etest
     steps:
       - name: Check out the repo
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
       - uses: ./.github/actions/step-publish
         with:
           tag: nightly
