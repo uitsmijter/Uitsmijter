@@ -1,10 +1,5 @@
 import Testing
 @testable import Uitsmijter_AuthServer
-#if canImport(Darwin)
-import Darwin
-#else
-import Glibc
-#endif
 
 @Suite("Tenant Configuration Algorithm Tests")
 struct TenantConfigAlgorithmTest {
@@ -45,29 +40,8 @@ struct TenantConfigAlgorithmTest {
         #expect(spec.effectiveJwtAlgorithm == "HS256")
     }
 
-    @Test("Tenant without algorithm falls back to environment RS256")
-    func tenantWithoutAlgorithmFallsBackToEnvRS256() throws {
-        setenv("JWT_ALGORITHM", "RS256", 1)
-        defer { unsetenv("JWT_ALGORITHM") }
-
-        let spec = TenantSpec(hosts: ["example.com"])
-        #expect(spec.effectiveJwtAlgorithm == "RS256")
-    }
-
-    @Test("Tenant without algorithm falls back to environment HS256")
-    func tenantWithoutAlgorithmFallsBackToEnvHS256() throws {
-        setenv("JWT_ALGORITHM", "HS256", 1)
-        defer { unsetenv("JWT_ALGORITHM") }
-
-        let spec = TenantSpec(hosts: ["example.com"])
-        #expect(spec.effectiveJwtAlgorithm == "HS256")
-    }
-
-    @Test("Tenant with invalid algorithm falls back to environment")
-    func tenantWithInvalidAlgorithmFallsBack() throws {
-        setenv("JWT_ALGORITHM", "HS256", 1)
-        defer { unsetenv("JWT_ALGORITHM") }
-
+    @Test("Tenant with invalid algorithm falls back to HS256")
+    func tenantWithInvalidAlgorithmFallsBackToHS256() throws {
         let spec = TenantSpec(
             hosts: ["example.com"],
             jwt_algorithm: "INVALID"
@@ -77,36 +51,8 @@ struct TenantConfigAlgorithmTest {
 
     @Test("Defaults to HS256 when nothing is set")
     func defaultsToHS256() throws {
-        unsetenv("JWT_ALGORITHM")
-
         let spec = TenantSpec(hosts: ["example.com"])
         #expect(spec.effectiveJwtAlgorithm == "HS256")
-    }
-
-    @Test("Tenant algorithm overrides environment variable")
-    func tenantAlgorithmOverridesEnvironment() throws {
-        setenv("JWT_ALGORITHM", "RS256", 1)
-        defer { unsetenv("JWT_ALGORITHM") }
-
-        let spec = TenantSpec(
-            hosts: ["example.com"],
-            jwt_algorithm: "HS256"
-        )
-
-        #expect(spec.effectiveJwtAlgorithm == "HS256")
-    }
-
-    @Test("Tenant RS256 overrides environment HS256")
-    func tenantAlgorithmRS256OverridesEnvironmentHS256() throws {
-        setenv("JWT_ALGORITHM", "HS256", 1)
-        defer { unsetenv("JWT_ALGORITHM") }
-
-        let spec = TenantSpec(
-            hosts: ["example.com"],
-            jwt_algorithm: "RS256"
-        )
-
-        #expect(spec.effectiveJwtAlgorithm == "RS256")
     }
 
     @Test("Multiple tenants with different algorithms")

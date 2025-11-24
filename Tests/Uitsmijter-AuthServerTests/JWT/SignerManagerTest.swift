@@ -33,11 +33,8 @@ struct SignerManagerTest {
         #expect(!token.isEmpty)
         #expect(token.split(separator: ".").count == 3)
 
-        // HS256 should not include kid
-        if ProcessInfo.processInfo.environment["JWT_ALGORITHM"] == "HS256"
-            || ProcessInfo.processInfo.environment["JWT_ALGORITHM"] == nil {
-            #expect(kid == nil)
-        }
+        // Default sign() uses HS256, which should not include kid
+        #expect(kid == nil)
     }
 
     @Test("Verify HS256 signed token")
@@ -436,8 +433,8 @@ struct SignerManagerTest {
 
     // MARK: - Algorithm Detection Tests
 
-    @Test("Signed token has correct algorithm in header")
-    func signedTokenHasCorrectAlgorithm() async throws {
+    @Test("Default signed token uses HS256")
+    func defaultSignedTokenUsesHS256() async throws {
         let storage = KeyStorage(use: .memory)
         let manager = SignerManager(keyStorage: storage)
 
@@ -479,13 +476,58 @@ struct SignerManagerTest {
 
         let headerJson = try JSONSerialization.jsonObject(with: headerData) as? [String: Any]
 
-        // Check algorithm
-        if ProcessInfo.processInfo.environment["JWT_ALGORITHM"] == "RS256" {
-            #expect(headerJson?["alg"] as? String == "RS256")
-            #expect(headerJson?["kid"] as? String == kid)
+        // Default algorithm should be HS256 with no kid
+        #expect(headerJson?["alg"] as? String == "HS256")
+        #expect(kid == nil)
+    }
+
+    @Test("RS256 signed token has kid in header")
+    func rs256SignedTokenHasKid() async throws {
+        let storage = KeyStorage(use: .memory)
+        let manager = SignerManager(keyStorage: storage)
+
+        let payload = Payload(
+            issuer: IssuerClaim(value: "https://test.example.com"),
+            subject: SubjectClaim(value: "test@example.com"),
+            audience: AudienceClaim(value: "test-client"),
+            expiration: ExpirationClaim(value: Date(timeIntervalSinceNow: 3600)),
+            issuedAt: IssuedAtClaim(value: Date()),
+            authTime: AuthTimeClaim(value: Date()),
+            tenant: "test-tenant",
+            role: "user",
+            user: "test@example.com"
+        )
+
+        let (token, kid) = try await manager.sign(payload, algorithmString: "RS256")
+
+        // Decode header
+        let parts = token.split(separator: ".")
+        #expect(parts.count == 3)
+
+        let headerString = String(parts[0])
+        let base64 = headerString
+            .replacingOccurrences(of: "-", with: "+")
+            .replacingOccurrences(of: "_", with: "/")
+
+        let paddedBase64: String
+        let remainder = base64.count % 4
+        if remainder > 0 {
+            paddedBase64 = base64 + String(repeating: "=", count: 4 - remainder)
         } else {
-            #expect(headerJson?["alg"] as? String == "HS256")
+            paddedBase64 = base64
         }
+
+        guard let headerData = Data(base64Encoded: paddedBase64) else {
+            Issue.record("Failed to decode header")
+            return
+        }
+
+        let headerJson = try JSONSerialization.jsonObject(with: headerData) as? [String: Any]
+
+        // RS256 should have algorithm and kid
+        #expect(headerJson?["alg"] as? String == "RS256")
+        #expect(headerJson?["kid"] as? String == kid)
+        #expect(kid != nil)
     }
 }
 // swiftlint:enable type_body_length

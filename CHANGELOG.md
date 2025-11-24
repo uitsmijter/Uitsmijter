@@ -1,3 +1,12 @@
+# 0.10.1
+
+- Change: **JWT Algorithm Configuration** - Removed `JWT_ALGORITHM` environment variable in favor of tenant-specific configuration. JWT signing algorithm is now exclusively controlled via `jwt_algorithm` field in tenant YAML configuration, defaulting to HS256 if not specified. This change provides better multi-tenant flexibility where different tenants can use different signing algorithms (HS256 or RS256) independently.
+
+- Fix: **RS256 Token Signature Verification** - Fixed critical bug where JWT tokens signed with RS256 would fail signature verification against JWKS public keys. SignerManager now uses the application's configured KeyStorage instance instead of a separate in-memory singleton, ensuring consistent key usage across token signing and JWKS endpoints.
+- Fix: **RSA Key Generation Race Condition** - Implemented distributed locking using Redis SETNX to prevent multiple pods from simultaneously generating different RSA key pairs with identical key IDs in horizontal scaling scenarios. Pods now coordinate key generation with automatic retry and exponential backoff.
+
+- Improvement: **JWT Validation Test Timing** - Added 5-second clock skew tolerance to JWT timestamp validation tests to handle timing variations between test execution and token issuance, following industry best practices for JWT validation.
+
 # 0.10.0
 
 - Feature: **RFC 7517 (JSON Web Key)** - Full implementation of JWKS endpoint at `/.well-known/jwks.json` with RSA public key distribution, supporting RS256 JWT signing algorithm with automatic key rotation and `kid` header support

@@ -1,16 +1,17 @@
 import Foundation
 import JWTKit
+import Vapor
 
-/// Manages JWT signing with support for both HS256 (legacy) and RS256 (RSA) algorithms.
+/// Manages JWT signing with support for both HS256 and RS256 algorithms.
 ///
 /// The SignerManager provides a unified interface for JWT signing that supports:
-/// - **HS256**: Symmetric HMAC signing (legacy, for backwards compatibility)
-/// - **RS256**: Asymmetric RSA signing (new, recommended)
+/// - **HS256**: Symmetric HMAC signing (default)
+/// - **RS256**: Asymmetric RSA signing with automatic key rotation
 ///
 /// ## Algorithm Selection
 ///
-/// The signing algorithm is controlled by the `JWT_ALGORITHM` environment variable:
-/// - `HS256`: Use symmetric HMAC signing (default for backwards compatibility)
+/// The signing algorithm is controlled by the tenant configuration (`jwt_algorithm`):
+/// - `HS256`: Use symmetric HMAC signing (default)
 /// - `RS256`: Use asymmetric RSA signing with automatic key rotation
 ///
 /// ## RSA Key Management
@@ -23,10 +24,10 @@ import JWTKit
 ///
 /// ## Migration from HS256 to RS256
 ///
-/// To migrate existing deployments:
-/// 1. Keep `JWT_ALGORITHM=HS256` initially (default)
+/// To migrate existing tenants from HS256 to RS256:
+/// 1. Tenant uses HS256 by default (no configuration needed)
 /// 2. Deploy code with RS256 support
-/// 3. Change to `JWT_ALGORITHM=RS256`
+/// 3. Add `jwt_algorithm: RS256` to tenant YAML configuration
 /// 4. Old HS256 tokens remain valid until expiration
 /// 5. New tokens use RS256 with kid headers
 ///
@@ -126,10 +127,10 @@ actor SignerManager {
         }
     }
 
-    /// Sign a payload with default algorithm from environment
+    /// Sign a payload with default algorithm (HS256)
     ///
-    /// Convenience method that uses the JWT_ALGORITHM environment variable to determine
-    /// the signing algorithm. Falls back to HS256 if not set.
+    /// Convenience method that uses HS256 as the default signing algorithm.
+    /// For tenant-specific algorithm selection, use `sign(_:algorithmString:)` instead.
     ///
     /// - Parameter payload: The JWT payload to sign
     /// - Returns: Tuple of (signed JWT string, optional kid)
@@ -137,9 +138,7 @@ actor SignerManager {
     func sign<Payload: JWTPayload>(
         _ payload: Payload
     ) async throws -> (token: String, kid: String?) {
-        let algorithmString = ProcessInfo.processInfo.environment["JWT_ALGORITHM"] ?? "HS256"
-        let algorithm = Algorithm(rawValue: algorithmString.uppercased()) ?? .hs256
-        return try await sign(payload, algorithm: algorithm)
+        return try await sign(payload, algorithm: .hs256)
     }
 
     /// Sign a payload with algorithm specified as string
@@ -222,6 +221,40 @@ enum SignerError: Error, CustomStringConvertible {
             return "JWT signer not initialized"
         case .algorithmNotSupported(let alg):
             return "JWT algorithm not supported: \(alg)"
+        }
+    }
+}
+
+/// A storage key for registering ``SignerManager`` in Vapor's application storage.
+///
+/// This key enables dependency injection of the signer manager throughout
+/// the Vapor application via the storage container pattern.
+struct SignerManagerKey: StorageKey {
+    typealias Value = SignerManager
+}
+
+/// Vapor application extension providing access to signer manager.
+extension Application {
+    /// The signer manager instance for this application.
+    ///
+    /// This property provides centralized access to the configured SignerManager
+    /// throughout the Vapor application. It's set during application configuration.
+    ///
+    /// ## Example
+    ///
+    /// ```swift
+    /// // Configure in configure.swift
+    /// app.signerManager = SignerManager(keyStorage: app.keyStorage)
+    ///
+    /// // Access in route handlers
+    /// let signerManager = req.application.signerManager ?? SignerManager.shared
+    /// ```
+    var signerManager: SignerManager? {
+        get {
+            storage[SignerManagerKey.self]
+        }
+        set {
+            storage[SignerManagerKey.self] = newValue
         }
     }
 }
