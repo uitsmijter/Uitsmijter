@@ -14,6 +14,30 @@ spec:
       served: true
       # One and only one version must be marked as the storage version.
       storage: true
+      # Additional columns to display in kubectl get
+      additionalPrinterColumns:
+        - name: Tenant
+          type: string
+          description: The tenant this client belongs to
+          jsonPath: .spec.tenantname
+        - name: Sessions
+          type: integer
+          description: Number of active user sessions
+          jsonPath: .status.activeSessions
+        - name: Denied
+          type: integer
+          description: Number of denied login attempts
+          jsonPath: .status.deniedAttempts
+        - name: Status
+          type: string
+          description: Current phase of the client
+          jsonPath: .status.phase
+        - name: Age
+          type: date
+          jsonPath: .metadata.creationTimestamp
+      # Enable status subresource
+      subresources:
+        status: {}
       schema:
         openAPIV3Schema:
           type: object
@@ -51,6 +75,22 @@ spec:
                 - ident
                 - tenantname
                 - redirect_urls
+            status:
+              type: object
+              properties:
+                phase:
+                  type: string
+                  description: Current phase of the client (Ready, Loading, Error)
+                activeSessions:
+                  type: integer
+                  description: Number of active user sessions for this client
+                deniedAttempts:
+                  type: integer
+                  description: Number of denied login attempts for this client
+                lastUpdated:
+                  type: string
+                  format: date-time
+                  description: Timestamp of last status update
 
   # either Namespaced or Cluster
   scope: Namespaced

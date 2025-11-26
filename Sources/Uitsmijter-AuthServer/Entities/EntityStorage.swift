@@ -71,6 +71,28 @@ final class EntityStorage {
     var hook: (@Sendable (ManagedEntityType, Entity?) -> Void)?
     #endif
 
+    /// Dictionary tracking denied login attempts per client.
+    ///
+    /// Key is the client name, value is the count of denied login attempts.
+    /// This is reset when clients are reloaded or manually cleared.
+    var deniedLoginAttempts: [String: Int] = [:]
+
+    /// Increment denied login attempts for a client.
+    ///
+    /// - Parameter clientName: The name of the client that had a failed login
+    func incrementDeniedAttempts(for clientName: String) {
+        deniedLoginAttempts[clientName, default: 0] += 1
+        Log.debug("Denied login attempt for client: \(clientName), total: \(deniedLoginAttempts[clientName] ?? 0)")
+    }
+
+    /// Get denied login attempts for a client.
+    ///
+    /// - Parameter clientName: The name of the client
+    /// - Returns: The number of denied login attempts, or 0 if none
+    func getDeniedAttempts(for clientName: String) -> Int {
+        return deniedLoginAttempts[clientName] ?? 0
+    }
+
     /// Initialize a new entity storage instance.
     ///
     /// In production, there's typically one storage instance per application.

@@ -202,6 +202,35 @@ actor MemoryAuthCodeStorage: AuthCodeStorageProtocol {
         return matchingSessions.count
     }
 
+    /// Counts authorization sessions for a specific client and type.
+    ///
+    /// - Parameters:
+    ///   - client: The client to count sessions for
+    ///   - type: The type of sessions to count (e.g., .refresh for long-lived sessions)
+    /// - Returns: The number of sessions matching the criteria
+    func count(client: UitsmijterClient, type: AuthSession.CodeType) async -> Int {
+        let matchingSessions = storage.filter { session in
+            // Match by audience (client_id) in the payload
+            guard let payload = session.payload else { return false }
+            let audienceMatches = payload.audience.value.contains(client.name)
+            return audienceMatches && session.type == type
+        }
+        Log.debug("Count called for client: \(client.name), type: \(type.rawValue) - found \(matchingSessions.count)")
+
+        // Log details of each matching session for debugging
+        for session in matchingSessions {
+            Log.debug(
+                """
+                Session in count - Type: \(session.type.rawValue), \
+                Client: \(session.payload?.audience.value.joined(separator: ",") ?? "nil"), \
+                Subject: \(session.payload?.subject.value ?? "nil")
+                """
+            )
+        }
+
+        return matchingSessions.count
+    }
+
     /// Checks if the storage backend is healthy and operational.
     ///
     /// - Returns: Always returns true for memory storage (always available)

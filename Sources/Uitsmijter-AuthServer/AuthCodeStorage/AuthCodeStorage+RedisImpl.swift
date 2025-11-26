@@ -206,6 +206,58 @@ actor RedisAuthCodeStorage: AuthCodeStorageProtocol {
         }
     }
 
+    func count(client: UitsmijterClient, type: AuthSession.CodeType) async -> Int {
+        Log.debug("Count AuthSession for client: \(client.name) with type: \(type.rawValue)")
+        do {
+            let (_, keys) = try await redis.scan(startingFrom: 0).get()
+            let matchingKeys: Int = try await withThrowingTaskGroup(of: Int.self) { group in
+                for key in keys {
+                    group.addTask {
+                        // Skip non-AuthSession keys (loginid~ keys are LoginSession, not AuthSession)
+                        if key.hasPrefix("loginid~") {
+                            return 0
+                        }
+
+                        if let rKey = RedisKey(rawValue: key) {
+                            let value = try? await self.redis.get(rKey).get()
+                            if let data = value?.data {
+                                // Try to decode as AuthSession, but skip if it's a different type
+                                if let decoded = try? JSONDecoder.main.decode(AuthSession.self, from: data) {
+                                    // Match by audience (client_id) in the payload and type
+                                    guard let payload = decoded.payload else { return 0 }
+                                    let audienceMatches = payload.audience.value.contains(client.name)
+                                    if audienceMatches && decoded.type == type {
+                                        Log.debug(
+                                            """
+                                            Session in count - Type: \(decoded.type.rawValue), \
+                                            Client: \(payload.audience.value.joined(separator: ",")), \
+                                            Subject: \(payload.subject.value), \
+                                            Key: \(key)
+                                            """
+                                        )
+                                        return 1
+                                    }
+                                }
+                            }
+                        }
+                        return 0
+                    }
+                }
+
+                var total = 0
+                for try await count in group {
+                    total += count
+                }
+                return total
+            }
+            Log.debug("Total matching sessions for client: \(matchingKeys)")
+            return matchingKeys
+        } catch {
+            Log.error("Cannot count redis keys for client: \(error)")
+            return 0
+        }
+    }
+
     func isHealthy() async -> Bool {
         if (try? await redis.ping().get()) == "PONG" {
             return true

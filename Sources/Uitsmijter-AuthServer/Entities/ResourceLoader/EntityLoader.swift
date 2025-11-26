@@ -127,6 +127,34 @@ public final class EntityLoader: EntityLoaderProtocolFunctions {
         await loader.updateTenantStatus(tenant: tenant, authCodeStorage: authCodeStorage)
     }
 
+    /// Triggers a status update for a client in Kubernetes.
+    ///
+    /// This method updates the client's status subresource with current metrics.
+    /// Only works for Kubernetes clients (those loaded from CRDs).
+    ///
+    /// - Parameter clientName: The name of the client to update
+    func triggerClientStatusUpdate(for clientName: String) async {
+        Log.info("triggerClientStatusUpdate called for client: \(clientName)")
+
+        guard let client = storage.clients.first(where: { $0.name == clientName }) else {
+            Log.warning("Client not found in storage: \(clientName)")
+            return
+        }
+
+        guard case .kubernetes = client.ref else {
+            Log.debug("Client \(clientName) is not a Kubernetes client, skipping status update")
+            return
+        }
+
+        guard let loader = crdLoader else {
+            Log.error("CRD loader not available for client status update")
+            return
+        }
+
+        Log.info("Triggering status update for Kubernetes client: \(clientName)")
+        await loader.updateClientStatus(client: client, authCodeStorage: authCodeStorage)
+    }
+
     // MARK: - EntityLoaderProtocolFunctions
 
     /// Adds a new entity to the global entity storage.
@@ -155,6 +183,12 @@ public final class EntityLoader: EntityLoaderProtocolFunctions {
             return inserted
         case let client as UitsmijterClient:
             storage.clients.append(client)
+            // Update client status in Kubernetes if this is a K8s client
+            if case .kubernetes = client.ref, let loader = crdLoader {
+                Task {
+                    await loader.updateClientStatus(client: client, authCodeStorage: authCodeStorage)
+                }
+            }
             // Update parent tenant status when a client is added
             if let loader = crdLoader,
                let parentTenant = storage.tenants.first(where: { $0.name == client.config.tenantname }) {

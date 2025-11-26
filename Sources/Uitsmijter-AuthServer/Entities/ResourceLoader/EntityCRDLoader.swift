@@ -10,6 +10,13 @@ struct TenantStatus: Codable, Hashable, Equatable {
     var lastUpdated: String
 }
 
+struct ClientStatus: Codable, Hashable, Equatable {
+    var phase: String
+    var activeSessions: Int
+    var deniedAttempts: Int
+    var lastUpdated: String
+}
+
 struct TenantResource: KubernetesAPIResource, NamespacedResource, MetadataHavingResource,
                               ReadableResource, CreatableResource, ListableResource, StatusHavingResource {
     typealias List = TenantResourceList
@@ -29,12 +36,13 @@ struct TenantResourceList: KubernetesResourceList {
 }
 
 struct ClientResource: KubernetesAPIResource, NamespacedResource, MetadataHavingResource,
-                              ReadableResource, CreatableResource, ListableResource {
+                              ReadableResource, CreatableResource, ListableResource, StatusHavingResource {
     typealias List = ClientResourceList
     var apiVersion = "uitsmijter.io/v1"
     var kind = "Client"
     var metadata: meta.v1.ObjectMeta?
     var spec: ClientSpec
+    var status: ClientStatus?
 }
 
 struct ClientResourceList: KubernetesResourceList {
@@ -380,6 +388,81 @@ struct EntityCRDLoader: EntityLoaderProtocol {
             )
         } catch {
             Log.error("Failed to update tenant status for \(tenant.name): \(error)")
+        }
+    }
+
+    /// Updates the status of a Client Custom Resource in Kubernetes.
+    ///
+    /// This method updates the client's status subresource with current metrics including
+    /// active sessions and denied login attempts.
+    ///
+    /// - Parameters:
+    ///   - client: The client to update status for
+    ///   - authCodeStorage: The storage to count active sessions (optional)
+    func updateClientStatus(client: UitsmijterClient, authCodeStorage: AuthCodeStorageProtocol?) async {
+        guard case .kubernetes = client.ref else {
+            Log.debug("Client \(client.name) is not a Kubernetes resource, skipping status update")
+            return
+        }
+
+        Log.info("Attempting to update status for client: \(client.name)")
+
+        // Extract namespace from tenant name (format: "namespace/name")
+        let tenantComponents = client.config.tenantname.split(separator: "/")
+        guard tenantComponents.count >= 1 else {
+            Log.error("Invalid tenant name format for client: \(client.config.tenantname)")
+            return
+        }
+        let namespace = String(tenantComponents[0])
+        // The client.name is the K8s resource name (without namespace)
+        let name = client.name
+
+        Log.info("Client namespace=\(namespace), name=\(name)")
+
+        do {
+            // Fetch current resource to get latest metadata and resourceVersion
+            let currentResource = try await kubeClient
+                .for(ClientResource.self, gvr: gvrClients)
+                .get(in: .namespace(namespace), name: name)
+
+            // Count active sessions for this client
+            var activeSessions = 0
+            if let storage = authCodeStorage {
+                Log.info("Counting active sessions for client: \(client.name)")
+                activeSessions = await storage.count(client: client, type: .refresh)
+                Log.info("Found \(activeSessions) active sessions for client: \(client.name)")
+            } else {
+                Log.warning("No authCodeStorage available for counting sessions")
+            }
+
+            // Get denied login attempts for this client
+            let deniedAttempts = delegate?.storage.getDeniedAttempts(for: client.name) ?? 0
+
+            // Create updated status
+            let status = ClientStatus(
+                phase: "Ready",
+                activeSessions: activeSessions,
+                deniedAttempts: deniedAttempts,
+                lastUpdated: ISO8601DateFormatter().string(from: Date())
+            )
+
+            Log.info(
+                "Updating Kubernetes status for \(client.name): sessions=\(activeSessions), denied=\(deniedAttempts)"
+            )
+
+            // Update status subresource
+            var updatedResource = currentResource
+            updatedResource.status = status
+            _ = try await kubeClient
+                .for(ClientResource.self, gvr: gvrClients)
+                .updateStatus(in: .namespace(namespace), name: name, updatedResource)
+
+            Log.info(
+                "Successfully updated status for client \(client.name): \(activeSessions) sessions, " +
+                "\(deniedAttempts) denied attempts"
+            )
+        } catch {
+            Log.error("Failed to update client status for \(client.name): \(error)")
         }
     }
 }

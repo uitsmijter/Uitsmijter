@@ -31,6 +31,13 @@ protocol AuthCodeStorageProtocol: Sendable {
     /// - Returns: The number of sessions matching the criteria
     func count(tenant: Tenant, type: AuthSession.CodeType) async -> Int
 
+    /// Count sessions for a specific client and type
+    /// - Parameters:
+    ///   - client: The client to count sessions for
+    ///   - type: The type of sessions to count (defaults to .refresh for long-lived sessions)
+    /// - Returns: The number of sessions matching the criteria
+    func count(client: UitsmijterClient, type: AuthSession.CodeType) async -> Int
+
     /// Check if the storage is healthy
     func isHealthy() async -> Bool
 }
