@@ -227,6 +227,27 @@ struct AuthCodeStorage: AuthCodeStorageProtocol, Sendable {
         await implementation.wipe(tenant: tenant, subject: subject)
     }
 
+    /// Counts sessions for a specific tenant and type.
+    ///
+    /// This method filters sessions to count only those belonging to a specific tenant
+    /// and of a specific type (e.g., refresh tokens to count active user sessions).
+    ///
+    /// - Parameters:
+    ///   - tenant: The tenant to count sessions for.
+    ///   - type: The type of sessions to count (e.g., `.refresh` for long-lived sessions).
+    /// - Returns: The number of sessions matching the criteria.
+    ///
+    /// ## Example
+    ///
+    /// ```swift
+    /// // Count active user sessions (refresh tokens) for a tenant
+    /// let sessionCount = await storage.count(tenant: myTenant, type: .refresh)
+    /// ```
+    func count(tenant: Tenant, type: AuthSession.CodeType) async -> Int {
+        Log.debug("Count AuthSession for tenant: \(tenant.name) with type: \(type.rawValue)")
+        return await implementation.count(tenant: tenant, type: type)
+    }
+
     /// Checks whether the storage backend is operational and able to serve requests.
     ///
     /// This health check is used by monitoring systems to verify the availability of

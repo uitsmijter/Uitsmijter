@@ -149,6 +149,16 @@ actor MemoryAuthCodeStorage: AuthCodeStorageProtocol {
         storage.removeAll(where: { $0.payload?.tenant == tenant.name && $0.payload?.subject.value == subject })
     }
 
+    /// Counts authorization sessions for a specific tenant and type.
+    ///
+    /// - Parameters:
+    ///   - tenant: The tenant to count sessions for
+    ///   - type: The type of sessions to count (e.g., .refresh for long-lived sessions)
+    /// - Returns: The number of sessions matching the criteria
+    func count(tenant: Tenant, type: AuthSession.CodeType) async -> Int {
+        return storage.filter { $0.payload?.tenant == tenant.name && $0.type == type }.count
+    }
+
     /// Checks if the storage backend is healthy and operational.
     ///
     /// - Returns: Always returns true for memory storage (always available)

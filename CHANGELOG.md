@@ -1,3 +1,14 @@
+# 0.10.2
+
+- Feature: **Kubernetes Tenant Status** - Added status subresource to Tenant CRD with real-time metrics displayed in `kubectl get tenants` and `kubectl describe tenant` commands. Status now shows client count, active user sessions, and tenant phase.
+- Feature: **Session Tracking for Interceptor Mode** - Interceptor mode logins now create session entries in AuthCodeStorage, enabling accurate session counting for both OAuth and Interceptor authentication flows.
+
+- Fix: **Redis Session Counting** - Fixed critical bug where RedisAuthCodeStorage.count() would fail with decoding errors when encountering LoginSession objects. The method now gracefully skips non-AuthSession keys during session counting operations.
+
+- Improvement: **AuthCodeStorage Protocol** - Extended AuthCodeStorageProtocol with tenant-specific session counting method `count(tenant:type:)`, implemented in both Memory and Redis backends.
+- Improvement: **Automatic Status Updates** - Tenant status now updates automatically when refresh tokens are created, users log out, or clients are added/removed, providing real-time operational visibility.
+- Improvement: **RBAC Permissions** - Added Kubernetes RBAC permissions for tenant status subresource updates (get, update, patch verbs).
+
 # 0.10.1
 
 - Change: **JWT Algorithm Configuration** - Removed `JWT_ALGORITHM` environment variable in favor of tenant-specific configuration. JWT signing algorithm is now exclusively controlled via `jwt_algorithm` field in tenant YAML configuration, defaulting to HS256 if not specified. This change provides better multi-tenant flexibility where different tenants can use different signing algorithms (HS256 or RS256) independently.

@@ -97,6 +97,9 @@ struct LogoutController: RouteCollection {
         req.session.destroy()
         await req.application.authCodeStorage?.wipe(tenant: tenant, subject: jwt.subject.value)
 
+        // Trigger status update for Kubernetes tenant after wiping sessions
+        await req.application.entityLoader?.triggerStatusUpdate(for: tenant.name)
+
         // Log, metrics and return
         Log.info("Logout succeeded \(jwt.user) for \(tenant.name), redirect to \(locationRedirect)", requestId: req.id)
         Prometheus.main.logout?.inc(1, [

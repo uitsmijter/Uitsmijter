@@ -239,6 +239,11 @@ public func configure(_ app: Application) async throws {
     // Store the entity loader so it can be properly shut down during app lifecycle
     app.entityLoader = try EntityLoader(storage: app.entityStorage)
 
+    // Wire up authCodeStorage to entity loader for status updates
+    if let storage = app.authCodeStorage {
+        app.entityLoader?.setAuthCodeStorage(storage)
+    }
+
     // Register all HTTP routes and controllers
     try routes(app)
 }

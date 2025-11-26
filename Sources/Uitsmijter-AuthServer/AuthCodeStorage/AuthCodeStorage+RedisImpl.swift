@@ -140,6 +140,41 @@ actor RedisAuthCodeStorage: AuthCodeStorageProtocol {
         }
     }
 
+    func count(tenant: Tenant, type: AuthSession.CodeType) async -> Int {
+        do {
+            let (_, keys) = try await redis.scan(startingFrom: 0).get()
+            let matchingKeys: Int = try await withThrowingTaskGroup(of: Int.self) { group in
+                for key in keys {
+                    group.addTask {
+                        if let rKey = RedisKey(rawValue: key) {
+                            let value = try? await self.redis.get(rKey).get()
+                            if let data = value?.data {
+                                // Try to decode as AuthSession, but skip if it's a different type
+                                // (e.g., LoginSession which doesn't have a 'type' field)
+                                if let decoded = try? JSONDecoder.main.decode(AuthSession.self, from: data) {
+                                    if decoded.payload?.tenant == tenant.name && decoded.type == type {
+                                        return 1
+                                    }
+                                }
+                            }
+                        }
+                        return 0
+                    }
+                }
+
+                var total = 0
+                for try await count in group {
+                    total += count
+                }
+                return total
+            }
+            return matchingKeys
+        } catch {
+            Log.error("Cannot count redis keys for tenant: \(error)")
+            return 0
+        }
+    }
+
     func isHealthy() async -> Bool {
         if (try? await redis.ping().get()) == "PONG" {
             return true

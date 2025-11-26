@@ -44,6 +44,12 @@ public final class EntityLoader: EntityLoaderProtocolFunctions {
     /// Manages loading and cleanup of tenant-specific S3 templates.
     let tenantTemplateLoader = TenantTemplateLoader()
 
+    /// Reference to the EntityCRDLoader for status updates (if Kubernetes CRD support is enabled)
+    var crdLoader: EntityCRDLoader?
+
+    /// Reference to the AuthCodeStorage for counting active sessions
+    var authCodeStorage: AuthCodeStorageProtocol?
+
     /// Initializes the entity loader and starts loading from all configured sources.
     ///
     /// This initializer:
@@ -62,7 +68,9 @@ public final class EntityLoader: EntityLoaderProtocolFunctions {
         entityLoaders.append(try EntityFileLoader(handler: self))
         // load from crd if supported
         if RuntimeConfiguration.SUPPORT_KUBERNETES_CRD {
-            entityLoaders.append(try EntityCRDLoader(handler: self))
+            let crdLoaderInstance = try EntityCRDLoader(handler: self)
+            entityLoaders.append(crdLoaderInstance)
+            crdLoader = crdLoaderInstance
         }
 
         try entityLoaders.forEach { loader in
@@ -89,6 +97,38 @@ public final class EntityLoader: EntityLoaderProtocolFunctions {
         }
     }
 
+    /// Sets the auth code storage reference for status updates
+    /// - Parameter storage: The auth code storage to use for counting active sessions
+    func setAuthCodeStorage(_ storage: AuthCodeStorage) {
+        self.authCodeStorage = storage
+    }
+
+    /// Triggers a status update for a tenant (for Kubernetes CRD tenants only)
+    /// - Parameter tenantName: The name of the tenant to update status for
+    func triggerStatusUpdate(for tenantName: String) {
+        Log.info("triggerStatusUpdate called for tenant: \(tenantName)")
+
+        guard let tenant = storage.tenants.first(where: { $0.name == tenantName }) else {
+            Log.warning("Tenant not found in storage: \(tenantName)")
+            return
+        }
+
+        guard case .kubernetes = tenant.ref else {
+            Log.debug("Tenant \(tenantName) is not a Kubernetes tenant, skipping status update")
+            return
+        }
+
+        guard let loader = crdLoader else {
+            Log.error("CRD loader not available for status update")
+            return
+        }
+
+        Log.info("Triggering status update for Kubernetes tenant: \(tenantName)")
+        Task {
+            await loader.updateTenantStatus(tenant: tenant, authCodeStorage: authCodeStorage)
+        }
+    }
+
     // MARK: - EntityLoaderProtocolFunctions
 
     /// Adds a new entity to the global entity storage.
@@ -108,9 +148,24 @@ public final class EntityLoader: EntityLoaderProtocolFunctions {
             Task {
                 await tenantTemplateLoader.operate(operation: .create(tenant: tenant))
             }
+            // Update tenant status in Kubernetes if this is a K8s tenant
+            if case .kubernetes = tenant.ref, let loader = crdLoader {
+                Task {
+                    await loader.updateTenantStatus(tenant: tenant, authCodeStorage: authCodeStorage)
+                }
+            }
             return inserted
         case let client as UitsmijterClient:
             storage.clients.append(client)
+            // Update parent tenant status when a client is added
+            if let loader = crdLoader,
+               let parentTenant = storage.tenants.first(where: { $0.name == client.config.tenantname }) {
+                if case .kubernetes = parentTenant.ref {
+                    Task {
+                        await loader.updateTenantStatus(tenant: parentTenant, authCodeStorage: authCodeStorage)
+                    }
+                }
+            }
             return true
         default:
             Log.error("Cannot add entity: unhandled entity type")
@@ -155,11 +210,22 @@ public final class EntityLoader: EntityLoaderProtocolFunctions {
             storage.tenants.remove(at: index)
         case let client as UitsmijterClient:
             Log.info("Remove client \(client.name) with reference \(reference.description)")
+            // Store parent tenant name before removing client
+            let parentTenantName = client.config.tenantname
             guard let index = storage.clients.firstIndex(where: { $0.ref == ref }) else {
                 Log.error("Client \(client.name) with reference \(reference) not found for removal")
                 return
             }
             storage.clients.remove(at: index)
+            // Update parent tenant status when a client is removed
+            if let loader = crdLoader,
+               let parentTenant = storage.tenants.first(where: { $0.name == parentTenantName }) {
+                if case .kubernetes = parentTenant.ref {
+                    Task {
+                        await loader.updateTenantStatus(tenant: parentTenant, authCodeStorage: authCodeStorage)
+                    }
+                }
+            }
         default:
             Log.error("Cannot remove entity: unhandled entity type")
         }

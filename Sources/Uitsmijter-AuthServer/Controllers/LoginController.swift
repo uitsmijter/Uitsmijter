@@ -582,6 +582,26 @@ struct LoginController: RouteCollection {
         )
         Log.audit.info("\(providedSubject.subject) on \(cookie.domain ?? "-")")
 
+        // For interceptor mode, create a session entry to track active users
+        // (OAuth mode creates refresh tokens separately in TokenController)
+        if clientInfo.mode == .interceptor {
+            Log.info("Creating session entry for interceptor login: \(tenant.name)")
+            let sessionCode = Code()
+            let interceptorSession = AuthSession(
+                type: .refresh,
+                state: "interceptor-login",
+                code: sessionCode,
+                scopes: [],
+                payload: payload,
+                redirect: "",
+                ttl: Int64(Constants.COOKIE.EXPIRATION_DAYS * 24 * 60 * 60)
+            )
+            try? await req.application.authCodeStorage?.set(authSession: interceptorSession)
+
+            // Trigger status update after creating session
+            await req.application.entityLoader?.triggerStatusUpdate(for: tenant.name)
+        }
+
         Prometheus.main.loginSuccess?.inc(1, [
             ("forward_host", req.forwardInfo?.location.host ?? "unknown"),
             ("mode", clientInfo.mode.rawValue),
