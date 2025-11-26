@@ -118,26 +118,20 @@ public final class EntityLoader: EntityLoaderProtocolFunctions {
     /// Called after authCodeStorage is set to populate initial status values
     private func updateAllKubernetesStatuses() async {
         guard let loader = crdLoader else {
-            Log.warning("crdLoader is nil, cannot update Kubernetes statuses")
             return
         }
 
         Log.info("Updating status for all Kubernetes entities after authCodeStorage initialization")
-        Log.info("Total tenants in storage: \(storage.tenants.count), Total clients: \(storage.clients.count)")
 
         // Update all Kubernetes tenants
-        let kubernetesTenants = storage.tenants.filter { $0.ref?.isKubernetes ?? false }
-        Log.info("Found \(kubernetesTenants.count) Kubernetes tenants")
-        for tenant in kubernetesTenants {
-            Log.info("Updating status for Kubernetes tenant: \(tenant.name)")
+        for tenant in storage.tenants where tenant.ref?.isKubernetes ?? false {
+            Log.debug("Updating status for Kubernetes tenant: \(tenant.name)")
             await loader.updateTenantStatus(tenant: tenant, authCodeStorage: authCodeStorage)
         }
 
         // Update all Kubernetes clients
-        let kubernetesClients = storage.clients.filter { $0.ref?.isKubernetes ?? false }
-        Log.info("Found \(kubernetesClients.count) Kubernetes clients")
-        for client in kubernetesClients {
-            Log.info("Updating status for Kubernetes client: \(client.name)")
+        for client in storage.clients where client.ref?.isKubernetes ?? false {
+            Log.debug("Updating status for Kubernetes client: \(client.name)")
             await loader.updateClientStatus(client: client, authCodeStorage: authCodeStorage)
         }
 
