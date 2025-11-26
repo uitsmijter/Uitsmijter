@@ -106,16 +106,30 @@ actor RedisAuthCodeStorage: AuthCodeStorageProtocol {
     }
 
     func wipe(tenant: Tenant, subject: String) async {
+        Log.debug("Wipe AuthSession for tenant: \(tenant.name) with subject: \(subject)")
         do {
             let (_, keys) = try await redis.scan(startingFrom: 0).get()
             let keysToDelete: [RedisKey] = try await withThrowingTaskGroup(of: RedisKey?.self) { group in
                 for key in keys {
                     group.addTask {
+                        // Skip non-AuthSession keys (loginid~ keys are LoginSession, not AuthSession)
+                        if key.hasPrefix("loginid~") {
+                            return nil
+                        }
+
                         if let rKey = RedisKey(rawValue: key) {
                             let value = try? await self.redis.get(rKey).get()
                             if let data = value?.data {
                                 let decoded = try JSONDecoder.main.decode(AuthSession.self, from: data)
                                 if decoded.payload?.tenant == tenant.name && decoded.payload?.subject.value == subject {
+                                    Log.debug(
+                                        """
+                                        Matching session found in Redis - Type: \(decoded.type.rawValue), \
+                                        Tenant: \(decoded.payload?.tenant ?? "nil"), \
+                                        Subject: \(decoded.payload?.subject.value ?? "nil"), \
+                                        Key: \(key)
+                                        """
+                                    )
                                     return rKey
                                 }
                             }
@@ -132,8 +146,10 @@ actor RedisAuthCodeStorage: AuthCodeStorageProtocol {
                 }
                 return result
             }
+            Log.debug("Found \(keysToDelete.count) sessions to wipe from Redis")
             if !keysToDelete.isEmpty {
                 _ = try await redis.delete(keysToDelete).get()
+                Log.debug("Successfully deleted \(keysToDelete.count) sessions from Redis")
             }
         } catch {
             Log.error("Cannot get all redis keys. \(error)")
@@ -141,11 +157,17 @@ actor RedisAuthCodeStorage: AuthCodeStorageProtocol {
     }
 
     func count(tenant: Tenant, type: AuthSession.CodeType) async -> Int {
+        Log.debug("Count AuthSession for tenant: \(tenant.name) with type: \(type.rawValue)")
         do {
             let (_, keys) = try await redis.scan(startingFrom: 0).get()
             let matchingKeys: Int = try await withThrowingTaskGroup(of: Int.self) { group in
                 for key in keys {
                     group.addTask {
+                        // Skip non-AuthSession keys (loginid~ keys are LoginSession, not AuthSession)
+                        if key.hasPrefix("loginid~") {
+                            return 0
+                        }
+
                         if let rKey = RedisKey(rawValue: key) {
                             let value = try? await self.redis.get(rKey).get()
                             if let data = value?.data {
@@ -153,6 +175,14 @@ actor RedisAuthCodeStorage: AuthCodeStorageProtocol {
                                 // (e.g., LoginSession which doesn't have a 'type' field)
                                 if let decoded = try? JSONDecoder.main.decode(AuthSession.self, from: data) {
                                     if decoded.payload?.tenant == tenant.name && decoded.type == type {
+                                        Log.debug(
+                                            """
+                                            Session in count - Type: \(decoded.type.rawValue), \
+                                            Tenant: \(decoded.payload?.tenant ?? "nil"), \
+                                            Subject: \(decoded.payload?.subject.value ?? "nil"), \
+                                            Key: \(key)
+                                            """
+                                        )
                                         return 1
                                     }
                                 }
@@ -168,6 +198,7 @@ actor RedisAuthCodeStorage: AuthCodeStorageProtocol {
                 }
                 return total
             }
+            Log.debug("Total matching sessions: \(matchingKeys)")
             return matchingKeys
         } catch {
             Log.error("Cannot count redis keys for tenant: \(error)")

@@ -93,9 +93,21 @@ struct LogoutController: RouteCollection {
         // remove authorisation headers
         response.headers.bearerAuthorization = nil
 
+        // Debug: Count sessions before wipe
+        if let storage = req.application.authCodeStorage {
+            let sessionsBefore = await storage.count(tenant: tenant, type: .refresh)
+            Log.debug("Session count before wipe: \(sessionsBefore) for tenant: \(tenant.name)", requestId: req.id)
+        }
+
         // destroy the session (if any) and wipe tokens that still exists.
         req.session.destroy()
         await req.application.authCodeStorage?.wipe(tenant: tenant, subject: jwt.subject.value)
+
+        // Debug: Count sessions after wipe
+        if let storage = req.application.authCodeStorage {
+            let sessionsAfter = await storage.count(tenant: tenant, type: .refresh)
+            Log.debug("Session count after wipe: \(sessionsAfter) for tenant: \(tenant.name)", requestId: req.id)
+        }
 
         // Trigger status update for Kubernetes tenant after wiping sessions
         await req.application.entityLoader?.triggerStatusUpdate(for: tenant.name)

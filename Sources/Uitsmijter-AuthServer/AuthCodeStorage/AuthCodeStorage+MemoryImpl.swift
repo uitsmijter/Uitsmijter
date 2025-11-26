@@ -79,8 +79,17 @@ actor MemoryAuthCodeStorage: AuthCodeStorageProtocol {
         if storage.contains(where: { $0.code.value == session.code.value }) {
             throw AuthCodeStorageError.CODE_TAKEN
         }
+        Log.debug(
+            """
+            Storing new session - Type: \(session.type.rawValue), \
+            Tenant: \(session.payload?.tenant ?? "nil"), \
+            Subject: \(session.payload?.subject.value ?? "nil"), \
+            TTL: \(String(describing: session.ttl))
+            """
+        )
         storage.append(session)
         sortAndGc()
+        Log.debug("Total sessions in storage after set: \(storage.count)")
     }
 
     /// Retrieves an authorization session by code value.
@@ -146,7 +155,27 @@ actor MemoryAuthCodeStorage: AuthCodeStorageProtocol {
     ///   - tenant: The tenant containing the user
     ///   - subject: The subject (user identifier) whose sessions should be removed
     func wipe(tenant: Tenant, subject: String) async {
+        Log.debug("Wipe called for tenant: \(tenant.name), subject: \(subject)")
+        Log.debug("Total sessions in storage before wipe: \(storage.count)")
+
+        // Log all sessions that match the criteria before removing
+        let matchingSessions = storage.filter { session in
+            let matches = session.payload?.tenant == tenant.name && session.payload?.subject.value == subject
+            if matches {
+                Log.debug(
+                    """
+                    Matching session found - Type: \(session.type.rawValue), \
+                    Tenant: \(session.payload?.tenant ?? "nil"), \
+                    Subject: \(session.payload?.subject.value ?? "nil")
+                    """
+                )
+            }
+            return matches
+        }
+        Log.debug("Found \(matchingSessions.count) sessions to wipe")
+
         storage.removeAll(where: { $0.payload?.tenant == tenant.name && $0.payload?.subject.value == subject })
+        Log.debug("Total sessions in storage after wipe: \(storage.count)")
     }
 
     /// Counts authorization sessions for a specific tenant and type.
@@ -156,7 +185,21 @@ actor MemoryAuthCodeStorage: AuthCodeStorageProtocol {
     ///   - type: The type of sessions to count (e.g., .refresh for long-lived sessions)
     /// - Returns: The number of sessions matching the criteria
     func count(tenant: Tenant, type: AuthSession.CodeType) async -> Int {
-        return storage.filter { $0.payload?.tenant == tenant.name && $0.type == type }.count
+        let matchingSessions = storage.filter { $0.payload?.tenant == tenant.name && $0.type == type }
+        Log.debug("Count called for tenant: \(tenant.name), type: \(type.rawValue) - found \(matchingSessions.count)")
+
+        // Log details of each matching session for debugging
+        for session in matchingSessions {
+            Log.debug(
+                """
+                Session in count - Type: \(session.type.rawValue), \
+                Tenant: \(session.payload?.tenant ?? "nil"), \
+                Subject: \(session.payload?.subject.value ?? "nil")
+                """
+            )
+        }
+
+        return matchingSessions.count
     }
 
     /// Checks if the storage backend is healthy and operational.

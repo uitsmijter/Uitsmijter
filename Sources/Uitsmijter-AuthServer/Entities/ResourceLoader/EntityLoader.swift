@@ -105,7 +105,7 @@ public final class EntityLoader: EntityLoaderProtocolFunctions {
 
     /// Triggers a status update for a tenant (for Kubernetes CRD tenants only)
     /// - Parameter tenantName: The name of the tenant to update status for
-    func triggerStatusUpdate(for tenantName: String) {
+    func triggerStatusUpdate(for tenantName: String) async {
         Log.info("triggerStatusUpdate called for tenant: \(tenantName)")
 
         guard let tenant = storage.tenants.first(where: { $0.name == tenantName }) else {
@@ -124,9 +124,7 @@ public final class EntityLoader: EntityLoaderProtocolFunctions {
         }
 
         Log.info("Triggering status update for Kubernetes tenant: \(tenantName)")
-        Task {
-            await loader.updateTenantStatus(tenant: tenant, authCodeStorage: authCodeStorage)
-        }
+        await loader.updateTenantStatus(tenant: tenant, authCodeStorage: authCodeStorage)
     }
 
     // MARK: - EntityLoaderProtocolFunctions
