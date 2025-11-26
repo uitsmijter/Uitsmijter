@@ -101,6 +101,36 @@ public final class EntityLoader: EntityLoaderProtocolFunctions {
     /// - Parameter storage: The auth code storage to use for counting active sessions
     func setAuthCodeStorage(_ storage: AuthCodeStorage) {
         self.authCodeStorage = storage
+
+        // Trigger status updates for all existing Kubernetes entities
+        // This is necessary because entities are loaded before authCodeStorage is set
+        Task {
+            await updateAllKubernetesStatuses()
+        }
+    }
+
+    /// Updates status for all existing Kubernetes tenants and clients
+    /// Called after authCodeStorage is set to populate initial status values
+    private func updateAllKubernetesStatuses() async {
+        guard let loader = crdLoader else {
+            return
+        }
+
+        Log.info("Updating status for all Kubernetes entities after authCodeStorage initialization")
+
+        // Update all Kubernetes tenants
+        for tenant in storage.tenants where tenant.ref?.isKubernetes ?? false {
+            Log.debug("Updating status for Kubernetes tenant: \(tenant.name)")
+            await loader.updateTenantStatus(tenant: tenant, authCodeStorage: authCodeStorage)
+        }
+
+        // Update all Kubernetes clients
+        for client in storage.clients where client.ref?.isKubernetes ?? false {
+            Log.debug("Updating status for Kubernetes client: \(client.name)")
+            await loader.updateClientStatus(client: client, authCodeStorage: authCodeStorage)
+        }
+
+        Log.info("Completed status updates for all Kubernetes entities")
     }
 
     /// Triggers a status update for a tenant (for Kubernetes CRD tenants only)
