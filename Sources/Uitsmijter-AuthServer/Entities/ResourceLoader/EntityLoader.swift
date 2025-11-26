@@ -100,13 +100,18 @@ public final class EntityLoader: EntityLoaderProtocolFunctions {
     /// Sets the auth code storage reference for status updates
     /// - Parameter storage: The auth code storage to use for counting active sessions
     func setAuthCodeStorage(_ storage: AuthCodeStorage) {
+        Log.info("setAuthCodeStorage called - will update all Kubernetes statuses")
         self.authCodeStorage = storage
 
         // Trigger status updates for all existing Kubernetes entities
         // This is necessary because entities are loaded before authCodeStorage is set
+        Log.info("Starting Task to update all Kubernetes statuses")
         Task {
+            Log.info("Task started - calling updateAllKubernetesStatuses()")
             await updateAllKubernetesStatuses()
+            Log.info("updateAllKubernetesStatuses() completed")
         }
+        Log.info("setAuthCodeStorage completed (Task running in background)")
     }
 
     /// Updates status for all existing Kubernetes tenants and clients
