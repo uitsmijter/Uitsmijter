@@ -225,7 +225,8 @@ actor RedisAuthCodeStorage: AuthCodeStorageProtocol {
                                 if let decoded = try? JSONDecoder.main.decode(AuthSession.self, from: data) {
                                     // Match by audience (client_id) in the payload and type
                                     guard let payload = decoded.payload else { return 0 }
-                                    let audienceMatches = payload.audience.value.contains(client.name)
+                                    let clientIdString = client.config.ident.uuidString
+                                    let audienceMatches = payload.audience.value.contains(clientIdString)
                                     if audienceMatches && decoded.type == type {
                                         Log.debug(
                                             """

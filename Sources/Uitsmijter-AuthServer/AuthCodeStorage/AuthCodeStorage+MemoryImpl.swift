@@ -209,10 +209,11 @@ actor MemoryAuthCodeStorage: AuthCodeStorageProtocol {
     ///   - type: The type of sessions to count (e.g., .refresh for long-lived sessions)
     /// - Returns: The number of sessions matching the criteria
     func count(client: UitsmijterClient, type: AuthSession.CodeType) async -> Int {
+        let clientIdString = client.config.ident.uuidString
         let matchingSessions = storage.filter { session in
             // Match by audience (client_id) in the payload
             guard let payload = session.payload else { return false }
-            let audienceMatches = payload.audience.value.contains(client.name)
+            let audienceMatches = payload.audience.value.contains(clientIdString)
             return audienceMatches && session.type == type
         }
         Log.debug("Count called for client: \(client.name), type: \(type.rawValue) - found \(matchingSessions.count)")
