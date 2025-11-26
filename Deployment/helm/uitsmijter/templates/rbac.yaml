@@ -18,6 +18,7 @@ rules:
       - uitsmijter.io
     resources:
       - tenants/status
+      - clients/status
     verbs:
       - get
       - update
