@@ -344,10 +344,17 @@ extension TokenController {
         )
         try await req.application.authCodeStorage?.set(authSession: refreshSession)
 
-        // Trigger status update for Kubernetes tenant after creating refresh token
+        // Trigger status update for Kubernetes tenant and client after creating refresh token
         if let tenantName = session.payload?.tenant {
             Log.info("Token created for tenant: \(tenantName), triggering status update")
-            await req.application.entityLoader?.triggerStatusUpdate(for: tenantName)
+            // Find client by client_id from the token request
+            let tokenRequest = try req.content.decode(TokenRequest.self)
+            let client = await Client.find(
+                in: req.application.entityStorage,
+                withId: tokenRequest.client_id,
+                for: tenant
+            )
+            await req.application.entityLoader?.triggerStatusUpdate(for: tenantName, client: client)
         } else {
             Log.warning("No tenant name in session payload, cannot trigger status update")
         }

@@ -190,6 +190,24 @@ public final class EntityLoader: EntityLoaderProtocolFunctions {
         await loader.updateClientStatus(client: client, authCodeStorage: authCodeStorage)
     }
 
+    /// Triggers a status update for both tenant and client (if client is provided).
+    ///
+    /// This is a convenience method to update status for a login/logout event that affects
+    /// both the tenant and the specific client. Only updates Kubernetes resources.
+    ///
+    /// - Parameters:
+    ///   - tenantName: The name of the tenant to update
+    ///   - client: Optional client to update status for
+    func triggerStatusUpdate(for tenantName: String, client: UitsmijterClient?) async {
+        // Update tenant status
+        await triggerStatusUpdate(for: tenantName)
+
+        // Update client status if provided
+        if let client = client {
+            await triggerClientStatusUpdate(for: client.name)
+        }
+    }
+
     // MARK: - EntityLoaderProtocolFunctions
 
     /// Adds a new entity to the global entity storage.

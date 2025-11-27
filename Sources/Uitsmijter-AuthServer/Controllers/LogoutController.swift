@@ -109,8 +109,8 @@ struct LogoutController: RouteCollection {
             Log.debug("Session count after wipe: \(sessionsAfter) for tenant: \(tenant.name)", requestId: req.id)
         }
 
-        // Trigger status update for Kubernetes tenant after wiping sessions
-        await req.application.entityLoader?.triggerStatusUpdate(for: tenant.name)
+        // Trigger status update for Kubernetes tenant and client after wiping sessions
+        await req.application.entityLoader?.triggerStatusUpdate(for: tenant.name, client: req.clientInfo?.client)
 
         // Log, metrics and return
         Log.info("Logout succeeded \(jwt.user) for \(tenant.name), redirect to \(locationRedirect)", requestId: req.id)

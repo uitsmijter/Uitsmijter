@@ -597,10 +597,10 @@ struct LoginController: RouteCollection {
                 ttl: Int64(Constants.COOKIE.EXPIRATION_DAYS * 24 * 60 * 60)
             )
             try? await req.application.authCodeStorage?.set(authSession: interceptorSession)
-
-            // Trigger status update after creating session
-            await req.application.entityLoader?.triggerStatusUpdate(for: tenant.name)
         }
+
+        // Trigger status update after creating session (for both interceptor and OAuth modes)
+        await req.application.entityLoader?.triggerStatusUpdate(for: tenant.name, client: clientInfo.client)
 
         Prometheus.main.loginSuccess?.inc(1, [
             ("forward_host", req.forwardInfo?.location.host ?? "unknown"),
