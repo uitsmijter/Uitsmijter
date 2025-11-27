@@ -244,6 +244,11 @@ public func configure(_ app: Application) async throws {
         app.entityLoader?.setAuthCodeStorage(storage)
     }
 
+    // Initialize the auth event actor for centralized event handling
+    // This must happen after entityStorage and entityLoader are configured
+    // The actor is accessed via computed property that auto-initializes if needed
+    _ = app.authEventActor  // Trigger initialization
+
     // Register all HTTP routes and controllers
     try routes(app)
 }

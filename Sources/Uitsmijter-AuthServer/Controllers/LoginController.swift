@@ -287,11 +287,13 @@ struct LoginController: RouteCollection {
             requestId: req.id
         )
 
-        Prometheus.main.loginFailure?.inc(1, [
-            ("forward_host", req.forwardInfo?.location.host ?? "unknown"),
-            ("mode", clientInfo.mode.rawValue),
-            ("tenant", clientInfo.tenant?.name ?? "unknown")
-        ])
+        // Record login failure event (Prometheus metrics + entity status update)
+        await req.application.authEventActor.recordLoginFailure(
+            tenant: clientInfo.tenant?.name,
+            client: clientInfo.client,
+            mode: clientInfo.mode.rawValue,
+            host: req.forwardInfo?.location.host ?? "unknown"
+        )
 
         if let host = req.forwardInfo?.location.host {
             req.headers.replaceOrAdd(name: "X-Forwarded-Host", value: host)
@@ -420,7 +422,7 @@ struct LoginController: RouteCollection {
             ?? tenant.config.hosts.first
             ?? Constants.PUBLIC_DOMAIN
         let issuer = "\(scheme)://\(host)"
-        let audience = clientInfo.client?.name ?? "unknown"
+        let audience = clientInfo.client?.config.ident.uuidString ?? "unknown"
         return (issuer, audience)
     }
 
@@ -599,14 +601,13 @@ struct LoginController: RouteCollection {
             try? await req.application.authCodeStorage?.set(authSession: interceptorSession)
         }
 
-        // Trigger status update after creating session (for both interceptor and OAuth modes)
-        await req.application.entityLoader?.triggerStatusUpdate(for: tenant.name, client: clientInfo.client)
-
-        Prometheus.main.loginSuccess?.inc(1, [
-            ("forward_host", req.forwardInfo?.location.host ?? "unknown"),
-            ("mode", clientInfo.mode.rawValue),
-            ("tenant", tenant.name)
-        ])
+        // Record login success event (Prometheus metrics + entity status update)
+        await req.application.authEventActor.recordLoginSuccess(
+            tenant: tenant.name,
+            client: clientInfo.client,
+            mode: clientInfo.mode.rawValue,
+            host: req.forwardInfo?.location.host ?? "unknown"
+        )
 
         return response
     }

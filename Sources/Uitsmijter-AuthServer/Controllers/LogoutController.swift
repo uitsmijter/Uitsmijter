@@ -109,16 +109,16 @@ struct LogoutController: RouteCollection {
             Log.debug("Session count after wipe: \(sessionsAfter) for tenant: \(tenant.name)", requestId: req.id)
         }
 
-        // Trigger status update for Kubernetes tenant and client after wiping sessions
-        await req.application.entityLoader?.triggerStatusUpdate(for: tenant.name, client: req.clientInfo?.client)
+        // Record logout event (Prometheus metrics + entity status update)
+        await req.application.authEventActor.recordLogout(
+            tenant: tenant.name,
+            client: req.clientInfo?.client,
+            mode: req.clientInfo?.mode.rawValue ?? "unknown",
+            redirect: locationRedirect
+        )
 
-        // Log, metrics and return
+        // Log and return
         Log.info("Logout succeeded \(jwt.user) for \(tenant.name), redirect to \(locationRedirect)", requestId: req.id)
-        Prometheus.main.logout?.inc(1, [
-            ("redirect", locationRedirect),
-            ("mode", req.clientInfo?.mode.rawValue ?? "unknown"),
-            ("tenant", tenant.name)
-        ])
 
         return response
     }

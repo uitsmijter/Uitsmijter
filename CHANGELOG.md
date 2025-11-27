@@ -2,12 +2,15 @@
 
 - Feature: **Kubernetes Tenant Status** - Added status subresource to Tenant CRD with real-time metrics displayed in `kubectl get tenants` and `kubectl describe tenant` commands. Status now shows client count, active user sessions, and tenant phase.
 - Feature: **Session Tracking for Interceptor Mode** - Interceptor mode logins now create session entries in AuthCodeStorage, enabling accurate session counting for both OAuth and Interceptor authentication flows.
+- Feature: **Kubernetes Client Status** - Added status subresource to Client CRD with real-time metrics displayed in `kubectl get clients` and `kubectl describe client` commands. Status now shows active sessions, denied login attempts, and last authentication activity timestamp.
 
 - Fix: **Redis Session Counting** - Fixed critical bug where RedisAuthCodeStorage.count() would fail with decoding errors when encountering LoginSession objects. The method now gracefully skips non-AuthSession keys during session counting operations.
+- Fix: **Denied Login Attempts Tracking** - Fixed bug where failed login attempts were never tracked. The `incrementDeniedAttempts()` method now properly records failed authentication attempts in Client CRD status.
 
 - Improvement: **AuthCodeStorage Protocol** - Extended AuthCodeStorageProtocol with tenant-specific session counting method `count(tenant:type:)`, implemented in both Memory and Redis backends.
 - Improvement: **Automatic Status Updates** - Tenant status now updates automatically when refresh tokens are created, users log out, or clients are added/removed, providing real-time operational visibility.
 - Improvement: **RBAC Permissions** - Added Kubernetes RBAC permissions for tenant status subresource updates (get, update, patch verbs).
+- Improvement: **Authentication Event Handling** - Created centralized AuthEventActor that consolidates Prometheus metrics recording and entity status updates for login success, login failure, and logout events. This eliminates code duplication across LoginController and LogoutController while ensuring consistent event tracking (GitHub issue #78).
 
 # 0.10.1
 
