@@ -351,8 +351,7 @@ extension TokenController {
             let tokenRequest = try req.content.decode(TokenRequest.self)
             let client = await Client.find(
                 in: req.application.entityStorage,
-                withId: tokenRequest.client_id,
-                for: tenant
+                clientId: tokenRequest.client_id
             )
             await req.application.entityLoader?.triggerStatusUpdate(for: tenantName, client: client)
         } else {
