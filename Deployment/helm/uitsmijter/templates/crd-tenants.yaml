@@ -14,6 +14,26 @@ spec:
       served: true
       # One and only one version must be marked as the storage version.
       storage: true
+      # Define additional columns for kubectl get output
+      additionalPrinterColumns:
+        - name: Status
+          type: string
+          description: Current phase of the tenant
+          jsonPath: .status.phase
+        - name: Clients
+          type: integer
+          description: Number of clients associated with this tenant
+          jsonPath: .status.clientCount
+        - name: Sessions
+          type: integer
+          description: Number of active user sessions
+          jsonPath: .status.activeSessions
+        - name: Age
+          type: date
+          jsonPath: .metadata.creationTimestamp
+      # Enable status subresource
+      subresources:
+        status: {}
       schema:
         openAPIV3Schema:
           type: object
@@ -85,6 +105,22 @@ spec:
               required:
                 - hosts
                 - providers
+            status:
+              type: object
+              properties:
+                phase:
+                  type: string
+                  description: Current phase of the tenant (Ready, Loading, Error)
+                clientCount:
+                  type: integer
+                  description: Number of clients associated with this tenant
+                activeSessions:
+                  type: integer
+                  description: Number of active user sessions for this tenant
+                lastUpdated:
+                  type: string
+                  format: date-time
+                  description: Timestamp of last status update
 
   # either Namespaced or Cluster
   scope: Namespaced

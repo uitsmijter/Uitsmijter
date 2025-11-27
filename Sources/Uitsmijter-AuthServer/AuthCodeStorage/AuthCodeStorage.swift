@@ -227,6 +227,48 @@ struct AuthCodeStorage: AuthCodeStorageProtocol, Sendable {
         await implementation.wipe(tenant: tenant, subject: subject)
     }
 
+    /// Counts sessions for a specific tenant and type.
+    ///
+    /// This method filters sessions to count only those belonging to a specific tenant
+    /// and of a specific type (e.g., refresh tokens to count active user sessions).
+    ///
+    /// - Parameters:
+    ///   - tenant: The tenant to count sessions for.
+    ///   - type: The type of sessions to count (e.g., `.refresh` for long-lived sessions).
+    /// - Returns: The number of sessions matching the criteria.
+    ///
+    /// ## Example
+    ///
+    /// ```swift
+    /// // Count active user sessions (refresh tokens) for a tenant
+    /// let sessionCount = await storage.count(tenant: myTenant, type: .refresh)
+    /// ```
+    func count(tenant: Tenant, type: AuthSession.CodeType) async -> Int {
+        Log.debug("Count AuthSession for tenant: \(tenant.name) with type: \(type.rawValue)")
+        return await implementation.count(tenant: tenant, type: type)
+    }
+
+    /// Counts the number of authorization sessions for a specific client and type.
+    ///
+    /// This method is useful for metrics and monitoring, allowing you to track how many
+    /// sessions exist for a particular client (OAuth2 application).
+    ///
+    /// - Parameters:
+    ///   - client: The client to count sessions for
+    ///   - type: The type of sessions to count (defaults to .refresh for long-lived sessions)
+    /// - Returns: The number of sessions matching the specified client and type
+    ///
+    /// ## Example
+    ///
+    /// ```swift
+    /// // Count active user sessions (refresh tokens) for a client
+    /// let sessionCount = await storage.count(client: myClient, type: .refresh)
+    /// ```
+    func count(client: UitsmijterClient, type: AuthSession.CodeType) async -> Int {
+        Log.debug("Count AuthSession for client: \(client.name) with type: \(type.rawValue)")
+        return await implementation.count(client: client, type: type)
+    }
+
     /// Checks whether the storage backend is operational and able to serve requests.
     ///
     /// This health check is used by monitoring systems to verify the availability of

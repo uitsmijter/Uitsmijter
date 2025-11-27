@@ -38,6 +38,7 @@ help() {
   echo "        --debug                   Enable debug output"
   echo "        --dirty                   Use incremental temporary runtime for the local cluster"
   echo "        --fast                    runs tests only on one virtual browser and resolution."
+  echo "        --hold                    Keep cluster running after e2e tests (requires manual shutdown)"
   echo ""
   echo "Example:"
   echo "        ./tooling build run"
@@ -57,6 +58,7 @@ MODE=""
 DEBUG=""
 USE_DIRTY=""
 USE_FAST=""
+USE_HOLD=""
 FILTER=
 PARAMS=""
 COUNT=$#
@@ -159,6 +161,10 @@ while (("$#")); do
     ;;
   --fast)
     USE_FAST=1
+    shift 1
+    ;;
+  --hold)
+    USE_HOLD=1
     shift 1
     ;;
   --) # end argument parsing
@@ -267,7 +273,7 @@ if [[ "${MODE}" == *"e2e"* ]]; then
     # Pass filter as a single argument by escaping it properly
     EXTRAS="${EXTRAS} --grep '${FILTER}'"
   fi
-  e2eTests "${dockerComposeBuildParameter}" "${EXTRAS}" "${TAG}"
+  e2eTests "${dockerComposeBuildParameter}" "${EXTRAS}" "${TAG}" "${USE_HOLD}"
 fi
 
 echo ""

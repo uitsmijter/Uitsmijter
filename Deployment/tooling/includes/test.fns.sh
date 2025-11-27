@@ -66,25 +66,29 @@ function unitTestsList() {
 #   $1: dockerComposeBuildParameter - Additional docker compose flags (optional)
 #   $2: ARGUMENTS - Additional arguments passed to Playwright/e2e runner (e.g., "--fast") (optional)
 #   $3: TAG - Docker image tag to test (default: ${TAG} from environment)
+#   $4: HOLD - If set, keep cluster running after tests (optional)
 # Returns: Exit code from e2e tests (0 if all tests pass)
 # Side effects:
 #   - Builds release if needed
 #   - Creates kind cluster with full test environment
 #   - Runs Playwright e2e tests
-#   - Deletes cluster after tests complete
+#   - Deletes cluster after tests complete (unless HOLD is set)
 # Environment variables:
 #   - ARGUMENTS: Passed to e2e test runner
 #   - GITHUB_ACTION: Set in CI to modify test behavior
-# Cleanup: Automatically deletes kind cluster on completion or error
+# Cleanup: Automatically deletes kind cluster on completion or error (unless HOLD is set)
 # Use case: Full integration testing of Uitsmijter in Kubernetes environment
 function e2eTests(){
   h2 "Run all e2e tests"
   local dockerComposeBuildParameter=${1}
   local ARGUMENTS="${2:-""}"
   local TAG="${3:-${TAG}}"
+  local HOLD="${4:-""}"
   buildReleaseIfNotPresent "${TAG}"
 
-  trap "kindDeleteCluster" EXIT
+  if [[ -z "${HOLD}" ]]; then
+    trap "kindDeleteCluster" EXIT
+  fi
   kindStartCluster "${TAG}"
 
   echo
@@ -101,8 +105,25 @@ function e2eTests(){
     --exit-code-from e2e \
     e2e || status=$?
 
-  kindDeleteCluster
-  trap - EXIT
+  if [[ -n "${HOLD}" ]]; then
+    echo ""
+    h1 "Tests completed - Cluster is still running"
+    echo ""
+    echo "You can now interact with the cluster:"
+    echo "  kubectl --kubeconfig .build/kubeconfig get pods -A"
+    echo "  kubectl --kubeconfig .build/kubeconfig get clients -A"
+    echo "  kubectl --kubeconfig .build/kubeconfig get tenants -A"
+    echo ""
+    echo "Access the services at:"
+    echo "  https://login.example.com:$(cat .build/port)/login"
+    echo ""
+    echoBanner "Press ENTER to delete the cluster and exit" "!"
+    read -r
+    kindDeleteCluster
+  else
+    kindDeleteCluster
+    trap - EXIT
+  fi
 
   if [[ "${status}" -gt 0 ]]; then
     exit "${status}"

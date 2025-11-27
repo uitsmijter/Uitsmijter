@@ -3,13 +3,28 @@ import SwiftkubeClient
 import SwiftkubeModel
 import Logger
 
+struct TenantStatus: Codable, Hashable, Equatable {
+    var phase: String
+    var clientCount: Int
+    var activeSessions: Int
+    var lastUpdated: String
+}
+
+struct ClientStatus: Codable, Hashable, Equatable {
+    var phase: String
+    var activeSessions: Int
+    var deniedAttempts: Int
+    var lastUpdated: String
+}
+
 struct TenantResource: KubernetesAPIResource, NamespacedResource, MetadataHavingResource,
-                              ReadableResource, CreatableResource, ListableResource {
+                              ReadableResource, CreatableResource, ListableResource, StatusHavingResource {
     typealias List = TenantResourceList
     var apiVersion = "uitsmijter.io/v1"
     var kind = "Tenant"
     var metadata: meta.v1.ObjectMeta?
     var spec: TenantSpec
+    var status: TenantStatus?
 }
 
 struct TenantResourceList: KubernetesResourceList {
@@ -21,12 +36,13 @@ struct TenantResourceList: KubernetesResourceList {
 }
 
 struct ClientResource: KubernetesAPIResource, NamespacedResource, MetadataHavingResource,
-                              ReadableResource, CreatableResource, ListableResource {
+                              ReadableResource, CreatableResource, ListableResource, StatusHavingResource {
     typealias List = ClientResourceList
     var apiVersion = "uitsmijter.io/v1"
     var kind = "Client"
     var metadata: meta.v1.ObjectMeta?
     var spec: ClientSpec
+    var status: ClientStatus?
 }
 
 struct ClientResourceList: KubernetesResourceList {
@@ -302,6 +318,151 @@ struct EntityCRDLoader: EntityLoaderProtocol {
             } catch {
                 Log.error("Error while processing client: \(error.localizedDescription), in \(item) ")
             }
+        }
+    }
+
+    // MARK: - Status Update
+
+    /// Updates the status of a tenant resource in Kubernetes
+    /// - Parameters:
+    ///   - tenant: The tenant to update status for
+    ///   - authCodeStorage: Optional auth code storage for counting active sessions
+    func updateTenantStatus(tenant: Tenant, authCodeStorage: AuthCodeStorageProtocol?) async {
+        Log.info("Attempting to update status for tenant: \(tenant.name)")
+
+        // Extract namespace and name from tenant name (format: "namespace/name")
+        let components = tenant.name.split(separator: "/")
+        guard components.count == 2 else {
+            Log.error("Invalid tenant name format: \(tenant.name). Expected 'namespace/name'")
+            return
+        }
+        let namespace = String(components[0])
+        let name = String(components[1])
+
+        Log.info("Parsed tenant namespace=\(namespace), name=\(name)")
+
+        do {
+            // Fetch current resource to get latest metadata
+            let currentResource = try await kubeClient
+                .for(TenantResource.self, gvr: gvrTenants)
+                .get(in: .namespace(namespace), name: name)
+
+            // Count clients for this tenant
+            let clientCount = delegate?.storage.clients.filter { client in
+                client.config.tenantname == tenant.name
+            }.count ?? 0
+
+            // Count active sessions for this tenant
+            var activeSessions = 0
+            if let storage = authCodeStorage {
+                Log.info("Counting active sessions for tenant: \(tenant.name)")
+                activeSessions = await storage.count(tenant: tenant, type: .refresh)
+                Log.info("Found \(activeSessions) active sessions for tenant: \(tenant.name)")
+            } else {
+                Log.warning("No authCodeStorage available for counting sessions")
+            }
+
+            // Create updated status
+            let status = TenantStatus(
+                phase: "Ready",
+                clientCount: clientCount,
+                activeSessions: activeSessions,
+                lastUpdated: ISO8601DateFormatter().string(from: Date())
+            )
+
+            Log.info(
+                "Updating Kubernetes status for \(tenant.name): clients=\(clientCount), sessions=\(activeSessions)"
+            )
+
+            // Create updated resource with new status
+            var updatedResource = currentResource
+            updatedResource.status = status
+
+            // Update status subresource
+            _ = try await kubeClient
+                .for(TenantResource.self, gvr: gvrTenants)
+                .updateStatus(in: .namespace(namespace), name: name, updatedResource)
+
+            Log.info(
+                "Successfully updated status for tenant \(tenant.name): \(clientCount) clients, \(activeSessions) sessions"
+            )
+        } catch {
+            Log.error("Failed to update tenant status for \(tenant.name): \(error)")
+        }
+    }
+
+    /// Updates the status of a Client Custom Resource in Kubernetes.
+    ///
+    /// This method updates the client's status subresource with current metrics including
+    /// active sessions and denied login attempts.
+    ///
+    /// - Parameters:
+    ///   - client: The client to update status for
+    ///   - authCodeStorage: The storage to count active sessions (optional)
+    func updateClientStatus(client: UitsmijterClient, authCodeStorage: AuthCodeStorageProtocol?) async {
+        guard case .kubernetes = client.ref else {
+            Log.debug("Client \(client.name) is not a Kubernetes resource, skipping status update")
+            return
+        }
+
+        Log.info("Attempting to update status for client: \(client.name)")
+
+        // Extract namespace from tenant name (format: "namespace/name")
+        let tenantComponents = client.config.tenantname.split(separator: "/")
+        guard tenantComponents.count >= 1 else {
+            Log.error("Invalid tenant name format for client: \(client.config.tenantname)")
+            return
+        }
+        let namespace = String(tenantComponents[0])
+        // The client.name is the K8s resource name (without namespace)
+        let name = client.name
+
+        Log.info("Client namespace=\(namespace), name=\(name)")
+
+        do {
+            // Fetch current resource to get latest metadata and resourceVersion
+            let currentResource = try await kubeClient
+                .for(ClientResource.self, gvr: gvrClients)
+                .get(in: .namespace(namespace), name: name)
+
+            // Count active sessions for this client
+            var activeSessions = 0
+            if let storage = authCodeStorage {
+                Log.info("Counting active sessions for client: \(client.name)")
+                activeSessions = await storage.count(client: client, type: .refresh)
+                Log.info("Found \(activeSessions) active sessions for client: \(client.name)")
+            } else {
+                Log.warning("No authCodeStorage available for counting sessions")
+            }
+
+            // Get denied login attempts for this client
+            let deniedAttempts = delegate?.storage.getDeniedAttempts(for: client.name) ?? 0
+
+            // Create updated status
+            let status = ClientStatus(
+                phase: "Ready",
+                activeSessions: activeSessions,
+                deniedAttempts: deniedAttempts,
+                lastUpdated: ISO8601DateFormatter().string(from: Date())
+            )
+
+            Log.info(
+                "Updating Kubernetes status for \(client.name): sessions=\(activeSessions), denied=\(deniedAttempts)"
+            )
+
+            // Update status subresource
+            var updatedResource = currentResource
+            updatedResource.status = status
+            _ = try await kubeClient
+                .for(ClientResource.self, gvr: gvrClients)
+                .updateStatus(in: .namespace(namespace), name: name, updatedResource)
+
+            Log.info(
+                "Successfully updated status for client \(client.name): \(activeSessions) sessions, " +
+                "\(deniedAttempts) denied attempts"
+            )
+        } catch {
+            Log.error("Failed to update client status for \(client.name): \(error)")
         }
     }
 }

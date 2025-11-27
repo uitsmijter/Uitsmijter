@@ -287,11 +287,13 @@ struct LoginController: RouteCollection {
             requestId: req.id
         )
 
-        Prometheus.main.loginFailure?.inc(1, [
-            ("forward_host", req.forwardInfo?.location.host ?? "unknown"),
-            ("mode", clientInfo.mode.rawValue),
-            ("tenant", clientInfo.tenant?.name ?? "unknown")
-        ])
+        // Record login failure event (Prometheus metrics + entity status update)
+        await req.application.authEventActor.recordLoginFailure(
+            tenant: clientInfo.tenant?.name,
+            client: clientInfo.client,
+            mode: clientInfo.mode.rawValue,
+            host: req.forwardInfo?.location.host ?? "unknown"
+        )
 
         if let host = req.forwardInfo?.location.host {
             req.headers.replaceOrAdd(name: "X-Forwarded-Host", value: host)
@@ -420,7 +422,7 @@ struct LoginController: RouteCollection {
             ?? tenant.config.hosts.first
             ?? Constants.PUBLIC_DOMAIN
         let issuer = "\(scheme)://\(host)"
-        let audience = clientInfo.client?.name ?? "unknown"
+        let audience = clientInfo.client?.config.ident.uuidString ?? "unknown"
         return (issuer, audience)
     }
 
@@ -582,11 +584,30 @@ struct LoginController: RouteCollection {
         )
         Log.audit.info("\(providedSubject.subject) on \(cookie.domain ?? "-")")
 
-        Prometheus.main.loginSuccess?.inc(1, [
-            ("forward_host", req.forwardInfo?.location.host ?? "unknown"),
-            ("mode", clientInfo.mode.rawValue),
-            ("tenant", tenant.name)
-        ])
+        // For interceptor mode, create a session entry to track active users
+        // (OAuth mode creates refresh tokens separately in TokenController)
+        if clientInfo.mode == .interceptor {
+            Log.info("Creating session entry for interceptor login: \(tenant.name)")
+            let sessionCode = Code()
+            let interceptorSession = AuthSession(
+                type: .refresh,
+                state: "interceptor-login",
+                code: sessionCode,
+                scopes: [],
+                payload: payload,
+                redirect: "",
+                ttl: Int64(Constants.COOKIE.EXPIRATION_DAYS * 24 * 60 * 60)
+            )
+            try? await req.application.authCodeStorage?.set(authSession: interceptorSession)
+        }
+
+        // Record login success event (Prometheus metrics + entity status update)
+        await req.application.authEventActor.recordLoginSuccess(
+            tenant: tenant.name,
+            client: clientInfo.client,
+            mode: clientInfo.mode.rawValue,
+            host: req.forwardInfo?.location.host ?? "unknown"
+        )
 
         return response
     }
