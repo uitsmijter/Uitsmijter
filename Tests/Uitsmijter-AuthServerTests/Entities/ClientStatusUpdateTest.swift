@@ -38,7 +38,7 @@ struct ClientStatusUpdateTest {
         let payload = Payload(
             issuer: IssuerClaim(value: "test-issuer"),
             subject: SubjectClaim(value: "test-user"),
-            audience: AudienceClaim(value: [client.name]),
+            audience: AudienceClaim(value: [client.config.ident.uuidString]),
             expiration: ExpirationClaim(value: Date().addingTimeInterval(3600)),
             issuedAt: IssuedAtClaim(value: Date()),
             authTime: AuthTimeClaim(value: Date()),
@@ -79,7 +79,7 @@ struct ClientStatusUpdateTest {
             let payload = Payload(
                 issuer: IssuerClaim(value: "test-issuer"),
                 subject: SubjectClaim(value: "user-\(index)"),
-                audience: AudienceClaim(value: [client1.name]),
+                audience: AudienceClaim(value: [client1.config.ident.uuidString]),
                 expiration: ExpirationClaim(value: Date().addingTimeInterval(3600)),
                 issuedAt: IssuedAtClaim(value: Date()),
                 authTime: AuthTimeClaim(value: Date()),
@@ -108,7 +108,7 @@ struct ClientStatusUpdateTest {
             let payload = Payload(
                 issuer: IssuerClaim(value: "test-issuer"),
                 subject: SubjectClaim(value: "user-\(index)"),
-                audience: AudienceClaim(value: [client2.name]),
+                audience: AudienceClaim(value: [client2.config.ident.uuidString]),
                 expiration: ExpirationClaim(value: Date().addingTimeInterval(3600)),
                 issuedAt: IssuedAtClaim(value: Date()),
                 authTime: AuthTimeClaim(value: Date()),
@@ -152,7 +152,7 @@ struct ClientStatusUpdateTest {
         let payload = Payload(
             issuer: IssuerClaim(value: "test-issuer"),
             subject: SubjectClaim(value: "test-user"),
-            audience: AudienceClaim(value: [client1.name, client2.name]),
+            audience: AudienceClaim(value: [client1.config.ident.uuidString, client2.config.ident.uuidString]),
             expiration: ExpirationClaim(value: Date().addingTimeInterval(3600)),
             issuedAt: IssuedAtClaim(value: Date()),
             authTime: AuthTimeClaim(value: Date()),
@@ -193,7 +193,7 @@ struct ClientStatusUpdateTest {
         let payload = Payload(
             issuer: IssuerClaim(value: "test-issuer"),
             subject: SubjectClaim(value: "test-user"),
-            audience: AudienceClaim(value: [client.name]),
+            audience: AudienceClaim(value: [client.config.ident.uuidString]),
             expiration: ExpirationClaim(value: Date().addingTimeInterval(3600)),
             issuedAt: IssuedAtClaim(value: Date()),
             authTime: AuthTimeClaim(value: Date()),

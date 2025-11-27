@@ -25,7 +25,7 @@ spec:
     - |
       class UserLoginProvider {
         auth = false;
-        constructor(credentials) { 
+        constructor(credentials) {
           this.auth = credentials.username.endsWith("@example.com");
           if(credentials.username.startsWith("delayed-login@")){
             let d = new Date();
