@@ -86,9 +86,9 @@ updates:
       prefix: "(Update: npm)"
       include: "scope"
     reviewers:
-      - "kris"
+      - "KrisSimon"
     assignees:
-      - "kris"
+      - "KrisSimon"
     # Prioritize security updates
     groups:
       security-updates:
