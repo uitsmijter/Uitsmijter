@@ -1,3 +1,8 @@
+# 0.10.3
+
+- Update: **Traefik 3** is now supported by default. Traefik 2 is still supported, but traefik.aiiVersion must be set. 
+ 
+
 # 0.10.2
 
 - Feature: **Kubernetes Tenant Status** - Added status subresource to Tenant CRD with real-time metrics displayed in `kubectl get tenants` and `kubectl describe tenant` commands. Status now shows client count, active user sessions, and tenant phase.

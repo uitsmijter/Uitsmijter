@@ -38,6 +38,9 @@ config:
     enabled: true
     scoped: false
 
+traefik:
+  apiVersion: traefik.io/v1alpha1
+
 resources:
   requests:
     memory: "256Mi"
