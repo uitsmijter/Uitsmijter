@@ -258,7 +258,6 @@ function kindSetupCert() {
 #   - Applies HTTPS redirect and default certificate configurations
 # Use case: Set up ingress routing for test applications
 function kindSetupTraefik() {
-  #kubectl apply -k "${PROJECT_DIR}/Deployment/e2e/traefik/"
   helm repo add traefik https://traefik.github.io/charts
   helm repo update
   helm upgrade --install traefik --namespace traefik --create-namespace -f "${PROJECT_DIR}/Deployment/e2e/traefik/values.yaml" traefik/traefik
