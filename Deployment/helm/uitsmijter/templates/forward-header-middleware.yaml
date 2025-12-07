@@ -3,7 +3,7 @@
 # usage:
 #   traefik.ingress.kubernetes.io/router.middlewares: sso-forward-header@kubernetescrd
 
-apiVersion: traefik.containo.us/v1alpha1
+apiVersion: {{ .Values.traefik.apiVersion | default "traefik.io/v1alpha1" }}
 kind: Middleware
 metadata:
   namespace: {{ include "uitsmijter.namespace" . }}
