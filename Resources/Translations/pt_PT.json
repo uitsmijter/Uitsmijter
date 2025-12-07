@@ -2,6 +2,7 @@
   "LOGIN": {
     "UI": {
       "LOGIN": "Iniciar sessão",
+      "LOGOUT": "Sair",
       "NAME": "Nome de usuário",
       "PASSWORD": "Palavra-chave"
     },

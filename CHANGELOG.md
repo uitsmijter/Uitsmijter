@@ -1,3 +1,5 @@
+- Improvement: **Index Page** - shows the actual logedin profile and a logout button.
+
 # 0.10.2
 
 - Feature: **Kubernetes Tenant Status** - Added status subresource to Tenant CRD with real-time metrics displayed in `kubectl get tenants` and `kubectl describe tenant` commands. Status now shows client count, active user sessions, and tenant phase.
