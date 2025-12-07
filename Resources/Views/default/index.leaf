@@ -7,11 +7,33 @@
     <link rel="stylesheet" href="css/uitsmijter.css">
     <script type="application/javascript" src="js/uitsmijter.js"></script>
     #if(payload == nil):
-    <meta http-equiv="refresh" content="0; url=login?for=#(serviceUrl)">
+        <meta http-equiv="refresh" content="0; url=login?for=#(serviceUrl)">
     #endif
 </head>
+<body class="background">
+<header>
+    <ul class="navigation">
+        <li><a href="#" id="clock">
+            <script type="application/javascript">
+                let clock = new SimpleClock("clock")
+                document.write(clock.currentTime)
+            </script>
+        </a></li>
+    </ul>
+</header>
+<main>
+    <div class="logo-box">
+        <img src="images/uitsmijter.svg">
+    </div>
+    <div class='login-box #isnotempty(error, "error")' style="max-width: 60%">
+            <div style="margin: 1.8rem">
+                #(payload)
+            </div>
+            <button id="logoutButton" type="button" class="button-big" name="login-button" onclick="document.location.href='/logout'">
+                <span>#t("LOGIN.UI.LOGOUT")</span>
+            </button>
+    </div>
+</main>
 
-<body>
-Payload: #(payload)
 </body>
 </html>

@@ -2,6 +2,7 @@
   "LOGIN": {
     "UI": {
       "LOGIN": "Anmelden",
+      "LOGOUT": "Abmelden",
       "NAME": "Benutzername",
       "PASSWORD": "Passwort"
     },

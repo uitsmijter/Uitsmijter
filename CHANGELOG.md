@@ -1,7 +1,7 @@
 # 0.10.3
 
 - Update: **Traefik 3** is now supported by default. Traefik 2 is still supported, but traefik.aiiVersion must be set. 
- 
+- Improvement: **Index Page** - shows the actual logedin profile and a logout button.
 
 # 0.10.2
 
