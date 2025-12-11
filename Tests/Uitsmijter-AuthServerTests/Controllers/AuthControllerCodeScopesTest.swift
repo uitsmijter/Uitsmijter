@@ -58,15 +58,14 @@ struct AuthControllerCodeScopesTest {
             """
                  class UserLoginProvider {
                     isLoggedIn = false;
+                    scopes = [];
                     constructor(credentials) {
                          console.log("Credentials:", credentials.username, credentials.password);
                          this.isLoggedIn = true;
-                         commit(
-                            {
-                                subject: credentials.username.replace(/@/g, "_"),
-                                scope: "user:list user:add admin:all"
-                            }
-                         );
+                         this.scopes = ["user:list", "user:add", "admin:all"]
+                         commit({
+                            subject: credentials.username.replace(/@/g, "_")
+                         });
                     }
 
                     // Getter
@@ -76,6 +75,10 @@ struct AuthControllerCodeScopesTest {
                 
                     get role(){
                         return "test-manager"
+                    }
+                
+                    get scopes(){
+                        return this.scopes
                     }
 
                     get userProfile() {
@@ -208,9 +211,9 @@ struct AuthControllerCodeScopesTest {
 
             #expect(payload.scope!.contains("openid"))
             #expect(payload.scope!.contains("email"))
-            //#expect(payload.scope!.contains("user:list"))
-            //#expect(payload.scope!.contains("user:add"))
-            //#expect(payload.scope!.contains("user:delete") == false)
+            #expect(payload.scope!.contains("user:list"))
+            #expect(payload.scope!.contains("user:add"))
+            #expect(payload.scope!.contains("user:delete") == false)
             //#expect(payload.scope!.contains("admin:all") == false)
 
         }

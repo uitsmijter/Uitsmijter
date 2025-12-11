@@ -48,5 +48,17 @@ extension JavaScriptProvider {
         }
         return role
     }
+    
+    
+    /// Returns the scopes property form `scriptClass`.
+    ///
+    /// - Parameter scriptClass: a `ScriptClassExecution`, default: userBackend
+    /// - Returns: The `scope` as a `[String]`
+    func getScopes(scriptClass: ScriptClassExecution = .userLogin) async -> [String] {
+        guard let scopes: [String] = try? self.getObject(class: scriptClass, property: "scopes") else {
+            return []
+        }
+        return scopes
+    }
 
 }

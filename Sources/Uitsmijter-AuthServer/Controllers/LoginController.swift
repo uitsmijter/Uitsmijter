@@ -538,7 +538,13 @@ struct LoginController: RouteCollection {
 
         // scopes
         let scopes = loginForm.scope?.split(separator: "+").map({String($0)}) ?? []
+        let providerScopes = await providerInterpreter.getScopes()
 
+        // TODO: filtering providerScopes by allowdProviderScopes (roadmap 11)
+        
+        let finalScopes = Array(Set(scopes + providerScopes))
+        
+        
         // create jwt
         guard let expirationDate = getExpirationDate() else {
             return try await LoginController.renderLoginView(
@@ -566,7 +572,7 @@ struct LoginController: RouteCollection {
             responsibility: responsibleDomainHash.hash,
             role: role,
             user: loginForm.username,
-            scope: scopes, // TODO insert correct scope values
+            scope: finalScopes, // TODO insert correct scope values
             profile: profile
         )
         let token = try await req.jwt.sign(payload)
