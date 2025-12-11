@@ -1,6 +1,16 @@
 # 0.10.3
 
-- Update: **Traefik 3** is now supported by default. Traefik 2 is still supported, but traefik.aiiVersion must be set. 
+- Feature: **Provider Scope Filtering** - Clients can now control which scopes JavaScript providers can add to user profiles via the new `allowedProviderScopes` configuration field. This implements a two-tier scope security model where both client-requested scopes (via `scopes` field) and provider-supplied scopes (via `allowedProviderScopes` field) are independently filtered before being merged into the final JWT token.
+- Feature: **Dynamic Scope Assignment** - JavaScript authentication providers can now return user-specific scopes through a new `scopes` getter property. Providers can dynamically assign scopes based on user roles, group memberships, database lookups, or custom business logic during authentication.
+- Feature: **Wildcard Scope Patterns** - Both `scopes` and `allowedProviderScopes` fields now support wildcard pattern matching (e.g., `user:*` matches `user:list`, `user:add`, `user:delete`) for flexible scope configuration without enumerating every possible scope value.
+- Feature: **JWT Scope Claim** - JWT tokens now include an optional `scope` claim containing the merged and filtered list of granted scopes, enabling downstream services to make fine-grained authorization decisions based on OAuth2 scopes.
+
+- Change: **Client CRD Schema** - Added `allowedProviderScopes` array field to Client custom resource definition. Existing clients without this field will have provider scopes disabled by default (secure by default behavior).
+
+- Update: **Traefik 3** is now supported by default. Traefik 2 is still supported, but traefik.aiiVersion must be set.
+
+- Improvement: **Scope Flow Visibility** - Login templates can now display requested scopes to users via `PageProperties.requestedScopes`, laying the foundation for future OAuth consent screens.
+- Improvement: **UserProfileProtocol** - Extended with `scope` property to support scope propagation through the authentication pipeline.
 - Improvement: **Index Page** - shows the actual logedin profile and a logout button.
 
 # 0.10.2
