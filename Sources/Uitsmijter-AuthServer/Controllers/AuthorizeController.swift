@@ -36,11 +36,6 @@ struct AuthorizeController: RouteCollection, OAuthControllerProtocol {
             )
         }
         
-        guard let client = clientInfo.client else {
-            Log.error("No auth without client!")
-            throw Abort(.badRequest, reason: "No auth without client!")
-        }
-
         let codeChallengeMethod = try getCodeChallengeMethod(on: req)
         let authRequest = try getAuthRequest(on: req, with: codeChallengeMethod)
 
@@ -61,6 +56,12 @@ struct AuthorizeController: RouteCollection, OAuthControllerProtocol {
         
         let scopes = authRequest.getScope() ?? ""
         Log.info("with scopes: \(scopes)", requestId: req.id)
+        
+        // get client late to handle other errors first
+        guard let client = clientInfo.client else {
+            Log.error("No auth without client!")
+            throw Abort(.badRequest, reason: "No auth without client!")
+        }
         
         // filter client allowed scopes, and create userAllowedScopes
         //let clientAllowedScopes = clientInfo.client?.config.scopes ?? []
