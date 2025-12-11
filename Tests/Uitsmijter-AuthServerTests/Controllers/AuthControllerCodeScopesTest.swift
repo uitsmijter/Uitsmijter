@@ -4,6 +4,40 @@ import VaporTesting
 import CryptoSwift
 @testable import Uitsmijter_AuthServer
 
+///
+///  ┌─────┐
+///  │    client     │
+///  └─────┘
+///   openid
+///   email
+///   profile
+///   user:delete
+///         │
+///         │
+///         │    allowedRequestScopes:
+///         │       openid
+///         │       email
+///         │       adress
+///         │──────────────────────▶
+///                                               openid
+///                                               email
+///                                                ┌────────┐
+///                                                │   user provider    │
+///                                                └────────┘
+///                                               user:list
+///                                               user:add
+///                                               admin:all
+///         ◀───────────────────────│
+///         │
+///         │   allowedProviderScopes:
+///         │       user:*
+///         │       can:*
+///         │
+///   openid
+///   email
+///   user:list
+///   user:add
+///
 
 // Tests that the allowed scopes chain passes
 @Suite("Auth Controller Code Scopes Test", .serialized)
@@ -26,14 +60,11 @@ struct AuthControllerCodeScopesTest {
                     isLoggedIn = false;
                     constructor(credentials) {
                          console.log("Credentials:", credentials.username, credentials.password);
-                         if(credentials.username == "ok@example.com"){
-                              this.isLoggedIn = true;
-                         }
+                         this.isLoggedIn = true;
                          commit(
-                            credentials.username == "ok@example.com",
                             {
                                 subject: credentials.username.replace(/@/g, "_"),
-                                scopes: "test:a test:b not:send first:a"
+                                scope: "user:list user:add admin:all"
                             }
                          );
                     }
@@ -57,7 +88,7 @@ struct AuthControllerCodeScopesTest {
                  }
                 """
         )
-        let tenant = Tenant(name: "Test Tenant", config: tenantConfig)
+        let tenant = Tenant(name: "Scope Test Tenant", config: tenantConfig)
 
         let (inserted, _) = app.entityStorage.tenants.insert(tenant)
         #expect(inserted)
@@ -73,7 +104,10 @@ struct AuthControllerCodeScopesTest {
                 grant_types: ["password",
                               "authorization_code",
                               "refresh_token"],
-                scopes: ["read", "openid", "first:a", "test:*"],
+                scopes: ["openid",
+                         "email",
+                         "adress"],
+                // "user:*" "can:*"
                 referrers: [
                     ".*"
                 ]
@@ -102,40 +136,83 @@ struct AuthControllerCodeScopesTest {
     func testValidUsersCodeFlowPkceS265CorrectVerifier() async throws {
         try await withApp(configure: configure) { app in
             try await setupEntities(app: app)
-            // await generateTestClient(in: app.entityStorage, uuid: testAppIdent)
 
-            let code = try await getCode(in: app.entityStorage, application: app,
-                clientUUID: testAppIdent,
-                challenge: codeVerifierSHA256B64,
-                method: .sha256
+            
+
+            
+            // 1. Request Code
+            // -----------------------------------
+            let state = String.random(length: 8)
+            //let testServerAddress = "http://\(app.http.server.configuration.hostname):\(app.http.server.configuration.port)"
+            let authorizeUrl = "/authorize"
+                + "?response_type=code"
+                + "&client_id=\(testAppIdent)"
+                + "&redirect_uri=http://localhost:9090"
+                + "&scope=openid+email+profile+user:delete"
+                + "&state=\(state)"
+            //let locationString = "\(testServerAddress)\(authorizeUrl.replacingOccurrences(of: "&", with: "&amp;"))"
+            let responseAuthorize = try await app.sendRequest(
+                .GET,
+                authorizeUrl,
+                headers: ["Content-Type": "application/json", "referer": "http://localhost:9090"]
             )
 
-            let response = try await app.sendRequest(.POST, "/token", beforeRequest: { @Sendable req async throws in
-                let tokenRequest = CodeTokenRequest(
-                    grant_type: .authorization_code,
-                    client_id: testAppIdent.uuidString,
-                    client_secret: nil,
-                    scope: nil,
-                    code: Code(value: code).value,
-                    code_challenge_method: .sha256,
-                    code_verifier: codeVerifier
+            #expect(responseAuthorize.status == .unauthorized)
+            #expect(responseAuthorize.body.string.contains("<body"))
+            #expect(responseAuthorize.body.string.contains("</html>"))
+            #expect(responseAuthorize.body.string.contains("login"))
+            
+            // check scopes
+            let scopeFormFiledValue: [String] = try {
+                let value = try responseAuthorize.body.string.groups(
+                    regex: "input\\s+type=\"hidden\"\\s+name=\"scope\"\\s+value=\"(.*)\""
                 )
-                try req.content.encode(tokenRequest, as: .json)
-                req.headers.contentType = .json
-            })
-            print(response.body.string)
-            #expect(response.status == .ok)
+                if value.count != 2 {
+                    return []
+                }
+                return value[1].split(separator: "+").map({String($0)}).sorted()
+            }()
+            
+            #expect(scopeFormFiledValue.contains("email"))
+            #expect(scopeFormFiledValue.contains("openid"))
+            #expect(scopeFormFiledValue.contains("profile") == false)
+            #expect(scopeFormFiledValue.contains("user:delte") == false)
+            
+            let testServerAddress = "http://\(app.http.server.configuration.hostname):\(app.http.server.configuration.port)"
+            let locationString = "\(testServerAddress)\(authorizeUrl.replacingOccurrences(of: "&", with: "&amp;"))"
+            
+            // 2. Login
+            // -----------------------------------
+            let responseLoginSubmission = try await app.sendRequest(.POST, "/login", beforeRequest: ({ req async throws in
+                req.headers = ["Content-Type": "application/x-www-form-urlencoded"]
+                // fill the form
+                try req.content.encode(LoginForm(
+                    username: "valid_user",
+                    password: "valid_password",
+                    location: locationString,
+                    scope: scopeFormFiledValue.joined(separator: "+")
+                ))
+            }))
+            #expect(responseLoginSubmission.status == .seeOther)
 
-            let accessToken = try response.content.decode(TokenResponse.self)
-            #expect(accessToken.token_type == .Bearer)
+            guard let cookie: HTTPCookies.Value = responseLoginSubmission.headers.setCookie?[Constants.COOKIE.NAME] else {
+                Issue.record("No set cookie header")
+                throw Abort(.badRequest)
+            }
+            
+            dump(cookie)
+            let payload = try await SignerManager.shared.verify(cookie.string, as: Payload.self)
+            
+            #expect(payload.issuer == "http://127.0.0.1")
+            #expect(payload.role == "test-manager")
 
-            let jwt = accessToken.access_token
-            let payload = try await SignerManager.shared.verify(jwt, as: Payload.self)
-            #expect(payload.user == "holger@mimimi.org")
+            #expect(payload.scope!.contains("openid"))
+            #expect(payload.scope!.contains("email"))
+            //#expect(payload.scope!.contains("user:list"))
+            //#expect(payload.scope!.contains("user:add"))
+            //#expect(payload.scope!.contains("user:delete") == false)
+            //#expect(payload.scope!.contains("admin:all") == false)
 
-            // There should be a request token, too
-            #expect(accessToken.refresh_token != nil)
-            #expect(accessToken.refresh_token?.count == Constants.TOKEN.LENGTH)
         }
     }
 }

@@ -236,7 +236,8 @@ struct KeyGeneratorTest {
             authTime: AuthTimeClaim(value: Date()),
             tenant: "test-tenant",
             role: "user",
-            user: "test@example.com"
+            user: "test@example.com",
+            scope: [], // TODO insert correct scope values
         )
 
         // Load the private key and sign
@@ -264,7 +265,8 @@ struct KeyGeneratorTest {
             authTime: AuthTimeClaim(value: Date()),
             tenant: "test-tenant",
             role: "user",
-            user: "verify@example.com"
+            user: "verify@example.com",
+            scope: [], // TODO insert correct scope values
         )
 
         // Sign with private key

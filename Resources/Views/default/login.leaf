@@ -26,6 +26,7 @@
         <form action="#(serviceUrl)/login" method="post">
             <input type="hidden" name="location" value="#(requestUri)"/>
             <input type="hidden" name="mode" value="#(mode)"/>
+            <input type="hidden" name="scope" value="#join("+", requestedScopes)"/>
             <div class="field">
                 <input type="text" id="username" name="username" placeholder='#t("LOGIN.UI.NAME")'>
             </div>

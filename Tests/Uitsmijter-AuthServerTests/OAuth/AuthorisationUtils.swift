@@ -353,7 +353,8 @@ func validAuthorisation(
         authTime: AuthTimeClaim(value: Date()),
         tenant: tenant.name,
         role: "default",
-        user: "holger@mimimi.org"
+        user: "holger@mimimi.org",
+        scope: [], // TODO insert correct scope values
     )
     let (tokenString, _) = try await SignerManager.shared.sign(payload)
     return BearerAuthorization(token: tokenString)

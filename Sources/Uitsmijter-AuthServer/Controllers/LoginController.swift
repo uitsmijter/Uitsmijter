@@ -536,6 +536,9 @@ struct LoginController: RouteCollection {
         // get users role from provider
         let role = await providerInterpreter.getRole()
 
+        // scopes
+        let scopes = loginForm.scope?.split(separator: "+").map({String($0)}) ?? []
+
         // create jwt
         guard let expirationDate = getExpirationDate() else {
             return try await LoginController.renderLoginView(
@@ -563,6 +566,7 @@ struct LoginController: RouteCollection {
             responsibility: responsibleDomainHash.hash,
             role: role,
             user: loginForm.username,
+            scope: scopes, // TODO insert correct scope values
             profile: profile
         )
         let token = try await req.jwt.sign(payload)

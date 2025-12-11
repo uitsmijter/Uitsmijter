@@ -40,6 +40,7 @@ struct Payload: JWTPayload, SubjectProtocol, UserProfileProtocol, Sendable {
         case responsibility = "responsibility"
         case role = "role"
         case user = "user"
+        case scope = "scope"
         case profile = "profile"
     }
 
@@ -104,10 +105,14 @@ struct Payload: JWTPayload, SubjectProtocol, UserProfileProtocol, Sendable {
     /// The authenticated user's username, typically an email address.
     var user: String
 
+    /// The users allowed scopes
+    var scope: [String]?
+    
     /// Additional user profile data
     ///
     /// Optional untyped profile information containing custom user attributes.
     var profile: CodableProfile?
+    
 
     /// Creates a new JWT payload
     ///
@@ -134,6 +139,7 @@ struct Payload: JWTPayload, SubjectProtocol, UserProfileProtocol, Sendable {
         responsibility: String? = nil,
         role: String,
         user: String,
+        scope: [String],
         profile: CodableProfile? = nil
     ) {
         self.issuer = issuer
@@ -146,6 +152,7 @@ struct Payload: JWTPayload, SubjectProtocol, UserProfileProtocol, Sendable {
         self.responsibility = responsibility
         self.role = role
         self.user = user
+        self.scope = scope
         self.profile = profile
     }
 

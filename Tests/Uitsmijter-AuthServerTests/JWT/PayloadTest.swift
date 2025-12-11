@@ -24,7 +24,8 @@ struct PayloadTest {
             authTime: AuthTimeClaim(value: Date()),
             tenant: tenant,
             role: role,
-            user: user
+            user: user,
+            scope: [], // TODO insert correct scope values
         )
 
         #expect(payload.subject == subject)
@@ -57,6 +58,7 @@ struct PayloadTest {
             responsibility: responsibility,
             role: role,
             user: user,
+            scope: [], // TODO insert correct scope values
             profile: profile
         )
 
@@ -83,7 +85,8 @@ struct PayloadTest {
             authTime: AuthTimeClaim(value: Date()),
             tenant: "my-tenant",
             role: "user",
-            user: "test@example.com"
+            user: "test@example.com",
+            scope: [], // TODO insert correct scope values
         )
 
         let encoder = JSONEncoder()
@@ -179,6 +182,7 @@ struct PayloadTest {
             responsibility: "roundtrip-scope",
             role: "developer",
             user: "dev@example.com",
+            scope: [], // TODO insert correct scope values
             profile: .object(["team": .string("backend")])
         )
 
@@ -210,7 +214,8 @@ struct PayloadTest {
             authTime: AuthTimeClaim(value: Date()),
             tenant: "test-tenant",
             role: "user",
-            user: "protocol@example.com"
+            user: "protocol@example.com",
+            scope: [], // TODO insert correct scope values
         )
 
         // Can be used as SubjectProtocol
@@ -231,6 +236,7 @@ struct PayloadTest {
             tenant: "test-tenant",
             role: "engineer",
             user: "engineer@example.com",
+            scope: [], // TODO insert correct scope values
             profile: profile
         )
 
@@ -256,7 +262,8 @@ struct PayloadTest {
             authTime: AuthTimeClaim(value: Date()),
             tenant: "",
             role: "",
-            user: ""
+            user: "",
+            scope: [], // TODO insert correct scope values
         )
 
         #expect(payload.subject == "")
@@ -288,6 +295,7 @@ struct PayloadTest {
             tenant: "test-tenant",
             role: "user",
             user: "nested@example.com",
+            scope: [], // TODO insert correct scope values
             profile: nestedProfile
         )
 
@@ -325,7 +333,9 @@ struct PayloadTest {
             tenant: "test-tenant",
             role: "admin",
             user: "array@example.com",
+            scope: [], // TODO insert correct scope values
             profile: arrayProfile
+            
         )
 
         // Encode and decode
