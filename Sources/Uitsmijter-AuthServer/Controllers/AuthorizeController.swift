@@ -65,6 +65,7 @@ struct AuthorizeController: RouteCollection, OAuthControllerProtocol {
         
         // filter client allowed scopes, and create userAllowedScopes
         //let clientAllowedScopes = clientInfo.client?.config.scopes ?? []
+        //(objectWithScopes.scope ?? "").components(separatedBy: .whitespacesAndNewlines)
         let userAllowedScopes = getAllowedScopes(client: client, authRequest: authRequest)
         
 
@@ -101,9 +102,15 @@ struct AuthorizeController: RouteCollection, OAuthControllerProtocol {
     private func getAllowedScopes(client: UitsmijterClient, authRequest: AuthRequests) -> [String] {
         switch authRequest {
         case .insecure(let authRequest):
-            return allowedScopes(on: client, for: authRequest)
+            return allowedScopes(
+                on: client,
+                for: authRequest.scope?.components(separatedBy: .whitespacesAndNewlines) ?? []
+            )
         case .pkce(let authRequest):
-            return allowedScopes(on: client, for: authRequest)
+            return allowedScopes(
+                on: client,
+                for: authRequest.scope?.components(separatedBy: .whitespacesAndNewlines) ?? []
+            )
         }
     }
     
@@ -258,7 +265,7 @@ struct AuthorizeController: RouteCollection, OAuthControllerProtocol {
             throw Abort(.unauthorized, reason: "LOGIN.ERROR.WRONG_CLIENT_SECRET")
         }
         let redirect = try client.checkedRedirect(for: authRequest)
-        let scopes = allowedScopes(on: client, for: authRequest)
+            let scopes = allowedScopes(on: client, for: authRequest.scope?.components(separatedBy: .whitespacesAndNewlines) ?? [])
         Log.info("""
                  User \(request.clientInfo?.subject ?? "-")
                  got scopes: \(scopes.joined(separator: ","))
@@ -316,7 +323,7 @@ struct AuthorizeController: RouteCollection, OAuthControllerProtocol {
         }
 
         let redirect = try client.checkedRedirect(for: authRequest)
-        let scopes = allowedScopes(on: client, for: authRequest)
+        let scopes = allowedScopes(on: client, for: authRequest.scope?.components(separatedBy: .whitespacesAndNewlines) ?? [])
         Log.info("""
                  User \(request.clientInfo?.subject ?? "-") got scopes: \(scopes.joined(separator: ","))
                  """, requestId: request.id)

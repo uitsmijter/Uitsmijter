@@ -110,6 +110,10 @@ struct AuthControllerCodeScopesTest {
                 scopes: ["openid",
                          "email",
                          "adress"],
+                allowedProviderScopes: [
+                    "user:*",
+                    "can:*"
+                ],
                 // "user:*" "can:*"
                 referrers: [
                     ".*"
@@ -214,8 +218,7 @@ struct AuthControllerCodeScopesTest {
             #expect(payload.scope!.contains("user:list"))
             #expect(payload.scope!.contains("user:add"))
             #expect(payload.scope!.contains("user:delete") == false)
-            //#expect(payload.scope!.contains("admin:all") == false)
-
+            #expect(payload.scope!.contains("admin:all") == false)
         }
     }
 }

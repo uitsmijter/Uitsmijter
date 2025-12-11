@@ -62,7 +62,7 @@ import Logger
 /// - SeeAlso: ``LoginForm`` for the form data structure
 /// - SeeAlso: ``PageProperties`` for template rendering context
 // swiftlint:disable:next type_body_length
-struct LoginController: RouteCollection {
+struct LoginController: RouteCollection, OAuthControllerProtocol {
 
     /// Calendar instance for date calculations.
     ///
@@ -538,9 +538,12 @@ struct LoginController: RouteCollection {
 
         // scopes
         let scopes = loginForm.scope?.split(separator: "+").map({String($0)}) ?? []
-        let providerScopes = await providerInterpreter.getScopes()
+        let possipleProviderScopes = await providerInterpreter.getScopes()
 
-        // TODO: filtering providerScopes by allowdProviderScopes (roadmap 11)
+        // filtering providerScopes
+        let providerScopes = if let client = clientInfo.client {
+            allowedScopes(on: client.config.allowedProviderScopes ?? [], for: possipleProviderScopes)
+        } else { [] as [String]}
         
         let finalScopes = Array(Set(scopes + providerScopes))
         
