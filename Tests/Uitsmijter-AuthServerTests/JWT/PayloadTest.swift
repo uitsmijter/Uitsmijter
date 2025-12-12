@@ -118,7 +118,8 @@ struct PayloadTest {
             "auth_time": \(issuedAtTimestamp),
             "tenant": "decoded-tenant",
             "role": "moderator",
-            "user": "mod@example.com"
+            "user": "mod@example.com", 
+            "scope": "openid"
         }
         """
 
