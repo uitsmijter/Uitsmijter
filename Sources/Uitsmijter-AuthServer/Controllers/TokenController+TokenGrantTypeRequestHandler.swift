@@ -126,7 +126,8 @@ extension TokenController {
         }
 
         try extendRequestWithRequestInfo(session, authorisationTokenRequest, req)
-
+        print("#### Login succeeded ####")
+        dump(session)
         Log.info(
             "Login succeeded \(session.payload?.user ?? "-") with scopes: \(scopes.joined(separator: ","))",
             requestId: req.id
