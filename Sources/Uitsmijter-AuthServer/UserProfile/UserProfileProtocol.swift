@@ -85,7 +85,7 @@ protocol UserProfileProtocol {
     var user: String { get set }
     
     // The users allowed scopes
-    var scope: [String]? { get set }
+    var scope: String { get set }
 
     /// Additional custom user profile data in a flexible JSON-like structure.
     ///
@@ -198,7 +198,7 @@ struct UserProfile: UserProfileProtocol {
     /// - SeeAlso: ``UserProfileProtocol/user`` for identifier format documentation
     var user: String
 
-    var scope: [String]?
+    var scope: String
     /// Optional additional profile data with flexible structure.
     ///
     /// Stores custom user attributes in a JSON-like format.
@@ -229,10 +229,10 @@ struct UserProfile: UserProfileProtocol {
     ///     ])
     /// )
     /// ```
-    init(role: String, user: String, scope: [String]? = nil, profile: CodableProfile? = nil) {
+    init(role: String, user: String, scope: String? = nil, profile: CodableProfile? = nil) {
         self.role = role
         self.user = user
-        self.scope = scope
+        self.scope = scope ?? ""
         self.profile = profile
     }
 }

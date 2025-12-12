@@ -213,12 +213,16 @@ struct AuthControllerCodeScopesTest {
             #expect(payload.issuer == "http://127.0.0.1")
             #expect(payload.role == "test-manager")
 
-            #expect(payload.scope!.contains("openid"))
-            #expect(payload.scope!.contains("email"))
-            #expect(payload.scope!.contains("user:list"))
-            #expect(payload.scope!.contains("user:add"))
-            #expect(payload.scope!.contains("user:delete") == false)
-            #expect(payload.scope!.contains("admin:all") == false)
+            #expect(payload.scope.contains("openid"))
+            #expect(payload.scope.contains("email"))
+            #expect(payload.scope.contains("user:list"))
+            #expect(payload.scope.contains("user:add"))
+            #expect(payload.scope.contains("user:delete") == false)
+            #expect(payload.scope.contains("admin:all") == false)
+            
+            
+            dump( type(of: payload.scope) )
+            #expect(type(of: payload.scope) == String.self)
         }
     }
 }

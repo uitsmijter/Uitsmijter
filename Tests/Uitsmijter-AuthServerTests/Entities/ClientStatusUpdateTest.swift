@@ -46,7 +46,7 @@ struct ClientStatusUpdateTest {
             responsibility: "test-domain",
             role: "user",
             user: "testuser",
-            scope: [], // TODO insert correct scope values
+            scope: "",
             profile: nil
         )
 
@@ -88,7 +88,7 @@ struct ClientStatusUpdateTest {
                 responsibility: "test-domain",
                 role: "user",
                 user: "testuser\(index)",
-                scope: [], // TODO insert correct scope values
+                scope: "",
                 profile: nil
             )
 
@@ -118,7 +118,7 @@ struct ClientStatusUpdateTest {
                 responsibility: "test-domain",
                 role: "user",
                 user: "testuser\(index)",
-                scope: [], // TODO insert correct scope values
+                scope: "",
                 profile: nil
             )
 
@@ -163,7 +163,7 @@ struct ClientStatusUpdateTest {
             responsibility: "test-domain",
             role: "user",
             user: "testuser",
-            scope: [], // TODO insert correct scope values
+            scope: "",
             profile: nil
         )
 
@@ -205,7 +205,7 @@ struct ClientStatusUpdateTest {
             responsibility: "test-domain",
             role: "user",
             user: "testuser",
-            scope: [], // TODO insert correct scope values
+            scope: "",
             profile: nil
         )
 

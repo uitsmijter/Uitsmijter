@@ -47,7 +47,7 @@ struct ClientStatusInitializationTest {
             responsibility: "test-domain",
             role: "user",
             user: "testuser",
-            scope: [], // TODO insert correct scope values
+            scope: "",
             profile: nil
         )
 
@@ -100,7 +100,7 @@ struct ClientStatusInitializationTest {
                 responsibility: "test-domain",
                 role: "user",
                 user: "user\(index)",
-                scope: [], // TODO insert correct scope values
+                scope: "",
                 profile: nil
             )
 
@@ -130,7 +130,7 @@ struct ClientStatusInitializationTest {
                 responsibility: "test-domain",
                 role: "user",
                 user: "user\(index)",
-                scope: [], // TODO insert correct scope values
+                scope: "",
                 profile: nil
             )
 

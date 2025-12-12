@@ -106,7 +106,7 @@ struct Payload: JWTPayload, SubjectProtocol, UserProfileProtocol, Sendable {
     var user: String
 
     /// The users allowed scopes
-    var scope: [String]?
+    var scope: String
     
     /// Additional user profile data
     ///
@@ -139,7 +139,7 @@ struct Payload: JWTPayload, SubjectProtocol, UserProfileProtocol, Sendable {
         responsibility: String? = nil,
         role: String,
         user: String,
-        scope: [String],
+        scope: String? = nil,
         profile: CodableProfile? = nil
     ) {
         self.issuer = issuer
@@ -152,7 +152,7 @@ struct Payload: JWTPayload, SubjectProtocol, UserProfileProtocol, Sendable {
         self.responsibility = responsibility
         self.role = role
         self.user = user
-        self.scope = scope
+        self.scope = scope ?? ""
         self.profile = profile
     }
 

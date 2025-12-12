@@ -545,7 +545,7 @@ struct LoginController: RouteCollection, OAuthControllerProtocol {
             allowedScopes(on: client.config.allowedProviderScopes ?? [], for: possipleProviderScopes)
         } else { [] as [String]}
         
-        let finalScopes = Array(Set(scopes + providerScopes))
+        let finalScopes = Array(Set(scopes + providerScopes)).joined(separator: " ")
         
         
         // create jwt
@@ -575,7 +575,7 @@ struct LoginController: RouteCollection, OAuthControllerProtocol {
             responsibility: responsibleDomainHash.hash,
             role: role,
             user: loginForm.username,
-            scope: finalScopes, // TODO insert correct scope values
+            scope: finalScopes,
             profile: profile
         )
         let token = try await req.jwt.sign(payload)

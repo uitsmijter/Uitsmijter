@@ -178,7 +178,7 @@ struct Token: ExpressibleByStringLiteral {
                 tenant: "",
                 role: "",
                 user: "",
-                scope: [] // TODO insert correct scope values
+                scope: ""
             )
             expirationDate = Date()
             secondsToExpire = 0
@@ -299,7 +299,7 @@ struct Token: ExpressibleByStringLiteral {
             responsibility: nil,
             role: userProfile.role,
             user: userProfile.user,
-            scope: [], // TODO insert correct scope values
+            scope: userProfile.scope,
             profile: userProfile.profile
         )
 

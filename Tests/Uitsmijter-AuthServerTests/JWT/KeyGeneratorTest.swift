@@ -237,7 +237,7 @@ struct KeyGeneratorTest {
             tenant: "test-tenant",
             role: "user",
             user: "test@example.com",
-            scope: [], // TODO insert correct scope values
+            scope: ""
         )
 
         // Load the private key and sign
@@ -266,7 +266,7 @@ struct KeyGeneratorTest {
             tenant: "test-tenant",
             role: "user",
             user: "verify@example.com",
-            scope: [], // TODO insert correct scope values
+            scope: ""
         )
 
         // Sign with private key

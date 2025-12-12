@@ -312,8 +312,7 @@ struct TokenTest {
             authTime: AuthTimeClaim(value: Date()),
             tenant: "test-tenant",
             role: "user",
-            user: "expired@example.com",
-            scope: [], // TODO insert correct scope values
+            user: "expired@example.com"
         )
 
         let (expiredTokenString, _) = try await SignerManager.shared.sign(payload)

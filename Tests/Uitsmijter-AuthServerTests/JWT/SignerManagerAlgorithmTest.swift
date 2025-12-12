@@ -230,7 +230,7 @@ struct SignerManagerAlgorithmTest {
             tenant: tenant,
             role: "user",
             user: "user@example.com",
-            scope: [], // TODO insert correct scope values
+            scope: ""
         )
     }
 }
