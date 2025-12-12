@@ -127,12 +127,23 @@ struct TokenController: RouteCollection, OAuthControllerProtocol {
                 throw ClientError.clientHasNoTenant
             }
 
+            Log.info("*** tokenrequest scopes: ")
+            dump(tokenRequest.scope)
+            
             let tokenResponse = try await tokenGrantTypeRequestHandler(
                 of: tokenRequest.grant_type,
                 for: tenant,
                 on: req,
-                scopes: allowedScopes(on: client, for: tokenRequest.scope?.components(separatedBy: .whitespacesAndNewlines) ?? [])
+                // TODO: scopes hia
+                scopes: allowedScopes(
+                    on: client,
+                    for: tokenRequest.scope?.components(separatedBy: .whitespacesAndNewlines) ?? []
+                )
             )
+            
+            Log.info("*** tokenresponse scopes: ")
+            dump(tokenResponse.scope)
+            
             Prometheus.main.oauthSuccess?.inc(1, [
                 ("tenant", tenant.name),
                 ("client", client.name),

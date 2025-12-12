@@ -545,7 +545,7 @@ struct LoginController: RouteCollection, OAuthControllerProtocol {
             allowedScopes(on: client.config.allowedProviderScopes ?? [], for: possipleProviderScopes)
         } else { [] as [String]}
         
-        let finalScopes = Array(Set(scopes + providerScopes)).joined(separator: " ")
+        let finalScopes = Array(Set(scopes + providerScopes)).sorted().joined(separator: " ")
         
         
         // create jwt
@@ -578,8 +578,10 @@ struct LoginController: RouteCollection, OAuthControllerProtocol {
             scope: finalScopes,
             profile: profile
         )
+        dump(payload)
         let token = try await req.jwt.sign(payload)
-
+        dump(token)
+        
         Log.info("Redirect to \(redirectTargetLocation)", requestId: req.id)
         let response = req.redirect(to: redirectTargetLocation, redirectType: .normal)
 
