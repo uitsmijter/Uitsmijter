@@ -150,6 +150,7 @@ struct PayloadTest {
             "tenant": "full-tenant",
             "responsibility": "full-scope",
             "role": "owner",
+            "scope": "access openid",
             "user": "owner@example.com",
             "profile": {
                 "firstName": "Jane",
