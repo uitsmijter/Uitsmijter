@@ -36,6 +36,7 @@ struct TenantStatusUpdateTest {
             responsibility: "test-domain",
             role: "user",
             user: "testuser",
+            scope: [], // TODO insert correct scope values
             profile: nil
         )
 
@@ -75,6 +76,7 @@ struct TenantStatusUpdateTest {
                 responsibility: "test-domain",
                 role: "user",
                 user: "testuser\(index)",
+                scope: [], // TODO insert correct scope values
                 profile: nil
             )
 
@@ -123,6 +125,7 @@ struct TenantStatusUpdateTest {
                 responsibility: "test-domain",
                 role: "user",
                 user: "testuser\(index)",
+                scope: [], // TODO insert correct scope values
                 profile: nil
             )
 
@@ -152,6 +155,7 @@ struct TenantStatusUpdateTest {
                 responsibility: "test-domain",
                 role: "user",
                 user: "testuser\(index)",
+                scope: [], // TODO insert correct scope values
                 profile: nil
             )
 
@@ -193,6 +197,7 @@ struct TenantStatusUpdateTest {
             responsibility: "test-domain",
             role: "user",
             user: "testuser",
+            scope: [], // TODO insert correct scope values
             profile: nil
         )
 

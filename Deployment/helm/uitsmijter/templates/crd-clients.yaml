@@ -59,6 +59,10 @@ spec:
                   type: array
                   items:
                     type: string
+                allowedProviderScopes:
+                  type: array
+                  items:
+                    type: string
                 referrers:
                   type: array
                   items:

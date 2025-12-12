@@ -131,7 +131,7 @@ struct TokenController: RouteCollection, OAuthControllerProtocol {
                 of: tokenRequest.grant_type,
                 for: tenant,
                 on: req,
-                scopes: allowedScopes(on: client, for: tokenRequest)
+                scopes: allowedScopes(on: client, for: tokenRequest.scope?.components(separatedBy: .whitespacesAndNewlines) ?? [])
             )
             Prometheus.main.oauthSuccess?.inc(1, [
                 ("tenant", tenant.name),

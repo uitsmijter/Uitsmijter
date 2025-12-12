@@ -353,7 +353,8 @@ func validAuthorisation(
         authTime: AuthTimeClaim(value: Date()),
         tenant: tenant.name,
         role: "default",
-        user: "holger@mimimi.org"
+        user: "holger@mimimi.org",
+        scope: [], // TODO insert correct scope values
     )
     let (tokenString, _) = try await SignerManager.shared.sign(payload)
     return BearerAuthorization(token: tokenString)
@@ -383,7 +384,8 @@ func getCode(
     application app: Application,
     clientUUID testAppIdent: UUID,
     challenge: String,
-    method: CodeChallengeMethod
+    method: CodeChallengeMethod,
+    scopes: [String]? = ["test"]
 ) async throws -> String {
     // get the tenant to save the id into the Payload
     guard let tenant: Tenant = await storage.clients.first(
@@ -393,16 +395,18 @@ func getCode(
         Issue.record("No tenant in client")
         throw TestError.abort
     }
-
+    let scopeString = scopes!.joined(separator: "+")
+    
     let url = "authorize"
         + "?response_type=code"
         + "&client_id=\(testAppIdent.uuidString)"
         + "&redirect_uri=http://localhost/"
-        + "&scope=test"
+        + "&scope=\(scopeString)"
         + "&state=123"
         + "&code_challenge=\(challenge)"
         + "&code_challenge_method=\(method.rawValue)"
     let response = try await app.sendRequest(.GET, url, beforeRequest: { @Sendable req async throws in
+        req.headers.add(name: "referer", value: "http://example.com")
         req.headers.bearerAuthorization = try await validAuthorisation(for: tenant, in: app)
     })
 

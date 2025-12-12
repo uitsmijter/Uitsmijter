@@ -83,6 +83,9 @@ protocol UserProfileProtocol {
     /// print("Authenticated user: \(profile.user)")
     /// ```
     var user: String { get set }
+    
+    // The users allowed scopes
+    var scope: [String]? { get set }
 
     /// Additional custom user profile data in a flexible JSON-like structure.
     ///
@@ -180,7 +183,7 @@ protocol UserProfileProtocol {
 /// - SeeAlso: ``UserProfileProtocol`` for the protocol definition
 /// - SeeAlso: ``CodableProfile`` for the profile data structure
 struct UserProfile: UserProfileProtocol {
-
+    
     /// The user's role for authorization decisions.
     ///
     /// This property determines access levels and permissions throughout the system.
@@ -195,6 +198,7 @@ struct UserProfile: UserProfileProtocol {
     /// - SeeAlso: ``UserProfileProtocol/user`` for identifier format documentation
     var user: String
 
+    var scope: [String]?
     /// Optional additional profile data with flexible structure.
     ///
     /// Stores custom user attributes in a JSON-like format.
@@ -225,9 +229,10 @@ struct UserProfile: UserProfileProtocol {
     ///     ])
     /// )
     /// ```
-    init(role: String, user: String, profile: CodableProfile? = nil) {
+    init(role: String, user: String, scope: [String]? = nil, profile: CodableProfile? = nil) {
         self.role = role
         self.user = user
+        self.scope = scope
         self.profile = profile
     }
 }

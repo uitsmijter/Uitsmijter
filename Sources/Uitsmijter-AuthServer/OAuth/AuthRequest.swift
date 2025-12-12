@@ -268,3 +268,15 @@ enum AuthRequests: Sendable {
     /// - Parameter request: The PKCE authorization request
     case pkce(AuthRequestPKCE)
 }
+
+extension AuthRequests {
+    func getScope() -> String? {
+        switch self {
+        case .insecure(let r):
+            return r.scope
+        case .pkce(let r):
+            return r.scope
+            
+        }
+    }
+}

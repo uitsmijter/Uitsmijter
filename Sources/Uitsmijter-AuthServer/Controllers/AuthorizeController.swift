@@ -35,7 +35,7 @@ struct AuthorizeController: RouteCollection, OAuthControllerProtocol {
                 )
             )
         }
-
+        
         let codeChallengeMethod = try getCodeChallengeMethod(on: req)
         let authRequest = try getAuthRequest(on: req, with: codeChallengeMethod)
 
@@ -53,12 +53,28 @@ struct AuthorizeController: RouteCollection, OAuthControllerProtocol {
         let payloadStatus = req.clientInfo?.validPayload != nil ? "present" : "nil"
         Log.debug("req.clientInfo?.validPayload = \(payloadStatus)", requestId: req.id)
         Log.debug("req.clientInfo?.expired = \(req.clientInfo?.expired ?? false)", requestId: req.id)
+        
+        let scopes = authRequest.getScope() ?? ""
+        Log.info("with scopes: \(scopes)", requestId: req.id)
+        
+        // get client late to handle other errors first
+        guard let client = clientInfo.client else {
+            Log.error("No auth without client!")
+            throw Abort(.badRequest, reason: "No auth without client!")
+        }
+        
+        // filter client allowed scopes, and create userAllowedScopes
+        //let clientAllowedScopes = clientInfo.client?.config.scopes ?? []
+        //(objectWithScopes.scope ?? "").components(separatedBy: .whitespacesAndNewlines)
+        let userAllowedScopes = getAllowedScopes(client: client, authRequest: authRequest)
+        
+
         guard let userPayload = req.clientInfo?.validPayload else {
             Log.info("No valid token, render login", requestId: req.id)
 
             let url = "\(clientInfo.requested.scheme)://\(clientInfo.requested.host)\(req.url.string)"
             Log.info("with request uri: \(url)", requestId: req.id)
-
+            
             return try await LoginController.renderLoginView(
                 on: req,
                 status: .unauthorized,
@@ -66,7 +82,8 @@ struct AuthorizeController: RouteCollection, OAuthControllerProtocol {
                 props: PageProperties(
                     title: "Login for a authorisation code",
                     requestUri: req.url.string, // UIT-372
-                    tenant: clientInfo.tenant
+                    requestedScopes: userAllowedScopes,
+                    tenant: clientInfo.tenant,
                 )
             )
         }
@@ -80,6 +97,23 @@ struct AuthorizeController: RouteCollection, OAuthControllerProtocol {
     }
 
     // MARK: - Privates
+    
+    /// Get allowed Scopes from the client definition
+    private func getAllowedScopes(client: UitsmijterClient, authRequest: AuthRequests) -> [String] {
+        switch authRequest {
+        case .insecure(let authRequest):
+            return allowedScopes(
+                on: client,
+                for: authRequest.scope?.components(separatedBy: .whitespacesAndNewlines) ?? []
+            )
+        case .pkce(let authRequest):
+            return allowedScopes(
+                on: client,
+                for: authRequest.scope?.components(separatedBy: .whitespacesAndNewlines) ?? []
+            )
+        }
+    }
+    
 
     /// Validates PKCE requirement for clients that enforce it
     ///
@@ -231,7 +265,7 @@ struct AuthorizeController: RouteCollection, OAuthControllerProtocol {
             throw Abort(.unauthorized, reason: "LOGIN.ERROR.WRONG_CLIENT_SECRET")
         }
         let redirect = try client.checkedRedirect(for: authRequest)
-        let scopes = allowedScopes(on: client, for: authRequest)
+            let scopes = allowedScopes(on: client, for: authRequest.scope?.components(separatedBy: .whitespacesAndNewlines) ?? [])
         Log.info("""
                  User \(request.clientInfo?.subject ?? "-")
                  got scopes: \(scopes.joined(separator: ","))
@@ -289,7 +323,7 @@ struct AuthorizeController: RouteCollection, OAuthControllerProtocol {
         }
 
         let redirect = try client.checkedRedirect(for: authRequest)
-        let scopes = allowedScopes(on: client, for: authRequest)
+        let scopes = allowedScopes(on: client, for: authRequest.scope?.components(separatedBy: .whitespacesAndNewlines) ?? [])
         Log.info("""
                  User \(request.clientInfo?.subject ?? "-") got scopes: \(scopes.joined(separator: ","))
                  """, requestId: request.id)

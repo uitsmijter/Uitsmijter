@@ -138,6 +138,10 @@ struct ClientSpec: Codable, Sendable {
     /// - `email`: User email address
     let scopes: [String]?
 
+    ///
+    /// Limits what provides can push to the users scopes:
+    let allowedProviderScopes: [String]?
+    
     /// Allowed HTTP referers for additional origin validation.
     ///
     /// If specified, requests must come from one of these referers.
@@ -185,6 +189,7 @@ struct ClientSpec: Codable, Sendable {
         redirect_urls: [String],
         grant_types: [String]? = nil,
         scopes: [String]? = nil,
+        allowedProviderScopes: [String]? = nil,
         referrers: [String]? = nil,
         secret: String? = nil,
         isPkceOnly: Bool? = false
@@ -194,6 +199,7 @@ struct ClientSpec: Codable, Sendable {
         self.redirect_urls = redirect_urls
         self.grant_types = grant_types
         self.scopes = scopes
+        self.allowedProviderScopes = allowedProviderScopes
         self.referrers = referrers
         self.secret = secret
         self.isPkceOnly = isPkceOnly

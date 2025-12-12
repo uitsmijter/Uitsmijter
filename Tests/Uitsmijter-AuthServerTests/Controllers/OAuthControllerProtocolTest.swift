@@ -28,21 +28,21 @@ struct OAuthControllerProtocolTest {
 
     @Test("Allowed scopes explicit scope") func allowedScopesExplicitScope() {
         let inputScope: InputScope = InputScope(scope: "read")
-        let allowedScopes = testController.allowedScopes(on: client, for: inputScope)
+        let allowedScopes = testController.allowedScopes(on: client, for: inputScope.scope?.components(separatedBy: .whitespacesAndNewlines) ?? [])
         #expect(allowedScopes.count == 1)
         #expect(allowedScopes.first == "read")
     }
 
     @Test("Allowed scopes with appends") func allowedScopesWithAppends() {
         let inputScope: InputScope = InputScope(scope: "admin_read")
-        let allowedScopes = testController.allowedScopes(on: client, for: inputScope)
+        let allowedScopes = testController.allowedScopes(on: client, for: inputScope.scope?.components(separatedBy: .whitespacesAndNewlines) ?? [])
         #expect(allowedScopes.count == 1)
         #expect(allowedScopes.first == "admin_read")
     }
 
     @Test("Allowed scopes but not only base") func allowedScopesButNotOnlyBase() {
         let inputScope: InputScope = InputScope(scope: "admin_")
-        let allowedScopes = testController.allowedScopes(on: client, for: inputScope)
+        let allowedScopes = testController.allowedScopes(on: client, for: inputScope.scope?.components(separatedBy: .whitespacesAndNewlines) ?? [])
         #expect(allowedScopes.isEmpty)
     }
 }

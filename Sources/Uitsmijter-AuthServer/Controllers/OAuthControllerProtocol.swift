@@ -32,10 +32,16 @@ extension OAuthControllerProtocol {
     ///   - objectWithScopes: Request type of AuthRequestProtocol
     /// - Returns: A list of scopes that are requested and that are allowed by the client
     ///
-    func allowedScopes(on client: UitsmijterClient, for objectWithScopes: ScopesProtocol) -> [String] {
+    ///
+    func allowedScopes(on client: UitsmijterClient, for scopes: [String]) -> [String] {
+        allowedScopes(on: client.config.scopes ?? [] as [String], for: scopes)
+    }
+    
+    func allowedScopes(on allowedScopes: [String], for scopes: [String]) -> [String] {
         // checked scopes only
-        (objectWithScopes.scope ?? "").components(separatedBy: .whitespacesAndNewlines).filter { inputScope in
-            client.config.scopes?.contains { clientScope in
+        // (objectWithScopes.scope ?? "").components(separatedBy: .whitespacesAndNewlines)
+        scopes.filter { inputScope in
+            allowedScopes.contains { clientScope in
                 var _clientScope = clientScope
                 // Allowed are Asterisks - reformat into regex
                 if clientScope.contains("*") {
@@ -48,7 +54,7 @@ extension OAuthControllerProtocol {
                     return true
                 }
                 return false
-            } ?? false
+            }
         }
     }
 }

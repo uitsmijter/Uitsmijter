@@ -25,7 +25,8 @@ struct SignerManagerTest {
             authTime: AuthTimeClaim(value: Date()),
             tenant: "test-tenant",
             role: "user",
-            user: "test@example.com"
+            user: "test@example.com",
+            scope: [], // TODO insert correct scope values
         )
 
         let (token, kid) = try await manager.sign(payload)
@@ -51,7 +52,8 @@ struct SignerManagerTest {
             authTime: AuthTimeClaim(value: Date()),
             tenant: "verify-tenant",
             role: "admin",
-            user: "verify@example.com"
+            user: "verify@example.com",
+            scope: [], // TODO insert correct scope values
         )
 
         let (token, _) = try await manager.sign(payload)
@@ -81,7 +83,8 @@ struct SignerManagerTest {
                 authTime: AuthTimeClaim(value: Date()),
                 tenant: "test-tenant",
                 role: "user",
-                user: "user\(i)@example.com"
+                user: "user\(i)@example.com",
+                scope: [], // TODO insert correct scope values
             )
 
             let (token, _) = try await manager.sign(payload)
@@ -116,6 +119,7 @@ struct SignerManagerTest {
             tenant: "test-tenant",
             role: "user",
             user: "john.doe@example.com",
+            scope: [], // TODO insert correct scope values
             profile: profile
         )
 
@@ -145,7 +149,8 @@ struct SignerManagerTest {
             authTime: AuthTimeClaim(value: Date()),
             tenant: "test-tenant",
             role: "user",
-            user: "tamper@example.com"
+            user: "tamper@example.com",
+            scope: [], // TODO insert correct scope values
         )
 
         let (token, _) = try await manager.sign(payload)
@@ -204,7 +209,8 @@ struct SignerManagerTest {
                         authTime: AuthTimeClaim(value: Date()),
                         tenant: "test-tenant",
                         role: "user",
-                        user: "concurrent\(i)@example.com"
+                        user: "concurrent\(i)@example.com",
+                        scope: [], // TODO insert correct scope values
                     )
 
                     if let result = try? await manager.sign(payload) {
@@ -242,7 +248,8 @@ struct SignerManagerTest {
             authTime: AuthTimeClaim(value: Date()),
             tenant: "test-tenant",
             role: "user",
-            user: "concurrent@example.com"
+            user: "concurrent@example.com",
+            scope: [], // TODO insert correct scope values
         )
 
         let (token, _) = try await manager.sign(payload)
@@ -288,7 +295,8 @@ struct SignerManagerTest {
                             authTime: AuthTimeClaim(value: Date()),
                             tenant: "test-tenant",
                             role: "user",
-                            user: "mixed\(i)@example.com"
+                            user: "mixed\(i)@example.com",
+                            scope: [], // TODO insert correct scope values
                         )
 
                         let (token, _) = try await manager.sign(payload)
@@ -326,7 +334,8 @@ struct SignerManagerTest {
             authTime: AuthTimeClaim(value: Date()),
             tenant: "",
             role: "user",
-            user: "test@example.com"
+            user: "test@example.com",
+            scope: [], // TODO insert correct scope values
         )
 
         let (token, _) = try await manager.sign(payload)
@@ -349,7 +358,8 @@ struct SignerManagerTest {
             authTime: AuthTimeClaim(value: Date()),
             tenant: "tenant-with-dashes_underscores.dots",
             role: "admin/developer",
-            user: "user+tag@example.com"
+            user: "user+tag@example.com",
+            scope: [], // TODO insert correct scope values
         )
 
         let (token, _) = try await manager.sign(payload)
@@ -374,7 +384,8 @@ struct SignerManagerTest {
             authTime: AuthTimeClaim(value: Date()),
             tenant: "租户-テナント",
             role: "Administrador",
-            user: "用户名"
+            user: "用户名",
+            scope: [], // TODO insert correct scope values
         )
 
         let (token, _) = try await manager.sign(payload)
@@ -419,6 +430,7 @@ struct SignerManagerTest {
             tenant: "test-tenant",
             role: "user",
             user: "complex@example.com",
+            scope: [], // TODO insert correct scope values
             profile: profile
         )
 
@@ -447,7 +459,8 @@ struct SignerManagerTest {
             authTime: AuthTimeClaim(value: Date()),
             tenant: "test-tenant",
             role: "user",
-            user: "test@example.com"
+            user: "test@example.com",
+            scope: [], // TODO insert correct scope values
         )
 
         let (token, kid) = try await manager.sign(payload)
@@ -495,7 +508,8 @@ struct SignerManagerTest {
             authTime: AuthTimeClaim(value: Date()),
             tenant: "test-tenant",
             role: "user",
-            user: "test@example.com"
+            user: "test@example.com",
+            scope: [], // TODO insert correct scope values
         )
 
         let (token, kid) = try await manager.sign(payload, algorithmString: "RS256")

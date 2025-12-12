@@ -37,6 +37,8 @@ struct PageProperties: Encodable {
     /// - SeeAlso:
     ///      - Payload
     var payload: Payload?
+    
+    var requestedScopes: [String]?
 
     /// Login mode
     var mode: LoginMode?
@@ -53,6 +55,7 @@ struct PageProperties: Encodable {
         requestUri: String? = nil,
         serviceUrl: String? = nil,
         payload: Payload? = nil,
+        requestedScopes: [String]? = nil,
         mode: LoginMode? = nil,
         requestInfo: RequestInfo? = nil,
         tenant: Tenant? = nil
@@ -62,6 +65,7 @@ struct PageProperties: Encodable {
         self.requestUri = requestUri
         self.serviceUrl = serviceUrl
         self.payload = payload
+        self.requestedScopes = requestedScopes
         self.mode = mode
         self.requestInfo = requestInfo
         self.tenant = tenant
