@@ -220,8 +220,7 @@ struct AuthControllerCodeScopesTest {
             #expect(payload.scope.contains("user:delete") == false)
             #expect(payload.scope.contains("admin:all") == false)
             
-            
-            dump( type(of: payload.scope) )
+            // Scopes are strings
             #expect(type(of: payload.scope) == String.self)
         }
     }
