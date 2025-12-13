@@ -134,11 +134,7 @@ struct TokenController: RouteCollection, OAuthControllerProtocol {
                 of: tokenRequest.grant_type,
                 for: tenant,
                 on: req,
-                // TODO: scopes hia
-                scopes: allowedScopes(
-                    on: client,
-                    for: tokenRequest.scope?.components(separatedBy: .whitespacesAndNewlines) ?? []
-                )
+                withScope: tokenRequest.scope
             )
             
             Log.info("*** tokenresponse scopes: ")
