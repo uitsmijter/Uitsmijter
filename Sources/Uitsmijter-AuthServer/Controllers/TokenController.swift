@@ -189,7 +189,7 @@ struct TokenController: RouteCollection, OAuthControllerProtocol {
             // We do not return a Codable here, because payload.profile is an untyped structure that we have to
             // build anyway. For future updates: Profile has to conform to ResponseEncodable.
             let profile = try JSONEncoder.main.encode(payload.profile)
-
+            
             let response = Response(
                 body: .init(data: profile)
             )

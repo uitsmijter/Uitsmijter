@@ -279,12 +279,15 @@ struct AuthorizeController: RouteCollection, OAuthControllerProtocol {
 
         // construct authorisation code
         let code = Code()
+        // Update payload with the filtered scopes for this authorization
+        var updatedPayload = userPayload
+        updatedPayload.scope = scopes.sorted().joined(separator: " ")
         let authSession = AuthSession(
             type: .code,
             state: authRequest.state,
             code: code,
             scopes: scopes,
-            payload: userPayload,
+            payload: updatedPayload,
             redirect: redirect,
             ttl: Constants.AUTHCODE.TimeToLive
         )
@@ -339,12 +342,15 @@ struct AuthorizeController: RouteCollection, OAuthControllerProtocol {
             codeChallengeMethod: authRequest.code_challenge_method,
             codeChallenge: authRequest.code_challenge
         )
+        // Update payload with the filtered scopes for this authorization
+        var updatedPayload = userPayload
+        updatedPayload.scope = scopes.sorted().joined(separator: " ")
         let authSession = AuthSession(
             type: .code,
             state: authRequest.state,
             code: code,
             scopes: scopes,
-            payload: userPayload,
+            payload: updatedPayload,
             redirect: redirect,
             ttl: Constants.AUTHCODE.TimeToLive
         )

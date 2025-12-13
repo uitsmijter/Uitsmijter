@@ -144,9 +144,6 @@ struct AuthControllerCodeScopesTest {
         try await withApp(configure: configure) { app in
             try await setupEntities(app: app)
 
-            
-
-            
             // 1. Request Code
             // -----------------------------------
             let state = String.random(length: 8)
@@ -168,7 +165,7 @@ struct AuthControllerCodeScopesTest {
             #expect(responseAuthorize.body.string.contains("<body"))
             #expect(responseAuthorize.body.string.contains("</html>"))
             #expect(responseAuthorize.body.string.contains("login"))
-            
+
             // check scopes
             let scopeFormFiledValue: [String] = try {
                 let value = try responseAuthorize.body.string.groups(
@@ -179,15 +176,15 @@ struct AuthControllerCodeScopesTest {
                 }
                 return value[1].split(separator: "+").map({String($0)}).sorted()
             }()
-            
+
             #expect(scopeFormFiledValue.contains("email"))
             #expect(scopeFormFiledValue.contains("openid"))
             #expect(scopeFormFiledValue.contains("profile") == false)
             #expect(scopeFormFiledValue.contains("user:delte") == false)
-            
+
             let testServerAddress = "http://\(app.http.server.configuration.hostname):\(app.http.server.configuration.port)"
             let locationString = "\(testServerAddress)\(authorizeUrl.replacingOccurrences(of: "&", with: "&amp;"))"
-            
+
             // 2. Login
             // -----------------------------------
             let responseLoginSubmission = try await app.sendRequest(.POST, "/login", beforeRequest: ({ req async throws in
@@ -206,10 +203,10 @@ struct AuthControllerCodeScopesTest {
                 Issue.record("No set cookie header")
                 throw Abort(.badRequest)
             }
-            
+
             dump(cookie)
             let payload = try await SignerManager.shared.verify(cookie.string, as: Payload.self)
-            
+
             #expect(payload.issuer == "http://127.0.0.1")
             #expect(payload.role == "test-manager")
 
@@ -219,9 +216,81 @@ struct AuthControllerCodeScopesTest {
             #expect(payload.scope.contains("user:add"))
             #expect(payload.scope.contains("user:delete") == false)
             #expect(payload.scope.contains("admin:all") == false)
-            
+
             // Scopes are strings
             #expect(type(of: payload.scope) == String.self)
+
+            // 3. Follow redirect to authorize endpoint
+            // -----------------------------------
+            guard let redirectLocation = responseLoginSubmission.headers["location"].first else {
+                Issue.record("No redirect location")
+                throw Abort(.badRequest)
+            }
+
+            let cleanedRedirectLocation = redirectLocation
+                .replacingOccurrences(of: testServerAddress, with: "")
+                .replacingOccurrences(of: "&amp;", with: "&")
+
+            let responseAuthorizeRedirect = try await app.sendRequest(
+                .GET,
+                cleanedRedirectLocation,
+                headers: [
+                    "Cookie": cookie.serialize(name: Constants.COOKIE.NAME)
+                ]
+            )
+
+            #expect(responseAuthorizeRedirect.status == .seeOther)
+
+            // 4. Get the authorization code from the final redirect
+            // -----------------------------------
+            guard let finalRedirectLocation = responseAuthorizeRedirect.headers["location"].first else {
+                Issue.record("No location header in authorize redirect")
+                throw Abort(.badRequest)
+            }
+
+            let codeMatch = try finalRedirectLocation.groups(regex: "code=([a-zA-Z0-9]+)")
+            #expect(codeMatch.count == 2, "Authorization code should be in redirect URL")
+            let authorizationCode = codeMatch[1]
+
+            // 5. Exchange authorization code for access token
+            // -----------------------------------
+            let tokenResponse = try await app.sendRequest(.POST, "/token", beforeRequest: { @Sendable req async throws in
+                let tokenRequest = CodeTokenRequest(
+                    grant_type: .authorization_code,
+                    client_id: testAppIdent.uuidString,
+                    client_secret: nil,
+                    scope: nil,
+                    code: Code(value: authorizationCode).value
+                )
+                try req.content.encode(tokenRequest, as: .json)
+                req.headers.contentType = .json
+            })
+
+            #expect(tokenResponse.status == .ok)
+
+            let tokenResponseBody = try decoder.decode(TokenResponse.self, from: tokenResponse.body)
+            #expect(tokenResponseBody.access_token.isEmpty == false)
+            #expect(tokenResponseBody.refresh_token?.isEmpty == false)
+
+            // 6. Verify scopes in the final access token
+            // -----------------------------------
+            let accessTokenPayload = try await SignerManager.shared.verify(
+                tokenResponseBody.access_token,
+                as: Payload.self
+            )
+
+            // Verify the access token contains the expected enriched scopes
+            #expect(accessTokenPayload.scope.contains("openid"), "Access token should contain 'openid' scope")
+            #expect(accessTokenPayload.scope.contains("email"), "Access token should contain 'email' scope")
+            #expect(accessTokenPayload.scope.contains("user:list"), "Access token should contain 'user:list' from provider")
+            #expect(accessTokenPayload.scope.contains("user:add"), "Access token should contain 'user:add' from provider")
+            #expect(accessTokenPayload.scope.contains("user:delete") == false, "Access token should NOT contain 'user:delete' (not in allowed scopes)")
+            #expect(accessTokenPayload.scope.contains("admin:all") == false, "Access token should NOT contain 'admin:all' (not matching provider scope patterns)")
+
+            // Verify TokenResponse also has the correct scope string
+            let expectedScopes = ["email", "openid", "user:add", "user:list"].sorted()
+            let actualScopes = (tokenResponseBody.scope ?? "").split(separator: " ").map { String($0) }.sorted()
+            #expect(actualScopes == expectedScopes, "TokenResponse scope should match expected scopes")
         }
     }
 }

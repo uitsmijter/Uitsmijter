@@ -125,14 +125,17 @@ extension TokenController {
         }
 
         try extendRequestWithRequestInfo(session, authorisationTokenRequest, req)
-        print("#### Login succeeded ####")
-        dump(session.payload?.scope)
         Log.info(
             "Login succeeded \(session.payload?.user ?? "-") with scopes: \(session.payload?.scope ?? "-")",
             requestId: req.id
         )
 
-        let userScopes = session.payload?.scope ?? session.scopes.sorted().joined(separator: " ")
+        let userScopes: String
+        if let payloadScope = session.payload?.scope, !payloadScope.isEmpty {
+            userScopes = payloadScope
+        } else {
+            userScopes = session.scopes.sorted().joined(separator: " ")
+        }
 
         let (accessToken, refreshToken) = try await getNewTokenPair(
             on: req,
@@ -179,8 +182,12 @@ extension TokenController {
 
         Log.info("Refresh succeeded \(session.payload?.user ?? "-")", requestId: req.id)
 
-
-        let userScopes = session.payload?.scope ?? session.scopes.sorted().joined(separator: " ")
+        let userScopes: String
+        if let payloadScope = session.payload?.scope, !payloadScope.isEmpty {
+            userScopes = payloadScope
+        } else {
+            userScopes = session.scopes.sorted().joined(separator: " ")
+        }
 
         let (accessToken, refreshToken) = try await getNewTokenPair(
             on: req,
@@ -284,6 +291,7 @@ extension TokenController {
         let profile = UserProfile(
             role: payload.role,
             user: payload.user,
+            scope: payload.scope,
             profile: payload.profile
         )
 
