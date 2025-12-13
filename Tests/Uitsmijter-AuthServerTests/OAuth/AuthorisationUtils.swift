@@ -472,7 +472,7 @@ func authorisationCodeGrantFlow(
             username: "valid_user",
             password: "valid_password",
             location: locationString,
-            scope: scopes?.joined(separator: " ") ?? ""
+            scope: scopes?.joined(separator: "+") ?? ""
         ))
     }))
     #expect(responseLoginSubmission.status == .seeOther)

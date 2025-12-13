@@ -537,15 +537,19 @@ struct LoginController: RouteCollection, OAuthControllerProtocol {
         let role = await providerInterpreter.getRole()
 
         // scopes
-        let scopes = loginForm.scope?.split(separator: "+").map({String($0)}) ?? []
+        let requestedScopes = loginForm.scope?.split(separator: "+").map({String($0)}) ?? []
         let possipleProviderScopes = await providerInterpreter.getScopes()
 
-        // filtering providerScopes
+        // filtering requested scopes and provider scopes
+        let filteredRequestedScopes = if let client = clientInfo.client {
+            allowedScopes(on: client, for: requestedScopes)
+        } else { [] as [String]}
+
         let providerScopes = if let client = clientInfo.client {
             allowedScopes(on: client.config.allowedProviderScopes ?? [], for: possipleProviderScopes)
         } else { [] as [String]}
-        
-        let finalScopes = Array(Set(scopes + providerScopes)).sorted().joined(separator: " ")
+
+        let finalScopes = Array(Set(filteredRequestedScopes + providerScopes)).sorted().joined(separator: " ")
         
         
         // create jwt
