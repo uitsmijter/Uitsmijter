@@ -65,7 +65,7 @@ jobs:
       - unittest
     steps:
       - name: Delete huge unnecessary tools folder
-        run: rm -rf /opt/hostedtoolcache
+        run: rm -rf /opt/hostedtoolcache; apt-get remove -y '^dotnet-.*'; apt-get remove -y 'php.*'; apt-get remove -y azure-cli google-cloud-sdk hhvm google-chrome-stable firefox powershell mono-devel; apt-get autoremove -y; apt-get clean
       - name: Check out the repo
         uses: actions/checkout@v6
         with:
