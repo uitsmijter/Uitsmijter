@@ -37,7 +37,7 @@ struct PageProperties: Encodable {
     /// - SeeAlso:
     ///      - Payload
     var payload: Payload?
-    
+
     var requestedScopes: [String]?
 
     /// Login mode

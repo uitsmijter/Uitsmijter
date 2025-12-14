@@ -25,4 +25,3 @@ protocol ScopesProtocol {
     /// prompt the user to select scopes.
     var scope: String? { get }
 }
- 

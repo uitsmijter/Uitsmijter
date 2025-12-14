@@ -1,3 +1,4 @@
+// swiftlint:disable force_unwrapping orphaned_doc_comment
 import Foundation
 import Testing
 import VaporTesting
@@ -396,7 +397,7 @@ func getCode(
         throw TestError.abort
     }
     let scopeString = scopes!.joined(separator: "+")
-    
+
     let url = "authorize"
         + "?response_type=code"
         + "&client_id=\(testAppIdent.uuidString)"

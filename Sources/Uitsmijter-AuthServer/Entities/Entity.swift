@@ -155,7 +155,7 @@ enum EntityResourceReference: Codable, Equatable, Sendable {
             }
         }
     }
-    
+
     /// Returns `true` if this is a Kubernetes resource reference
     var isKubernetes: Bool {
         if case .kubernetes = self {
@@ -215,6 +215,4 @@ enum EntityResourceReference: Codable, Equatable, Sendable {
         // .file != .kubernetes
         return false
     }
-
-
 }

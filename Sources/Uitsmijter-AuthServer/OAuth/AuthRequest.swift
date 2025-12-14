@@ -272,11 +272,10 @@ enum AuthRequests: Sendable {
 extension AuthRequests {
     func getScope() -> String? {
         switch self {
-        case .insecure(let r):
-            return r.scope
-        case .pkce(let r):
-            return r.scope
-            
+        case .insecure(let req):
+            return req.scope
+        case .pkce(let req):
+            return req.scope
         }
     }
 }

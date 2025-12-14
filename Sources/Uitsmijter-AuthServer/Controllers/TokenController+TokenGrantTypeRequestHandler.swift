@@ -251,9 +251,13 @@ extension TokenController {
         // Get provider scopes and filter them against client's allowedProviderScopes
         let possibleProviderScopes = await providerInterpreter.getScopes()
         let providerScopes: [String]
-        if let allowedProviderScopePatterns = client.config.allowedProviderScopes, !allowedProviderScopePatterns.isEmpty {
+        if let allowedProviderScopePatterns = client.config.allowedProviderScopes,
+           !allowedProviderScopePatterns.isEmpty {
             // If allowedProviderScopes is configured, filter provider scopes by patterns
-            providerScopes = allowedScopes(on: allowedProviderScopePatterns, for: possibleProviderScopes)
+            providerScopes = allowedScopes(
+                on: allowedProviderScopePatterns,
+                for: possibleProviderScopes
+            )
         } else {
             // If no allowedProviderScopes configured, use all provider scopes
             providerScopes = possibleProviderScopes
@@ -286,7 +290,7 @@ extension TokenController {
             algorithmString: tenant.config.effectiveJwtAlgorithm,
             signerManager: req.application.signerManager
         )
-        
+
         return TokenResponse(
             access_token: accessToken.value,
             token_type: .Bearer,

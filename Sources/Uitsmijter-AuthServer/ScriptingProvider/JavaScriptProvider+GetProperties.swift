@@ -48,8 +48,7 @@ extension JavaScriptProvider {
         }
         return role
     }
-    
-    
+
     /// Returns the scopes property form `scriptClass`.
     ///
     /// - Parameter scriptClass: a `ScriptClassExecution`, default: userBackend

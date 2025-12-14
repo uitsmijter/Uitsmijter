@@ -1,3 +1,4 @@
+// swiftlint:disable file_length
 import Foundation
 import Vapor
 import JWT
@@ -426,6 +427,7 @@ struct LoginController: RouteCollection, OAuthControllerProtocol {
         return (issuer, audience)
     }
 
+    // swiftlint:disable:next orphaned_doc_comment
     /// Processes login credentials and authenticates the user.
     ///
     /// This method handles POST requests to `/login`, validating submitted credentials
@@ -467,6 +469,7 @@ struct LoginController: RouteCollection, OAuthControllerProtocol {
     /// - Parameter req: The incoming HTTP request with form data and client context.
     /// - Returns: A redirect `Response` to the target URL with authentication cookie set.
     /// - Throws: `Abort` errors for validation failures or system errors.
+    // swiftlint:disable:next cyclomatic_complexity function_body_length
     @Sendable func doLogin(req: Request) async throws -> Response {
         guard let clientInfo = req.clientInfo else {
             Log.error("Client request without clientInfo is not allowed in this context", requestId: req.id)
@@ -537,7 +540,7 @@ struct LoginController: RouteCollection, OAuthControllerProtocol {
         let role = await providerInterpreter.getRole()
 
         // scopes
-        let requestedScopes = loginForm.scope?.split(separator: "+").map({String($0)}) ?? []
+        let requestedScopes = loginForm.scope?.split(separator: "+").map({ String($0) }) ?? []
         let possipleProviderScopes = await providerInterpreter.getScopes()
 
         // filtering requested scopes and provider scopes
@@ -550,8 +553,7 @@ struct LoginController: RouteCollection, OAuthControllerProtocol {
         } else { [] as [String]}
 
         let finalScopes = Array(Set(filteredRequestedScopes + providerScopes)).sorted().joined(separator: " ")
-        
-        
+
         // create jwt
         guard let expirationDate = getExpirationDate() else {
             return try await LoginController.renderLoginView(
@@ -585,7 +587,7 @@ struct LoginController: RouteCollection, OAuthControllerProtocol {
         dump(payload)
         let token = try await req.jwt.sign(payload)
         dump(token)
-        
+
         Log.info("Redirect to \(redirectTargetLocation)", requestId: req.id)
         let response = req.redirect(to: redirectTargetLocation, redirectType: .normal)
 

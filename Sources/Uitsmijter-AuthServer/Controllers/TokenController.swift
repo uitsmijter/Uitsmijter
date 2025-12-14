@@ -129,17 +129,17 @@ struct TokenController: RouteCollection, OAuthControllerProtocol {
 
             Log.info("*** tokenrequest scopes: ")
             dump(tokenRequest.scope)
-            
+
             let tokenResponse = try await tokenGrantTypeRequestHandler(
                 of: tokenRequest.grant_type,
                 for: tenant,
                 on: req,
                 withScope: tokenRequest.scope
             )
-            
+
             Log.info("*** tokenresponse scopes: ")
             dump(tokenResponse.scope)
-            
+
             Prometheus.main.oauthSuccess?.inc(1, [
                 ("tenant", tenant.name),
                 ("client", client.name),
@@ -189,7 +189,7 @@ struct TokenController: RouteCollection, OAuthControllerProtocol {
             // We do not return a Codable here, because payload.profile is an untyped structure that we have to
             // build anyway. For future updates: Profile has to conform to ResponseEncodable.
             let profile = try JSONEncoder.main.encode(payload.profile)
-            
+
             let response = Response(
                 body: .init(data: profile)
             )

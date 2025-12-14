@@ -3,6 +3,8 @@ disabled_rules:
   - implicit_getter
   - class_delegate_protocol
   - syntactic_sugar
+  - blanket_disable_command
+  - superfluous_disable_command
 
 analyzer_rules:
   - unused_import

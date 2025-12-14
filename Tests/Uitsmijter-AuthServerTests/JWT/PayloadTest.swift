@@ -118,7 +118,7 @@ struct PayloadTest {
             "auth_time": \(issuedAtTimestamp),
             "tenant": "decoded-tenant",
             "role": "moderator",
-            "user": "mod@example.com", 
+            "user": "mod@example.com",
             "scope": "openid"
         }
         """
@@ -337,7 +337,7 @@ struct PayloadTest {
             user: "array@example.com",
             scope: "",
             profile: arrayProfile
-            
+
         )
 
         // Encode and decode

@@ -83,7 +83,7 @@ protocol UserProfileProtocol {
     /// print("Authenticated user: \(profile.user)")
     /// ```
     var user: String { get set }
-    
+
     // The users allowed scopes
     var scope: String { get set }
 
@@ -183,7 +183,7 @@ protocol UserProfileProtocol {
 /// - SeeAlso: ``UserProfileProtocol`` for the protocol definition
 /// - SeeAlso: ``CodableProfile`` for the profile data structure
 struct UserProfile: UserProfileProtocol {
-    
+
     /// The user's role for authorization decisions.
     ///
     /// This property determines access levels and permissions throughout the system.

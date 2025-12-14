@@ -1,43 +1,45 @@
+// swiftlint:disable line_length function_body_length closure_body_length type_body_length closure_spacing
+// swiftlint:disable closure_end_indentation comment_spacing
 import Foundation
 import Testing
 import VaporTesting
 import CryptoSwift
 @testable import Uitsmijter_AuthServer
 
-///
-///  ┌─────┐
-///  │    client     │
-///  └─────┘
-///   openid
-///   email
-///   profile
-///   user:delete
-///         │
-///         │
-///         │    allowedRequestScopes:
-///         │       openid
-///         │       email
-///         │       adress
-///         │──────────────────────▶
-///                                               openid
-///                                               email
-///                                                ┌────────┐
-///                                                │   user provider    │
-///                                                └────────┘
-///                                               user:list
-///                                               user:add
-///                                               admin:all
-///         ◀───────────────────────│
-///         │
-///         │   allowedProviderScopes:
-///         │       user:*
-///         │       can:*
-///         │
-///   openid
-///   email
-///   user:list
-///   user:add
-///
+//
+//  ┌─────┐
+//  │    client     │
+//  └─────┘
+//   openid
+//   email
+//   profile
+//   user:delete
+//         │
+//         │
+//         │    allowedRequestScopes:
+//         │       openid
+//         │       email
+//         │       adress
+//         │──────────────────────▶
+//                                               openid
+//                                               email
+//                                                ┌────────┐
+//                                                │   user provider    │
+//                                                └────────┘
+//                                               user:list
+//                                               user:add
+//                                               admin:all
+//         ◀───────────────────────│
+//         │
+//         │   allowedProviderScopes:
+//         │       user:*
+//         │       can:*
+//         │
+//   openid
+//   email
+//   user:list
+//   user:add
+//
 
 // Tests that the allowed scopes chain passes
 @Suite("Auth Controller Code Scopes Test", .serialized)
@@ -72,11 +74,11 @@ struct AuthControllerCodeScopesTest {
                     get canLogin() {
                        return this.isLoggedIn;
                     }
-                
+
                     get role(){
                         return "test-manager"
                     }
-                
+
                     get scopes(){
                         return this.scopes
                     }
@@ -122,11 +124,11 @@ struct AuthControllerCodeScopesTest {
         )
         app.entityStorage.clients = [client]
     }
-    
+
     /// When the native app begins the authorization request, instead of immediately launching a
-    /// browser, the client first creates what is known as a "code verifier". This is a cryptographically
-    /// random string using the characters A-Z, a-z, 0-9, and the punctuation characters -._~ (hyphen, period,
-    /// underscore, and tilde), between 43 and 128 characters long.
+    /// browser, the client first creates what is known as a "code verifier". This is a
+    /// cryptographically random string using the characters A-Z, a-z, 0-9, and the punctuation
+    /// characters -._~ (hyphen, period, underscore, and tilde), between 43 and 128 characters long.
     let codeVerifier = String.random(length: Int.random(in: 43...128), of: .codeVerifier)
 
     var codeVerifierSHA256B64: String {
@@ -199,7 +201,8 @@ struct AuthControllerCodeScopesTest {
             }))
             #expect(responseLoginSubmission.status == .seeOther)
 
-            guard let cookie: HTTPCookies.Value = responseLoginSubmission.headers.setCookie?[Constants.COOKIE.NAME] else {
+            guard let cookie: HTTPCookies.Value =
+                    responseLoginSubmission.headers.setCookie?[Constants.COOKIE.NAME] else {
                 Issue.record("No set cookie header")
                 throw Abort(.badRequest)
             }
@@ -254,7 +257,9 @@ struct AuthControllerCodeScopesTest {
 
             // 5. Exchange authorization code for access token
             // -----------------------------------
-            let tokenResponse = try await app.sendRequest(.POST, "/token", beforeRequest: { @Sendable req async throws in
+            let tokenResponse = try await app.sendRequest(
+                .POST, "/token",
+                beforeRequest: { @Sendable req async throws in
                 let tokenRequest = CodeTokenRequest(
                     grant_type: .authorization_code,
                     client_id: testAppIdent.uuidString,
@@ -280,12 +285,30 @@ struct AuthControllerCodeScopesTest {
             )
 
             // Verify the access token contains the expected enriched scopes
-            #expect(accessTokenPayload.scope.contains("openid"), "Access token should contain 'openid' scope")
-            #expect(accessTokenPayload.scope.contains("email"), "Access token should contain 'email' scope")
-            #expect(accessTokenPayload.scope.contains("user:list"), "Access token should contain 'user:list' from provider")
-            #expect(accessTokenPayload.scope.contains("user:add"), "Access token should contain 'user:add' from provider")
-            #expect(accessTokenPayload.scope.contains("user:delete") == false, "Access token should NOT contain 'user:delete' (not in allowed scopes)")
-            #expect(accessTokenPayload.scope.contains("admin:all") == false, "Access token should NOT contain 'admin:all' (not matching provider scope patterns)")
+            #expect(
+                accessTokenPayload.scope.contains("openid"),
+                "Access token should contain 'openid' scope"
+            )
+            #expect(
+                accessTokenPayload.scope.contains("email"),
+                "Access token should contain 'email' scope"
+            )
+            #expect(
+                accessTokenPayload.scope.contains("user:list"),
+                "Access token should contain 'user:list' from provider"
+            )
+            #expect(
+                accessTokenPayload.scope.contains("user:add"),
+                "Access token should contain 'user:add' from provider"
+            )
+            #expect(
+                accessTokenPayload.scope.contains("user:delete") == false,
+                "Access token should NOT contain 'user:delete' (not in allowed scopes)"
+            )
+            #expect(
+                accessTokenPayload.scope.contains("admin:all") == false,
+                "Access token should NOT contain 'admin:all' (not matching provider scope patterns)"
+            )
 
             // Verify TokenResponse also has the correct scope string
             let expectedScopes = ["email", "openid", "user:add", "user:list"].sorted()

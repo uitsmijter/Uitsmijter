@@ -107,12 +107,11 @@ struct Payload: JWTPayload, SubjectProtocol, UserProfileProtocol, Sendable {
 
     /// The users allowed scopes
     var scope: String
-    
+
     /// Additional user profile data
     ///
     /// Optional untyped profile information containing custom user attributes.
     var profile: CodableProfile?
-    
 
     /// Creates a new JWT payload
     ///
