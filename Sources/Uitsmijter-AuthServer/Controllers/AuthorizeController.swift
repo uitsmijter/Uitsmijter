@@ -2,8 +2,8 @@ import Vapor
 import Foundation
 import Logger
 
+// swiftlint:disable:next type_body_length
 struct AuthorizeController: RouteCollection, OAuthControllerProtocol {
-
     /// Load handled routes
     func boot(routes: RoutesBuilder) throws {
         let auth = routes.grouped("authorize")
@@ -35,7 +35,7 @@ struct AuthorizeController: RouteCollection, OAuthControllerProtocol {
                 )
             )
         }
-        
+
         let codeChallengeMethod = try getCodeChallengeMethod(on: req)
         let authRequest = try getAuthRequest(on: req, with: codeChallengeMethod)
 
@@ -53,28 +53,27 @@ struct AuthorizeController: RouteCollection, OAuthControllerProtocol {
         let payloadStatus = req.clientInfo?.validPayload != nil ? "present" : "nil"
         Log.debug("req.clientInfo?.validPayload = \(payloadStatus)", requestId: req.id)
         Log.debug("req.clientInfo?.expired = \(req.clientInfo?.expired ?? false)", requestId: req.id)
-        
+
         let scopes = authRequest.getScope() ?? ""
         Log.info("with scopes: \(scopes)", requestId: req.id)
-        
+
         // get client late to handle other errors first
         guard let client = clientInfo.client else {
             Log.error("No auth without client!")
             throw Abort(.badRequest, reason: "No auth without client!")
         }
-        
+
         // filter client allowed scopes, and create userAllowedScopes
-        //let clientAllowedScopes = clientInfo.client?.config.scopes ?? []
-        //(objectWithScopes.scope ?? "").components(separatedBy: .whitespacesAndNewlines)
+        // let clientAllowedScopes = clientInfo.client?.config.scopes ?? []
+        // (objectWithScopes.scope ?? "").components(separatedBy: .whitespacesAndNewlines)
         let userAllowedScopes = getAllowedScopes(client: client, authRequest: authRequest)
-        
 
         guard let userPayload = req.clientInfo?.validPayload else {
             Log.info("No valid token, render login", requestId: req.id)
 
             let url = "\(clientInfo.requested.scheme)://\(clientInfo.requested.host)\(req.url.string)"
             Log.info("with request uri: \(url)", requestId: req.id)
-            
+
             return try await LoginController.renderLoginView(
                 on: req,
                 status: .unauthorized,
@@ -97,7 +96,7 @@ struct AuthorizeController: RouteCollection, OAuthControllerProtocol {
     }
 
     // MARK: - Privates
-    
+
     /// Get allowed Scopes from the client definition
     private func getAllowedScopes(client: UitsmijterClient, authRequest: AuthRequests) -> [String] {
         switch authRequest {
@@ -113,7 +112,6 @@ struct AuthorizeController: RouteCollection, OAuthControllerProtocol {
             )
         }
     }
-    
 
     /// Validates PKCE requirement for clients that enforce it
     ///
@@ -267,12 +265,18 @@ struct AuthorizeController: RouteCollection, OAuthControllerProtocol {
         let redirect = try client.checkedRedirect(for: authRequest)
 
         // Filter requested scopes from the authorization request
-        let requestedScopes = allowedScopes(on: client, for: authRequest.scope?.components(separatedBy: .whitespacesAndNewlines) ?? [])
+        let requestedScopes = allowedScopes(
+            on: client,
+            for: authRequest.scope?.components(separatedBy: .whitespacesAndNewlines) ?? []
+        )
 
         // Extract provider scopes from SSO payload
-        let payloadScopes = userPayload.scope.components(separatedBy: .whitespacesAndNewlines).filter { !$0.isEmpty }
+        let payloadScopes = userPayload.scope
+            .components(separatedBy: .whitespacesAndNewlines)
+            .filter { !$0.isEmpty }
         let providerScopes: [String]
-        if let allowedProviderScopePatterns = client.config.allowedProviderScopes, !allowedProviderScopePatterns.isEmpty {
+        let allowedProviderScopePatterns = client.config.allowedProviderScopes
+        if let allowedProviderScopePatterns, !allowedProviderScopePatterns.isEmpty {
             // If allowedProviderScopes is configured, filter payload scopes by patterns
             providerScopes = allowedScopes(on: allowedProviderScopePatterns, for: payloadScopes)
         } else {
@@ -345,12 +349,18 @@ struct AuthorizeController: RouteCollection, OAuthControllerProtocol {
         let redirect = try client.checkedRedirect(for: authRequest)
 
         // Filter requested scopes from the authorization request
-        let requestedScopes = allowedScopes(on: client, for: authRequest.scope?.components(separatedBy: .whitespacesAndNewlines) ?? [])
+        let requestedScopes = allowedScopes(
+            on: client,
+            for: authRequest.scope?.components(separatedBy: .whitespacesAndNewlines) ?? []
+        )
 
         // Extract provider scopes from SSO payload
-        let payloadScopes = userPayload.scope.components(separatedBy: .whitespacesAndNewlines).filter { !$0.isEmpty }
+        let payloadScopes = userPayload.scope
+            .components(separatedBy: .whitespacesAndNewlines)
+            .filter { !$0.isEmpty }
         let providerScopes: [String]
-        if let allowedProviderScopePatterns = client.config.allowedProviderScopes, !allowedProviderScopePatterns.isEmpty {
+        let allowedProviderScopePatterns = client.config.allowedProviderScopes
+        if let allowedProviderScopePatterns, !allowedProviderScopePatterns.isEmpty {
             // If allowedProviderScopes is configured, filter payload scopes by patterns
             providerScopes = allowedScopes(on: allowedProviderScopePatterns, for: payloadScopes)
         } else {

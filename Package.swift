@@ -84,7 +84,7 @@ let package = Package(
                         .plugin(name: "PackageBuildInfoPlugin", package: "PackageBuildInfo")
                     ]
             ),
-            
+
             // TESTS
             .testTarget(name: "FoundationExtensionsTests", dependencies: [
                 .target(name: "FoundationExtensions"),

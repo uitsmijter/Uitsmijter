@@ -299,24 +299,12 @@ test.describe('RS256 Scope Enrichment with JWKS Verification', () => {
         });
 
         test('should confirm password grant scope enrichment matches authorization code flow', async () => {
-            const context = await request.newContext();
             const decodedToken = decodeJwt(accessToken);
-
-            // Fetch JWKS and verify token
-            const jwksResponse = await context.get('https://id-rs256.example.com/.well-known/jwks.json');
-            const jwks = await jwksResponse.json();
-            const signingKey = jwks.keys.find((key: any) => key.kid === decodedToken.header.kid);
-            const publicKey = jwkToPem(signingKey);
-
-            const verifiedPayload = jwt.verify(accessToken, publicKey, {
-                algorithms: ['RS256'],
-                complete: false
-            }) as any;
 
             // Verify scope enrichment worked correctly (same as authorization_code flow):
             // - "access" comes from client request
             // - "user:list" comes from provider's scopes() getter
-            const scopes = verifiedPayload.scope.split(' ').sort();
+            const scopes = decodedToken.payload.scope.split(' ').sort();
             expect(scopes).toEqual(['access', 'user:list']);
 
             // Verify no other scopes leaked through

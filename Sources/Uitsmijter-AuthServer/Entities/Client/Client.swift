@@ -141,7 +141,7 @@ struct ClientSpec: Codable, Sendable {
     ///
     /// Limits what provides can push to the users scopes:
     let allowedProviderScopes: [String]?
-    
+
     /// Allowed HTTP referers for additional origin validation.
     ///
     /// If specified, requests must come from one of these referers.

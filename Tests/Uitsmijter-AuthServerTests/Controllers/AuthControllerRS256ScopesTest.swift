@@ -1,3 +1,5 @@
+// swiftlint:disable line_length function_body_length closure_body_length type_body_length
+// swiftlint:disable closure_spacing closure_parameter_position orphaned_doc_comment
 import Foundation
 import Testing
 import VaporTesting

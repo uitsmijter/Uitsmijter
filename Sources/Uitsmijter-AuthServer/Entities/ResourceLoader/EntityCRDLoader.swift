@@ -54,6 +54,7 @@ struct ClientResourceList: KubernetesResourceList {
 }
 
 @MainActor
+// swiftlint:disable:next type_body_length
 struct EntityCRDLoader: EntityLoaderProtocol {
 
     let delegate: EntityLoaderProtocolFunctions?
@@ -383,9 +384,10 @@ struct EntityCRDLoader: EntityLoaderProtocol {
                 .for(TenantResource.self, gvr: gvrTenants)
                 .updateStatus(in: .namespace(namespace), name: name, updatedResource)
 
-            Log.info(
-                "Successfully updated status for tenant \(tenant.name): \(clientCount) clients, \(activeSessions) sessions"
-            )
+            Log.info("""
+                Successfully updated status for tenant \(tenant.name): \
+                \(clientCount) clients, \(activeSessions) sessions
+                """)
         } catch {
             Log.error("Failed to update tenant status for \(tenant.name): \(error)")
         }

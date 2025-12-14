@@ -34,7 +34,7 @@ struct LoginControllerScopesTests {
                     get canLogin() {
                        return this.isLoggedIn;
                     }
-                
+
                     get role(){
                         return "test-manager"
                     }
@@ -95,7 +95,7 @@ struct LoginControllerScopesTests {
                     #expect(res.body.string.isEmpty)
                     #expect(res.status == .seeOther)
                     #expect(res.headers["location"].first == "https://example.com/ok")
-                    
+
                     guard let cookie: String = res.headers["set-cookie"].first else {
                         Issue.record("No Cookie set")
                         return
@@ -109,7 +109,7 @@ struct LoginControllerScopesTests {
                     let payload = try await SignerManager.shared.verify(token, as: Payload.self)
                     #expect(payload.subject == "ok_example.com")
                     dump(payload)
-                    
+
                     #expect(payload.role == "test-manager")
                 })
         }

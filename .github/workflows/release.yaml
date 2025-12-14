@@ -44,7 +44,7 @@ jobs:
       - unittest
     steps:
       - name: Delete huge unnecessary tools folder
-        run: rm -rf /opt/hostedtoolcache    
+        run: rm -rf /opt/hostedtoolcache; sudo apt-get remove -y '^dotnet-.*'; sudo apt-get remove -y 'php.*'; sudo apt-get remove -y azure-cli google-chrome-stable firefox powershell mono-devel; sudo apt-get autoremove -y; sudo apt-get clean; rm -rf /usr/share/dotnet/  
       - name: Check out the repo
         uses: actions/checkout@v6
         with:

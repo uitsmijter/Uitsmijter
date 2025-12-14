@@ -36,7 +36,7 @@ extension OAuthControllerProtocol {
     func allowedScopes(on client: UitsmijterClient, for scopes: [String]) -> [String] {
         allowedScopes(on: client.config.scopes ?? [] as [String], for: scopes)
     }
-    
+
     func allowedScopes(on allowedScopes: [String], for scopes: [String]) -> [String] {
         // checked scopes only
         // (objectWithScopes.scope ?? "").components(separatedBy: .whitespacesAndNewlines)

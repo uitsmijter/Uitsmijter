@@ -1,3 +1,4 @@
+// swiftlint:disable line_length comment_spacing closure_body_length orphaned_doc_comment
 import Foundation
 import Testing
 import VaporTesting
@@ -123,9 +124,11 @@ struct TokenControllerPasswordGrantScopesTest {
             //   - "user:list" is allowed by allowedProviderScopes pattern "user:*"
             //   - "admin:write" is filtered out (doesn't match "user:*" pattern)
 
-            let tokenResponse = try await app.sendRequest(.POST, "/token", beforeRequest: {
-                @Sendable req async throws in
-                let tokenRequest = PasswordTokenRequest(
+            let tokenResponse = try await app.sendRequest(
+                .POST,
+                "/token",
+                beforeRequest: { @Sendable req async throws in
+                    let tokenRequest = PasswordTokenRequest(
                     grant_type: .password,
                     client_id: testAppIdent.uuidString,
                     client_secret: nil,
@@ -135,7 +138,7 @@ struct TokenControllerPasswordGrantScopesTest {
                 )
                 try req.content.encode(tokenRequest, as: .json)
                 req.headers.contentType = .json
-            })
+                })
 
             #expect(tokenResponse.status == .ok)
 
@@ -144,8 +147,14 @@ struct TokenControllerPasswordGrantScopesTest {
 
             // Verify TokenResponse has the correct filtered scope string
             let expectedScopes = ["access", "openid", "user:list"].sorted()
-            let actualScopes = (tokenResponseBody.scope ?? "").split(separator: " ").map { String($0) }.sorted()
-            #expect(actualScopes == expectedScopes, "TokenResponse scope should contain only filtered scopes")
+            let actualScopes = (tokenResponseBody.scope ?? "")
+                .split(separator: " ")
+                .map { String($0) }
+                .sorted()
+            #expect(
+                actualScopes == expectedScopes,
+                "TokenResponse scope should contain only filtered scopes"
+            )
 
             // Decode JWT payload to verify scopes in the token itself
             let jwtParts = tokenResponseBody.access_token.split(separator: ".")
@@ -166,17 +175,38 @@ struct TokenControllerPasswordGrantScopesTest {
                 let payload = try decoder.decode(JWTPayload.self, from: payloadData)
 
                 // Verify the access token payload contains the expected filtered scopes
-                let tokenScopes = payload.scope.split(separator: " ").map { String($0) }.sorted()
-                #expect(tokenScopes == expectedScopes, "JWT payload should contain only filtered scopes")
+                let tokenScopes = payload.scope
+                    .split(separator: " ")
+                    .map { String($0) }
+                    .sorted()
+                #expect(
+                    tokenScopes == expectedScopes,
+                    "JWT payload should contain only filtered scopes"
+                )
 
                 // Verify requested scopes that should be present
-                #expect(payload.scope.contains("access"), "Should contain 'access' from client request")
-                #expect(payload.scope.contains("openid"), "Should contain 'openid' from client request")
-                #expect(payload.scope.contains("user:list"), "Should contain 'user:list' from provider")
+                #expect(
+                    payload.scope.contains("access"),
+                    "Should contain 'access' from client request"
+                )
+                #expect(
+                    payload.scope.contains("openid"),
+                    "Should contain 'openid' from client request"
+                )
+                #expect(
+                    payload.scope.contains("user:list"),
+                    "Should contain 'user:list' from provider"
+                )
 
                 // Verify filtered scopes that should NOT be present
-                #expect(!payload.scope.contains("admin:delete"), "Should NOT contain 'admin:delete' (filtered by client.config.scopes)")
-                #expect(!payload.scope.contains("admin:write"), "Should NOT contain 'admin:write' (filtered by allowedProviderScopes)")
+                #expect(
+                    !payload.scope.contains("admin:delete"),
+                    "Should NOT contain 'admin:delete' (filtered by client.config.scopes)"
+                )
+                #expect(
+                    !payload.scope.contains("admin:write"),
+                    "Should NOT contain 'admin:write' (filtered by allowedProviderScopes)"
+                )
 
                 #expect(payload.tenant == "Password Grant Scope Test Tenant", "Tenant should match")
                 #expect(payload.sub == "test_user", "Subject should match")
@@ -233,9 +263,11 @@ struct TokenControllerPasswordGrantScopesTest {
         try await withApp(configure: configure) { app in
             try await setupEntitiesWithoutProviderRestrictions(app: app)
 
-            let tokenResponse = try await app.sendRequest(.POST, "/token", beforeRequest: {
-                @Sendable req async throws in
-                let tokenRequest = PasswordTokenRequest(
+            let tokenResponse = try await app.sendRequest(
+                .POST,
+                "/token",
+                beforeRequest: { @Sendable req async throws in
+                    let tokenRequest = PasswordTokenRequest(
                     grant_type: .password,
                     client_id: testAppIdent.uuidString,
                     client_secret: nil,
@@ -245,7 +277,7 @@ struct TokenControllerPasswordGrantScopesTest {
                 )
                 try req.content.encode(tokenRequest, as: .json)
                 req.headers.contentType = .json
-            })
+                })
 
             #expect(tokenResponse.status == .ok)
 
@@ -253,8 +285,14 @@ struct TokenControllerPasswordGrantScopesTest {
 
             // When no allowedProviderScopes is set, all provider scopes should be included
             let expectedScopes = ["access", "provider:scope1", "provider:scope2"].sorted()
-            let actualScopes = (tokenResponseBody.scope ?? "").split(separator: " ").map { String($0) }.sorted()
-            #expect(actualScopes == expectedScopes, "Should include all provider scopes when no restrictions configured")
+            let actualScopes = (tokenResponseBody.scope ?? "")
+                .split(separator: " ")
+                .map { String($0) }
+                .sorted()
+            #expect(
+                actualScopes == expectedScopes,
+                "Should include all provider scopes when no restrictions configured"
+            )
         }
     }
 
