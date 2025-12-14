@@ -238,9 +238,30 @@ extension TokenController {
 
         let profile = await providerInterpreter.getProfile()
         let role = await providerInterpreter.getRole()
-        let providerScopes = await providerInterpreter.getScopes()
-        let finalScopes = Array(Set((scope?.components(separatedBy: " ") ?? []) + providerScopes)).sorted()
-        
+
+        // Get client_id for audience and scope filtering
+        let tokenRequest = try req.content.decode(TokenRequest.self)
+
+        // Get client entity for scope filtering
+        let client = try await client(for: tokenRequest, request: req)
+
+        // Filter requested scopes against client's allowed scopes
+        let requestedScopes = allowedScopes(on: client, for: scope?.components(separatedBy: " ") ?? [])
+
+        // Get provider scopes and filter them against client's allowedProviderScopes
+        let possibleProviderScopes = await providerInterpreter.getScopes()
+        let providerScopes: [String]
+        if let allowedProviderScopePatterns = client.config.allowedProviderScopes, !allowedProviderScopePatterns.isEmpty {
+            // If allowedProviderScopes is configured, filter provider scopes by patterns
+            providerScopes = allowedScopes(on: allowedProviderScopePatterns, for: possibleProviderScopes)
+        } else {
+            // If no allowedProviderScopes configured, use all provider scopes
+            providerScopes = possibleProviderScopes
+        }
+
+        // Merge filtered requested scopes with filtered provider scopes
+        let finalScopes = Array(Set(requestedScopes + providerScopes)).sorted()
+
         // Construct issuer from request
         let scheme = req.headers.first(name: "X-Forwarded-Proto")
             ?? (Constants.TOKEN.isSecure ? "https" : "http")
@@ -249,9 +270,6 @@ extension TokenController {
             ?? tenant.config.hosts.first
             ?? Constants.PUBLIC_DOMAIN
         let issuer = "\(scheme)://\(host)"
-
-        // Get client_id for audience
-        let tokenRequest = try req.content.decode(TokenRequest.self)
 
         let accessToken = try await Token(
             issuer: IssuerClaim(value: issuer),
