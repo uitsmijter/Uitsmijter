@@ -35,6 +35,7 @@ spec:
         get canLogin() { return this.auth; }
         get userProfile() { return { name: "Test User RS256" }; }
         get role() { return "user"; }
+        get scopes() { return ["user:list"]; }
       }
     - |
       class UserValidationProvider {

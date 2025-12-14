@@ -21,17 +21,17 @@ extension TokenController {
         of grant: GrantTypes,
         for tenant: Tenant,
         on req: Request,
-        scopes: [String]
+        withScope scope: String?
     ) async throws -> TokenResponse {
         var token: TokenResponse?
 
         switch grant {
         case .authorization_code:
-            token = try await authorisationTokenGrantTypeRequestHandler(for: tenant, on: req, scopes: scopes)
+            token = try await authorisationTokenGrantTypeRequestHandler(for: tenant, on: req)
         case .refresh_token:
-            token = try await refreshTokenGrantTypeRequestHandler(for: tenant, on: req, scopes: scopes)
+            token = try await refreshTokenGrantTypeRequestHandler(for: tenant, on: req)
         case .password:
-            token = try await passwordGrantTypeRequestHandler(for: tenant, on: req, scopes: scopes)
+            token = try await passwordGrantTypeRequestHandler(for: tenant, on: req, scope: scope)
         default:
             throw Abort(.notImplemented, reason: "ERRORS.GRANT_TYPE_NOT_IMPLEMENTED")
         }
@@ -102,8 +102,7 @@ extension TokenController {
 
     private func authorisationTokenGrantTypeRequestHandler(
         for tenant: Tenant,
-        on req: Request,
-        scopes: [String]
+        on req: Request
     ) async throws -> TokenResponse {
         let authorisationTokenRequest = try req.content.decode(CodeTokenRequest.self)
 
@@ -126,46 +125,36 @@ extension TokenController {
         }
 
         try extendRequestWithRequestInfo(session, authorisationTokenRequest, req)
-
         Log.info(
-            "Login succeeded \(session.payload?.user ?? "-") with scopes: \(scopes.joined(separator: ","))",
+            "Login succeeded \(session.payload?.user ?? "-") with scopes: \(session.payload?.scope ?? "-")",
             requestId: req.id
         )
 
-        // scopes should come from the login, not from the token request
-        if session.scopes.isEmpty == true && scopes.isEmpty == false {
-            Log.warning("""
-                        Taking scopes from token request is deprecated and should be avoided
-                        tenant \(tenant)
-                        """, requestId: req.id)
+        let userScopes: String
+        if let payloadScope = session.payload?.scope, !payloadScope.isEmpty {
+            userScopes = payloadScope
+        } else {
+            userScopes = session.scopes.sorted().joined(separator: " ")
         }
-        if (session.scopes.isEmpty == false && scopes.isEmpty == false)
-            && (session.scopes.sorted() != scopes.sorted()) {
-            Log.info("Invalid scope request", requestId: req.id)
-            throw Abort(.forbidden, reason: "ERRORS.INVALID_SCOPES")
-        }
-
-        let userScopes = session.scopes.isEmpty == false ? session.scopes : scopes
 
         let (accessToken, refreshToken) = try await getNewTokenPair(
             on: req,
             tenant: tenant,
             session: session,
-            scopes: userScopes
+            scopes: userScopes.components(separatedBy: " ")
         )
         return TokenResponse(
             access_token: accessToken.value,
             token_type: .Bearer,
             expires_in: accessToken.secondsToExpire,
             refresh_token: refreshToken.value,
-            scope: userScopes.joined(separator: " ")
+            scope: userScopes
         )
     }
 
     private func refreshTokenGrantTypeRequestHandler(
         for tenant: Tenant,
-        on req: Request,
-        scopes: [String]
+        on req: Request
     ) async throws -> TokenResponse {
         let refreshTokenRequest = try req.content.decode(RefreshTokenRequest.self)
         guard let session = await req.application.authCodeStorage?.get(
@@ -193,40 +182,32 @@ extension TokenController {
 
         Log.info("Refresh succeeded \(session.payload?.user ?? "-")", requestId: req.id)
 
-        // scopes should come from the login, not from the token request
-        if session.scopes.isEmpty == true && scopes.isEmpty == false {
-            Log.warning("""
-                        Taking scopes from token request is deprecated and should be avoided
-                        tenant \(tenant)
-                        """, requestId: req.id)
+        let userScopes: String
+        if let payloadScope = session.payload?.scope, !payloadScope.isEmpty {
+            userScopes = payloadScope
+        } else {
+            userScopes = session.scopes.sorted().joined(separator: " ")
         }
-        if (session.scopes.isEmpty == false && scopes.isEmpty == false)
-            && (session.scopes.sorted() != scopes.sorted()) {
-            Log.info("Invalid scope request", requestId: req.id)
-            throw Abort(.forbidden, reason: "ERRORS.INVALID_SCOPES")
-        }
-
-        let userScopes = session.scopes.isEmpty == false ? session.scopes : scopes
 
         let (accessToken, refreshToken) = try await getNewTokenPair(
             on: req,
             tenant: tenant,
             session: session,
-            scopes: scopes
+            scopes: userScopes.components(separatedBy: " ")
         )
         return TokenResponse(
             access_token: accessToken.value,
             token_type: .Bearer,
             expires_in: accessToken.secondsToExpire,
             refresh_token: refreshToken.value,
-            scope: userScopes.joined(separator: " ")
+            scope: userScopes
         )
     }
 
     private func passwordGrantTypeRequestHandler(
         for tenant: Tenant,
         on req: Request,
-        scopes: [String]
+        scope: String? = ""
     ) async throws -> TokenResponse {
         let passwordTokenRequest = try req.content.decode(PasswordTokenRequest.self)
 
@@ -258,6 +239,29 @@ extension TokenController {
         let profile = await providerInterpreter.getProfile()
         let role = await providerInterpreter.getRole()
 
+        // Get client_id for audience and scope filtering
+        let tokenRequest = try req.content.decode(TokenRequest.self)
+
+        // Get client entity for scope filtering
+        let client = try await client(for: tokenRequest, request: req)
+
+        // Filter requested scopes against client's allowed scopes
+        let requestedScopes = allowedScopes(on: client, for: scope?.components(separatedBy: " ") ?? [])
+
+        // Get provider scopes and filter them against client's allowedProviderScopes
+        let possibleProviderScopes = await providerInterpreter.getScopes()
+        let providerScopes: [String]
+        if let allowedProviderScopePatterns = client.config.allowedProviderScopes, !allowedProviderScopePatterns.isEmpty {
+            // If allowedProviderScopes is configured, filter provider scopes by patterns
+            providerScopes = allowedScopes(on: allowedProviderScopePatterns, for: possibleProviderScopes)
+        } else {
+            // If no allowedProviderScopes configured, use all provider scopes
+            providerScopes = possibleProviderScopes
+        }
+
+        // Merge filtered requested scopes with filtered provider scopes
+        let finalScopes = Array(Set(requestedScopes + providerScopes)).sorted()
+
         // Construct issuer from request
         let scheme = req.headers.first(name: "X-Forwarded-Proto")
             ?? (Constants.TOKEN.isSecure ? "https" : "http")
@@ -267,9 +271,6 @@ extension TokenController {
             ?? Constants.PUBLIC_DOMAIN
         let issuer = "\(scheme)://\(host)"
 
-        // Get client_id for audience
-        let tokenRequest = try req.content.decode(TokenRequest.self)
-
         let accessToken = try await Token(
             issuer: IssuerClaim(value: issuer),
             audience: AudienceClaim(value: tokenRequest.client_id),
@@ -278,19 +279,21 @@ extension TokenController {
             userProfile: UserProfile(
                 role: role,
                 user: passwordTokenRequest.username,
+                scope: finalScopes.joined(separator: " "),
                 profile: profile
             ),
             authTime: Date(),
             algorithmString: tenant.config.effectiveJwtAlgorithm,
             signerManager: req.application.signerManager
         )
+        
         return TokenResponse(
             access_token: accessToken.value,
             token_type: .Bearer,
             expires_in: accessToken.secondsToExpire,
             // tokens issued with the implicit grant cannot be issued a refresh token.
             refresh_token: nil,
-            scope: scopes.joined(separator: " ")
+            scope: finalScopes.joined(separator: " ")
         )
     }
 
@@ -306,6 +309,7 @@ extension TokenController {
         let profile = UserProfile(
             role: payload.role,
             user: payload.user,
+            scope: payload.scope,
             profile: payload.profile
         )
 

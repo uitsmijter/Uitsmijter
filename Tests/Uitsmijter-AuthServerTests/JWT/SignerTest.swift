@@ -66,7 +66,7 @@ struct SignerTest {
             tenant: "verify-tenant",
             role: "admin",
             user: "verify@example.com",
-            scope: nil
+            scope: "openid email"
         )
 
         // Sign the payload
@@ -94,7 +94,7 @@ struct SignerTest {
             tenant: "test-tenant",
             role: "user",
             user: "tamper@example.com",
-            scope: nil
+            scope: "openid email"
         )
 
         let (tokenString, _) = try await SignerManager.shared.sign(payload)
@@ -136,7 +136,7 @@ struct SignerTest {
             tenant: "test-tenant",
             role: "user",
             user: "hs256@example.com",
-            scope: nil
+            scope: "openid email"
         )
 
         let (tokenString, _) = try await SignerManager.shared.sign(payload)
@@ -182,7 +182,7 @@ struct SignerTest {
             tenant: "test-tenant",
             role: "user",
             user: "consistent@example.com",
-            scope: nil
+            scope: "openid email foo:bar"
         )
 
         // Sign the same payload twice
@@ -223,7 +223,7 @@ struct SignerTest {
             responsibility: "admin-domain",
             role: "admin",
             user: "optional@example.com",
-            scope: nil,
+            scope: "foo:bar openid",
             profile: profile
         )
 
@@ -251,7 +251,7 @@ struct SignerTest {
             tenant: "test-tenant",
             role: "user",
             user: "short@example.com",
-            scope: nil
+            scope: "foo:bar can:all"
         )
 
         let payload2 = Payload(
@@ -264,7 +264,7 @@ struct SignerTest {
             tenant: "test-tenant",
             role: "user",
             user: "long@example.com",
-            scope: nil
+            scope: "foo:bar can:all"
         )
 
         let (tokenString1, _) = try await SignerManager.shared.sign(payload1)
@@ -290,7 +290,7 @@ struct SignerTest {
             tenant: "",
             role: "",
             user: "",
-            scope: nil
+            scope: ""
         )
 
         let (tokenString, _) = try await SignerManager.shared.sign(payload)
@@ -314,7 +314,7 @@ struct SignerTest {
             tenant: "tenant-with-dashes_and_underscores",
             role: "admin/developer",
             user: "user@example.com (John Doe)",
-            scope: nil
+            scope: "admin"
         )
 
         let (tokenString, _) = try await SignerManager.shared.sign(payload)
@@ -338,7 +338,7 @@ struct SignerTest {
             tenant: "租户-テナント",
             role: "Administrador",
             user: "用户名",
-            scope: nil
+            scope: "admin"
         )
 
         let (tokenString, _) = try await SignerManager.shared.sign(payload)
@@ -362,7 +362,7 @@ struct SignerTest {
             tenant: "test-tenant",
             role: "user",
             user: "format@example.com",
-            scope: nil
+            scope: "user:list"
         )
 
         let (tokenString, _) = try await SignerManager.shared.sign(payload)
@@ -394,7 +394,7 @@ struct SignerTest {
                 tenant: "test-tenant",
                 role: "user",
                 user: "user\(i)@example.com",
-                scope: nil
+                scope: "id"
             )
 
             let (tokenString, _) = try await SignerManager.shared.sign(payload)

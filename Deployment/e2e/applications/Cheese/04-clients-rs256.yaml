@@ -17,3 +17,5 @@ spec:
     - access
     - update
     - delete
+  allowedProviderScopes:
+    - user:*

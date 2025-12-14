@@ -265,10 +265,27 @@ struct AuthorizeController: RouteCollection, OAuthControllerProtocol {
             throw Abort(.unauthorized, reason: "LOGIN.ERROR.WRONG_CLIENT_SECRET")
         }
         let redirect = try client.checkedRedirect(for: authRequest)
-            let scopes = allowedScopes(on: client, for: authRequest.scope?.components(separatedBy: .whitespacesAndNewlines) ?? [])
+
+        // Filter requested scopes from the authorization request
+        let requestedScopes = allowedScopes(on: client, for: authRequest.scope?.components(separatedBy: .whitespacesAndNewlines) ?? [])
+
+        // Extract provider scopes from SSO payload
+        let payloadScopes = userPayload.scope.components(separatedBy: .whitespacesAndNewlines).filter { !$0.isEmpty }
+        let providerScopes: [String]
+        if let allowedProviderScopePatterns = client.config.allowedProviderScopes, !allowedProviderScopePatterns.isEmpty {
+            // If allowedProviderScopes is configured, filter payload scopes by patterns
+            providerScopes = allowedScopes(on: allowedProviderScopePatterns, for: payloadScopes)
+        } else {
+            // If no allowedProviderScopes configured, use all payload scopes
+            providerScopes = payloadScopes
+        }
+
+        // Merge requested scopes with provider scopes
+        let finalScopes = Array(Set(requestedScopes + providerScopes)).sorted()
+
         Log.info("""
                  User \(request.clientInfo?.subject ?? "-")
-                 got scopes: \(scopes.joined(separator: ","))
+                 got scopes: \(finalScopes.joined(separator: ","))
                  """, requestId: request.id)
 
         Prometheus.main.authorizeAttempts?.observe(1, [
@@ -279,12 +296,15 @@ struct AuthorizeController: RouteCollection, OAuthControllerProtocol {
 
         // construct authorisation code
         let code = Code()
+        // Update payload with the merged scopes for this authorization
+        var updatedPayload = userPayload
+        updatedPayload.scope = finalScopes.joined(separator: " ")
         let authSession = AuthSession(
             type: .code,
             state: authRequest.state,
             code: code,
-            scopes: scopes,
-            payload: userPayload,
+            scopes: finalScopes,
+            payload: updatedPayload,
             redirect: redirect,
             ttl: Constants.AUTHCODE.TimeToLive
         )
@@ -323,9 +343,26 @@ struct AuthorizeController: RouteCollection, OAuthControllerProtocol {
         }
 
         let redirect = try client.checkedRedirect(for: authRequest)
-        let scopes = allowedScopes(on: client, for: authRequest.scope?.components(separatedBy: .whitespacesAndNewlines) ?? [])
+
+        // Filter requested scopes from the authorization request
+        let requestedScopes = allowedScopes(on: client, for: authRequest.scope?.components(separatedBy: .whitespacesAndNewlines) ?? [])
+
+        // Extract provider scopes from SSO payload
+        let payloadScopes = userPayload.scope.components(separatedBy: .whitespacesAndNewlines).filter { !$0.isEmpty }
+        let providerScopes: [String]
+        if let allowedProviderScopePatterns = client.config.allowedProviderScopes, !allowedProviderScopePatterns.isEmpty {
+            // If allowedProviderScopes is configured, filter payload scopes by patterns
+            providerScopes = allowedScopes(on: allowedProviderScopePatterns, for: payloadScopes)
+        } else {
+            // If no allowedProviderScopes configured, use all payload scopes
+            providerScopes = payloadScopes
+        }
+
+        // Merge requested scopes with provider scopes
+        let finalScopes = Array(Set(requestedScopes + providerScopes)).sorted()
+
         Log.info("""
-                 User \(request.clientInfo?.subject ?? "-") got scopes: \(scopes.joined(separator: ","))
+                 User \(request.clientInfo?.subject ?? "-") got scopes: \(finalScopes.joined(separator: ","))
                  """, requestId: request.id)
 
         Prometheus.main.authorizeAttempts?.observe(1, [
@@ -339,12 +376,15 @@ struct AuthorizeController: RouteCollection, OAuthControllerProtocol {
             codeChallengeMethod: authRequest.code_challenge_method,
             codeChallenge: authRequest.code_challenge
         )
+        // Update payload with the merged scopes for this authorization
+        var updatedPayload = userPayload
+        updatedPayload.scope = finalScopes.joined(separator: " ")
         let authSession = AuthSession(
             type: .code,
             state: authRequest.state,
             code: code,
-            scopes: scopes,
-            payload: userPayload,
+            scopes: finalScopes,
+            payload: updatedPayload,
             redirect: redirect,
             ttl: Constants.AUTHCODE.TimeToLive
         )
