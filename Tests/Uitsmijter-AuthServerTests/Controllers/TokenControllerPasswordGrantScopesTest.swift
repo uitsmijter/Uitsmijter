@@ -138,7 +138,7 @@ struct TokenControllerPasswordGrantScopesTest {
                 )
                 try req.content.encode(tokenRequest, as: .json)
                 req.headers.contentType = .json
-                }
+                })
 
             #expect(tokenResponse.status == .ok)
 
@@ -277,7 +277,7 @@ struct TokenControllerPasswordGrantScopesTest {
                 )
                 try req.content.encode(tokenRequest, as: .json)
                 req.headers.contentType = .json
-                }
+                })
 
             #expect(tokenResponse.status == .ok)
 
