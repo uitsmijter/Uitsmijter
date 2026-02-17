@@ -75,13 +75,14 @@ struct LogoutController: RouteCollection {
         )
 
         // set the cookie domain
-        response.cookies[Constants.COOKIE.NAME]?.domain = Constants.PUBLIC_DOMAIN
-
         if req.clientInfo?.mode == .interceptor {
             Log.info("Logout for interceptor mode", requestId: req.id)
             response.cookies[Constants.COOKIE.NAME]?.domain = tenant.config.interceptor?.cookieOrDomain
+                ?? Constants.PUBLIC_DOMAIN
         } else {
             Log.info("Logout for oauth mode", requestId: req.id)
+            response.cookies[Constants.COOKIE.NAME]?.domain = req.headers.first(name: "host")
+                ?? Constants.PUBLIC_DOMAIN
         }
 
         Log.info(
