@@ -71,6 +71,28 @@ struct LoginControllerLogoutTests {
         }
     }
 
+    @Test("Logout cookie domain matches request host")
+    func logoutCookieDomainMatchesHost() async throws {
+        try await withApp(configure: configure) { app in
+            let token = try await performLoginAndGetToken(app: app)
+
+            try await app.testing().test(
+                .GET,
+                "logout/finalize?location=/out",
+                beforeRequest: { @Sendable req async throws in
+                    req.headers.bearerAuthorization = BearerAuthorization(token: token ?? "_ERROR_")
+                    req.headers.replaceOrAdd(name: "host", value: "example.com")
+                }, afterResponse: { @Sendable response async throws in
+                    let cookie = response.headers["set-cookie"]
+                        .filter({ $0.contains(Constants.COOKIE.NAME) })
+                        .first
+                    #expect(cookie?.contains("Domain=example.com") ?? false)
+                    #expect(cookie?.contains("\(Constants.COOKIE.NAME)=invalid") ?? false)
+                    #expect(response.status == .seeOther)
+                })
+        }
+    }
+
     @Test("Logout URI")
     func logoutUri() async throws {
         try await withApp(configure: configure) { app in
