@@ -93,6 +93,59 @@ struct LoginControllerLogoutTests {
         }
     }
 
+    @Test("Logout cookie domain uses interceptor cookieOrDomain in oauth mode")
+    func logoutCookieDomainUsesInterceptorConfig() async throws {
+        try await withApp(configure: configure) { app in
+            // Login with the default tenant (no interceptor config)
+            let token = try await performLoginAndGetToken(app: app)
+
+            // Now replace the tenant with one that has interceptor config,
+            // simulating a tenant whose cookie was set on a wildcard domain.
+            // The JWT still references "Test Tenant" by name.
+            var tenantConfig = TenantSpec(hosts: ["example.com", "example.org"])
+            tenantConfig.interceptor = TenantInterceptorSettings(
+                enabled: true,
+                domain: "login.feature.gcb-cloud.de",
+                cookie: ".feature.gcb-cloud.de"
+            )
+            tenantConfig.providers.append(
+                """
+                     class UserLoginProvider {
+                        constructor(credentials) {
+                             commit(credentials.username == "ok@example.com");
+                        }
+                        get canLogin() { return true; }
+                        get userProfile() { return { name: "Test" }; }
+                     }
+                    """
+            )
+            let tenant = Tenant(name: "Test Tenant", config: tenantConfig)
+            await MainActor.run {
+                app.entityStorage.tenants.removeAll()
+                let (inserted, _) = app.entityStorage.tenants.insert(tenant)
+                #expect(inserted)
+            }
+
+            // Logout without forwarded headers → detected as oauth mode.
+            // The cookie domain must use the interceptor cookieOrDomain,
+            // not the host header.
+            try await app.testing().test(
+                .GET,
+                "logout/finalize?location=/out",
+                beforeRequest: { @Sendable req async throws in
+                    req.headers.bearerAuthorization = BearerAuthorization(token: token ?? "_ERROR_")
+                    req.headers.replaceOrAdd(name: "host", value: "login.feature.gcb-cloud.de")
+                }, afterResponse: { @Sendable response async throws in
+                    let cookie = response.headers["set-cookie"]
+                        .filter({ $0.contains(Constants.COOKIE.NAME) })
+                        .first
+                    #expect(cookie?.contains("Domain=.feature.gcb-cloud.de") ?? false)
+                    #expect(cookie?.contains("\(Constants.COOKIE.NAME)=invalid") ?? false)
+                    #expect(response.status == .seeOther)
+                })
+        }
+    }
+
     @Test("Logout URI")
     func logoutUri() async throws {
         try await withApp(configure: configure) { app in
