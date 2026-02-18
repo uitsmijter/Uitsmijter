@@ -1,3 +1,8 @@
+# 0.10.4
+
+- Fix: **Logout Cookie Domain Mismatch** - Fixed a bug where the logout cookie domain did not match the request host in OAuth mode, causing logout to fail on certain domain configurations.
+- Fix: **Token Info JSON Encoding** - The `/token/info` endpoint now returns a proper JSON object instead of a double-encoded JSON string when the JavaScript provider's `userProfile` contains a stringified JSON value.
+
 # 0.10.3
 
 - Feature: **Provider Scope Filtering** - Clients can now control which scopes JavaScript providers can add to user profiles via the new `allowedProviderScopes` configuration field. This implements a two-tier scope security model where both client-requested scopes (via `scopes` field) and provider-supplied scopes (via `allowedProviderScopes` field) are independently filtered before being merged into the final JWT token.
