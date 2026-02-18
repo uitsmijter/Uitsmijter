@@ -186,10 +186,19 @@ struct TokenController: RouteCollection, OAuthControllerProtocol {
                          """, requestId: req.id)
                 throw Abort(.unauthorized, reason: "ERRORS.EXPIRED_TOKEN")
             }
-            // We do not return a Codable here, because payload.profile is an untyped structure that we have to
-            // build anyway. For future updates: Profile has to conform to ResponseEncodable.
-            let profile = try JSONEncoder.main.encode(payload.profile)
-
+            // If the profile is a plain string containing JSON (e.g. from a JS provider using
+            // JSON.stringify), decode it into a proper CodableProfile object first to avoid
+            // double-encoding.
+            let profileToEncode: CodableProfile?
+            if case .string(let jsonString) = payload.profile,
+               let data = jsonString.data(using: .utf8),
+               let decoded = try? JSONDecoder().decode(CodableProfile.self, from: data) {
+                profileToEncode = decoded
+            } else {
+                profileToEncode = payload.profile
+            }
+            let profile = try JSONEncoder.main.encode(profileToEncode)
+            
             let response = Response(
                 body: .init(data: profile)
             )
