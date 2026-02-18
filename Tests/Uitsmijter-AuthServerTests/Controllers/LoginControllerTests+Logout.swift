@@ -127,8 +127,8 @@ struct LoginControllerLogoutTests {
             }
 
             // Logout without forwarded headers → detected as oauth mode.
-            // The cookie domain must use the interceptor cookieOrDomain,
-            // not the host header.
+            // Both the interceptor domain (.example.com) and the request host
+            // (login.app.example.com) must receive invalidation cookies.
             try await app.testing().test(
                 .GET,
                 "logout/finalize?location=/out",
@@ -136,11 +136,64 @@ struct LoginControllerLogoutTests {
                     req.headers.bearerAuthorization = BearerAuthorization(token: token ?? "_ERROR_")
                     req.headers.replaceOrAdd(name: "host", value: "login.app.example.com")
                 }, afterResponse: { @Sendable response async throws in
-                    let cookie = response.headers["set-cookie"]
+                    let cookies = response.headers["set-cookie"]
                         .filter({ $0.contains(Constants.COOKIE.NAME) })
-                        .first
-                    #expect(cookie?.contains("Domain=.example.com") ?? false)
-                    #expect(cookie?.contains("\(Constants.COOKIE.NAME)=invalid") ?? false)
+                    #expect(cookies.count == 2)
+                    #expect(cookies.contains(where: { $0.contains("Domain=.example.com") }))
+                    #expect(cookies.contains(where: { cookie in
+                        cookie.contains("Domain=login.app.example.com")
+                    }))
+                    #expect(cookies.allSatisfy({ cookie in
+                        cookie.contains("\(Constants.COOKIE.NAME)=invalid")
+                    }))
+                    #expect(response.status == .seeOther)
+                })
+        }
+    }
+
+    @Test("Logout sends only one cookie when interceptor domain matches request host")
+    func logoutNoDuplicateCookieWhenDomainsMatch() async throws {
+        try await withApp(configure: configure) { app in
+            let token = try await performLoginAndGetToken(app: app)
+
+            // Configure interceptor with cookie domain equal to the request host
+            var tenantConfig = TenantSpec(hosts: ["example.com", "example.org"])
+            tenantConfig.interceptor = TenantInterceptorSettings(
+                enabled: true,
+                domain: "example.com",
+                cookie: "example.com"
+            )
+            tenantConfig.providers.append(
+                """
+                     class UserLoginProvider {
+                        constructor(credentials) {
+                             commit(credentials.username == "ok@example.com");
+                        }
+                        get canLogin() { return true; }
+                        get userProfile() { return { name: "Test" }; }
+                     }
+                    """
+            )
+            let tenant = Tenant(name: "Test Tenant", config: tenantConfig)
+            await MainActor.run {
+                app.entityStorage.tenants.removeAll()
+                let (inserted, _) = app.entityStorage.tenants.insert(tenant)
+                #expect(inserted)
+            }
+
+            // Host matches interceptor cookie domain → only one Set-Cookie header
+            try await app.testing().test(
+                .GET,
+                "logout/finalize?location=/out",
+                beforeRequest: { @Sendable req async throws in
+                    req.headers.bearerAuthorization = BearerAuthorization(token: token ?? "_ERROR_")
+                    req.headers.replaceOrAdd(name: "host", value: "example.com")
+                }, afterResponse: { @Sendable response async throws in
+                    let cookies = response.headers["set-cookie"]
+                        .filter({ $0.contains(Constants.COOKIE.NAME) })
+                    #expect(cookies.count == 1)
+                    #expect(cookies.first?.contains("Domain=example.com") ?? false)
+                    #expect(cookies.first?.contains("\(Constants.COOKIE.NAME)=invalid") ?? false)
                     #expect(response.status == .seeOther)
                 })
         }

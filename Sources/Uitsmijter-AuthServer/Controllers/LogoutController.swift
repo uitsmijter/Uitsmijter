@@ -68,30 +68,28 @@ struct LogoutController: RouteCollection {
 
         // construct the redirect
         let response = req.redirect(to: locationRedirect)
-        // invalid the cookie
-        response.cookies[Constants.COOKIE.NAME] = HTTPCookies.Value.defaultCookie(
-            expires: Date().advanced(by: -1),
-            withContent: "invalid"
-        )
 
-        // set the cookie domain (must match the domain used during login)
-        if req.clientInfo?.mode == .interceptor {
-            Log.info("Logout for interceptor mode", requestId: req.id)
-            response.cookies[Constants.COOKIE.NAME]?.domain = tenant.config.interceptor?.cookieOrDomain
-                ?? req.forwardInfo?.location.host
-                ?? Constants.PUBLIC_DOMAIN
-        } else {
-            Log.info("Logout for oauth mode", requestId: req.id)
-            response.cookies[Constants.COOKIE.NAME]?.domain = tenant.config.interceptor?.cookieOrDomain
-                ?? req.forwardInfo?.location.host
-                ?? req.headers.first(name: "host")
-                ?? Constants.PUBLIC_DOMAIN
+        // Invalidate cookies on all relevant domains.
+        // The browser may hold separate cookies for the interceptor domain
+        // (e.g. .ops.example.com) and the OAuth host (e.g. login.ops.example.com).
+        // We must send a Set-Cookie header for each distinct domain.
+        let domains = cookieDomainsToInvalidate(req: req, tenant: tenant)
+        for domain in domains {
+            var cookie = HTTPCookies.Value.defaultCookie(
+                expires: Date().advanced(by: -1),
+                withContent: "invalid"
+            )
+            cookie.domain = domain
+            response.headers.add(
+                name: "Set-Cookie",
+                value: cookie.serialize(name: Constants.COOKIE.NAME)
+            )
         }
 
         Log.info(
             """
                 Finish logout \(jwt.subject.value) from tenant: \(tenant.name)
-                , domain \(response.cookies[Constants.COOKIE.NAME]?.domain ?? "-")
+                , domains \(domains.joined(separator: ", "))
                 """, requestId: req.id)
 
         // remove authorisation headers
@@ -125,5 +123,40 @@ struct LogoutController: RouteCollection {
         Log.info("Logout succeeded \(jwt.user) for \(tenant.name), redirect to \(locationRedirect)", requestId: req.id)
 
         return response
+    }
+
+    /// Collects all distinct cookie domains that need invalidation.
+    ///
+    /// When a tenant has an interceptor domain configured (e.g. `.ops.example.com`)
+    /// and the OAuth login page runs on a different host (e.g. `login.ops.example.com`),
+    /// the browser holds two separate cookies with the same name but different domains.
+    /// Both must be invalidated for a complete logout.
+    ///
+    /// - Parameters:
+    ///   - req: The current request
+    ///   - tenant: The tenant the user is logging out from
+    /// - Returns: An array of unique domain strings to invalidate
+    private func cookieDomainsToInvalidate(req: Request, tenant: Tenant) -> [String] {
+        var domains: [String] = []
+
+        // Interceptor cookie domain (e.g. ".ops.example.com")
+        if let interceptorDomain = tenant.config.interceptor?.cookieOrDomain {
+            domains.append(interceptorDomain)
+        }
+
+        // Request host domain (the OAuth login host, e.g. "login.ops.example.com")
+        let hostDomain = req.forwardInfo?.location.host
+            ?? req.headers.first(name: "host")
+            ?? Constants.PUBLIC_DOMAIN
+        if !domains.contains(hostDomain) {
+            domains.append(hostDomain)
+        }
+
+        // Fallback: ensure at least one domain is present
+        if domains.isEmpty {
+            domains.append(Constants.PUBLIC_DOMAIN)
+        }
+
+        return domains
     }
 }
