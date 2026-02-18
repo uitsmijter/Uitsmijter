@@ -10,4 +10,3 @@ data:
   SECURE: "true"
   ENVIRONMENT: "production"
   {{- end }}
-  COOKIE_DOMAINS: {{ include "uitsmijter.cookieDomains" . | quote }}

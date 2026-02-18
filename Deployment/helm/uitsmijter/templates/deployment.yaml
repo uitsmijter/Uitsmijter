@@ -40,6 +40,8 @@ spec:
                 name: uitsmijter-config
             - configMapRef:
                 name: environment-config
+            - configMapRef:
+                name: domain-cookies
             - secretRef:
                 name: jwt-secret
 
