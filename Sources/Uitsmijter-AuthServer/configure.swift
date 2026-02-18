@@ -226,6 +226,10 @@ public func configure(_ app: Application) async throws {
         )
     }
 
+    // Add extra-cookies middleware before sessions so it can append Set-Cookie
+    // headers after the session middleware has finished its dictionary round-trip.
+    app.middleware.use(ExtraCookiesMiddleware())
+
     // Add session middleware to handle cookie-based session management
     app.middleware.use(app.sessions.middleware)
 

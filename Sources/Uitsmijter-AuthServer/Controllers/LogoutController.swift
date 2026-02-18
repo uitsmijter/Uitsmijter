@@ -73,16 +73,26 @@ struct LogoutController: RouteCollection {
         // The browser may hold separate cookies for the interceptor domain
         // (e.g. .ops.example.com) and the OAuth host (e.g. login.ops.example.com).
         // We must send a Set-Cookie header for each distinct domain.
+        //
+        // The first domain uses response.cookies (survives SessionsMiddleware's
+        // dictionary round-trip). Additional domains are stored in request storage
+        // and appended by ExtraCookiesMiddleware after the session middleware runs.
         let domains = cookieDomainsToInvalidate(req: req, tenant: tenant)
-        for domain in domains {
+        if let primaryDomain = domains.first {
+            response.cookies[Constants.COOKIE.NAME] = HTTPCookies.Value.defaultCookie(
+                expires: Date().advanced(by: -1),
+                withContent: "invalid"
+            )
+            response.cookies[Constants.COOKIE.NAME]?.domain = primaryDomain
+        }
+        for domain in domains.dropFirst() {
             var cookie = HTTPCookies.Value.defaultCookie(
                 expires: Date().advanced(by: -1),
                 withContent: "invalid"
             )
             cookie.domain = domain
-            response.headers.add(
-                name: "Set-Cookie",
-                value: cookie.serialize(name: Constants.COOKIE.NAME)
+            req.extraSetCookieHeaders.append(
+                cookie.serialize(name: Constants.COOKIE.NAME)
             )
         }
 
