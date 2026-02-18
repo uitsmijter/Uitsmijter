@@ -154,12 +154,13 @@ struct LogoutController: RouteCollection {
             domains.append(interceptorDomain)
         }
 
-        // Request host domain (the OAuth login host, e.g. "login.ops.example.com")
-        let hostDomain = req.forwardInfo?.location.host
+        // OAuth cookie domain — resolved through the Helm cookieDomain mapping
+        let host = req.forwardInfo?.location.host
             ?? req.headers.first(name: "host")
             ?? Constants.PUBLIC_DOMAIN
-        if !domains.contains(hostDomain) {
-            domains.append(hostDomain)
+        let oauthDomain = CookieDomainMapping.resolve(for: host)
+        if !domains.contains(oauthDomain) {
+            domains.append(oauthDomain)
         }
 
         // Fallback: ensure at least one domain is present

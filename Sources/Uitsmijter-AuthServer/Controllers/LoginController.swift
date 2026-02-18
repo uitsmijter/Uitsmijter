@@ -247,10 +247,10 @@ struct LoginController: RouteCollection, OAuthControllerProtocol {
                 ?? req.forwardInfo?.location.host
                 ?? Constants.PUBLIC_DOMAIN
         } else {
-            cookie.domain = tenant.config.interceptor?.cookieOrDomain
-                ?? req.forwardInfo?.location.host
+            let host = req.forwardInfo?.location.host
                 ?? req.headers.first(name: "host")
                 ?? Constants.PUBLIC_DOMAIN
+            cookie.domain = CookieDomainMapping.resolve(for: host)
         }
         Log.debug("Set cookie to domain: \(cookie.domain ?? "-")", requestId: req.id)
     }
