@@ -198,7 +198,7 @@ struct TokenController: RouteCollection, OAuthControllerProtocol {
                 profileToEncode = payload.profile
             }
             let profile = try JSONEncoder.main.encode(profileToEncode)
-
+            
             let response = Response(
                 body: .init(data: profile)
             )
