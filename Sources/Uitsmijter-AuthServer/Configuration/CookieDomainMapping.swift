@@ -21,6 +21,7 @@ import Logger
 struct CookieDomainMapping {
 
     /// The domain → cookieDomain mapping loaded at startup.
+    /// Wildcard prefixes like `*.example.com` are sanitized to `.example.com`.
     private static let mapping: [String: String] = {
         guard let raw = Environment.get("COOKIE_DOMAINS") else {
             return [:]
@@ -30,9 +31,19 @@ struct CookieDomainMapping {
             Log.warning("COOKIE_DOMAINS is set but not valid JSON: \(raw)")
             return [:]
         }
-        Log.info("Loaded cookie domain mapping: \(dict)")
-        return dict
+        let sanitized = dict.mapValues { sanitizeCookieDomain($0) }
+        Log.info("Loaded cookie domain mapping: \(sanitized)")
+        return sanitized
     }()
+
+    /// Converts wildcard cookie domains (e.g. `*.example.com`) to valid
+    /// Set-Cookie domain attributes (`.example.com`).
+    private static func sanitizeCookieDomain(_ domain: String) -> String {
+        if domain.hasPrefix("*.") {
+            return String(domain.dropFirst())
+        }
+        return domain
+    }
 
     /// Resolves the cookie domain for a given host.
     ///
