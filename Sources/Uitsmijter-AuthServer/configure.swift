@@ -161,70 +161,8 @@ public func configure(_ app: Application) async throws {
     // Log the application version for deployment tracking and debugging
     Log.info("Uitsmijter Version: \(PackageBuild.info.describe)")
 
-    // Configure session management with environment-specific storage backend
-    app.sessions.configuration.cookieName = "\(Constants.APPLICATION.lowercased())"
-
-    // Use Redis for session storage in production/release builds for persistence and scalability
-    if app.environment.isRelease || ProcessInfo.processInfo.environment["ENVIRONMENT"] == "production" {
-        do {
-            // Configure Redis connection with connection pooling and retry logic
-            // TEST: Using only 1 connection to eliminate connection pooling as a variable
-            app.redis.configuration = try RedisConfiguration(
-                hostname: ProcessInfo.processInfo.environment["REDIS_HOST"] ?? "localhost",
-                port: 6379,
-                password: ProcessInfo.processInfo.environment["REDIS_PASSWORD"],
-                database: 0,
-                pool: .init(
-                    maximumConnectionCount: .maximumActiveConnections(16),
-                    minimumConnectionCount: 0,
-                    connectionBackoffFactor: 2,  // Exponential backoff multiplier
-                    initialConnectionBackoffDelay: .milliseconds(100),
-                    connectionRetryTimeout: .seconds(5)
-                )
-            )
-            app.logger.warning("DEBUG: Redis connection pool configured with ONLY 1 connection for testing")
-            // Enable Redis-backed session storage with custom delegate for serialization
-            app.sessions.use(.redis(delegate: AuthSessionDelegate()))
-            // Store OAuth authorization codes in Redis for distributed deployments
-            app.authCodeStorage = .init(use: .redis(client: app.redis))
-            // Store RSA keys in Redis for distributed deployments (supports HPA/multi-pod)
-            // IMPORTANT: Use shared KeyGenerator to avoid unnecessary instances
-            let keyStorage = KeyStorage(use: .redis(client: app.redis))
-            app.keyStorage = keyStorage
-            // Configure SignerManager to use the same KeyStorage instance
-            app.signerManager = SignerManager(keyStorage: keyStorage)
-        } catch {
-            // If Redis connection fails, fall back to in-memory storage to keep the application running
-            app.logger.error("Failed to configure Redis: \(error). Falling back to in-memory session storage.")
-            app.sessions.use(.memory)
-            app.authCodeStorage = .init(use: .memory)
-            // Fallback to in-memory key storage
-            let keyStorage = KeyStorage(use: .memory)
-            app.keyStorage = keyStorage
-            app.signerManager = SignerManager(keyStorage: keyStorage)
-        }
-    } else {
-        // Development mode: use in-memory storage (sessions lost on restart)
-        app.logger.warning(
-            "Sessions are stored in memory, DO NOT USE THIS IN PRODUCTION. -> build a release version instead"
-        )
-        app.sessions.use(.memory)
-        app.authCodeStorage = .init(use: .memory)
-        // Use in-memory key storage for development
-        let keyStorage = KeyStorage(use: .memory)
-        app.keyStorage = keyStorage
-        app.signerManager = SignerManager(keyStorage: keyStorage)
-    }
-
-    // Configure session cookie settings for security and expiration
-    app.sessions.configuration.cookieFactory = { sessionID in
-        .init(
-            string: sessionID.string,
-            maxAge: Constants.COOKIE.EXPIRATION_DAYS * (24 * 60 * 60 * 1000),
-            isSecure: true,        // Requires HTTPS
-            sameSite: .strict      // Prevents CSRF attacks
-        )
-    }
+    // Configure session management, storage backends, and cookie settings
+    try configureSessionStorage(app)
 
     // Add extra-cookies middleware before sessions so it can append Set-Cookie
     // headers after the session middleware has finished its dictionary round-trip.
@@ -255,4 +193,64 @@ public func configure(_ app: Application) async throws {
 
     // Register all HTTP routes and controllers
     try routes(app)
+}
+
+/// Configures session management, storage backends, and cookie settings.
+///
+/// In production, Redis is used for session storage, authorization code storage, and key storage.
+/// In development, in-memory storage is used instead.
+@MainActor
+private func configureSessionStorage(_ app: Application) throws {
+    app.sessions.configuration.cookieName = "\(Constants.APPLICATION.lowercased())"
+
+    if app.environment.isRelease || ProcessInfo.processInfo.environment["ENVIRONMENT"] == "production" {
+        do {
+            app.redis.configuration = try RedisConfiguration(
+                hostname: ProcessInfo.processInfo.environment["REDIS_HOST"] ?? "localhost",
+                port: 6379,
+                password: ProcessInfo.processInfo.environment["REDIS_PASSWORD"],
+                database: 0,
+                pool: .init(
+                    maximumConnectionCount: .maximumActiveConnections(16),
+                    minimumConnectionCount: 0,
+                    connectionBackoffFactor: 2,
+                    initialConnectionBackoffDelay: .milliseconds(100),
+                    connectionRetryTimeout: .seconds(5)
+                )
+            )
+            app.logger.warning("DEBUG: Redis connection pool configured with ONLY 1 connection for testing")
+            app.sessions.use(.redis(delegate: AuthSessionDelegate()))
+            app.authCodeStorage = .init(use: .redis(client: app.redis))
+            let keyStorage = KeyStorage(use: .redis(client: app.redis))
+            app.keyStorage = keyStorage
+            app.signerManager = SignerManager(keyStorage: keyStorage)
+        } catch {
+            app.logger.error("Failed to configure Redis: \(error). Falling back to in-memory session storage.")
+            configureInMemoryStorage(app)
+        }
+    } else {
+        app.logger.warning(
+            "Sessions are stored in memory, DO NOT USE THIS IN PRODUCTION. -> build a release version instead"
+        )
+        configureInMemoryStorage(app)
+    }
+
+    app.sessions.configuration.cookieFactory = { sessionID in
+        .init(
+            string: sessionID.string,
+            maxAge: Constants.COOKIE.EXPIRATION_DAYS * (24 * 60 * 60 * 1000),
+            isSecure: true,
+            sameSite: .strict
+        )
+    }
+}
+
+/// Configures in-memory storage for sessions, authorization codes, and keys.
+@MainActor
+private func configureInMemoryStorage(_ app: Application) {
+    app.sessions.use(.memory)
+    app.authCodeStorage = .init(use: .memory)
+    let keyStorage = KeyStorage(use: .memory)
+    app.keyStorage = keyStorage
+    app.signerManager = SignerManager(keyStorage: keyStorage)
 }
