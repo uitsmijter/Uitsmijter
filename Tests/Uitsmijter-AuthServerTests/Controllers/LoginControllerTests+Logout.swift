@@ -105,8 +105,8 @@ struct LoginControllerLogoutTests {
             var tenantConfig = TenantSpec(hosts: ["example.com", "example.org"])
             tenantConfig.interceptor = TenantInterceptorSettings(
                 enabled: true,
-                domain: "login.feature.gcb-cloud.de",
-                cookie: ".feature.gcb-cloud.de"
+                domain: "login.app.example.com",
+                cookie: ".example.com"
             )
             tenantConfig.providers.append(
                 """
@@ -134,12 +134,12 @@ struct LoginControllerLogoutTests {
                 "logout/finalize?location=/out",
                 beforeRequest: { @Sendable req async throws in
                     req.headers.bearerAuthorization = BearerAuthorization(token: token ?? "_ERROR_")
-                    req.headers.replaceOrAdd(name: "host", value: "login.feature.gcb-cloud.de")
+                    req.headers.replaceOrAdd(name: "host", value: "login.app.example.com")
                 }, afterResponse: { @Sendable response async throws in
                     let cookie = response.headers["set-cookie"]
                         .filter({ $0.contains(Constants.COOKIE.NAME) })
                         .first
-                    #expect(cookie?.contains("Domain=.feature.gcb-cloud.de") ?? false)
+                    #expect(cookie?.contains("Domain=.example.com") ?? false)
                     #expect(cookie?.contains("\(Constants.COOKIE.NAME)=invalid") ?? false)
                     #expect(response.status == .seeOther)
                 })
