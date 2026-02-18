@@ -218,7 +218,6 @@ private func configureSessionStorage(_ app: Application) throws {
                     connectionRetryTimeout: .seconds(5)
                 )
             )
-            app.logger.warning("DEBUG: Redis connection pool configured with ONLY 1 connection for testing")
             app.sessions.use(.redis(delegate: AuthSessionDelegate()))
             app.authCodeStorage = .init(use: .redis(client: app.redis))
             let keyStorage = KeyStorage(use: .redis(client: app.redis))
