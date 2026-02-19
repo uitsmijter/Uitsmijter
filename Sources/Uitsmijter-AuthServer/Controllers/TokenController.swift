@@ -127,18 +127,12 @@ struct TokenController: RouteCollection, OAuthControllerProtocol {
                 throw ClientError.clientHasNoTenant
             }
 
-            Log.info("*** tokenrequest scopes: ")
-            dump(tokenRequest.scope)
-
             let tokenResponse = try await tokenGrantTypeRequestHandler(
                 of: tokenRequest.grant_type,
                 for: tenant,
                 on: req,
                 withScope: tokenRequest.scope
             )
-
-            Log.info("*** tokenresponse scopes: ")
-            dump(tokenResponse.scope)
 
             Prometheus.main.oauthSuccess?.inc(1, [
                 ("tenant", tenant.name),
@@ -198,7 +192,7 @@ struct TokenController: RouteCollection, OAuthControllerProtocol {
                 profileToEncode = payload.profile
             }
             let profile = try JSONEncoder.main.encode(profileToEncode)
-            
+
             let response = Response(
                 body: .init(data: profile)
             )

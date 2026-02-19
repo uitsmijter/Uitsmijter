@@ -125,6 +125,24 @@ Looks up existing secret first to maintain persistence across upgrades
 Generate or retrieve Redis password
 Looks up existing secret first to maintain persistence across upgrades
 */}}
+{{/*
+Build a JSON object mapping domain -> cookieDomain from .Values.domains
+Only includes entries where cookieDomain is set.
+Example output: {"login.ops.example.com":".ops.example.com"}
+*/}}
+{{- define "uitsmijter.cookieDomains" -}}
+{
+{{- $first := true -}}
+{{- range .Values.domains -}}
+  {{- if .cookieDomain -}}
+    {{- if not $first -}},{{- end -}}
+    {{ .domain | quote }}:{{ .cookieDomain | quote }}
+    {{- $first = false -}}
+  {{- end -}}
+{{- end -}}
+}
+{{- end -}}
+
 {{- define "uitsmijter.redisPassword" -}}
 {{- if .Values.redisPassword -}}
   {{- .Values.redisPassword -}}

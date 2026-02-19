@@ -57,13 +57,24 @@ struct LogoutController: RouteCollection {
         // get the location parameter for redirect back to the client
         let locationRedirect: String = try req.query.get(at: "location") ?? "/"
 
-        // to logout a user must have a valid token
-        let jwt = try await req.jwt.verify(as: Payload.self)
+        // Verify the JWT if present. Some browsers (notably WebKit/Safari) may
+        // not send SameSite=Strict cookies on meta-refresh navigations, so the
+        // token cookie can be absent. We still want to redirect and clean up.
+        let jwt = try? await req.jwt.verify(as: Payload.self)
 
-        // The tenant with whom the user is registered
-        let tenantName = jwt.tenant
-        guard let tenant = await Tenant.find(in: req.application.entityStorage, name: tenantName) else {
-            throw Abort(.badRequest, reason: "LOGOUT.ERRORS.NO_TENANT")
+        // Resolve the tenant — prefer the JWT claim, fall back to the tenant
+        // already resolved by RequestClientMiddleware from the location param.
+        let tenant: Tenant?
+        if let jwt {
+            tenant = await Tenant.find(
+                in: req.application.entityStorage, name: jwt.tenant
+            )
+        } else {
+            Log.warning(
+                "Logout without valid JWT, falling back to clientInfo tenant",
+                requestId: req.id
+            )
+            tenant = req.clientInfo?.tenant
         }
 
         // construct the redirect
@@ -77,60 +88,55 @@ struct LogoutController: RouteCollection {
         // The first domain uses response.cookies (survives SessionsMiddleware's
         // dictionary round-trip). Additional domains are stored in request storage
         // and appended by ExtraCookiesMiddleware after the session middleware runs.
-        let domains = cookieDomainsToInvalidate(req: req, tenant: tenant)
-        if let primaryDomain = domains.first {
-            response.cookies[Constants.COOKIE.NAME] = HTTPCookies.Value.defaultCookie(
-                expires: Date().advanced(by: -1),
-                withContent: "invalid"
-            )
-            response.cookies[Constants.COOKIE.NAME]?.domain = primaryDomain
-        }
-        for domain in domains.dropFirst() {
-            var cookie = HTTPCookies.Value.defaultCookie(
-                expires: Date().advanced(by: -1),
-                withContent: "invalid"
-            )
-            cookie.domain = domain
-            req.extraSetCookieHeaders.append(
-                cookie.serialize(name: Constants.COOKIE.NAME)
-            )
+        if let tenant {
+            let domains = cookieDomainsToInvalidate(req: req, tenant: tenant)
+            if let primaryDomain = domains.first {
+                response.cookies[Constants.COOKIE.NAME] = HTTPCookies.Value.defaultCookie(
+                    expires: Date().advanced(by: -1),
+                    withContent: "invalid"
+                )
+                response.cookies[Constants.COOKIE.NAME]?.domain = primaryDomain
+            }
+            for domain in domains.dropFirst() {
+                var cookie = HTTPCookies.Value.defaultCookie(
+                    expires: Date().advanced(by: -1),
+                    withContent: "invalid"
+                )
+                cookie.domain = domain
+                req.extraSetCookieHeaders.append(
+                    cookie.serialize(name: Constants.COOKIE.NAME)
+                )
+            }
         }
 
         Log.info(
-            """
-                Finish logout \(jwt.subject.value) from tenant: \(tenant.name)
-                , domains \(domains.joined(separator: ", "))
-                """, requestId: req.id)
+            "Finish logout \(jwt?.subject.value ?? "-") from tenant: \(tenant?.name ?? "-")",
+            requestId: req.id
+        )
 
         // remove authorisation headers
         response.headers.bearerAuthorization = nil
 
-        // Debug: Count sessions before wipe
-        if let storage = req.application.authCodeStorage {
-            let sessionsBefore = await storage.count(tenant: tenant, type: .refresh)
-            Log.debug("Session count before wipe: \(sessionsBefore) for tenant: \(tenant.name)", requestId: req.id)
-        }
-
-        // destroy the session (if any) and wipe tokens that still exists.
+        // destroy the session (if any) and wipe tokens that still exist.
         req.session.destroy()
-        await req.application.authCodeStorage?.wipe(tenant: tenant, subject: jwt.subject.value)
-
-        // Debug: Count sessions after wipe
-        if let storage = req.application.authCodeStorage {
-            let sessionsAfter = await storage.count(tenant: tenant, type: .refresh)
-            Log.debug("Session count after wipe: \(sessionsAfter) for tenant: \(tenant.name)", requestId: req.id)
+        if let tenant, let subject = jwt?.subject.value {
+            await req.application.authCodeStorage?.wipe(
+                tenant: tenant, subject: subject
+            )
         }
 
         // Record logout event (Prometheus metrics + entity status update)
         await req.application.authEventActor.recordLogout(
-            tenant: tenant.name,
+            tenant: tenant?.name ?? "unknown",
             client: req.clientInfo?.client,
             mode: req.clientInfo?.mode.rawValue ?? "unknown",
             redirect: locationRedirect
         )
 
-        // Log and return
-        Log.info("Logout succeeded \(jwt.user) for \(tenant.name), redirect to \(locationRedirect)", requestId: req.id)
+        Log.info(
+            "Logout succeeded for \(tenant?.name ?? "-"), redirect to \(locationRedirect)",
+            requestId: req.id
+        )
 
         return response
     }
@@ -154,12 +160,13 @@ struct LogoutController: RouteCollection {
             domains.append(interceptorDomain)
         }
 
-        // Request host domain (the OAuth login host, e.g. "login.ops.example.com")
-        let hostDomain = req.forwardInfo?.location.host
+        // OAuth cookie domain — resolved through the Helm cookieDomain mapping
+        let host = req.forwardInfo?.location.host
             ?? req.headers.first(name: "host")
             ?? Constants.PUBLIC_DOMAIN
-        if !domains.contains(hostDomain) {
-            domains.append(hostDomain)
+        let oauthDomain = CookieDomainMapping.resolve(for: host)
+        if !domains.contains(oauthDomain) {
+            domains.append(oauthDomain)
         }
 
         // Fallback: ensure at least one domain is present

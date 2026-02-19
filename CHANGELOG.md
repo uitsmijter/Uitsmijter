@@ -1,3 +1,13 @@
+# 0.10.5
+
+- Fix: **Dual-Domain Cookie Invalidation on Logout** - When a tenant has both an interceptor domain (e.g. `.ops.example.com`) and an OAuth login page on a different host (e.g. `login.ops.example.com`), the browser holds two separate SSO cookies. Logout now invalidates cookies on all relevant domains instead of only one, ensuring a complete session teardown.
+- Fix: **Helm cookieDomain Mapping for OAuth Cookies** - The `cookieDomain` value from Helm `values.domains[]` entries is now used when setting cookies in OAuth login mode. A new `domain-cookies` ConfigMap passes the domain-to-cookieDomain mapping to the application via the `COOKIE_DOMAINS` environment variable, ensuring cookies are set on the correct broad domain (e.g. `.ops.example.com` instead of `login.ops.example.com`).
+- Fix: **Logout Resilience on WebKit/Safari** - The `/logout/finalize` endpoint no longer requires a valid JWT cookie to redirect. WebKit may not send `SameSite=Strict` cookies on meta-refresh navigations; the logout flow now falls back to the tenant resolved from the request context, ensuring the redirect always works across all browsers.
+- Fix: **Wildcard Cookie Domain Sanitization** - Cookie domains configured with wildcard prefixes (e.g. `*.example.com`) are now automatically sanitized to valid `Set-Cookie` domain attributes (`.example.com`), preventing browsers from silently rejecting the cookie.
+
+- Improvement: **ExtraCookiesMiddleware** - New middleware that appends additional `Set-Cookie` headers after Vapor's `SessionsMiddleware` has finished processing, working around the framework's cookie dictionary limitation that collapses multiple cookies with the same name but different domains into a single entry.
+- Improvement: **configure.swift Refactoring** - Extracted session storage configuration into dedicated `configureSessionStorage()` and `configureInMemoryStorage()` helper functions for improved readability.
+
 # 0.10.4
 
 - Fix: **Logout Cookie Domain Mismatch** - Fixed a bug where the logout cookie domain did not match the request host in OAuth mode, causing logout to fail on certain domain configurations.
