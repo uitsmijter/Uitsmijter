@@ -4,7 +4,9 @@ import Testing
 @testable import Uitsmijter_AuthServer
 @Suite("JavaScript Provider Get Properties Tests")
 struct JavaScriptProviderGetPropertiesTest {
-    let dummyCredentials = JSInputCredentials(username: "test@example.com", password: "test")
+    let dummyCredentials = JSInputCredentials(
+        username: "test@example.com", password: "test", grantType: .authorization_code
+    )
     @Test("getSubject returns committed subject from script")
     func getSubjectReturnsCommittedSubject() async throws {
         let jsp = JavaScriptProvider()

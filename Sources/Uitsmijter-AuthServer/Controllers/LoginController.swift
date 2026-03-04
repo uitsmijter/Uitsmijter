@@ -262,12 +262,16 @@ struct LoginController: RouteCollection, OAuthControllerProtocol {
     ///   - form: a filled login form
     /// - Returns: a Provider
     /// - Throws: an error if the provider can't be constructed
-    private func userLoginProvider(for tenant: Tenant, login form: LoginForm) async throws -> JavaScriptProvider {
+    private func userLoginProvider(
+        for tenant: Tenant,
+        login form: LoginForm,
+        grantType: GrantTypes
+    ) async throws -> JavaScriptProvider {
         let providerInterpreter = JavaScriptProvider()
         try await providerInterpreter.loadProvider(script: tenant.config.providers.joined(separator: "\n"))
         try await providerInterpreter.start(
             class: .userLogin,
-            arguments: JSInputCredentials(username: form.username, password: form.password)
+            arguments: JSInputCredentials(username: form.username, password: form.password, grantType: grantType)
         )
         return providerInterpreter
     }
@@ -523,7 +527,19 @@ struct LoginController: RouteCollection, OAuthControllerProtocol {
             queryItem: URLQueryItem(name: "loginid", value: loginSession.loginId.uuidString) )
 
         // use a provider to check login requests
-        let providerInterpreter = try await userLoginProvider(for: tenant, login: loginForm)
+        // Grant type is read directly from the submitted form body, not from clientInfo.mode.
+        // clientInfo.mode is unreliable here because the uitsmijter-forward-header middleware
+        // unconditionally injects X-Uitsmijter-Mode: interceptor on the login-proxy ingress,
+        // affecting all requests to that domain including OAuth form submissions.
+        // The form's hidden `mode` field is set by the rendering controller:
+        //   - AuthorizeController renders without an explicit mode → form carries mode=""
+        //   - InterceptorController redirects with mode=interceptor → form carries mode="interceptor"
+        // Reading from the form body bypasses the middleware header and remains correct
+        // even if interceptor flows gain a client association in the future.
+        let modeFromForm = (try? req.content.get(String.self, at: "mode")) ?? ""
+        let loginGrantType: GrantTypes = modeFromForm == LoginMode.interceptor.rawValue
+            ? .interceptor : .authorization_code
+        let providerInterpreter = try await userLoginProvider(for: tenant, login: loginForm, grantType: loginGrantType)
 
         // Ask the provider if the user can login
         if await providerInterpreter.canLogin() == false {

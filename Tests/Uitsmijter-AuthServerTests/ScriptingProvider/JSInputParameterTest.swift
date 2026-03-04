@@ -85,14 +85,19 @@ struct JSInputParameterTest {
 
     @Test("JSInputCredentials initializes with username and password")
     func jsInputCredentialsInitialization() throws {
-        let credentials = JSInputCredentials(username: "user@test.com", password: "secret123")
+        let credentials = JSInputCredentials(
+            username: "user@test.com", password: "secret123", grantType: .authorization_code
+        )
         #expect(credentials.username == "user@test.com")
         #expect(credentials.password == "secret123")
+        #expect(credentials.grantType == .authorization_code)
     }
 
     @Test("JSInputCredentials toJSON produces valid JSON")
     func jsInputCredentialsToJSON() throws {
-        let credentials = JSInputCredentials(username: "user@test.com", password: "pass123")
+        let credentials = JSInputCredentials(
+            username: "user@test.com", password: "pass123", grantType: .authorization_code
+        )
         let json = try credentials.toJSON()
 
         #expect(json != nil)
@@ -100,23 +105,33 @@ struct JSInputParameterTest {
         #expect(json?.contains("pass123") == true)
         #expect(json?.contains("username") == true)
         #expect(json?.contains("password") == true)
+        #expect(json?.contains("grant_type") == true)
+        #expect(json?.contains("authorization_code") == true)
     }
 
     @Test("JSInputCredentials toJSON format is correct")
     func jsInputCredentialsJSONFormat() throws {
-        let credentials = JSInputCredentials(username: "user@test.com", password: "mypass")
+        let credentials = JSInputCredentials(
+            username: "user@test.com", password: "mypass", grantType: .authorization_code
+        )
         let json = try credentials.toJSON()
 
-        // Order might vary, so check both possibilities
-        let validFormat1 = "{\"username\":\"user@test.com\",\"password\":\"mypass\"}"
-        let validFormat2 = "{\"password\":\"mypass\",\"username\":\"user@test.com\"}"
-
-        #expect(json == validFormat1 || json == validFormat2)
+        // Parse and verify fields rather than checking exact format (key order may vary)
+        guard let data = json?.data(using: .utf8),
+              let parsed = try? JSONDecoder().decode(JSInputCredentials.self, from: data) else {
+            Issue.record("Failed to parse JSON output")
+            return
+        }
+        #expect(parsed.username == "user@test.com")
+        #expect(parsed.password == "mypass")
+        #expect(parsed.grantType == .authorization_code)
     }
 
     @Test("JSInputCredentials encodes with special characters")
     func jsInputCredentialsWithSpecialChars() throws {
-        let credentials = JSInputCredentials(username: "test+user@example.com", password: "p@ss!word#123")
+        let credentials = JSInputCredentials(
+            username: "test+user@example.com", password: "p@ss!word#123", grantType: .authorization_code
+        )
         let json = try credentials.toJSON()
 
         #expect(json?.contains("test+user@example.com") == true)
@@ -125,7 +140,7 @@ struct JSInputParameterTest {
 
     @Test("JSInputCredentials encodes with empty password")
     func jsInputCredentialsEmptyPassword() throws {
-        let credentials = JSInputCredentials(username: "user@test.com", password: "")
+        let credentials = JSInputCredentials(username: "user@test.com", password: "", grantType: .authorization_code)
         let json = try credentials.toJSON()
 
         #expect(json?.contains("user@test.com") == true)
@@ -134,7 +149,7 @@ struct JSInputParameterTest {
 
     @Test("JSInputCredentials encodes with empty username")
     func jsInputCredentialsEmptyUsername() throws {
-        let credentials = JSInputCredentials(username: "", password: "password")
+        let credentials = JSInputCredentials(username: "", password: "password", grantType: .authorization_code)
         let json = try credentials.toJSON()
 
         #expect(json?.contains("username") == true)
@@ -143,7 +158,9 @@ struct JSInputParameterTest {
 
     @Test("JSInputCredentials encodes with unicode")
     func jsInputCredentialsWithUnicode() throws {
-        let credentials = JSInputCredentials(username: "用户@example.com", password: "密码123")
+        let credentials = JSInputCredentials(
+            username: "用户@example.com", password: "密码123", grantType: .authorization_code
+        )
         let json = try credentials.toJSON()
 
         #expect(json != nil)
@@ -153,17 +170,20 @@ struct JSInputParameterTest {
     @Test("JSInputCredentials decodes from JSON")
     func jsInputCredentialsDecoding() throws {
         let jsonData = Data("""
-        {"username":"decoded@example.com","password":"decodedpass"}
+        {"username":"decoded@example.com","password":"decodedpass","grant_type":"authorization_code"}
         """.utf8)
 
         let decoded = try JSONDecoder().decode(JSInputCredentials.self, from: jsonData)
         #expect(decoded.username == "decoded@example.com")
         #expect(decoded.password == "decodedpass")
+        #expect(decoded.grantType == .authorization_code)
     }
 
     @Test("JSInputCredentials round-trip encoding and decoding")
     func jsInputCredentialsRoundTrip() throws {
-        let original = JSInputCredentials(username: "roundtrip@test.com", password: "roundtrippass")
+        let original = JSInputCredentials(
+            username: "roundtrip@test.com", password: "roundtrippass", grantType: .password
+        )
         let json = try original.toJSON()
 
         guard let jsonString = json else {
@@ -175,6 +195,7 @@ struct JSInputParameterTest {
 
         #expect(decoded.username == original.username)
         #expect(decoded.password == original.password)
+        #expect(decoded.grantType == original.grantType)
     }
 
     // MARK: - Protocol Conformance Tests
@@ -191,7 +212,8 @@ struct JSInputParameterTest {
     func jsInputCredentialsConformsToProtocol() throws {
         let credentials: any JSInputParameterProtocol = JSInputCredentials(
             username: "test@example.com",
-            password: "password"
+            password: "password",
+            grantType: .authorization_code
         )
         let json = try credentials.toJSON()
 
@@ -209,12 +231,15 @@ struct JSInputParameterTest {
 
     @Test("JSInputCredentials conforms to Codable")
     func jsInputCredentialsConformsToCodable() throws {
-        let credentials = JSInputCredentials(username: "test@example.com", password: "password")
+        let credentials = JSInputCredentials(
+            username: "test@example.com", password: "password", grantType: .interceptor
+        )
         let encoded = try JSONEncoder().encode(credentials)
         let decoded = try JSONDecoder().decode(JSInputCredentials.self, from: encoded)
 
         #expect(decoded.username == credentials.username)
         #expect(decoded.password == credentials.password)
+        #expect(decoded.grantType == credentials.grantType)
     }
 
     @Test("JSInputUsername conforms to Sendable")
@@ -232,7 +257,9 @@ struct JSInputParameterTest {
 
     @Test("JSInputCredentials conforms to Sendable")
     func jsInputCredentialsConformsToSendable() throws {
-        let credentials = JSInputCredentials(username: "test@example.com", password: "password")
+        let credentials = JSInputCredentials(
+            username: "test@example.com", password: "password", grantType: .authorization_code
+        )
 
         // Sendable conformance is compile-time checked
         // This test verifies it can be used in async contexts
@@ -259,7 +286,9 @@ struct JSInputParameterTest {
     @Test("JSInputCredentials with very long password")
     func jsInputCredentialsVeryLongPassword() throws {
         let longPassword = String(repeating: "x", count: 1000)
-        let credentials = JSInputCredentials(username: "test@example.com", password: longPassword)
+        let credentials = JSInputCredentials(
+            username: "test@example.com", password: longPassword, grantType: .authorization_code
+        )
         let json = try credentials.toJSON()
 
         #expect(json != nil)
@@ -268,7 +297,9 @@ struct JSInputParameterTest {
 
     @Test("JSInputCredentials with newlines in password")
     func jsInputCredentialsWithNewlines() throws {
-        let credentials = JSInputCredentials(username: "test@example.com", password: "pass\nword")
+        let credentials = JSInputCredentials(
+            username: "test@example.com", password: "pass\nword", grantType: .authorization_code
+        )
         let json = try credentials.toJSON()
 
         #expect(json != nil)
@@ -288,7 +319,9 @@ struct JSInputParameterTest {
 
     @Test("JSInputCredentials with backslashes")
     func jsInputCredentialsWithBackslashes() throws {
-        let credentials = JSInputCredentials(username: "test\\user@example.com", password: "pass\\word")
+        let credentials = JSInputCredentials(
+            username: "test\\user@example.com", password: "pass\\word", grantType: .authorization_code
+        )
         let json = try credentials.toJSON()
 
         #expect(json != nil)

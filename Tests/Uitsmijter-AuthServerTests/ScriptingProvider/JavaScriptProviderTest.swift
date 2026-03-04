@@ -6,7 +6,9 @@ import Testing
 @Suite("JavaScript Provider Core Tests")
 struct JavaScriptProviderTest {
 
-    let dummyCredentials = JSInputCredentials(username: "test@example.com", password: "test")
+    let dummyCredentials = JSInputCredentials(
+        username: "test@example.com", password: "test", grantType: .authorization_code
+    )
 
     @Test("JavaScriptProvider initializes successfully")
     func providerInitializes() async throws {
