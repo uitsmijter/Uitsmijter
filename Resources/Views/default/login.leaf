@@ -28,7 +28,7 @@
             <input type="hidden" name="mode" value="#(mode)"/>
             <input type="hidden" name="scope" value="#join("+", requestedScopes)"/>
             <div class="field">
-                <input type="text" id="username" name="username" placeholder='#t("LOGIN.UI.NAME")'>
+                <input type="text" id="username" name="username" placeholder='#t("LOGIN.UI.NAME")' autofocus>
             </div>
             <div class="field">
                 <input type="password" id="password" name="password" placeholder='#t("LOGIN.UI.PASSWORD")'>

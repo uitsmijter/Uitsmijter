@@ -5,6 +5,7 @@
 - Fix: **Logout Resilience on WebKit/Safari** - The `/logout/finalize` endpoint no longer requires a valid JWT cookie to redirect. WebKit may not send `SameSite=Strict` cookies on meta-refresh navigations; the logout flow now falls back to the tenant resolved from the request context, ensuring the redirect always works across all browsers.
 - Fix: **Wildcard Cookie Domain Sanitization** - Cookie domains configured with wildcard prefixes (e.g. `*.example.com`) are now automatically sanitized to valid `Set-Cookie` domain attributes (`.example.com`), preventing browsers from silently rejecting the cookie.
 
+- Improvement: **Autofocus on Login Page** - The username field on the login page now receives focus automatically when the page loads, reducing the number of interactions required to authenticate.
 - Improvement: **ExtraCookiesMiddleware** - New middleware that appends additional `Set-Cookie` headers after Vapor's `SessionsMiddleware` has finished processing, working around the framework's cookie dictionary limitation that collapses multiple cookies with the same name but different domains into a single entry.
 - Improvement: **configure.swift Refactoring** - Extracted session storage configuration into dedicated `configureSessionStorage()` and `configureInMemoryStorage()` helper functions for improved readability.
 
