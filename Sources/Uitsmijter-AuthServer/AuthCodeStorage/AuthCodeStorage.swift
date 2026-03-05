@@ -128,7 +128,7 @@ struct AuthCodeStorage: AuthCodeStorageProtocol, Sendable {
         thread.main()
     }
 
-    /// Retrieves an authorization session by its code type and value.
+    /// Retrieves an authorization session by its session type and value.
     ///
     /// - Parameters:
     ///   - codeType: The type of code to retrieve (e.g., `.code` for authorization codes, `.refresh` for refresh tokens).
@@ -150,7 +150,7 @@ struct AuthCodeStorage: AuthCodeStorageProtocol, Sendable {
     /// }
     /// ```
     func get(
-        type codeType: AuthSession.CodeType,
+        type codeType: AuthSessionType,
         codeValue value: String,
         remove: Bool? = false
     ) async -> AuthSession? {
@@ -193,7 +193,7 @@ struct AuthCodeStorage: AuthCodeStorageProtocol, Sendable {
         return await implementation.count()
     }
 
-    /// Deletes a specific authorization session by its code type and value.
+    /// Deletes a specific authorization session by its session type and value.
     ///
     /// This method is used to explicitly invalidate a code or token, such as when a user
     /// logs out or when a token is revoked.
@@ -202,7 +202,7 @@ struct AuthCodeStorage: AuthCodeStorageProtocol, Sendable {
     ///   - codeType: The type of code to delete.
     ///   - value: The unique code value to remove.
     /// - Throws: An error if the delete operation fails.
-    func delete(type codeType: AuthSession.CodeType, codeValue value: String) async throws {
+    func delete(type codeType: AuthSessionType, codeValue value: String) async throws {
         Log.debug("Delete AuthSession for type \(codeType.rawValue) with value: \(value)")
         try await implementation.delete(type: codeType, codeValue: value)
     }
@@ -229,50 +229,49 @@ struct AuthCodeStorage: AuthCodeStorageProtocol, Sendable {
 
     /// Counts sessions for a specific tenant and type.
     ///
-    /// This method filters sessions to count only those belonging to a specific tenant
-    /// and of a specific type (e.g., refresh tokens to count active user sessions).
-    ///
     /// - Parameters:
     ///   - tenant: The tenant to count sessions for.
     ///   - type: The type of sessions to count (e.g., `.refresh` for long-lived sessions).
     /// - Returns: The number of sessions matching the criteria.
-    ///
-    /// ## Example
-    ///
-    /// ```swift
-    /// // Count active user sessions (refresh tokens) for a tenant
-    /// let sessionCount = await storage.count(tenant: myTenant, type: .refresh)
-    /// ```
-    func count(tenant: Tenant, type: AuthSession.CodeType) async -> Int {
+    func count(tenant: Tenant, type: AuthSessionType) async -> Int {
         Log.debug("Count AuthSession for tenant: \(tenant.name) with type: \(type.rawValue)")
         return await implementation.count(tenant: tenant, type: type)
     }
 
     /// Counts the number of authorization sessions for a specific client and type.
     ///
-    /// This method is useful for metrics and monitoring, allowing you to track how many
-    /// sessions exist for a particular client (OAuth2 application).
-    ///
     /// - Parameters:
     ///   - client: The client to count sessions for
     ///   - type: The type of sessions to count (defaults to .refresh for long-lived sessions)
     /// - Returns: The number of sessions matching the specified client and type
-    ///
-    /// ## Example
-    ///
-    /// ```swift
-    /// // Count active user sessions (refresh tokens) for a client
-    /// let sessionCount = await storage.count(client: myClient, type: .refresh)
-    /// ```
-    func count(client: UitsmijterClient, type: AuthSession.CodeType) async -> Int {
+    func count(client: UitsmijterClient, type: AuthSessionType) async -> Int {
         Log.debug("Count AuthSession for client: \(client.name) with type: \(type.rawValue)")
         return await implementation.count(client: client, type: type)
     }
 
+    /// Retrieve a device session by the short user code entered at the activation endpoint.
+    func getDevice(byUserCode userCode: String) async -> AuthSession? {
+        Log.debug("Get device session by userCode: \(userCode)")
+        return await implementation.getDevice(byUserCode: userCode)
+    }
+
+    /// Update an existing device session's status, payload, and last-polled timestamp.
+    func updateDevice(
+        deviceCode: String,
+        newStatus: DeviceGrantStatus,
+        payload: Payload?,
+        lastPolledAt: Date?
+    ) async throws {
+        Log.debug("Update device session \(deviceCode) → \(newStatus.rawValue)")
+        try await implementation.updateDevice(
+            deviceCode: deviceCode,
+            newStatus: newStatus,
+            payload: payload,
+            lastPolledAt: lastPolledAt
+        )
+    }
+
     /// Checks whether the storage backend is operational and able to serve requests.
-    ///
-    /// This health check is used by monitoring systems to verify the availability of
-    /// the storage layer. For Redis backends, this typically involves a ping operation.
     ///
     /// - Returns: `true` if the storage is healthy, `false` otherwise.
     func isHealthy() async -> Bool {

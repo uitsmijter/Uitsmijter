@@ -7,7 +7,7 @@ protocol AuthCodeStorageProtocol: Sendable {
     func set(authSession: AuthSession) async throws
 
     /// Retrieve an authorization session by type and code value
-    func get(type: AuthSession.CodeType, codeValue: String, remove: Bool?) async -> AuthSession?
+    func get(type: AuthSessionType, codeValue: String, remove: Bool?) async -> AuthSession?
 
     /// Push a login session
     func push(loginId: LoginSession) async throws
@@ -19,7 +19,7 @@ protocol AuthCodeStorageProtocol: Sendable {
     func count() async -> Int
 
     /// Delete a specific session by type and code value
-    func delete(type: AuthSession.CodeType, codeValue: String) async throws
+    func delete(type: AuthSessionType, codeValue: String) async throws
 
     /// Wipe all sessions for a specific tenant and subject
     func wipe(tenant: Tenant, subject: String) async
@@ -29,14 +29,25 @@ protocol AuthCodeStorageProtocol: Sendable {
     ///   - tenant: The tenant to count sessions for
     ///   - type: The type of sessions to count (defaults to .refresh for long-lived sessions)
     /// - Returns: The number of sessions matching the criteria
-    func count(tenant: Tenant, type: AuthSession.CodeType) async -> Int
+    func count(tenant: Tenant, type: AuthSessionType) async -> Int
 
     /// Count sessions for a specific client and type
     /// - Parameters:
     ///   - client: The client to count sessions for
     ///   - type: The type of sessions to count (defaults to .refresh for long-lived sessions)
     /// - Returns: The number of sessions matching the criteria
-    func count(client: UitsmijterClient, type: AuthSession.CodeType) async -> Int
+    func count(client: UitsmijterClient, type: AuthSessionType) async -> Int
+
+    /// Retrieve a device session by the user code entered at the activation endpoint
+    func getDevice(byUserCode userCode: String) async -> AuthSession?
+
+    /// Update an existing device session's status and optional payload
+    func updateDevice(
+        deviceCode: String,
+        newStatus: DeviceGrantStatus,
+        payload: Payload?,
+        lastPolledAt: Date?
+    ) async throws
 
     /// Check if the storage is healthy
     func isHealthy() async -> Bool

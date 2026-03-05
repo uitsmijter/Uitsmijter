@@ -22,11 +22,19 @@
     <div class="logo-box">
         <img src="images/uitsmijter.svg">
     </div>
+
+    #if(success):
+    <div class="login-box">
+        <div class="message" data-result="success">#t("ACTIVATE.UI.SUCCESS")</div>
+    </div>
+    #else:
     <div class='login-box #isnotempty(error, "error")'>
-        <form action="#(serviceUrl)/login" method="post">
-            <input type="hidden" name="location" value="#(requestUri)"/>
-            <input type="hidden" name="mode" value="#(mode)"/>
-            <input type="hidden" name="scope" value="#join("+", requestedScopes)"/>
+        <form action="/activate" method="post">
+            <div class="field">
+                <input type="text" id="user_code" name="user_code" value="#(userCode)"
+                       placeholder='#t("ACTIVATE.UI.USER_CODE")'
+                       autocomplete="off" autocorrect="off" autocapitalize="characters" spellcheck="false">
+            </div>
             <div class="field">
                 <input type="text" id="username" name="username" placeholder='#t("LOGIN.UI.NAME")' autofocus>
             </div>
@@ -36,20 +44,13 @@
             #if(error != nil):
             <div class="error" data-error="#(error)">#t(error)</div>
             #endif
-            #if(requestInfo != nil):
-            <div class="message">#(requestInfo.description)</div>
-            #endif
 
-            <button id="loginButton" type="submit" class="button-big" name="login-button">
-                <span>#t("LOGIN.UI.LOGIN")</span>
-                <svg id="loginSpinner" class="login-spinner login-spinner-invisible" width="16" height="16"
-                     viewBox="0 0 16 16"
-                     xmlns="http://www.w3.org/2000/svg">
-                    <circle cx="8" cy="8" r="8"/>
-                </svg>
+            <button id="activateButton" type="submit" class="button-big" name="activate-button">
+                <span>#t("ACTIVATE.UI.AUTHORIZE")</span>
             </button>
         </form>
     </div>
+    #endif
 </main>
 
 #if(tenant != nil && tenant.config.informations != nil):
@@ -60,9 +61,6 @@
         #endif
         #if(tenant.config.informations.privacy_url != nil):
         <li><a href="#(tenant.config.informations.privacy_url)" data-type="privacy">Datenschutz</a></li>
-        #endif
-        #if(tenant.config.informations.register_url != nil):
-        <li><a href="#(tenant.config.informations.register_url)" data-type="register">Registrieren</a></li>
         #endif
     </ul>
 </footer>

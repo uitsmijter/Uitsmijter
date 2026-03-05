@@ -1,137 +1,38 @@
 import Foundation
 
-/// Session state for OAuth2 authorization code flow.
-///
-/// `AuthSession` stores the intermediate state during an OAuth2 authorization flow,
-/// bridging the gap between user authorization and token exchange. This session
-/// contains the authorization code, state parameter, and user payload that will
-/// be used to generate access tokens.
-///
-/// ## OAuth2 Authorization Code Flow
-///
-/// 1. Client initiates authorization request with `state` parameter
-/// 2. User authenticates and authorizes the client
-/// 3. `AuthSession` is created with authorization `code` and user `payload`
-/// 4. Session is stored temporarily (with TTL)
-/// 5. Client exchanges code for access token at token endpoint
-/// 6. Session is consumed and removed
-///
-/// ## Session Types
-///
-/// Auth sessions can represent different OAuth2 flows:
-/// - ``CodeType/code``: Standard authorization code
-/// - ``CodeType/refresh``: Refresh token flow
-///
-/// ## Example
-///
-/// ```swift
-/// let session = AuthSession(
-///     type: .code,
-///     state: "xyz123",
-///     code: Code(),
-///     scopes: ["openid", "profile"],
-///     payload: userPayload,
-///     redirect: "https://app.example.com/callback",
-///     ttl: 300  // 5 minutes
-/// )
-/// ```
-///
-/// ## Security Considerations
-///
-/// - Authorization codes are single-use and expire quickly (typically 5-10 minutes)
-/// - The `state` parameter prevents CSRF attacks (RFC 6749, Section 10.12)
-/// - Sessions are stored securely in Redis or memory
-/// - Codes should be cryptographically random
-///
-/// - SeeAlso: ``Code``, ``Payload``, ``TimeToLiveProtocol``
-struct AuthSession: Codable, TimeToLiveProtocol, Sendable {
-    /// The type of authorization code.
-    ///
-    /// Distinguishes between standard authorization codes and refresh tokens.
-    enum CodeType: String, Codable, Sendable {
-        /// Standard authorization code from authorization endpoint.
-        case code
+// MARK: - Supporting Types
 
-        /// Refresh token used to obtain new access tokens.
-        case refresh
-    }
+/// Status of a device authorization flow (RFC 8628)
+enum DeviceGrantStatus: String, Codable, Sendable {
+    case pending, authorized, denied
+}
 
-    /// The type of this authorization session.
-    ///
-    /// Specifies whether this is a standard authorization code or refresh token session.
-    let type: AuthSession.CodeType
+/// Discriminator for ``AuthSession`` cases and storage key prefix.
+enum AuthSessionType: String, Sendable, Equatable {
+    case code, refresh, device
+}
 
-    /// The state parameter from the client's authorization request.
-    ///
-    /// This opaque value is returned unchanged to the client to prevent CSRF attacks.
-    /// The client should verify this matches their original request.
-    ///
-    /// Per OAuth 2.0 (RFC 6749, Section 10.12), the state parameter is recommended
-    /// for preventing cross-site request forgery.
+// MARK: - Per-type session structs
+
+/// Session for the standard OAuth 2.0 authorization code flow.
+struct CodeSession: Codable, Sendable {
     let state: String
-
-    /// The authorization code generated for this session.
-    ///
-    /// This one-time code is exchanged for an access token at the token endpoint.
-    /// The code is cryptographically random and expires quickly (typically 5-10 minutes).
-    ///
-    /// - SeeAlso: ``Code``
     let code: Code
-
-    /// The OAuth2 scopes approved for this authorization.
-    ///
-    /// Contains the intersection of:
-    /// - Scopes requested by the client
-    /// - Scopes allowed for the client
-    /// - Scopes authorized by the user
-    ///
-    /// These scopes determine the permissions granted to the resulting access token.
     let scopes: [String]
-
-    /// The authenticated user's payload.
-    ///
-    /// Contains user information retrieved from the authentication provider.
-    /// This payload is used to populate claims in the issued JWT access token.
-    ///
-    /// - SeeAlso: ``Payload``
     let payload: Payload?
-
-    /// The redirect URI where the authorization response will be sent.
-    ///
-    /// This URI must match one of the client's registered redirect URIs.
-    /// After authorization, the authorization code is sent to this URI.
     let redirect: String
-
-    /// Time-to-live for this session in seconds.
-    ///
-    /// Authorization codes should have short lifetimes (typically 300-600 seconds).
-    /// After expiration, the session is automatically removed from storage.
-    ///
-    /// Per OAuth 2.0 (RFC 6749, Section 4.1.2), authorization codes should be
-    /// short-lived and single-use.
     var ttl: Int64?
+    var generated: Date
 
-    /// The timestamp when this session was created.
-    ///
-    /// Used for session expiration calculations and auditing.
-    var generated: Date = Date()
-
-    /// Initialize an authorization session.
-    ///
-    /// - Parameters:
-    ///   - type: The type of authorization code (code or refresh)
-    ///   - state: The state parameter from the authorization request
-    ///   - code: The generated authorization code
-    ///   - scopes: The approved OAuth2 scopes
-    ///   - payload: The authenticated user's payload
-    ///   - redirect: The redirect URI for the authorization response
-    ///   - ttl: Optional time-to-live in seconds (defaults to system configuration)
-    ///   - generated: The session creation timestamp (defaults to now)
     init(
-        type: AuthSession.CodeType, state: String, code: Code, scopes: [String],
-        payload: Payload?, redirect: String, ttl: Int64? = nil, generated: Date = Date()
+        state: String,
+        code: Code,
+        scopes: [String],
+        payload: Payload?,
+        redirect: String,
+        ttl: Int64? = nil,
+        generated: Date = Date()
     ) {
-        self.type = type
         self.state = state
         self.code = code
         self.scopes = scopes
@@ -140,5 +41,254 @@ struct AuthSession: Codable, TimeToLiveProtocol, Sendable {
         self.ttl = ttl
         self.generated = generated
     }
+}
 
+/// Session for the OAuth 2.0 refresh token flow.
+struct RefreshSession: Codable, Sendable {
+    let state: String
+    let code: Code
+    let scopes: [String]
+    let payload: Payload?
+    let redirect: String
+    var ttl: Int64?
+    var generated: Date
+
+    init(
+        state: String,
+        code: Code,
+        scopes: [String],
+        payload: Payload?,
+        redirect: String,
+        ttl: Int64? = nil,
+        generated: Date = Date()
+    ) {
+        self.state = state
+        self.code = code
+        self.scopes = scopes
+        self.payload = payload
+        self.redirect = redirect
+        self.ttl = ttl
+        self.generated = generated
+    }
+}
+
+/// Session for the OAuth 2.0 Device Authorization Grant (RFC 8628).
+struct DeviceSession: Codable, Sendable {
+    let clientId: String
+    let deviceCode: Code
+    let userCode: String
+    let scopes: [String]
+    var payload: Payload?
+    var status: DeviceGrantStatus
+    var lastPolledAt: Date?
+    var ttl: Int64?
+    var generated: Date
+
+    init(
+        clientId: String,
+        deviceCode: Code,
+        userCode: String,
+        scopes: [String],
+        payload: Payload? = nil,
+        status: DeviceGrantStatus = .pending,
+        lastPolledAt: Date? = nil,
+        ttl: Int64? = nil,
+        generated: Date = Date()
+    ) {
+        self.clientId = clientId
+        self.deviceCode = deviceCode
+        self.userCode = userCode
+        self.scopes = scopes
+        self.payload = payload
+        self.status = status
+        self.lastPolledAt = lastPolledAt
+        self.ttl = ttl
+        self.generated = generated
+    }
+}
+
+// MARK: - Discriminated Union
+
+/// Session state for OAuth2 authorization flows.
+///
+/// `AuthSession` is a discriminated union covering the standard authorization code flow,
+/// refresh token flow, and the Device Authorization Grant (RFC 8628). The union is stored
+/// and retrieved by ``AuthCodeStorageProtocol`` implementations.
+///
+/// ## Backward Compatibility
+///
+/// The JSON encoding uses `"type": "code"` / `"type": "refresh"` / `"type": "device"` as
+/// the discriminator. Existing Redis sessions encoded with the old flat-struct format decode
+/// correctly because they already carry `"type": "code"` or `"type": "refresh"`.
+///
+/// - SeeAlso: ``CodeSession``, ``RefreshSession``, ``DeviceSession``
+enum AuthSession: Codable, TimeToLiveProtocol, Sendable {
+    case code(CodeSession)
+    case refresh(RefreshSession)
+    case device(DeviceSession)
+
+    // MARK: - Forwarding computed properties
+
+    /// The session type discriminator.
+    var sessionType: AuthSessionType {
+        switch self {
+        case .code:    return .code
+        case .refresh: return .refresh
+        case .device:  return .device
+        }
+    }
+
+    /// The primary storage lookup key value.
+    var codeValue: String {
+        switch self {
+        case .code(let sess):    return sess.code.value
+        case .refresh(let sess): return sess.code.value
+        case .device(let sess):  return sess.deviceCode.value
+        }
+    }
+
+    /// The authenticated user's payload, or `nil` for pending device sessions.
+    var payload: Payload? {
+        switch self {
+        case .code(let sess):    return sess.payload
+        case .refresh(let sess): return sess.payload
+        case .device(let sess):  return sess.payload
+        }
+    }
+
+    /// The OAuth2 scopes approved for this session.
+    var scopes: [String] {
+        switch self {
+        case .code(let sess):    return sess.scopes
+        case .refresh(let sess): return sess.scopes
+        case .device(let sess):  return sess.scopes
+        }
+    }
+
+    /// The CSRF state parameter (empty for device sessions, which have no redirect).
+    var state: String {
+        switch self {
+        case .code(let sess):    return sess.state
+        case .refresh(let sess): return sess.state
+        case .device:            return ""
+        }
+    }
+
+    /// The redirect URI (empty for device sessions, which have no redirect).
+    var redirect: String {
+        switch self {
+        case .code(let sess):    return sess.redirect
+        case .refresh(let sess): return sess.redirect
+        case .device:            return ""
+        }
+    }
+
+    // MARK: - TimeToLiveProtocol
+
+    var ttl: Int64? {
+        switch self {
+        case .code(let sess):    return sess.ttl
+        case .refresh(let sess): return sess.ttl
+        case .device(let sess):  return sess.ttl
+        }
+    }
+
+    var generated: Date {
+        switch self {
+        case .code(let sess):    return sess.generated
+        case .refresh(let sess): return sess.generated
+        case .device(let sess):  return sess.generated
+        }
+    }
+
+    // MARK: - Custom Codable (discriminator key: "type")
+
+    private enum CodingKeys: String, CodingKey {
+        // discriminator
+        case type
+        // code / refresh fields
+        case state, code, scopes, payload, redirect, ttl, generated
+        // device-only fields
+        case clientId, deviceCode, userCode, status, lastPolledAt
+    }
+
+    init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        let typeName = try container.decode(String.self, forKey: .type)
+        switch typeName {
+        case AuthSessionType.code.rawValue:
+            self = .code(CodeSession(
+                state: try container.decode(String.self, forKey: .state),
+                code: try container.decode(Code.self, forKey: .code),
+                scopes: try container.decode([String].self, forKey: .scopes),
+                payload: try container.decodeIfPresent(Payload.self, forKey: .payload),
+                redirect: try container.decode(String.self, forKey: .redirect),
+                ttl: try container.decodeIfPresent(Int64.self, forKey: .ttl),
+                generated: try container.decodeIfPresent(Date.self, forKey: .generated) ?? Date()
+            ))
+        case AuthSessionType.refresh.rawValue:
+            self = .refresh(RefreshSession(
+                state: try container.decode(String.self, forKey: .state),
+                code: try container.decode(Code.self, forKey: .code),
+                scopes: try container.decode([String].self, forKey: .scopes),
+                payload: try container.decodeIfPresent(Payload.self, forKey: .payload),
+                redirect: try container.decode(String.self, forKey: .redirect),
+                ttl: try container.decodeIfPresent(Int64.self, forKey: .ttl),
+                generated: try container.decodeIfPresent(Date.self, forKey: .generated) ?? Date()
+            ))
+        case AuthSessionType.device.rawValue:
+            self = .device(DeviceSession(
+                clientId: try container.decode(String.self, forKey: .clientId),
+                deviceCode: try container.decode(Code.self, forKey: .deviceCode),
+                userCode: try container.decode(String.self, forKey: .userCode),
+                scopes: try container.decode([String].self, forKey: .scopes),
+                payload: try container.decodeIfPresent(Payload.self, forKey: .payload),
+                status: try container.decode(DeviceGrantStatus.self, forKey: .status),
+                lastPolledAt: try container.decodeIfPresent(Date.self, forKey: .lastPolledAt),
+                ttl: try container.decodeIfPresent(Int64.self, forKey: .ttl),
+                generated: try container.decodeIfPresent(Date.self, forKey: .generated) ?? Date()
+            ))
+        default:
+            throw DecodingError.dataCorruptedError(
+                forKey: .type,
+                in: container,
+                debugDescription: "Unknown AuthSession type: \(typeName)"
+            )
+        }
+    }
+
+    func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: CodingKeys.self)
+        switch self {
+        case .code(let session):
+            try container.encode(AuthSessionType.code.rawValue, forKey: .type)
+            try container.encode(session.state, forKey: .state)
+            try container.encode(session.code, forKey: .code)
+            try container.encode(session.scopes, forKey: .scopes)
+            try container.encodeIfPresent(session.payload, forKey: .payload)
+            try container.encode(session.redirect, forKey: .redirect)
+            try container.encodeIfPresent(session.ttl, forKey: .ttl)
+            try container.encode(session.generated, forKey: .generated)
+        case .refresh(let session):
+            try container.encode(AuthSessionType.refresh.rawValue, forKey: .type)
+            try container.encode(session.state, forKey: .state)
+            try container.encode(session.code, forKey: .code)
+            try container.encode(session.scopes, forKey: .scopes)
+            try container.encodeIfPresent(session.payload, forKey: .payload)
+            try container.encode(session.redirect, forKey: .redirect)
+            try container.encodeIfPresent(session.ttl, forKey: .ttl)
+            try container.encode(session.generated, forKey: .generated)
+        case .device(let session):
+            try container.encode(AuthSessionType.device.rawValue, forKey: .type)
+            try container.encode(session.clientId, forKey: .clientId)
+            try container.encode(session.deviceCode, forKey: .deviceCode)
+            try container.encode(session.userCode, forKey: .userCode)
+            try container.encode(session.scopes, forKey: .scopes)
+            try container.encodeIfPresent(session.payload, forKey: .payload)
+            try container.encode(session.status, forKey: .status)
+            try container.encodeIfPresent(session.lastPolledAt, forKey: .lastPolledAt)
+            try container.encodeIfPresent(session.ttl, forKey: .ttl)
+            try container.encode(session.generated, forKey: .generated)
+        }
+    }
 }

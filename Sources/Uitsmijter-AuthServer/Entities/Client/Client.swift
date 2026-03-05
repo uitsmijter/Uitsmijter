@@ -83,6 +83,19 @@ struct Client: ClientProtocol, Sendable {
     }
 }
 
+/// Configuration for the Device Authorization Grant (RFC 8628).
+///
+/// When present and `device_code` is listed in `grant_types`, enables the
+/// device authorization flow for input-constrained devices (CLIs, smart TVs, IoT).
+struct DeviceGrantConfig: Codable, Sendable {
+    /// The lifetime in seconds of the `device_code` and `user_code`. Defaults to 1800.
+    var expires_in: Int?
+    /// Minimum polling interval in seconds. Defaults to 5.
+    var interval: Int?
+    /// Override the verification URI shown to the user. Auto-detected from the request if nil.
+    var verification_uri: String?
+}
+
 /// Complete configuration specification for an OAuth2 client.
 ///
 /// Contains all settings required for OAuth2 authorization flows, including
@@ -172,6 +185,12 @@ struct ClientSpec: Codable, Sendable {
     /// Recommended for: SPAs, mobile apps, and any public client.
     var isPkceOnly: Bool? = false
 
+    /// Device Authorization Grant configuration (RFC 8628).
+    ///
+    /// When present, the `device_code` grant type may be used by this client.
+    /// Requires `device_code` to also be listed in `grant_types`.
+    var device_grant_config: DeviceGrantConfig?
+
     /// Initialize a client specification.
     ///
     /// - Parameters:
@@ -192,7 +211,8 @@ struct ClientSpec: Codable, Sendable {
         allowedProviderScopes: [String]? = nil,
         referrers: [String]? = nil,
         secret: String? = nil,
-        isPkceOnly: Bool? = false
+        isPkceOnly: Bool? = false,
+        device_grant_config: DeviceGrantConfig? = nil
     ) {
         self.ident = ident
         self.tenantname = tenantname
@@ -203,6 +223,7 @@ struct ClientSpec: Codable, Sendable {
         self.referrers = referrers
         self.secret = secret
         self.isPkceOnly = isPkceOnly
+        self.device_grant_config = device_grant_config
     }
 }
 

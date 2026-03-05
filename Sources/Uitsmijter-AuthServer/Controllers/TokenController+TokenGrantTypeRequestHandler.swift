@@ -32,6 +32,8 @@ extension TokenController {
             token = try await refreshTokenGrantTypeRequestHandler(for: tenant, on: req)
         case .password:
             token = try await passwordGrantTypeRequestHandler(for: tenant, on: req, scope: scope)
+        case .device_code:
+            token = try await deviceCodeGrantTypeRequestHandler(for: tenant, on: req)
         default:
             throw Abort(.notImplemented, reason: "ERRORS.GRANT_TYPE_NOT_IMPLEMENTED")
         }
@@ -51,11 +53,12 @@ extension TokenController {
         _ authorisationTokenRequest: CodeTokenRequest,
         _ req: Request
     ) throws {
-        // check code challenge if set
-        switch session.code.codeChallengeMethod {
+        // check code challenge if set — only applicable for authorization code sessions
+        guard case .code(let codeSession) = session else { return }
+        switch codeSession.code.codeChallengeMethod {
         case .plain:
             if authorisationTokenRequest.code_challenge_method != nil
-                && authorisationTokenRequest.code_challenge_method != session.code.codeChallengeMethod {
+                && authorisationTokenRequest.code_challenge_method != codeSession.code.codeChallengeMethod {
                 req.requestInfo = RequestInfo(
                     description: "Wrong challenge method (plain). Request: "
                         + """
@@ -64,17 +67,17 @@ extension TokenController {
                                         ?? "_no_code_challenge_method"
                                   ),
                                   """.replacingOccurrences(of: "\n", with: "")
-                        + "Send: \(session.code.codeChallengeMethod?.rawValue ?? "_no_codeChallengeMethod")"
+                        + "Send: \(codeSession.code.codeChallengeMethod?.rawValue ?? "_no_codeChallengeMethod")"
                 )
                 throw Abort(.forbidden, reason: "ERRORS.CODE_CHALLENGE_METHOD_MISMATCH")
             }
 
-            if authorisationTokenRequest.code_verifier != session.code.codeChallenge {
+            if authorisationTokenRequest.code_verifier != codeSession.code.codeChallenge {
                 throw Abort(.forbidden, reason: "ERRORS.CODE_CHALLENGE_METHOD_MISMATCH")
             }
         case .sha256:
             if authorisationTokenRequest.code_challenge_method != nil
-                && authorisationTokenRequest.code_challenge_method != session.code.codeChallengeMethod {
+                && authorisationTokenRequest.code_challenge_method != codeSession.code.codeChallengeMethod {
                 req.requestInfo = RequestInfo(
                     description: "Wrong challenge method (sha256). Request: "
                         + """
@@ -83,7 +86,7 @@ extension TokenController {
                                         ?? "_no_code_challenge_method"
                                   ),
                                   """.replacingOccurrences(of: "\n", with: "")
-                        + "Send: \(session.code.codeChallengeMethod?.rawValue ?? "_no_codeChallengeMethod")"
+                        + "Send: \(codeSession.code.codeChallengeMethod?.rawValue ?? "_no_codeChallengeMethod")"
                 )
                 throw Abort(
                     .forbidden,
@@ -91,7 +94,7 @@ extension TokenController {
                 )
             }
 
-            if authorisationTokenRequest.code_challenge != session.code.codeChallenge {
+            if authorisationTokenRequest.code_challenge != codeSession.code.codeChallenge {
                 throw Abort(.forbidden, reason: "ERRORS.CODE_CHALLENGE_METHOD_MISMATCH")
             }
 
@@ -111,7 +114,7 @@ extension TokenController {
         }
 
         guard let session = await authCodeStorage.get(
-            type: .code,
+            type: AuthSessionType.code,
             codeValue: authorisationTokenRequest.code,
             remove: true
         )
@@ -158,7 +161,7 @@ extension TokenController {
     ) async throws -> TokenResponse {
         let refreshTokenRequest = try req.content.decode(RefreshTokenRequest.self)
         guard let session = await req.application.authCodeStorage?.get(
-            type: .refresh,
+            type: AuthSessionType.refresh,
             codeValue: refreshTokenRequest.refresh_token,
             remove: true
         )
@@ -302,6 +305,93 @@ extension TokenController {
         )
     }
 
+    private func deviceCodeGrantTypeRequestHandler(
+        for tenant: Tenant,
+        on req: Request
+    ) async throws -> TokenResponse {
+        let deviceTokenRequest = try req.content.decode(DeviceTokenRequest.self)
+
+        guard let storage = req.application.authCodeStorage else {
+            throw Abort(.insufficientStorage, reason: "ERRORS.CODE_STORAGE_AVAILABILITY")
+        }
+
+        guard let session = await storage.get(
+            type: AuthSessionType.device,
+            codeValue: deviceTokenRequest.device_code
+        ) else {
+            throw Abort(.badRequest, reason: "ERRORS.INVALID_GRANT")
+        }
+
+        guard case .device(let deviceData) = session else {
+            throw Abort(.badRequest, reason: "ERRORS.INVALID_GRANT")
+        }
+
+        // Rate limiting: check if polling too fast
+        let client = await Client.find(
+            in: req.application.entityStorage,
+            clientId: deviceData.clientId
+        )
+        let pollInterval = Double(client?.config.device_grant_config?.interval ?? 5)
+        if let lastPolled = deviceData.lastPolledAt, Date().timeIntervalSince(lastPolled) < pollInterval {
+            try await storage.updateDevice(
+                deviceCode: deviceTokenRequest.device_code,
+                newStatus: deviceData.status,
+                payload: deviceData.payload,
+                lastPolledAt: Date()
+            )
+            throw Abort(.tooManyRequests, reason: "ERRORS.SLOW_DOWN")
+        }
+
+        // Update lastPolledAt
+        try await storage.updateDevice(
+            deviceCode: deviceTokenRequest.device_code,
+            newStatus: deviceData.status,
+            payload: deviceData.payload,
+            lastPolledAt: Date()
+        )
+
+        switch deviceData.status {
+        case .denied:
+            try await storage.delete(type: AuthSessionType.device, codeValue: deviceTokenRequest.device_code)
+            throw Abort(.badRequest, reason: "ERRORS.ACCESS_DENIED")
+
+        case .pending:
+            Prometheus.main.deviceFlowPending?.inc()
+            throw Abort(.badRequest, reason: "ERRORS.AUTHORIZATION_PENDING")
+
+        case .authorized:
+            try await storage.delete(type: AuthSessionType.device, codeValue: deviceTokenRequest.device_code)
+
+            guard deviceData.payload != nil else {
+                throw Abort(.internalServerError, reason: "ERRORS.EXPECTED_VALUE_UNSET")
+            }
+
+            let userScopes: String
+            if let payloadScope = deviceData.payload?.scope, !payloadScope.isEmpty {
+                userScopes = payloadScope
+            } else {
+                userScopes = deviceData.scopes.sorted().joined(separator: " ")
+            }
+
+            let (accessToken, refreshToken) = try await getNewTokenPair(
+                on: req,
+                tenant: tenant,
+                session: session,
+                scopes: userScopes.components(separatedBy: " ")
+            )
+
+            Prometheus.main.deviceFlowSuccess?.inc()
+
+            return TokenResponse(
+                access_token: accessToken.value,
+                token_type: .Bearer,
+                expires_in: accessToken.secondsToExpire,
+                refresh_token: refreshToken.value,
+                scope: userScopes
+            )
+        }
+    }
+
     func getNewTokenPair(
         on req: Request,
         tenant: Tenant,
@@ -342,15 +432,14 @@ extension TokenController {
         )
         let refreshToken: Code = Code()
 
-        let refreshSession = AuthSession(
-            type: .refresh,
+        let refreshSession = AuthSession.refresh(RefreshSession(
             state: session.state,
             code: refreshToken,
             scopes: scopes,
             payload: session.payload,
             redirect: session.redirect,
             ttl: (Int64(Constants.TOKEN.REFRESH_EXPIRATION_IN_HOURS) * 60 * 60)
-        )
+        ))
         try await req.application.authCodeStorage?.set(authSession: refreshSession)
 
         // Trigger status update for Kubernetes tenant and client after creating refresh token

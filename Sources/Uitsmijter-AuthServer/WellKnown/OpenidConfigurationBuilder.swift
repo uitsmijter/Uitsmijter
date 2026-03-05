@@ -175,6 +175,14 @@ actor OpenidConfigurationBuilder {
         let endSessionEndpoint = "\(issuer)/logout"
         let revocationEndpoint = "\(issuer)/revoke"
 
+        // Device authorization endpoint (RFC 8628) — advertise when any client supports device_code
+        let hasDeviceGrantClient = tenantClients.contains { client in
+            client.config.grant_types?.contains(GrantTypes.device_code.rawValue) == true
+        }
+        let deviceAuthorizationEndpoint = hasDeviceGrantClient
+            ? "\(issuer)/oauth/device_authorization"
+            : nil
+
         // Get policy URLs from tenant information
         let policyUri = tenant.config.informations?.privacy_url
         let imprintUri = tenant.config.informations?.imprint_url
@@ -220,7 +228,8 @@ actor OpenidConfigurationBuilder {
             request_object_signing_alg_values_supported: nil,
             request_object_encryption_alg_values_supported: nil,
             request_object_encryption_enc_values_supported: nil,
-            code_challenge_methods_supported: codeChallengeMethods
+            code_challenge_methods_supported: codeChallengeMethods,
+            device_authorization_endpoint: deviceAuthorizationEndpoint
         )
     }
 

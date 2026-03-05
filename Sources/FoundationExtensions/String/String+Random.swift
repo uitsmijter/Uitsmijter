@@ -39,7 +39,7 @@ public extension String {
         ///
         /// - Parameter characterSet: A string containing all allowed characters
         /// - Returns: A `RandomCharacterSet` with the specified characters
-        static func custom(_ characterSet: String) -> RandomCharacterSet {
+        public static func custom(_ characterSet: String) -> RandomCharacterSet {
             RandomCharacterSet(value: characterSet)
         }
     }

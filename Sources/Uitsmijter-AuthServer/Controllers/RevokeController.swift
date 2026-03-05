@@ -360,7 +360,7 @@ struct RevokeController: RouteCollection {
 
         // Look up the refresh token in storage
         guard let session = await authCodeStorage.get(
-            type: .refresh,
+            type: AuthSessionType.refresh,
             codeValue: token
         ), let payload = session.payload else {
             // Token not found or has no payload - might already be revoked or never existed
@@ -384,7 +384,7 @@ struct RevokeController: RouteCollection {
         // Delete the refresh token
         do {
             try await authCodeStorage.delete(
-                type: .refresh,
+                type: AuthSessionType.refresh,
                 codeValue: token
             )
             Log.info(
@@ -395,9 +395,9 @@ struct RevokeController: RouteCollection {
 
             // Cascade: Also revoke the authorization code if it still exists
             // This prevents the client from using the authorization code to get new tokens
-            let authCodeValue = session.code.value
+            let authCodeValue = session.codeValue
             try? await authCodeStorage.delete(
-                type: .code,
+                type: AuthSessionType.code,
                 codeValue: authCodeValue
             )
             Log.debug("Cascaded revocation: authorization code also deleted", requestId: req.id)
