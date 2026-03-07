@@ -7,4 +7,12 @@ struct JSInputCredentials: JSInputParameterProtocol, Sendable {
     let username: String
     /// Users password
     let password: String
+    /// The OAuth2 grant type used for this authentication request
+    let grantType: GrantTypes
+
+    enum CodingKeys: String, CodingKey {
+        case username
+        case password
+        case grantType = "grant_type"
+    }
 }

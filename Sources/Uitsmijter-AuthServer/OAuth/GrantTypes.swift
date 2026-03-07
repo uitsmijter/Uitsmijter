@@ -34,4 +34,8 @@ enum GrantTypes: String, Codable, Sendable {
     /// A special grant type that Uitsmijter supports for an authentication middleware that passes the user to
     /// a backend system if the login succeeds.
     case interceptor
+
+    /// The Device Authorization Grant (RFC 8628) for input-constrained devices (CLIs, smart TVs, IoT) that
+    /// cannot open a browser directly. The device polls the token endpoint while the user authorizes on another device.
+    case device_code
 }

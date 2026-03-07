@@ -39,3 +39,22 @@ spec:
   tenantname: uitsmijter/ham
   redirect_urls:
     - 'https?://(.*\.)?ham.test(:8080)?/.*'
+
+---
+# Device Authorization Grant client used by terminal-login-test
+apiVersion: "uitsmijter.io/v1"
+kind: Client
+metadata:
+  name: terminal-device-client
+spec:
+  ident: f8b3c2a1-0d1e-4f8b-9c2a-3d4e5f6a7b8c
+  tenantname: uitsmijter/uitsmijter-tenant
+  redirect_urls:
+    - 'https?://(.*\.)?localhost(:8080)?/.*'
+  grant_types:
+    - device_code
+  scopes:
+    - access
+  device_grant_config:
+    expires_in: 1800
+    interval: 5

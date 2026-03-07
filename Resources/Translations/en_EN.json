@@ -1,4 +1,11 @@
 {
+  "ACTIVATE": {
+    "UI": {
+      "USER_CODE": "Device Code (e.g. ABCD-EFGH)",
+      "SUCCESS": "Your device has been authorized successfully.",
+      "AUTHORIZE": "Authorize Device"
+    }
+  },
   "LOGIN": {
     "UI": {
       "LOGIN": "Log In",

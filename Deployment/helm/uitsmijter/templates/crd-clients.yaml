@@ -75,6 +75,18 @@ spec:
                   type: boolean
                 secret:
                   type: string
+                device_grant_config:
+                  type: object
+                  properties:
+                    expires_in:
+                      type: integer
+                      description: Lifetime in seconds of device_code and user_code (default 1800)
+                    interval:
+                      type: integer
+                      description: Minimum polling interval in seconds (default 5)
+                    verification_uri:
+                      type: string
+                      description: Override the verification URI shown to the user
               required:
                 - ident
                 - tenantname

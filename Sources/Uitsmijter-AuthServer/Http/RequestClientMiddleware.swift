@@ -108,7 +108,8 @@ final class RequestClientMiddleware: AsyncMiddleware {
         Log.info("Login Mode: \(loginMode.rawValue) to: \(request.url.string)", requestId: request.id)
 
         // token request does not need further checks and do not have a clientInfo, yet
-        if ["/token", "/token/info"].contains(request.url.string) {
+        if ["/token", "/token/info", "/oauth/device_authorization", "/activate"].contains(request.url.string)
+            || request.url.string.hasPrefix("/activate?") {
             return try await next.respond(to: request)
         }
 

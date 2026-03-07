@@ -9,31 +9,30 @@ import VaporTesting
     @Test func storeSessionsInMemoryGarbageCollection() async throws {
         let storage = MemoryAuthCodeStorage()
 
-        let session_1 = AuthSession(
-            type: .code,
+        let session_1 = AuthSession.code(CodeSession(
             state: "state_1",
             code: Code(value: "code_1"),
             scopes: [],
             payload: nil,
-            redirect: "", ttl: 2
-        )
-        let session_2 = AuthSession(
-            type: .code,
+            redirect: "",
+            ttl: 2
+        ))
+        let session_2 = AuthSession.code(CodeSession(
             state: "state_2",
             code: Code(value: "code_2"),
             scopes: [],
             payload: nil,
-            redirect: "", ttl: 4
-        )
-        let session_3 = AuthSession(
-            type: .code,
+            redirect: "",
+            ttl: 4
+        ))
+        let session_3 = AuthSession.code(CodeSession(
             state: "state_3",
             code: Code(value: "code_3"),
             scopes: [],
             payload: nil,
             redirect: "",
             ttl: 6
-        )
+        ))
 
         do {
             try await storage.set(authSession: session_1)

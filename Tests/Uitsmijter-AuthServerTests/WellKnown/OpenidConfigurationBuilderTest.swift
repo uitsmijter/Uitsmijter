@@ -437,6 +437,71 @@ struct OpenidConfigurationBuilderTest {
         #expect(scopes.contains("admin"))
     }
 
+    // MARK: - Device Authorization Endpoint Tests
+
+    @Test("Builder includes device_authorization_endpoint when a client has device_code grant type")
+    func builderIncludesDeviceAuthorizationEndpointForDeviceCodeClient() async throws {
+        let app = try await createTestApp()
+        defer { Task { try? await app.asyncShutdown() } }
+
+        let tenant = createTestTenant(name: "DeviceTenant", hosts: ["device.example.com"])
+        app.entityStorage.tenants.insert(tenant)
+
+        let client = createTestClient(
+            name: "DeviceClient",
+            tenantName: "DeviceTenant",
+            grantTypes: ["device_code"]
+        )
+        app.entityStorage.clients.append(client)
+
+        let builder = OpenidConfigurationBuilder()
+        let request = createMockRequest(app: app, host: "device.example.com")
+
+        let config = builder.build(for: tenant, request: request, storage: app.entityStorage)
+
+        #expect(config.device_authorization_endpoint == "https://device.example.com/oauth/device_authorization")
+        #expect(config.grant_types_supported?.contains("device_code") == true)
+    }
+
+    @Test("Builder omits device_authorization_endpoint when no client has device_code grant type")
+    func builderOmitsDeviceAuthorizationEndpointWithoutDeviceCodeClient() async throws {
+        let app = try await createTestApp()
+        defer { Task { try? await app.asyncShutdown() } }
+
+        let tenant = createTestTenant(name: "NoDeviceTenant", hosts: ["nodevice.example.com"])
+        app.entityStorage.tenants.insert(tenant)
+
+        let client = createTestClient(
+            name: "RegularClient",
+            tenantName: "NoDeviceTenant",
+            grantTypes: ["authorization_code", "refresh_token"]
+        )
+        app.entityStorage.clients.append(client)
+
+        let builder = OpenidConfigurationBuilder()
+        let request = createMockRequest(app: app, host: "nodevice.example.com")
+
+        let config = builder.build(for: tenant, request: request, storage: app.entityStorage)
+
+        #expect(config.device_authorization_endpoint == nil)
+    }
+
+    @Test("Builder omits device_authorization_endpoint when tenant has no clients")
+    func builderOmitsDeviceAuthorizationEndpointForTenantWithNoClients() async throws {
+        let app = try await createTestApp()
+        defer { Task { try? await app.asyncShutdown() } }
+
+        let tenant = createTestTenant(name: "EmptyTenant", hosts: ["empty2.example.com"])
+        app.entityStorage.tenants.insert(tenant)
+
+        let builder = OpenidConfigurationBuilder()
+        let request = createMockRequest(app: app, host: "empty2.example.com")
+
+        let config = builder.build(for: tenant, request: request, storage: app.entityStorage)
+
+        #expect(config.device_authorization_endpoint == nil)
+    }
+
     @Test("Builder sorts scopes alphabetically")
     func builderSortsScopesAlphabetically() async throws {
         let app = try await createTestApp()

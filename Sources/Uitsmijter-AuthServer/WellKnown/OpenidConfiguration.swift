@@ -402,6 +402,15 @@ struct OpenidConfiguration: Codable, Sendable {
     /// ```
     let code_challenge_methods_supported: [String]?
 
+    /// OPTIONAL. URL of the authorization server's device authorization endpoint (RFC 8628).
+    ///
+    /// ## Example
+    ///
+    /// ```
+    /// "https://auth.example.com/oauth/device_authorization"
+    /// ```
+    let device_authorization_endpoint: String?
+
     // MARK: - Initialization
 
     /// Initialize OpenID Configuration with all fields.
@@ -483,7 +492,8 @@ struct OpenidConfiguration: Codable, Sendable {
         request_object_signing_alg_values_supported: [String]? = nil,
         request_object_encryption_alg_values_supported: [String]? = nil,
         request_object_encryption_enc_values_supported: [String]? = nil,
-        code_challenge_methods_supported: [String]? = nil
+        code_challenge_methods_supported: [String]? = nil,
+        device_authorization_endpoint: String? = nil
     ) {
         self.issuer = issuer
         self.authorization_endpoint = authorization_endpoint
@@ -523,6 +533,7 @@ struct OpenidConfiguration: Codable, Sendable {
         self.request_object_encryption_alg_values_supported = request_object_encryption_alg_values_supported
         self.request_object_encryption_enc_values_supported = request_object_encryption_enc_values_supported
         self.code_challenge_methods_supported = code_challenge_methods_supported
+        self.device_authorization_endpoint = device_authorization_endpoint
     }
 }
 // swiftlint:enable identifier_name

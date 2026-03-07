@@ -278,7 +278,9 @@ struct JSFunctionsNetworkingTest {
             }
         """)
 
-        let credentials = JSInputCredentials(username: "test@example.com", password: "test")
+        let credentials = JSInputCredentials(
+            username: "test@example.com", password: "test", grantType: .authorization_code
+        )
         let results = try await jsp.start(class: .userLogin, arguments: credentials)
 
         // Verify we got a result

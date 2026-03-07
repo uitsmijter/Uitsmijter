@@ -7,6 +7,7 @@ metadata:
 spec:
   silent_login: false
   hosts:
+    - id.ham.test
     - page.ham.test
     - shop.ham.test
     - api1.ham.test
@@ -26,7 +27,14 @@ spec:
     - |
       class UserLoginProvider {
         auth = false;
-        constructor(credentials) { this.auth = credentials.username.endsWith("@example.com"); commit(true); }
+        constructor(credentials) {
+          if (credentials.grant_type === 'interceptor' && credentials.username != "allow@example.com") {
+            commit(false);
+            return;
+          }
+          this.auth = credentials.username.endsWith("@example.com");
+          commit(true);
+        }
         get canLogin() { return this.auth; }
         get userProfile() { return { name: "Test User" }; }
         get role() { return "user"; }

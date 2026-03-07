@@ -67,6 +67,18 @@ struct Prometheus: Sendable {
     /// Currently known clients
     let countClients: PromGauge<Int>?
 
+    // MARK: - Device Authorization Grant (RFC 8628)
+
+    /// How many device authorization flows were initiated
+    let deviceFlowInitiation: PromCounter<Int>?
+    /// How many device authorization flows were successfully authorized by the user
+    let deviceFlowAuthorized: PromCounter<Int>?
+    /// How many device token polls returned authorization_pending
+    let deviceFlowPending: PromCounter<Int>?
+    /// How many device authorization flows were completed with an access token issued
+    let deviceFlowSuccess: PromCounter<Int>?
+
+    // swiftlint:disable function_body_length
     /// Private init to initialize the singleton once
     private init() {
         MetricsSystem.bootstrap(PrometheusMetricsFactory(client: Prometheus.prometheusClient))
@@ -148,7 +160,29 @@ struct Prometheus: Sendable {
             named: "\(Prometheus.metricsPrefix)_clients_count",
             helpText: "Current number of managed clients for all tenants."
         )
+
+        self.deviceFlowInitiation = client.createCounter(
+            forType: Int.self,
+            named: "\(Prometheus.metricsPrefix)_device_flow_initiation",
+            helpText: "Counter of device authorization flows initiated (POST /oauth/device_authorization)."
+        )
+        self.deviceFlowAuthorized = client.createCounter(
+            forType: Int.self,
+            named: "\(Prometheus.metricsPrefix)_device_flow_authorized",
+            helpText: "Counter of device flows authorized by the user at the activation endpoint."
+        )
+        self.deviceFlowPending = client.createCounter(
+            forType: Int.self,
+            named: "\(Prometheus.metricsPrefix)_device_flow_pending",
+            helpText: "Counter of device token poll responses with authorization_pending."
+        )
+        self.deviceFlowSuccess = client.createCounter(
+            forType: Int.self,
+            named: "\(Prometheus.metricsPrefix)_device_flow_success",
+            helpText: "Counter of device flows completed with an access token issued."
+        )
     }
+    // swiftlint:enable function_body_length
 
     /// Return the global prometheus client
     ///

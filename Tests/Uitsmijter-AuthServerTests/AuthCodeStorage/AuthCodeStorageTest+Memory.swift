@@ -8,33 +8,30 @@ import VaporTesting
     func setupStorage() async throws -> AuthCodeStorage {
         let storage = AuthCodeStorage(use: .memory)
 
-        let session_1 = AuthSession(
-            type: .code,
+        let session_1 = AuthSession.code(CodeSession(
             state: "state_1",
             code: Code(value: "code_1"),
             scopes: ["foo", "bar"],
             payload: nil,
             redirect: "",
             ttl: 10
-        )
-        let session_2 = AuthSession(
-            type: .code,
+        ))
+        let session_2 = AuthSession.code(CodeSession(
             state: "state_2",
             code: Code(value: "code_2"),
             scopes: ["foo", "bar"],
             payload: nil,
             redirect: "",
             ttl: 50
-        )
-        let session_TTL = AuthSession(
-            type: .code,
+        ))
+        let session_TTL = AuthSession.code(CodeSession(
             state: "state_TTL",
             code: Code(value: "code_TTL"),
             scopes: [],
             payload: nil,
             redirect: "",
             ttl: 1
-        )
+        ))
         do {
             try await storage.set(authSession: session_1)
             try await storage.set(authSession: session_2)
@@ -62,7 +59,7 @@ import VaporTesting
         #expect(ret_set_twice != nil)
 
         #expect(ret_set?.state == "state_1")
-        #expect(ret_set?.code.value == "code_1")
+        #expect(ret_set?.codeValue == "code_1")
     }
 
     @Test func storeSessionsInMemoryGetRemoved() async throws {
@@ -74,7 +71,7 @@ import VaporTesting
         #expect(ret_set_twice == nil)
 
         #expect(ret_set?.state == "state_1")
-        #expect(ret_set?.code.value == "code_1")
+        #expect(ret_set?.codeValue == "code_1")
     }
 
     @Test func storeSessionsInMemoryTTL() async throws {

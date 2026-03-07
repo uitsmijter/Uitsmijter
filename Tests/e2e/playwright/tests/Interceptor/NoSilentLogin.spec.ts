@@ -35,7 +35,7 @@ test.describe('No Silent login to ham', () => {
             await app.goto('https://page.ham.test/')
             await expect(page).toHaveTitle(/Login/)
 
-            await app.auth.login("test@example.com", "test", page)
+            await app.auth.login("allow@example.com", "test", page)
             await expect(page).toHaveTitle("A hilarious ham named Hank")
         })
 

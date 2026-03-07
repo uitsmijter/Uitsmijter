@@ -51,15 +51,14 @@ struct ClientStatusInitializationTest {
             profile: nil
         )
 
-        let refreshSession = AuthSession(
-            type: .refresh,
+        let refreshSession = AuthSession.refresh(RefreshSession(
             state: "test-state",
             code: Code(),
             scopes: ["openid"],
             payload: payload,
             redirect: "https://example.com/callback",
             ttl: (Int64(Constants.TOKEN.REFRESH_EXPIRATION_IN_HOURS) * 60 * 60)
-        )
+        ))
 
         try await authStorage.set(authSession: refreshSession)
 
@@ -104,15 +103,14 @@ struct ClientStatusInitializationTest {
                 profile: nil
             )
 
-            let refreshSession = AuthSession(
-                type: .refresh,
+            let refreshSession = AuthSession.refresh(RefreshSession(
                 state: "state-\(index)",
                 code: Code(),
                 scopes: ["openid"],
                 payload: payload,
                 redirect: "https://example.com/callback",
                 ttl: (Int64(Constants.TOKEN.REFRESH_EXPIRATION_IN_HOURS) * 60 * 60)
-            )
+            ))
 
             try await authStorage.set(authSession: refreshSession)
         }
@@ -134,15 +132,14 @@ struct ClientStatusInitializationTest {
                 profile: nil
             )
 
-            let refreshSession = AuthSession(
-                type: .refresh,
+            let refreshSession = AuthSession.refresh(RefreshSession(
                 state: "state-\(index)",
                 code: Code(),
                 scopes: ["openid"],
                 payload: payload,
                 redirect: "https://example.com/callback",
                 ttl: (Int64(Constants.TOKEN.REFRESH_EXPIRATION_IN_HOURS) * 60 * 60)
-            )
+            ))
 
             try await authStorage.set(authSession: refreshSession)
         }

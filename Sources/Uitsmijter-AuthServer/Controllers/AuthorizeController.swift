@@ -303,15 +303,14 @@ struct AuthorizeController: RouteCollection, OAuthControllerProtocol {
         // Update payload with the merged scopes for this authorization
         var updatedPayload = userPayload
         updatedPayload.scope = finalScopes.joined(separator: " ")
-        let authSession = AuthSession(
-            type: .code,
+        let authSession = AuthSession.code(CodeSession(
             state: authRequest.state,
             code: code,
             scopes: finalScopes,
             payload: updatedPayload,
             redirect: redirect,
             ttl: Constants.AUTHCODE.TimeToLive
-        )
+        ))
 
         try await request.application.authCodeStorage?.set(authSession: authSession)
         return authSession.codeRedirect(to: request)
@@ -389,15 +388,14 @@ struct AuthorizeController: RouteCollection, OAuthControllerProtocol {
         // Update payload with the merged scopes for this authorization
         var updatedPayload = userPayload
         updatedPayload.scope = finalScopes.joined(separator: " ")
-        let authSession = AuthSession(
-            type: .code,
+        let authSession = AuthSession.code(CodeSession(
             state: authRequest.state,
             code: code,
             scopes: finalScopes,
             payload: updatedPayload,
             redirect: redirect,
             ttl: Constants.AUTHCODE.TimeToLive
-        )
+        ))
 
         try await request.application.authCodeStorage?.set(authSession: authSession)
         return authSession.codeRedirect(to: request)

@@ -36,7 +36,7 @@ test.describe('Templates', () => {
         test.skip(browserName === 'webkit' || browserName === 'mobile-safari', 'WebKit form submission issue');
 
         let response = await app.goto('https://page.ham.test')
-        await app.auth.login('test@example.com', 'test')
+        await app.auth.login('allow@example.com', 'test')
 
         // logout
         const logoutLink = await page.locator('a').getByText('logout')

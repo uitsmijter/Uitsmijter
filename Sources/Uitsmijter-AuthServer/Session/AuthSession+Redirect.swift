@@ -11,6 +11,6 @@ extension AuthSession {
     /// - Returns: A redirection response
     ///
     func codeRedirect(to req: Request) -> Response {
-        req.redirect(to: "\(redirect)?code=\(code.value)&state=\(state)")
+        req.redirect(to: "\(redirect)?code=\(codeValue)&state=\(state)")
     }
 }

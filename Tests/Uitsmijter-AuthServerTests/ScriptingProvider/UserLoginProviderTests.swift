@@ -35,8 +35,12 @@ struct UserLoginProviderTests {
                                      }
                                      """
 
-    let userOK = JSInputCredentials(username: "ok@example.com", password: "very-secret")
-    let userDenied = JSInputCredentials(username: "deni@example.com", password: "very-secret")
+    let userOK = JSInputCredentials(
+        username: "ok@example.com", password: "very-secret", grantType: .authorization_code
+    )
+    let userDenied = JSInputCredentials(
+        username: "deni@example.com", password: "very-secret", grantType: .authorization_code
+    )
 
     @Test("Get example with callback")
     func getExampleCallback() async throws {

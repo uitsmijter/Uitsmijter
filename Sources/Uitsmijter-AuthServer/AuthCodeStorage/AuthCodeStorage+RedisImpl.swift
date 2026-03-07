@@ -2,10 +2,14 @@ import Foundation
 @preconcurrency import Redis
 import Logger
 
+// swiftlint:disable type_body_length
 /// Actor-based thread-safe Redis storage for authorization codes and login sessions
 actor RedisAuthCodeStorage: AuthCodeStorageProtocol {
     /// TTL for login session IDs in seconds (2 hours)
     private static let loginSessionTTL: Int64 = 60 * 120
+
+    /// Redis key prefix for secondary device-user-code index
+    private static let deviceUserPrefix = "deviceuser~"
 
     /// Injected redis client
     let redis: RedisClient
@@ -17,7 +21,7 @@ actor RedisAuthCodeStorage: AuthCodeStorageProtocol {
     // MARK: - AuthCodeStorageProtocol
 
     func set(authSession session: AuthSession) async throws {
-        guard let key = RedisKey(rawValue: "\(session.type)~" + session.code.value) else {
+        guard let key = RedisKey(rawValue: "\(session.sessionType.rawValue)~" + session.codeValue) else {
             throw AuthCodeStorageError.KEY_ERROR
         }
 
@@ -27,10 +31,21 @@ actor RedisAuthCodeStorage: AuthCodeStorageProtocol {
         if let ttl = session.ttl {
             _ = try await redis.expire(key, after: TimeAmount.seconds(ttl)).get()
         }
+
+        // For device sessions: also store a secondary key usercode → deviceCode for user-code lookup
+        if case .device(let deviceSession) = session {
+            let userCodeKey = RedisKey(rawValue: Self.deviceUserPrefix + deviceSession.userCode)
+            if let userCodeKey {
+                try await redis.set(userCodeKey, to: deviceSession.deviceCode.value).get()
+                if let ttl = session.ttl {
+                    _ = try await redis.expire(userCodeKey, after: TimeAmount.seconds(ttl)).get()
+                }
+            }
+        }
     }
 
-    func get(type: AuthSession.CodeType, codeValue value: String, remove: Bool? = false) async -> AuthSession? {
-        guard let key = RedisKey(rawValue: "\(type)~" + value) else {
+    func get(type: AuthSessionType, codeValue value: String, remove: Bool? = false) async -> AuthSession? {
+        guard let key = RedisKey(rawValue: "\(type.rawValue)~" + value) else {
             return nil
         }
         let value = try? await redis.get(key).get()
@@ -98,10 +113,21 @@ actor RedisAuthCodeStorage: AuthCodeStorageProtocol {
         return false
     }
 
-    func delete(type: AuthSession.CodeType, codeValue value: String) async throws {
-        guard let key = RedisKey(rawValue: "\(type)~" + value) else {
+    func delete(type: AuthSessionType, codeValue value: String) async throws {
+        guard let key = RedisKey(rawValue: "\(type.rawValue)~" + value) else {
             return
         }
+
+        // For device sessions: also delete the secondary user-code index
+        if type == .device {
+            if let existing = await get(type: .device, codeValue: value, remove: false),
+               case .device(let deviceSession) = existing {
+                if let userCodeKey = RedisKey(rawValue: Self.deviceUserPrefix + deviceSession.userCode) {
+                    _ = try? await redis.delete([userCodeKey]).get()
+                }
+            }
+        }
+
         _ = try await redis.delete(key).get()
     }
 
@@ -112,8 +138,8 @@ actor RedisAuthCodeStorage: AuthCodeStorageProtocol {
             let keysToDelete: [RedisKey] = try await withThrowingTaskGroup(of: RedisKey?.self) { group in
                 for key in keys {
                     group.addTask {
-                        // Skip non-AuthSession keys (loginid~ keys are LoginSession, not AuthSession)
-                        if key.hasPrefix("loginid~") {
+                        // Skip non-AuthSession keys
+                        if key.hasPrefix("loginid~") || key.hasPrefix(Self.deviceUserPrefix) {
                             return nil
                         }
 
@@ -124,7 +150,7 @@ actor RedisAuthCodeStorage: AuthCodeStorageProtocol {
                                 if decoded.payload?.tenant == tenant.name && decoded.payload?.subject.value == subject {
                                     Log.debug(
                                         """
-                                        Matching session found in Redis - Type: \(decoded.type.rawValue), \
+                                        Matching session found in Redis - Type: \(decoded.sessionType.rawValue), \
                                         Tenant: \(decoded.payload?.tenant ?? "nil"), \
                                         Subject: \(decoded.payload?.subject.value ?? "nil"), \
                                         Key: \(key)
@@ -156,28 +182,26 @@ actor RedisAuthCodeStorage: AuthCodeStorageProtocol {
         }
     }
 
-    func count(tenant: Tenant, type: AuthSession.CodeType) async -> Int {
+    func count(tenant: Tenant, type: AuthSessionType) async -> Int {
         Log.debug("Count AuthSession for tenant: \(tenant.name) with type: \(type.rawValue)")
         do {
             let (_, keys) = try await redis.scan(startingFrom: 0).get()
             let matchingKeys: Int = try await withThrowingTaskGroup(of: Int.self) { group in
                 for key in keys {
                     group.addTask {
-                        // Skip non-AuthSession keys (loginid~ keys are LoginSession, not AuthSession)
-                        if key.hasPrefix("loginid~") {
+                        // Skip non-AuthSession keys
+                        if key.hasPrefix("loginid~") || key.hasPrefix(Self.deviceUserPrefix) {
                             return 0
                         }
 
                         if let rKey = RedisKey(rawValue: key) {
                             let value = try? await self.redis.get(rKey).get()
                             if let data = value?.data {
-                                // Try to decode as AuthSession, but skip if it's a different type
-                                // (e.g., LoginSession which doesn't have a 'type' field)
                                 if let decoded = try? JSONDecoder.main.decode(AuthSession.self, from: data) {
-                                    if decoded.payload?.tenant == tenant.name && decoded.type == type {
+                                    if decoded.payload?.tenant == tenant.name && decoded.sessionType == type {
                                         Log.debug(
                                             """
-                                            Session in count - Type: \(decoded.type.rawValue), \
+                                            Session in count - Type: \(decoded.sessionType.rawValue), \
                                             Tenant: \(decoded.payload?.tenant ?? "nil"), \
                                             Subject: \(decoded.payload?.subject.value ?? "nil"), \
                                             Key: \(key)
@@ -206,31 +230,29 @@ actor RedisAuthCodeStorage: AuthCodeStorageProtocol {
         }
     }
 
-    func count(client: UitsmijterClient, type: AuthSession.CodeType) async -> Int {
+    func count(client: UitsmijterClient, type: AuthSessionType) async -> Int {
         Log.debug("Count AuthSession for client: \(client.name) with type: \(type.rawValue)")
         do {
             let (_, keys) = try await redis.scan(startingFrom: 0).get()
             let matchingKeys: Int = try await withThrowingTaskGroup(of: Int.self) { group in
                 for key in keys {
                     group.addTask {
-                        // Skip non-AuthSession keys (loginid~ keys are LoginSession, not AuthSession)
-                        if key.hasPrefix("loginid~") {
+                        // Skip non-AuthSession keys
+                        if key.hasPrefix("loginid~") || key.hasPrefix(Self.deviceUserPrefix) {
                             return 0
                         }
 
                         if let rKey = RedisKey(rawValue: key) {
                             let value = try? await self.redis.get(rKey).get()
                             if let data = value?.data {
-                                // Try to decode as AuthSession, but skip if it's a different type
                                 if let decoded = try? JSONDecoder.main.decode(AuthSession.self, from: data) {
-                                    // Match by audience (client_id) in the payload and type
                                     guard let payload = decoded.payload else { return 0 }
                                     let clientIdString = client.config.ident.uuidString
                                     let audienceMatches = payload.audience.value.contains(clientIdString)
-                                    if audienceMatches && decoded.type == type {
+                                    if audienceMatches && decoded.sessionType == type {
                                         Log.debug(
                                             """
-                                            Session in count - Type: \(decoded.type.rawValue), \
+                                            Session in count - Type: \(decoded.sessionType.rawValue), \
                                             Client: \(payload.audience.value.joined(separator: ",")), \
                                             Subject: \(payload.subject.value), \
                                             Key: \(key)
@@ -259,6 +281,48 @@ actor RedisAuthCodeStorage: AuthCodeStorageProtocol {
         }
     }
 
+    /// Retrieves a device session by the short user code via secondary index.
+    func getDevice(byUserCode userCode: String) async -> AuthSession? {
+        guard let userCodeKey = RedisKey(rawValue: Self.deviceUserPrefix + userCode) else {
+            return nil
+        }
+        guard let deviceCodeValue = try? await redis.get(userCodeKey).get(),
+              let deviceCodeString = deviceCodeValue.string else {
+            return nil
+        }
+        return await get(type: .device, codeValue: deviceCodeString)
+    }
+
+    /// Updates a device session: deletes the old entry and stores the updated session.
+    func updateDevice(
+        deviceCode: String,
+        newStatus: DeviceGrantStatus,
+        payload: Payload?,
+        lastPolledAt: Date?
+    ) async throws {
+        guard let existing = await get(type: .device, codeValue: deviceCode),
+              case .device(let deviceSession) = existing else {
+            throw AuthCodeStorageError.KEY_ERROR
+        }
+
+        // Delete the old session (also removes secondary user-code key)
+        try await delete(type: .device, codeValue: deviceCode)
+
+        // Store the updated session
+        let updated = DeviceSession(
+            clientId: deviceSession.clientId,
+            deviceCode: deviceSession.deviceCode,
+            userCode: deviceSession.userCode,
+            scopes: deviceSession.scopes,
+            payload: payload,
+            status: newStatus,
+            lastPolledAt: lastPolledAt,
+            ttl: deviceSession.ttl,
+            generated: deviceSession.generated
+        )
+        try await set(authSession: .device(updated))
+    }
+
     func isHealthy() async -> Bool {
         if (try? await redis.ping().get()) == "PONG" {
             return true
@@ -268,3 +332,4 @@ actor RedisAuthCodeStorage: AuthCodeStorageProtocol {
         return false
     }
 }
+// swiftlint:enable type_body_length

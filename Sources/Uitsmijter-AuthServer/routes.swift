@@ -40,4 +40,8 @@ func routes(_ app: Application) throws {
     try app.register(collection: AuthorizeController())
     try app.register(collection: TokenController())
     try app.register(collection: RevokeController())
+
+    // Device Authorization Grant (RFC 8628)
+    try app.register(collection: DeviceController())
+    try app.register(collection: ActivateController())
 }

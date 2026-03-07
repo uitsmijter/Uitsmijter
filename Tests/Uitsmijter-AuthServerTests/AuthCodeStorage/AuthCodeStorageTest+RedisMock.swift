@@ -67,33 +67,30 @@ import Redis
         let mock = RedisMock()
         let storage = AuthCodeStorage(use: .redis(client: mock))
 
-        let session_1 = AuthSession(
-            type: .code,
+        let session_1 = AuthSession.code(CodeSession(
             state: "state_1",
             code: Code(value: "code_1"),
             scopes: ["foo", "bar"],
             payload: nil,
             redirect: "",
             ttl: 10
-        )
-        let session_2 = AuthSession(
-            type: .code,
+        ))
+        let session_2 = AuthSession.code(CodeSession(
             state: "state_2",
             code: Code(value: "code_2"),
             scopes: ["foo", "bar"],
             payload: nil,
             redirect: "",
             ttl: 50
-        )
-        let session_TTL = AuthSession(
-            type: .code,
+        ))
+        let session_TTL = AuthSession.code(CodeSession(
             state: "state_TTL",
             code: Code(value: "code_TTL"),
             scopes: [],
             payload: nil,
             redirect: "",
             ttl: 1
-        )
+        ))
 
         do {
             try await storage.set(authSession: session_1)
@@ -123,15 +120,14 @@ import Redis
         let mock = RedisMock()
         let storage = AuthCodeStorage(use: .redis(client: mock))
 
-        let session_1 = AuthSession(
-            type: .code,
+        let session_1 = AuthSession.code(CodeSession(
             state: "state_1",
             code: Code(value: "code_1"),
             scopes: ["foo", "bar"],
             payload: nil,
             redirect: "",
             ttl: 10
-        )
+        ))
         try await storage.set(authSession: session_1)
 
         _ = await storage.get(type: .code, codeValue: "code_1", remove: true)

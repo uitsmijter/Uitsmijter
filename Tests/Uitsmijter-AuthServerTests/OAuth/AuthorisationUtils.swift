@@ -531,3 +531,48 @@ func authorisationCodeGrantFlow(
     #expect(loginRedirectState == state)
     return code
 }
+
+/// Generate a test client with Device Authorization Grant configured (RFC 8628).
+///
+/// Creates a client with `device_grant_config` and `device_code` in `grant_types`,
+/// ready for use in device grant flow tests.
+///
+/// - Parameters:
+///   - storage: Entity storage to populate
+///   - clientIdent: UUID for the test client
+///   - script: JavaScript provider script to use
+///   - scopes: Allowed scopes (defaults to ["read"])
+///   - expiresIn: Device code lifetime in seconds (default 1800)
+///   - interval: Minimum polling interval in seconds (default 5)
+@MainActor
+func generateDeviceTestClient(
+    in storage: EntityStorage,
+    uuid clientIdent: UUID,
+    script: TestTenantScripts? = .johnDoe,
+    scopes: [String]? = nil,
+    expiresIn: Int = 1800,
+    interval: Int = 5
+) {
+    storage.tenants.removeAll()
+    storage.clients.removeAll()
+    let tenant = createTenant(in: storage, script: script ?? .johnDoe)
+
+    let deviceGrantTypes: [String] = [GrantTypes.device_code.rawValue]
+    let deviceGrantConfig = DeviceGrantConfig(
+        expires_in: expiresIn,
+        interval: interval,
+        verification_uri: nil
+    )
+    let client = Client(
+        name: "Device Test Client",
+        config: ClientSpec(
+            ident: clientIdent,
+            tenantname: tenant.name,
+            redirect_urls: ["http://localhost:?([0-9]+)?", "http://example.com"],
+            grant_types: deviceGrantTypes,
+            scopes: scopes ?? ["read"],
+            device_grant_config: deviceGrantConfig
+        )
+    )
+    storage.clients = [client]
+}
