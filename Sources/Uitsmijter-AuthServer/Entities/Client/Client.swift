@@ -85,8 +85,11 @@ struct Client: ClientProtocol, Sendable {
 
 /// Configuration for the Device Authorization Grant (RFC 8628).
 ///
-/// When present and `device_code` is listed in `grant_types`, enables the
-/// device authorization flow for input-constrained devices (CLIs, smart TVs, IoT).
+/// Optional tuning for the device authorization flow (CLIs, smart TVs, IoT).
+///
+/// The flow is enabled by listing `device_code` in the client's `grant_types`.
+/// This config only overrides individual defaults; when it is omitted entirely,
+/// the defaults apply (`expires_in: 1800`, `interval: 5`, auto-detected verification URI).
 struct DeviceGrantConfig: Codable, Sendable {
     /// The lifetime in seconds of the `device_code` and `user_code`. Defaults to 1800.
     var expires_in: Int?

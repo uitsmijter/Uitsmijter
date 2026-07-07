@@ -169,11 +169,15 @@ struct DeviceControllerTests {
         }
     }
 
-    @Test("Device authorization without device_grant_config returns bad request")
-    func deviceAuthorizationNoGrantConfigReturnsBadRequest() async throws {
+    @Test("Device authorization without device_grant_config falls back to default expires_in and interval")
+    func deviceAuthorizationNoGrantConfigUsesDefaults() async throws {
         try await withApp(configure: configure) { app in
-            // generateTestClient creates a client WITHOUT device_grant_config
-            await generateTestClient(in: app.entityStorage, uuid: testAppIdent)
+            // Client enables the device_code grant but provides NO device_grant_config.
+            await generateTestClient(
+                in: app.entityStorage,
+                uuid: testAppIdent,
+                includeGrantTypes: [.device_code]
+            )
 
             let response = try await app.sendRequest(
                 .POST, "/oauth/device_authorization",
@@ -187,7 +191,15 @@ struct DeviceControllerTests {
                 }
             )
 
-            #expect(response.status == .badRequest)
+            #expect(response.status == .ok)
+
+            guard let body = try? response.content.decode(DeviceAuthorizationResponse.self) else {
+                Issue.record("Failed to decode DeviceAuthorizationResponse")
+                return
+            }
+            // Falls back to the documented defaults when no config is present.
+            #expect(body.expires_in == 1800)
+            #expect(body.interval == 5)
         }
     }
 
