@@ -170,7 +170,8 @@ struct ActivateController: RouteCollection {
             arguments: JSInputCredentials(
                 username: username,
                 password: password,
-                grantType: .device_code
+                grantType: .device_code,
+                tenant: JSInputTenant(from: tenant)
             )
         )
 

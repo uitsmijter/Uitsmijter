@@ -7,7 +7,8 @@ import Testing
 struct JavaScriptProviderTest {
 
     let dummyCredentials = JSInputCredentials(
-        username: "test@example.com", password: "test", grantType: .authorization_code
+        username: "test@example.com", password: "test", grantType: .authorization_code,
+        tenant: JSInputTenant(name: "test")
     )
 
     @Test("JavaScriptProvider initializes successfully")

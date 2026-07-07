@@ -23,8 +23,8 @@ struct UserValidationProviderTests {
                          }
                          """
 
-    let userOK = JSInputUsername(username: "ok@example.com")
-    let userDenied = JSInputUsername(username: "deni@example.com")
+    let userOK = JSInputUsername(username: "ok@example.com", tenant: JSInputTenant(name: "test"))
+    let userDenied = JSInputUsername(username: "deni@example.com", tenant: JSInputTenant(name: "test"))
 
     @Test("Get example with callback")
     func getExampleCallback() async throws {

@@ -3,6 +3,7 @@ import Foundation
 import Testing
 @testable import Uitsmijter_AuthServer
 
+// swiftlint:disable type_body_length
 @Suite("JavaScript Functions Networking Tests")
 struct JSFunctionsNetworkingTest {
 
@@ -279,7 +280,8 @@ struct JSFunctionsNetworkingTest {
         """)
 
         let credentials = JSInputCredentials(
-            username: "test@example.com", password: "test", grantType: .authorization_code
+            username: "test@example.com", password: "test", grantType: .authorization_code,
+            tenant: JSInputTenant(name: "test")
         )
         let results = try await jsp.start(class: .userLogin, arguments: credentials)
 

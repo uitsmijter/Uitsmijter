@@ -117,7 +117,8 @@ struct UserValidation {
         try await providerInterpreter.start(
             class: .userValidate,
             arguments: JSInputUsername(
-                username: username
+                username: username,
+                tenant: JSInputTenant(from: tenant)
             )
         )
 

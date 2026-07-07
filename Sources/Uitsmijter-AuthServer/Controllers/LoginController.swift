@@ -271,7 +271,12 @@ struct LoginController: RouteCollection, OAuthControllerProtocol {
         try await providerInterpreter.loadProvider(script: tenant.config.providers.joined(separator: "\n"))
         try await providerInterpreter.start(
             class: .userLogin,
-            arguments: JSInputCredentials(username: form.username, password: form.password, grantType: grantType)
+            arguments: JSInputCredentials(
+                username: form.username,
+                password: form.password,
+                grantType: grantType,
+                tenant: JSInputTenant(from: tenant)
+            )
         )
         return providerInterpreter
     }
