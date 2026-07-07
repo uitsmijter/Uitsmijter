@@ -41,7 +41,7 @@ struct AuthControllerCodeClientWithSecretTest {
         }
     }
 
-    @Test("Code flow no client secret") func codeFlowNoClientSecret() async throws {
+    @Test("Code flow issues a code without client_secret at /authorize") func codeFlowNoClientSecret() async throws {
         try await withApp(configure: configure) { app in
             await generateTestClientWithSecret(in: app.entityStorage, uuid: testAppIdent, secret: testSecret)
             guard let tenant = await app.entityStorage.clients.first(
@@ -64,13 +64,16 @@ struct AuthControllerCodeClientWithSecretTest {
                     req.headers.bearerAuthorization = try await validAuthorisation(for: tenant, in: app)
                 },
                 afterResponse: { @Sendable res async throws in
-                    #expect(res.status == .unauthorized)
+                    // RFC 6749 §4.1.1: the authorization endpoint does not authenticate
+                    // the client secret, so a code is still issued. The secret is enforced
+                    // on the token request.
+                    #expect(res.status == .seeOther)
                 }
             )
         }
     }
 
-    @Test("Code flow wrong client secret") func codeFlowWrongClientSecret() async throws {
+    @Test("Code flow ignores client_secret at /authorize") func codeFlowWrongClientSecret() async throws {
         try await withApp(configure: configure) { app in
             await generateTestClientWithSecret(in: app.entityStorage, uuid: testAppIdent, secret: testSecret)
             guard let tenant = await app.entityStorage.clients
@@ -93,7 +96,10 @@ struct AuthControllerCodeClientWithSecretTest {
                     req.headers.bearerAuthorization = try await validAuthorisation(for: tenant, in: app)
                 },
                 afterResponse: { @Sendable res async throws in
-                    #expect(res.status == .unauthorized)
+                    // RFC 6749 §4.1.1: the authorization endpoint does not authenticate
+                    // the client secret, so a code is still issued. The secret is enforced
+                    // on the token request.
+                    #expect(res.status == .seeOther)
                 }
             )
         }
@@ -132,7 +138,8 @@ struct AuthControllerCodeClientWithSecretTest {
         }
     }
 
-    @Test("Code flow no client secret plain") func codeFlowNoClientSecretPlain() async throws {
+    @Test("Code flow (PKCE) issues a code without client_secret at /authorize")
+    func codeFlowNoClientSecretPlain() async throws {
         try await withApp(configure: configure) { app in
             await generateTestClientWithSecret(in: app.entityStorage, uuid: testAppIdent, secret: testSecret)
             guard let tenant = await app.entityStorage.clients
@@ -156,13 +163,16 @@ struct AuthControllerCodeClientWithSecretTest {
                     req.headers.bearerAuthorization = try await validAuthorisation(for: tenant, in: app)
                 },
                 afterResponse: { @Sendable res async throws in
-                    #expect(res.status == .unauthorized)
+                    // RFC 6749 §4.1.1: the authorization endpoint does not authenticate
+                    // the client secret, so a code is still issued. The secret is enforced
+                    // on the token request.
+                    #expect(res.status == .seeOther)
                 }
             )
         }
     }
 
-    @Test("Code flow wrong client secret plain") func codeFlowWrongClientSecretPlain() async throws {
+    @Test("Code flow (PKCE) ignores client_secret at /authorize") func codeFlowWrongClientSecretPlain() async throws {
         try await withApp(configure: configure) { app in
             await generateTestClientWithSecret(in: app.entityStorage, uuid: testAppIdent, secret: testSecret)
             guard let tenant = await app.entityStorage.clients
@@ -187,7 +197,10 @@ struct AuthControllerCodeClientWithSecretTest {
                     req.headers.bearerAuthorization = try await validAuthorisation(for: tenant, in: app)
                 },
                 afterResponse: { @Sendable res async throws in
-                    #expect(res.status == .unauthorized)
+                    // RFC 6749 §4.1.1: the authorization endpoint does not authenticate
+                    // the client secret, so a code is still issued. The secret is enforced
+                    // on the token request.
+                    #expect(res.status == .seeOther)
                 }
             )
         }

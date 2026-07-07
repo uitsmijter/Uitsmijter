@@ -259,9 +259,11 @@ struct AuthorizeController: RouteCollection, OAuthControllerProtocol {
         if client.config.isPkceOnly ?? false {
             throw Abort(.badRequest, reason: "LOGIN.ERRORS.CLIENT_ONLY_SUPPORTS_PKCE")
         }
-        if client.config.secret != nil && client.config.secret != authRequest.client_secret {
-            throw Abort(.unauthorized, reason: "LOGIN.ERROR.WRONG_CLIENT_SECRET")
-        }
+        // NOTE: The client secret is deliberately NOT validated here. Per RFC 6749
+        // §3.2.1 / §4.1.1 the authorization endpoint only *identifies* the client
+        // (client_id); confidential clients authenticate with their secret on the
+        // back-channel token request (TokenController). Requiring it here would both
+        // break spec-conformant clients and leak the secret through the user-agent.
         let redirect = try client.checkedRedirect(for: authRequest)
 
         // Filter requested scopes from the authorization request
@@ -341,10 +343,10 @@ struct AuthorizeController: RouteCollection, OAuthControllerProtocol {
             throw Abort(.forbidden, reason: "LOGIN.ERRORS.TENANT_MISMATCH")
         }
 
-        if client.config.secret != nil && client.config.secret != authRequest.client_secret {
-            throw Abort(.unauthorized, reason: "LOGIN.ERROR.WRONG_CLIENT_SECRET")
-        }
-
+        // NOTE: No client secret validation on the authorization endpoint — see the
+        // non-PKCE handler above. The secret is authenticated on the token request
+        // (RFC 6749 §3.2.1 / §4.1.1). PKCE clients in particular are typically public
+        // and carry no secret at all.
         let redirect = try client.checkedRedirect(for: authRequest)
 
         // Filter requested scopes from the authorization request
