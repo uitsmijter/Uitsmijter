@@ -35,7 +35,7 @@ OAuth2 device-flow client works.
 ### Interactive
 
 ```bash
-cd Demo/Tools/Cli/DeviceGrantDemo
+cd Tests/Tools/Cli/DeviceGrantDemo
 cargo run
 ```
 
