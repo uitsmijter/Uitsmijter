@@ -260,7 +260,9 @@ function kindSetupCert() {
 function kindSetupTraefik() {
   helm repo add traefik https://traefik.github.io/charts
   helm repo update
-  helm upgrade --install traefik --namespace traefik --create-namespace -f "${PROJECT_DIR}/Deployment/e2e/traefik/values.yaml" traefik/traefik
+  # Pin the chart version: Deployment/e2e/traefik/values.yaml tracks the 38.x values schema.
+  # Newer charts (39.x+) changed the values schema and reject this file. See TRAEFIK_CHART_VERSION.
+  helm upgrade --install traefik --namespace traefik --create-namespace --version "${TRAEFIK_CHART_VERSION:-38.0.2}" -f "${PROJECT_DIR}/Deployment/e2e/traefik/values.yaml" traefik/traefik
   
   kindWaitForPods traefik app.kubernetes.io/instance=traefik-traefik
   kubectl apply \

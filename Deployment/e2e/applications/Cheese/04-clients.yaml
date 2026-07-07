@@ -93,3 +93,23 @@ spec:
     - authorization_code
   referrers:
     - https://spa.example.net/.*
+
+---
+apiVersion: "uitsmijter.io/v1"
+kind: Client
+metadata:
+  name: cheese-secret-client
+  namespace: cheese
+spec:
+  ident: 7b1c9e63-2f8a-4d11-9f3e-5a8c2d4b6e90
+  tenantname: cheese/cheese
+  redirect_urls:
+    - 'https?://api\.example\.com(:8080)?/.*'
+  grant_types:
+    - password
+    - authorization_code
+    - refresh_token
+  scopes:
+    - access
+  # use only test secrets: https://docs.uitsmijter.io/contribution/guidelines/#using-test-secrets-for-development
+  secret: Phai0ohG7zaJ2eech4ohch5ouV9aiwoo3ueRoongei

@@ -1,6 +1,7 @@
 export interface TokenRequestData {
     grant_type: "authorization_code" | "refresh_token" | "password"
     client_id: string
+    client_secret?: string,
     scope?: string,
     code?: string,
     refresh_token?: string
