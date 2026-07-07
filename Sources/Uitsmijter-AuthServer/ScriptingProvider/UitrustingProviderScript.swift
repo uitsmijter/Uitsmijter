@@ -1,10 +1,16 @@
 import Foundation
 
-/// Generates the JavaScript `UserLoginProvider` for the `uitrusting/v1` predefined
-/// provider type.
+/// Generates the JavaScript `UserLoginProvider` + `UserValidationProvider` for the
+/// `uitrusting/v1` predefined provider type.
 ///
-/// The generated script calls Uitrusting's `POST {url}/verify` endpoint with the
-/// tenant, username and password, and maps its response
+/// Both call Uitrusting's single `POST {url}/verify` endpoint:
+/// - **Login** sends `{ tenant, username, password_hash }` (SHA256 hex — the plain
+///   password is never transmitted); `valid` means the credentials are correct.
+/// - **Refresh re-validation** sends `{ tenant, username }` with no hash; `valid`
+///   then means the user still exists and is active.
+///
+/// The status code is always 200, so the decision is made on `valid`, and the
+/// response maps
 ///
 /// ```json
 /// { "known": true, "valid": true, "subject": "…", "roles": [...],
@@ -33,6 +39,11 @@ enum UitrustingProviderScript {
 
         return """
         // Auto-generated provider for uitrusting/v1
+
+        // Login: POST { username, password_hash, tenant } to /verify.
+        // `valid` means the credentials are correct. The status is always 200, so we
+        // decide on `valid` (and `known`), never the HTTP status code. The password is
+        // never sent in the clear — only its SHA256 hex hash.
         class UserLoginProvider {
             canLoginFlag = false;
             subjectId = null;
@@ -48,12 +59,12 @@ enum UitrustingProviderScript {
                     body: JSON.stringify({
                         tenant: credentials.tenant.name,
                         username: credentials.username,
-                        password: credentials.password
+                        password_hash: sha256(credentials.password)
                     })
                 }).then((response) => {
                     try {
                         const data = JSON.parse(response.body);
-                        if (response.code == 200 && data.known === true && data.valid === true) {
+                        if (data.known === true && data.valid === true) {
                             this.canLoginFlag = true;
                             this.subjectId = data.subject;
                             this.userRoles = data.roles || [];
@@ -75,6 +86,36 @@ enum UitrustingProviderScript {
             get role() { return this.userRoles.length ? this.userRoles[0] : "none"; }
             get roles() { return this.userRoles; }
             get scopes() { return this.userScopes; }
+        }
+
+        // Refresh re-validation: POST { username, tenant } (no password_hash) to the
+        // same /verify. With no hash, `valid` means the user still exists and is active.
+        class UserValidationProvider {
+            validFlag = false;
+            constructor(args) {
+                const headers = { "Content-Type": "application/json" };
+                \(tokenHeader)
+                fetch(\(verifyURL), {
+                    method: "post",
+                    headers: headers,
+                    body: JSON.stringify({
+                        tenant: args.tenant.name,
+                        username: args.username
+                    })
+                }).then((response) => {
+                    try {
+                        const data = JSON.parse(response.body);
+                        this.validFlag = (data.valid === true);
+                    } catch (e) {
+                        console.log("uitrusting/v1: cannot parse verify response: " + e);
+                    }
+                    commit(this.validFlag);
+                }).catch((err) => {
+                    console.log("uitrusting/v1: verify request failed: " + err);
+                    commit(false);
+                });
+            }
+            get isValid() { return this.validFlag; }
         }
         """
     }
