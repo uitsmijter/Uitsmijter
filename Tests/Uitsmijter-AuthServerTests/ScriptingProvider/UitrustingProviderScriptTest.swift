@@ -43,6 +43,15 @@ struct UitrustingProviderScriptTest {
         #expect(!validationPart.contains("password_hash"))
     }
 
+    @Test("Both /verify bodies include the tenant namespace")
+    func bodiesIncludeNamespace() {
+        let script = UitrustingProviderScript.make(url: "u.svc", token: nil)
+        // Login body.
+        #expect(script.contains("namespace: credentials.tenant.namespace"))
+        // Validation body.
+        #expect(script.contains("namespace: args.tenant.namespace"))
+    }
+
     @Test("Generated script is valid JS and defines both provider classes")
     func generatedScriptLoadsAsValidJS() async throws {
         let provider = JavaScriptProvider()

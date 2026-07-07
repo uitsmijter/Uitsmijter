@@ -4,10 +4,12 @@ import Foundation
 /// `uitrusting/v1` predefined provider type.
 ///
 /// Both call Uitrusting's single `POST {url}/verify` endpoint:
-/// - **Login** sends `{ tenant, username, password_hash }` (SHA256 hex — the plain
-///   password is never transmitted); `valid` means the credentials are correct.
-/// - **Refresh re-validation** sends `{ tenant, username }` with no hash; `valid`
-///   then means the user still exists and is active.
+/// - **Login** sends `{ tenant, namespace, username, password_hash }` (SHA256 hex —
+///   the plain password is never transmitted); `valid` means the credentials are correct.
+/// - **Refresh re-validation** sends `{ tenant, namespace, username }` with no hash;
+///   `valid` then means the user still exists and is active.
+///
+/// `namespace` is the tenant's Kubernetes namespace (`null` for file-based tenants).
 ///
 /// The status code is always 200, so the decision is made on `valid`, and the
 /// response maps
@@ -58,6 +60,7 @@ enum UitrustingProviderScript {
                     headers: headers,
                     body: JSON.stringify({
                         tenant: credentials.tenant.name,
+                        namespace: credentials.tenant.namespace,
                         username: credentials.username,
                         password_hash: sha256(credentials.password)
                     })
@@ -100,6 +103,7 @@ enum UitrustingProviderScript {
                     headers: headers,
                     body: JSON.stringify({
                         tenant: args.tenant.name,
+                        namespace: args.tenant.namespace,
                         username: args.username
                     })
                 }).then((response) => {
