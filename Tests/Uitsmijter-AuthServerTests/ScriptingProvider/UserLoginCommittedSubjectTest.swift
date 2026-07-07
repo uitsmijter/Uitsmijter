@@ -32,10 +32,12 @@ struct UserLoginCommittedSubjectTest {
                                      """
 
     let userOK = JSInputCredentials(
-        username: "ok@example.com", password: "very-secret", grantType: .authorization_code
+        username: "ok@example.com", password: "very-secret", grantType: .authorization_code,
+        tenant: JSInputTenant(name: "test")
     )
     let userDenied = JSInputCredentials(
-        username: "deni@example.com", password: "very-secret", grantType: .authorization_code
+        username: "deni@example.com", password: "very-secret", grantType: .authorization_code,
+        tenant: JSInputTenant(name: "test")
     )
 
     @Test("Get committed value can login")

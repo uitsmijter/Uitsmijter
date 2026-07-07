@@ -222,7 +222,8 @@ extension TokenController {
             arguments: JSInputCredentials(
                 username: passwordTokenRequest.username,
                 password: passwordTokenRequest.password,
-                grantType: .password
+                grantType: .password,
+                tenant: JSInputTenant(from: tenant)
             )
         )
 

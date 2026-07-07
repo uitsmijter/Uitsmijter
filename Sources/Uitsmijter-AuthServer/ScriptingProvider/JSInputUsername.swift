@@ -5,4 +5,6 @@ import Foundation
 struct JSInputUsername: JSInputParameterProtocol, Sendable {
     /// Users username or email address
     let username: String
+    /// The tenant this validation request belongs to
+    let tenant: JSInputTenant
 }

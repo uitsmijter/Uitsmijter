@@ -5,7 +5,8 @@ import Testing
 @Suite("JavaScript Provider Get Properties Tests")
 struct JavaScriptProviderGetPropertiesTest {
     let dummyCredentials = JSInputCredentials(
-        username: "test@example.com", password: "test", grantType: .authorization_code
+        username: "test@example.com", password: "test", grantType: .authorization_code,
+        tenant: JSInputTenant(name: "test")
     )
     @Test("getSubject returns committed subject from script")
     func getSubjectReturnsCommittedSubject() async throws {
