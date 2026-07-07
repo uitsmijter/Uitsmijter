@@ -10,6 +10,27 @@ final class RequestErrorMiddleware: AsyncMiddleware {
     ///     - environment: The environment to respect when presenting errors.
     static func `default`(environment: Environment) -> RequestErrorMiddleware {
         .init { req, error in
+            // Standard OAuth 2.0 errors (RFC 6749 §5.2 / RFC 8628 §3.5) are rendered
+            // in their own `{"error": "...", "error_description": "..."}` shape so that
+            // conformant OAuth2 client libraries can interpret them.
+            if let oauth = error as? OAuthError {
+                Log.info("OAuth error on \(req.url.path): \(oauth.code)")
+                let response = Response(status: oauth.status)
+                response.headers.replaceOrAdd(name: .contentType, value: "application/json; charset=utf-8")
+                response.headers.replaceOrAdd(name: .cacheControl, value: "no-store")
+                do {
+                    response.body = try .init(
+                        data: JSONEncoder().encode(
+                            OAuthErrorBody(error: oauth.code, error_description: oauth.errorDescription)
+                        ),
+                        byteBufferAllocator: req.byteBufferAllocator
+                    )
+                } catch {
+                    response.body = .init(string: "{\"error\":\"\(oauth.code)\"}")
+                }
+                return response
+            }
+
             // variables to determine
             let status: HTTPResponseStatus
             let reason: String

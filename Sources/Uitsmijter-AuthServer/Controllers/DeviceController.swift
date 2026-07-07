@@ -35,16 +35,8 @@ struct DeviceController: RouteCollection, OAuthControllerProtocol {
         // Validate client
         let uitsmijterClient = try await client(for: deviceRequest, request: req)
 
-        // Device grant must be configured for the client
-        guard let grantConfig = uitsmijterClient.config.device_grant_config else {
-            Log.error(
-                "device_grant_config not configured for client \(deviceRequest.client_id)",
-                requestId: req.id
-            )
-            throw Abort(.badRequest, reason: "ERRORS.DEVICE_GRANT_NOT_CONFIGURED")
-        }
-
-        // Client must explicitly allow device_code grant type
+        // Enabling the device grant is controlled solely by listing `device_code`
+        // in the client's grant_types. `device_grant_config` is optional tuning.
         let grantTypes = uitsmijterClient.config.grant_types ?? []
         guard grantTypes.contains(GrantTypes.device_code.rawValue) else {
             Log.error(
@@ -54,12 +46,15 @@ struct DeviceController: RouteCollection, OAuthControllerProtocol {
             throw Abort(.badRequest, reason: "ERRORS.GRANT_TYPE_NOT_SUPPORTED")
         }
 
-        let expiresIn = grantConfig.expires_in ?? 1800
-        let interval = grantConfig.interval ?? 5
+        // When `device_grant_config` is omitted, fall back to the defaults:
+        // expires_in: 1800, interval: 5, and an auto-detected verification URI.
+        let grantConfig = uitsmijterClient.config.device_grant_config
+        let expiresIn = grantConfig?.expires_in ?? 1800
+        let interval = grantConfig?.interval ?? 5
 
         // Determine verification URI
         let verificationUri: String
-        if let configuredUri = grantConfig.verification_uri {
+        if let configuredUri = grantConfig?.verification_uri {
             verificationUri = configuredUri
         } else {
             let scheme = req.headers.first(name: "X-Forwarded-Proto")

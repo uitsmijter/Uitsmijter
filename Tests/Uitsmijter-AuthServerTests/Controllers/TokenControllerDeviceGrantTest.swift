@@ -22,6 +22,21 @@ struct TokenControllerDeviceGrantTest {
         )
     }
 
+    /// POST a device_code token request for the test client and return the response.
+    private func postDeviceToken(_ app: Application, deviceCode: String) async throws -> TestingHTTPResponse {
+        try await app.sendRequest(
+            .POST, "/token",
+            beforeRequest: { @Sendable req async throws in
+                let tokenRequest = self.makeDeviceTokenRequest(
+                    clientId: self.testAppIdent.uuidString,
+                    deviceCode: deviceCode
+                )
+                try req.content.encode(tokenRequest, as: .json)
+                req.headers.contentType = .json
+            }
+        )
+    }
+
     private func seedPendingSession(in storage: AuthCodeStorage, deviceCode: String, clientId: String) async throws {
         let session = AuthSession.device(DeviceSession(
             clientId: clientId,
@@ -57,23 +72,14 @@ struct TokenControllerDeviceGrantTest {
         try await withApp(configure: configure) { app in
             await generateDeviceTestClient(in: app.entityStorage, uuid: testAppIdent)
 
-            let response = try await app.sendRequest(
-                .POST, "/token",
-                beforeRequest: { @Sendable req async throws in
-                    let tokenRequest = self.makeDeviceTokenRequest(
-                        clientId: self.testAppIdent.uuidString,
-                        deviceCode: "nonexistent-device-code-01"
-                    )
-                    try req.content.encode(tokenRequest, as: .json)
-                    req.headers.contentType = .json
-                }
-            )
+            let response = try await postDeviceToken(app, deviceCode: "nonexistent-device-code-01")
 
             #expect(response.status == .badRequest)
+            #expect((try? response.content.decode(OAuthErrorBody.self))?.error == "invalid_grant")
         }
     }
 
-    @Test("Device token grant with pending status returns bad request")
+    @Test("Device token grant with pending status returns authorization_pending")
     func deviceTokenPendingStatusReturnsBadRequest() async throws {
         try await withApp(configure: configure) { app in
             await generateDeviceTestClient(in: app.entityStorage, uuid: testAppIdent)
@@ -89,23 +95,14 @@ struct TokenControllerDeviceGrantTest {
                 clientId: testAppIdent.uuidString
             )
 
-            let response = try await app.sendRequest(
-                .POST, "/token",
-                beforeRequest: { @Sendable req async throws in
-                    let tokenRequest = self.makeDeviceTokenRequest(
-                        clientId: self.testAppIdent.uuidString,
-                        deviceCode: knownDeviceCode
-                    )
-                    try req.content.encode(tokenRequest, as: .json)
-                    req.headers.contentType = .json
-                }
-            )
+            let response = try await postDeviceToken(app, deviceCode: knownDeviceCode)
 
             #expect(response.status == .badRequest)
+            #expect((try? response.content.decode(OAuthErrorBody.self))?.error == "authorization_pending")
         }
     }
 
-    @Test("Device token grant with denied status returns bad request")
+    @Test("Device token grant with denied status returns access_denied")
     func deviceTokenDeniedStatusReturnsBadRequest() async throws {
         try await withApp(configure: configure) { app in
             await generateDeviceTestClient(in: app.entityStorage, uuid: testAppIdent)
@@ -125,19 +122,10 @@ struct TokenControllerDeviceGrantTest {
             ))
             try await storage.set(authSession: session)
 
-            let response = try await app.sendRequest(
-                .POST, "/token",
-                beforeRequest: { @Sendable req async throws in
-                    let tokenRequest = self.makeDeviceTokenRequest(
-                        clientId: self.testAppIdent.uuidString,
-                        deviceCode: knownDeviceCode
-                    )
-                    try req.content.encode(tokenRequest, as: .json)
-                    req.headers.contentType = .json
-                }
-            )
+            let response = try await postDeviceToken(app, deviceCode: knownDeviceCode)
 
             #expect(response.status == .badRequest)
+            #expect((try? response.content.decode(OAuthErrorBody.self))?.error == "access_denied")
         }
     }
 
@@ -166,17 +154,7 @@ struct TokenControllerDeviceGrantTest {
             ))
             try await storage.set(authSession: session)
 
-            let response = try await app.sendRequest(
-                .POST, "/token",
-                beforeRequest: { @Sendable req async throws in
-                    let tokenRequest = self.makeDeviceTokenRequest(
-                        clientId: self.testAppIdent.uuidString,
-                        deviceCode: knownDeviceCode
-                    )
-                    try req.content.encode(tokenRequest, as: .json)
-                    req.headers.contentType = .json
-                }
-            )
+            let response = try await postDeviceToken(app, deviceCode: knownDeviceCode)
 
             #expect(response.status == .ok)
             guard let tokenResponse = try? response.content.decode(TokenResponse.self) else {
@@ -214,17 +192,7 @@ struct TokenControllerDeviceGrantTest {
             ))
             try await storage.set(authSession: session)
 
-            let response = try await app.sendRequest(
-                .POST, "/token",
-                beforeRequest: { @Sendable req async throws in
-                    let tokenRequest = self.makeDeviceTokenRequest(
-                        clientId: self.testAppIdent.uuidString,
-                        deviceCode: knownDeviceCode
-                    )
-                    try req.content.encode(tokenRequest, as: .json)
-                    req.headers.contentType = .json
-                }
-            )
+            let response = try await postDeviceToken(app, deviceCode: knownDeviceCode)
 
             #expect(response.status == .ok)
             let gone = await storage.get(type: .device, codeValue: knownDeviceCode)
@@ -232,8 +200,8 @@ struct TokenControllerDeviceGrantTest {
         }
     }
 
-    @Test("Device token grant with rapid polling returns slow_down (429)")
-    func deviceTokenRapidPollingReturnsTooManyRequests() async throws {
+    @Test("Device token grant with rapid polling returns slow_down (RFC 8628, HTTP 400)")
+    func deviceTokenRapidPollingReturnsSlowDown() async throws {
         try await withApp(configure: configure) { app in
             await generateDeviceTestClient(in: app.entityStorage, uuid: testAppIdent)
 
@@ -255,19 +223,61 @@ struct TokenControllerDeviceGrantTest {
             ))
             try await storage.set(authSession: session)
 
+            let response = try await postDeviceToken(app, deviceCode: knownDeviceCode)
+
+            // RFC 8628 §3.5: slow_down is a 400 error with the code in the body,
+            // not an HTTP 429.
+            #expect(response.status == .badRequest)
+            #expect((try? response.content.decode(OAuthErrorBody.self))?.error == "slow_down")
+        }
+    }
+
+    @Test("Device token grant accepts the RFC 8628 grant_type URN")
+    func deviceTokenAcceptsGrantTypeURN() async throws {
+        try await withApp(configure: configure) { app in
+            await generateDeviceTestClient(in: app.entityStorage, uuid: testAppIdent)
+
+            guard let storage = app.authCodeStorage else {
+                Issue.record("authCodeStorage not available")
+                return
+            }
+
+            let knownDeviceCode = "urn-device-code-0001"
+            let payload = makeTestPayload(clientId: testAppIdent.uuidString, tenantName: "Test Tenant")
+            let session = AuthSession.device(DeviceSession(
+                clientId: testAppIdent.uuidString,
+                deviceCode: Code(value: knownDeviceCode),
+                userCode: "URNU-CODE",
+                scopes: ["read"],
+                payload: payload,
+                status: .authorized
+            ))
+            try await storage.set(authSession: session)
+
+            // Send the standard form body with the URN grant_type, exactly as a
+            // conformant OAuth2 client library would.
             let response = try await app.sendRequest(
                 .POST, "/token",
                 beforeRequest: { @Sendable req async throws in
-                    let tokenRequest = self.makeDeviceTokenRequest(
-                        clientId: self.testAppIdent.uuidString,
-                        deviceCode: knownDeviceCode
+                    let form = RawTokenForm(
+                        grant_type: GrantTypes.deviceCodeURN,
+                        client_id: self.testAppIdent.uuidString,
+                        device_code: knownDeviceCode
                     )
-                    try req.content.encode(tokenRequest, as: .json)
-                    req.headers.contentType = .json
+                    try req.content.encode(form, as: .urlEncodedForm)
                 }
             )
 
-            #expect(response.status == .tooManyRequests)
+            #expect(response.status == .ok)
+            #expect((try? response.content.decode(TokenResponse.self))?.token_type == .Bearer)
         }
     }
+}
+
+/// Raw form body letting a test send an arbitrary `grant_type` string (e.g. the
+/// RFC 8628 URN), which the typed `DeviceTokenRequest` would otherwise normalize.
+private struct RawTokenForm: Content {
+    let grant_type: String   // swiftlint:disable:this identifier_name
+    let client_id: String    // swiftlint:disable:this identifier_name
+    let device_code: String  // swiftlint:disable:this identifier_name
 }

@@ -322,11 +322,11 @@ extension TokenController {
             type: AuthSessionType.device,
             codeValue: deviceTokenRequest.device_code
         ) else {
-            throw Abort(.badRequest, reason: "ERRORS.INVALID_GRANT")
+            throw OAuthError.invalidGrant()
         }
 
         guard case .device(let deviceData) = session else {
-            throw Abort(.badRequest, reason: "ERRORS.INVALID_GRANT")
+            throw OAuthError.invalidGrant()
         }
 
         // Rate limiting: check if polling too fast
@@ -342,7 +342,7 @@ extension TokenController {
                 payload: deviceData.payload,
                 lastPolledAt: Date()
             )
-            throw Abort(.tooManyRequests, reason: "ERRORS.SLOW_DOWN")
+            throw OAuthError.slowDown
         }
 
         // Update lastPolledAt
@@ -356,11 +356,11 @@ extension TokenController {
         switch deviceData.status {
         case .denied:
             try await storage.delete(type: AuthSessionType.device, codeValue: deviceTokenRequest.device_code)
-            throw Abort(.badRequest, reason: "ERRORS.ACCESS_DENIED")
+            throw OAuthError.accessDenied
 
         case .pending:
             Prometheus.main.deviceFlowPending?.inc()
-            throw Abort(.badRequest, reason: "ERRORS.AUTHORIZATION_PENDING")
+            throw OAuthError.authorizationPending
 
         case .authorized:
             try await storage.delete(type: AuthSessionType.device, codeValue: deviceTokenRequest.device_code)

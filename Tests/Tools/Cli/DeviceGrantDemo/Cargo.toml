@@ -1,0 +1,25 @@
+[package]
+name = "device-grant-demo"
+version = "0.1.0"
+edition = "2021"
+description = "Interactive demo of the OAuth 2.0 Device Authorization Grant (RFC 8628) against a Uitsmijter OIDC server."
+license = "MIT"
+
+[dependencies]
+# oauth2 is the de-facto standard OAuth2 client for Rust. It implements the
+# device authorization grant (RFC 8628), including the token-endpoint polling
+# loop, so we don't hand-roll it. Requires an RFC-compliant server.
+oauth2 = { version = "5", features = ["reqwest-blocking"] }
+# reqwest is the HTTP client oauth2 drives (and we use it for OIDC discovery).
+# It is the same reqwest 0.12 that oauth2 re-exports, so the client types unify.
+reqwest = { version = "0.12", features = ["blocking", "json"] }
+# serde / serde_json parse the OIDC discovery document.
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+# clap is the de-facto standard CLI argument parser. `env` lets each flag fall
+# back to an environment variable.
+clap = { version = "4", features = ["derive", "env"] }
+
+[[bin]]
+name = "device-grant-demo"
+path = "src/main.rs"
