@@ -60,4 +60,20 @@ extension JavaScriptProvider {
         return scopes
     }
 
+    /// Returns the optional `roles` array from `scriptClass`.
+    ///
+    /// Providers may expose either a single `role` or a `roles` array (or both).
+    /// Returns `nil` when the provider does not expose a non-empty `roles` array,
+    /// so the token omits the `roles` claim for single-role providers.
+    ///
+    /// - Parameter scriptClass: a `ScriptClassExecution`, default: userLogin
+    /// - Returns: The `roles` as a `[String]`, or `nil` when not provided.
+    func getRoles(scriptClass: ScriptClassExecution = .userLogin) async -> [String]? {
+        guard let roles: [String] = try? self.getObject(class: scriptClass, property: "roles"),
+              !roles.isEmpty else {
+            return nil
+        }
+        return roles
+    }
+
 }

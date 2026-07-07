@@ -298,6 +298,7 @@ struct Token: ExpressibleByStringLiteral {
             tenant: tenantName,
             responsibility: nil,
             role: userProfile.role,
+            roles: userProfile.roles,
             user: userProfile.user,
             scope: userProfile.scope,
             profile: userProfile.profile

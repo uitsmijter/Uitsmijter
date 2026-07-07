@@ -117,7 +117,7 @@ fileprivate func createTenant(
                 """
         )
     case .custom(let source):
-        tenantConfig.providers.append(source)
+        tenantConfig.providers.append(.script(source))
     }
     let tenant = Tenant(
         name: tenantName ?? "Test Tenant",

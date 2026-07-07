@@ -94,7 +94,7 @@ struct UserValidation {
     /// - SeeAlso: ``Constants/SECURITY/ALLOW_MISSING_PROVIDERS``
     static func isStillValid(username: String, tenant: Tenant, on request: Request) async throws -> Bool {
         let providerInterpreter = JavaScriptProvider()
-        try await providerInterpreter.loadProvider(script: tenant.config.providers.joined(separator: "\n"))
+        try await providerInterpreter.loadProvider(script: tenant.config.providerScripts.joined(separator: "\n"))
 
         if await providerInterpreter.isClassExists(class: .userValidate) == false {
             if Constants.SECURITY.ALLOW_MISSING_PROVIDERS == false {

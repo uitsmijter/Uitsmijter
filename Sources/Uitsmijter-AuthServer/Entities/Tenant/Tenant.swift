@@ -332,10 +332,20 @@ struct TenantSpec: Codable, Sendable {
     ///
     /// ```yaml
     /// providers:
-    ///   - "ldap-auth.js"
-    ///   - "custom-db.js"
+    ///   - |
+    ///     class UserLoginProvider { … }   # raw script
+    ///   - type: "uitrusting/v1"           # predefined provider
+    ///     url: uitrusting.acme.svc
     /// ```
-    var providers: [String] = []
+    var providers: [TenantProvider] = []
+
+    /// The effective JavaScript for every provider entry, in order.
+    ///
+    /// Raw script entries are returned as-is; predefined providers (e.g.
+    /// `uitrusting/v1`) are expanded to their generated provider script.
+    var providerScripts: [String] {
+        providers.map { $0.script }
+    }
 
     /// Configuration for loading templates from S3-compatible storage.
     ///
@@ -395,7 +405,7 @@ struct TenantSpec: Codable, Sendable {
         hosts: [String],
         informations: TenantInformations? = nil,
         interceptor: TenantInterceptorSettings? = nil,
-        providers: [String] = [],
+        providers: [TenantProvider] = [],
         templates: TenantTemplatesSettings? = nil,
         silent_login: Bool? = true,
         jwt_algorithm: String? = nil

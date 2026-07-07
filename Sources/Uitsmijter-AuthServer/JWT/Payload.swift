@@ -39,6 +39,7 @@ struct Payload: JWTPayload, SubjectProtocol, UserProfileProtocol, Sendable {
         case tenant = "tenant"
         case responsibility = "responsibility"
         case role = "role"
+        case roles = "roles"
         case user = "user"
         case scope = "scope"
         case profile = "profile"
@@ -97,8 +98,15 @@ struct Payload: JWTPayload, SubjectProtocol, UserProfileProtocol, Sendable {
 
     /// The user's role within the system
     ///
-    /// Used for role-based access control (RBAC) decisions.
+    /// Used for role-based access control (RBAC) decisions. For providers that
+    /// expose multiple roles, this holds the primary (first) role; see ``roles``.
     var role: String
+
+    /// The user's roles, when the provider supplies more than one.
+    ///
+    /// Optional and omitted from the token when the provider only exposes a single
+    /// `role`. The `role` claim always mirrors the primary (first) role.
+    var roles: [String]?
 
     /// The username or identifier of the user
     ///
@@ -137,6 +145,7 @@ struct Payload: JWTPayload, SubjectProtocol, UserProfileProtocol, Sendable {
         tenant: String,
         responsibility: String? = nil,
         role: String,
+        roles: [String]? = nil,
         user: String,
         scope: String? = nil,
         profile: CodableProfile? = nil
@@ -150,6 +159,7 @@ struct Payload: JWTPayload, SubjectProtocol, UserProfileProtocol, Sendable {
         self.tenant = tenant
         self.responsibility = responsibility
         self.role = role
+        self.roles = roles
         self.user = user
         self.scope = scope ?? ""
         self.profile = profile

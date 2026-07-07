@@ -216,7 +216,7 @@ extension TokenController {
 
         // handle provider requests
         let providerInterpreter = JavaScriptProvider()
-        try await providerInterpreter.loadProvider(script: tenant.config.providers.joined(separator: "\n"))
+        try await providerInterpreter.loadProvider(script: tenant.config.providerScripts.joined(separator: "\n"))
         try await providerInterpreter.start(
             class: .userLogin,
             arguments: JSInputCredentials(
@@ -243,6 +243,7 @@ extension TokenController {
 
         let profile = await providerInterpreter.getProfile()
         let role = await providerInterpreter.getRole()
+        let roles = await providerInterpreter.getRoles()
 
         // Get client_id for audience and scope filtering
         let tokenRequest = try req.content.decode(TokenRequest.self)
@@ -287,6 +288,7 @@ extension TokenController {
             subject: providedSubject.subject,
             userProfile: UserProfile(
                 role: role,
+                roles: roles,
                 user: passwordTokenRequest.username,
                 scope: finalScopes.joined(separator: " "),
                 profile: profile
@@ -404,6 +406,7 @@ extension TokenController {
         }
         let profile = UserProfile(
             role: payload.role,
+            roles: payload.roles,
             user: payload.user,
             scope: payload.scope,
             profile: payload.profile
