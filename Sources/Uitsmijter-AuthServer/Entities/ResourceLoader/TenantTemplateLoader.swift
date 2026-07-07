@@ -190,15 +190,16 @@ actor TenantTemplateLoader {
                 accessKeyId: templates.access_key_id,
                 secretAccessKey: templates.secret_access_key
             ),
-            httpClientProvider: .createNew,
             logger: Log.shared
         )
 
         defer {
-            do {
-                try client.syncShutdown()
-            } catch let err {
-                Log.error("S3 client was unable to shut down: \(err) (\(err.localizedDescription))")
+            Task { [client] in
+                do {
+                    try await client.shutdown()
+                } catch let err {
+                    Log.error("S3 client was unable to shut down: \(err) (\(err.localizedDescription))")
+                }
             }
         }
 
@@ -233,7 +234,9 @@ actor TenantTemplateLoader {
             Log.debug("Creating S3 template directory: \(tenantDir.path)")
             do {
                 let response: S3.GetObjectOutput = try await s3.getObject(fileRequest)
-                guard let content = response.body?.asString() else {
+                let buffer = try await response.body.collect(upTo: 10 * 1024 * 1024)
+                guard let content = buffer.getString(at: buffer.readerIndex, length: buffer.readableBytes),
+                      !content.isEmpty else {
                     Log.warning("S3 object \(s3Debug)/\(file) has no content")
                     continue
                 }

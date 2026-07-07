@@ -3,3 +3,6 @@ node_modules/
 /test-results/
 /playwright-report/
 /playwright/.cache/
+# Crash core dumps left behind by browser crashes (e.g. WebKit minibrowser)
+core
+core.*
