@@ -104,13 +104,15 @@ test.describe('client_secret validation', () => {
         let accessToken: string = null
         let refreshToken: string = null
 
-        test('returns a code after login when the correct client_secret is provided on /authorize', async ({page}) => {
+        // RFC 6749 §4.1.1: the authorization endpoint must not require the client
+        // secret — it is only identified by client_id. The secret is enforced on the
+        // token request below.
+        test('issues a code from /authorize WITHOUT a client_secret', async ({page}) => {
             const response = await loginAuthorizeFormRequest(
                 page,
                 authUrl,
                 {
                     client_id: clientId,
-                    client_secret: clientSecret,
                     redirect_uri: redirectUri,
                     response_type: "code",
                     scope: "access",
@@ -182,7 +184,6 @@ test.describe('client_secret validation', () => {
                 authUrl,
                 {
                     client_id: clientId,
-                    client_secret: clientSecret,
                     redirect_uri: redirectUri,
                     response_type: "code",
                     scope: "access",
