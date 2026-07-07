@@ -163,7 +163,7 @@ struct ActivateController: RouteCollection {
         // Authenticate via JavaScript provider
         let providerInterpreter = JavaScriptProvider()
         try await providerInterpreter.loadProvider(
-            script: tenant.config.providers.joined(separator: "\n")
+            script: tenant.config.providerScripts.joined(separator: "\n")
         )
         try await providerInterpreter.start(
             class: .userLogin,
@@ -191,6 +191,7 @@ struct ActivateController: RouteCollection {
         )
         let profile = await providerInterpreter.getProfile()
         let role = await providerInterpreter.getRole()
+        let roles = await providerInterpreter.getRoles()
         let providerScopes = await providerInterpreter.getScopes()
 
         let scheme = req.headers.first(name: "X-Forwarded-Proto")
@@ -219,6 +220,7 @@ struct ActivateController: RouteCollection {
             tenant: tenant.name,
             responsibility: "",
             role: role,
+            roles: roles,
             user: username,
             scope: finalScopes.joined(separator: " "),
             profile: profile

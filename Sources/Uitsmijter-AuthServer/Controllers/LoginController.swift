@@ -268,7 +268,7 @@ struct LoginController: RouteCollection, OAuthControllerProtocol {
         grantType: GrantTypes
     ) async throws -> JavaScriptProvider {
         let providerInterpreter = JavaScriptProvider()
-        try await providerInterpreter.loadProvider(script: tenant.config.providers.joined(separator: "\n"))
+        try await providerInterpreter.loadProvider(script: tenant.config.providerScripts.joined(separator: "\n"))
         try await providerInterpreter.start(
             class: .userLogin,
             arguments: JSInputCredentials(
@@ -560,8 +560,9 @@ struct LoginController: RouteCollection, OAuthControllerProtocol {
             Log.error("Cannot get profile of \(loginForm.username)", requestId: req.id)
         }
 
-        // get users role from provider
+        // get users role(s) from provider
         let role = await providerInterpreter.getRole()
+        let roles = await providerInterpreter.getRoles()
 
         // scopes
         let requestedScopes = loginForm.scope?.split(separator: "+").map({ String($0) }) ?? []
@@ -604,6 +605,7 @@ struct LoginController: RouteCollection, OAuthControllerProtocol {
             tenant: tenant.name,
             responsibility: responsibleDomainHash.hash,
             role: role,
+            roles: roles,
             user: loginForm.username,
             scope: finalScopes,
             profile: profile

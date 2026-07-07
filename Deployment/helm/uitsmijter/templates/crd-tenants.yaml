@@ -89,9 +89,10 @@ spec:
                     - bucket
                 providers:
                   type: array
+                  # Each entry is either a raw provider script (a string) or a
+                  # predefined-provider object, e.g. { type: "uitrusting/v1", url, token }.
                   items:
-                    type: string
-                    minItems: 1
+                    x-kubernetes-preserve-unknown-fields: true
                 silent_login:
                   type: boolean
                 jwt_algorithm:

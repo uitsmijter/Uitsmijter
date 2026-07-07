@@ -63,6 +63,10 @@ protocol UserProfileProtocol {
     /// ```
     var role: String { get set }
 
+    /// The user's roles, when the provider supplies more than one. Optional; the
+    /// primary role is mirrored in ``role``.
+    var roles: [String]? { get set }
+
     /// The unique identifier or username of the user.
     ///
     /// This property contains the primary user identifier used for authentication and identity.
@@ -191,6 +195,9 @@ struct UserProfile: UserProfileProtocol {
     /// - SeeAlso: ``UserProfileProtocol/role`` for detailed role usage documentation
     var role: String
 
+    /// The user's roles when the provider supplies more than one.
+    var roles: [String]?
+
     /// The unique identifier or username of the user.
     ///
     /// This is the primary user identifier used for authentication and identity.
@@ -229,8 +236,15 @@ struct UserProfile: UserProfileProtocol {
     ///     ])
     /// )
     /// ```
-    init(role: String, user: String, scope: String? = nil, profile: CodableProfile? = nil) {
+    init(
+        role: String,
+        roles: [String]? = nil,
+        user: String,
+        scope: String? = nil,
+        profile: CodableProfile? = nil
+    ) {
         self.role = role
+        self.roles = roles
         self.user = user
         self.scope = scope ?? ""
         self.profile = profile
