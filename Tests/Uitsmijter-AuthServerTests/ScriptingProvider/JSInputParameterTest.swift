@@ -67,13 +67,13 @@ struct JSInputParameterTest {
     @Test("JSInputUsername decodes from JSON")
     func jsInputUsernameDecoding() throws {
         let jsonData = Data("""
-        {"username":"decoded@example.com","tenant":{"name":"acme","id":"xyz"}}
+        {"username":"decoded@example.com","tenant":{"name":"acme","namespace":"acme-ns"}}
         """.utf8)
 
         let decoded = try JSONDecoder().decode(JSInputUsername.self, from: jsonData)
         #expect(decoded.username == "decoded@example.com")
         #expect(decoded.tenant.name == "acme")
-        #expect(decoded.tenant.id == "xyz")
+        #expect(decoded.tenant.namespace == "acme-ns")
     }
 
     @Test("JSInputUsername round-trip encoding and decoding")

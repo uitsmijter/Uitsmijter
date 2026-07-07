@@ -10,33 +10,39 @@ import Foundation
 /// class UserLoginProvider {
 ///   constructor(credentials) {
 ///     const tenantName = credentials.tenant.name;
-///     const tenantId = credentials.tenant.id; // null for file-based tenants
+///     const tenantNamespace = credentials.tenant.namespace; // null for file-based tenants
 ///     // … call the external user service scoped to this tenant …
 ///   }
 /// }
 /// ```
 struct JSInputTenant: Codable, Sendable {
-    /// The tenant's unique name (always present).
+    /// The tenant's name (without the namespace prefix).
     let name: String
 
-    /// The tenant's resource identifier. This is the Kubernetes CRD UID when the
-    /// tenant is loaded from a CRD, and `nil` for file-based tenants (which have
-    /// no stable id — identify those by ``name``).
-    let id: String?
+    /// The Kubernetes namespace the tenant is defined in.
+    ///
+    /// `nil` for file-based tenants, which have no namespace. CRD tenants are stored
+    /// internally as `"<namespace>/<name>"`; this splits that back into its parts.
+    let namespace: String?
 
     /// Create the tenant context from explicit values.
-    init(name: String, id: String? = nil) {
+    init(name: String, namespace: String? = nil) {
         self.name = name
-        self.id = id
+        self.namespace = namespace
     }
 
     /// Build the tenant context from a loaded ``Tenant``.
+    ///
+    /// CRD tenants carry a `"<namespace>/<name>"` name; file-based tenants carry a
+    /// plain name and therefore have no namespace.
     init(from tenant: Tenant) {
-        self.name = tenant.name
-        if case .kubernetes(let uuid, _) = tenant.ref {
-            self.id = uuid.uuidString
+        let parts = tenant.name.split(separator: "/", maxSplits: 1, omittingEmptySubsequences: false)
+        if parts.count == 2 {
+            self.namespace = String(parts[0])
+            self.name = String(parts[1])
         } else {
-            self.id = nil
+            self.namespace = nil
+            self.name = tenant.name
         }
     }
 }
