@@ -49,10 +49,15 @@ export async function loginAuthorizeFormRequest(page: Page, url: string, data: A
     const queryParams: Record<string, string> = {
         response_type: data.response_type,
         client_id: data.client_id,
-        client_secret: data.client_secret || "null",
         redirect_uri: data.redirect_uri,
         scope: data.scope,
         state: data.state
+    }
+
+    // Only forward client_secret when actually provided — sending the literal
+    // string "null" is rejected by the server for clients that have a secret.
+    if (data.client_secret) {
+        queryParams.client_secret = data.client_secret
     }
 
     // Add optional PKCE parameters if provided
