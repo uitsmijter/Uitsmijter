@@ -38,4 +38,27 @@ enum GrantTypes: String, Codable, Sendable {
     /// The Device Authorization Grant (RFC 8628) for input-constrained devices (CLIs, smart TVs, IoT) that
     /// cannot open a browser directly. The device polls the token endpoint while the user authorizes on another device.
     case device_code
+
+    /// The grant_type value RFC 8628 §3.4 mandates for the device flow token request.
+    ///
+    /// Standard OAuth2 client libraries send this URN rather than the bare `device_code`,
+    /// so we accept it as an alias when decoding.
+    static let deviceCodeURN = "urn:ietf:params:oauth:grant-type:device_code"
+
+    /// Custom decoding so that both the bare `device_code` (Uitsmijter's original value)
+    /// and the RFC 8628 URN map to ``device_code``. Encoding still emits the bare rawValue.
+    init(from decoder: Decoder) throws {
+        let raw = try decoder.singleValueContainer().decode(String.self)
+        if raw == Self.deviceCodeURN {
+            self = .device_code
+            return
+        }
+        guard let value = GrantTypes(rawValue: raw) else {
+            throw DecodingError.dataCorruptedError(
+                in: try decoder.singleValueContainer(),
+                debugDescription: "Unsupported grant_type: \(raw)"
+            )
+        }
+        self = value
+    }
 }
