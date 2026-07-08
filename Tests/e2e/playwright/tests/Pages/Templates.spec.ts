@@ -43,13 +43,22 @@ test.describe('Templates', () => {
         await logoutLink.click();
         await app.waitForPage();
 
+        // The logout page carries `<meta http-equiv="refresh" content="2;URL=/logout/finalize…">`,
+        // so it navigates itself away after 2s. On slower emulated devices (e.g. mobile-pixel) the
+        // assertions and screenshot below can cross that boundary and observe the wrong page, which
+        // makes this test flaky. Cancel the pending finalize navigation so the transient logout page
+        // stays put. Registered after the click so it only affects the meta-refresh, not the click.
+        await page.route('**/logout/finalize*', route => route.abort());
+
+        // Read the rendered page once so every assertion observes the same point in time.
+        const html = await page.content()
+
         // Should be the S3 logout page
         expect(response?.status()).toBe(200)
-        expect(await page.content()).toContain('Logout')
-        expect(await page.content()).toContain('in progress')
-        expect(await page.content()).toContain('logout-box')
-        expect(await page.content()).toContain('data-tenant="ham"')
-        await page.waitForLoadState('networkidle');
+        expect(html).toContain('Logout')
+        expect(html).toContain('in progress')
+        expect(html).toContain('logout-box')
+        expect(html).toContain('data-tenant="ham"')
         expect(await page.screenshot()).toMatchSnapshot();
     });
 

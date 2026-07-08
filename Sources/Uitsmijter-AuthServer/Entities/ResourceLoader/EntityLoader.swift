@@ -270,7 +270,7 @@ public final class EntityLoader: EntityLoaderProtocolFunctions {
     /// - Parameter entity: The entity to remove (``Tenant`` or ``UitsmijterClient``)
     /// - Note: Entities without a reference cannot be removed and will log an error
     /// - SeeAlso: ``addEntity(entity:)``
-    func removeEntity(entity: Entity) {
+    func removeEntity(entity: Entity, cleanupTemplates: Bool) {
         guard let reference = entity.ref else {
             Log.error("Cannot remove entity without reference")
             return
@@ -284,8 +284,13 @@ public final class EntityLoader: EntityLoaderProtocolFunctions {
         switch entity {
         case let tenant as Tenant:
             Log.info("Remove tenant \(tenant.name) with reference \(reference.description)")
-            Task {
-                await tenantTemplateLoader.operate(operation: .remove(tenant: tenant))
+            // On modify/reload the entity is re-added immediately and `create` overwrites the templates
+            // in place. Deleting them here would open a window where requests fall back to the default
+            // template, so template cleanup is only performed for genuine deletions.
+            if cleanupTemplates {
+                Task {
+                    await tenantTemplateLoader.operate(operation: .remove(tenant: tenant))
+                }
             }
 
             guard let index = storage.tenants.firstIndex(where: { $0.ref == ref }) else {

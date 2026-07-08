@@ -84,6 +84,18 @@ protocol EntityLoaderProtocolFunctions {
     /// This method is called by entity loaders when a tenant or client configuration
     /// is deleted from the source.
     ///
-    /// - Parameter entity: The entity to remove (must be ``Tenant`` or ``UitsmijterClient``)
-    func removeEntity(entity: Entity)
+    /// - Parameters:
+    ///   - entity: The entity to remove (must be ``Tenant`` or ``UitsmijterClient``)
+    ///   - cleanupTemplates: When `true` (the default for real deletions), tenant S3 templates are
+    ///     removed from disk. Pass `false` for modify/reload flows that immediately re-add the entity,
+    ///     so the on-disk templates are overwritten in place rather than transiently deleted — otherwise
+    ///     requests served during the gap fall back to the default template.
+    func removeEntity(entity: Entity, cleanupTemplates: Bool)
+}
+
+extension EntityLoaderProtocolFunctions {
+    /// Convenience overload that removes an entity and cleans up its templates (real-deletion default).
+    func removeEntity(entity: Entity) {
+        removeEntity(entity: entity, cleanupTemplates: true)
+    }
 }

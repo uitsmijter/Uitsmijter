@@ -53,7 +53,8 @@ class EntityFileLoaderTenantChangedHandler: @unchecked Sendable, FileDidChangeDe
             let alreadyExistingTenant = Tenant.find(in: delegate.storage, ref: entityRef)
             if let alreadyExistingTenant { // if alreadyExistingTenant != nil
                 Log.warning("Removing Tenant based on reference \(entityRef).")
-                delegate.removeEntity(entity: alreadyExistingTenant)
+                // Dedup before re-adding: keep on-disk templates so they are overwritten, not dropped.
+                delegate.removeEntity(entity: alreadyExistingTenant, cleanupTemplates: false)
             }
         }
         return entity
@@ -288,7 +289,8 @@ fileprivate func eventHandler(
         // remove if there is a file reference to the file path
         if let delegate,
            let existingEntityOnFilePath = ofType.find(in: delegate.storage, ref: .file(file)) {
-            delegate.removeEntity(entity: existingEntityOnFilePath)
+            // Reload in place: keep on-disk templates so they are overwritten, not transiently dropped.
+            delegate.removeEntity(entity: existingEntityOnFilePath, cleanupTemplates: false)
         }
         do {
             // add the new entity

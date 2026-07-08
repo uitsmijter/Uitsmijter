@@ -488,11 +488,15 @@ fileprivate func eventHandler(
                 Log.info("Skipped reloading \(type(of: ofType)) \(entity.name) as it is already loaded")
                 return
             }
-            delegate.removeEntity(entity: existingClient)
+            // Reload of an already-loaded entity: keep its on-disk templates (see .modified below).
+            delegate.removeEntity(entity: existingClient, cleanupTemplates: false)
         }
         delegate?.addEntity(entity: entity)
     case .modified:
-        delegate?.removeEntity(entity: entity)
+        // Reload in place: keep the tenant's on-disk S3 templates (addEntity overwrites them) so no
+        // request is served the default template during a modify — which K8s also emits on every
+        // status-subresource write and periodic resync.
+        delegate?.removeEntity(entity: entity, cleanupTemplates: false)
         delegate?.addEntity(entity: entity)
     case .deleted:
         delegate?.removeEntity(entity: entity)
