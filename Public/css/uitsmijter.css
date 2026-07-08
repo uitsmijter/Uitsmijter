@@ -245,16 +245,25 @@ header, footer {
 /*Login*/
 .login-box {
     background-color: white;
+    box-shadow: 0 3px 15px;
+    display: flex;
+    margin: auto;
+    margin-top: 1rem;
+    padding: 1rem 0 1rem 0;;
+    min-width: 300px;
+    flex-direction: column;
+}
+
+/* Device activation page — a rounded, elevated card (scoped so the login page
+   keeps its original look). See default/activate.leaf `<body class="… activate">`. */
+body.activate .login-box {
     box-shadow: 0 8px 30px rgba(0, 0, 0, .25);
     border-radius: 12px;
-    display: flex;
-    margin: 1rem auto auto;
+    margin-top: 1rem;
     padding: 1.5rem 1.25rem;
-    min-width: 300px;
     max-width: 360px;
     width: 100%;
     box-sizing: border-box;
-    flex-direction: column;
 }
 
 .login-box.error {
@@ -336,9 +345,9 @@ input {
     }
 }
 
-/* Keep a gutter so the card never touches the screen edges on small viewports */
+/* Keep the activation card off the screen edges on small viewports */
 @media all and (max-width: 400px) {
-    main {
+    body.activate main {
         padding-left: 1rem;
         padding-right: 1rem;
     }

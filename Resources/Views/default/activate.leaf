@@ -7,7 +7,7 @@
     <link rel="stylesheet" href="css/uitsmijter.css">
     <script type="application/javascript" src="js/uitsmijter.js"></script>
 </head>
-<body class="background">
+<body class="background activate">
 <header>
     <ul class="navigation">
         <li><a href="#" id="clock">
