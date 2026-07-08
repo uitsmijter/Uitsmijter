@@ -33,10 +33,10 @@
             <div class="field">
                 <input type="text" id="user_code" name="user_code" value="#(userCode)"
                        placeholder='#t("ACTIVATE.UI.USER_CODE")'
-                       autocomplete="off" autocorrect="off" autocapitalize="characters" spellcheck="false">
+                       autocomplete="off" autocorrect="off" autocapitalize="characters" spellcheck="false"#if(userCode == nil || userCode == ""): autofocus#endif>
             </div>
             <div class="field">
-                <input type="text" id="username" name="username" placeholder='#t("LOGIN.UI.NAME")' autofocus>
+                <input type="text" id="username" name="username" placeholder='#t("LOGIN.UI.NAME")'#if(userCode != nil && userCode != ""): autofocus#endif>
             </div>
             <div class="field">
                 <input type="password" id="password" name="password" placeholder='#t("LOGIN.UI.PASSWORD")'>
