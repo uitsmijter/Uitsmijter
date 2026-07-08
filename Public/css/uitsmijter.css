@@ -243,27 +243,129 @@ header, footer {
 }
 
 /*Login*/
+/* Liquid-glass auth card — shared by every auth page (login, logout, token
+   information and device activation) for one consistent look. A translucent,
+   backdrop-blurred panel with pill-shaped fields floating on top. The graphite
+   dark variant is applied automatically via prefers-color-scheme (see below).
+   The width shrinks with a 1rem side gutter so it always fits small phones. */
 .login-box {
-    background-color: white;
-    box-shadow: 0 3px 15px;
+    position: relative;
     display: flex;
-    margin: auto;
-    margin-top: 1rem;
-    padding: 1rem 0 1rem 0;;
-    min-width: 300px;
     flex-direction: column;
+    box-sizing: border-box;
+    width: min(360px, calc(100% - 2rem));
+    margin: 1rem auto auto;
+    padding: 1.75rem 1.5rem;
+    border-radius: 28px;
+    color: #1c2410;
+    background: linear-gradient(135deg, rgba(255, 255, 255, .55), rgba(255, 255, 255, .30));
+    -webkit-backdrop-filter: blur(22px) saturate(180%);
+    backdrop-filter: blur(22px) saturate(180%);
+    border: 1px solid rgba(255, 255, 255, .55);
+    box-shadow: 0 10px 40px rgba(0, 0, 0, .28),
+                inset 0 1px 0 rgba(255, 255, 255, .85),
+                inset 0 -1px 6px rgba(255, 255, 255, .25);
 }
 
-/* Device activation page — a rounded, elevated card (scoped so the login page
-   keeps its original look). See default/activate.leaf `<body class="… activate">`. */
-body.activate .login-box {
-    box-shadow: 0 8px 30px rgba(0, 0, 0, .25);
-    border-radius: 12px;
-    margin-top: 1rem;
-    padding: 1.5rem 1.25rem;
-    max-width: 360px;
+/* Specular sheen across the top-left of the panel */
+.login-box::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: 28px;
+    pointer-events: none;
+    background: linear-gradient(160deg, rgba(255, 255, 255, .5) 0%, rgba(255, 255, 255, 0) 40%);
+}
+
+/* Keep form contents above the sheen overlay */
+.login-box form {
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    z-index: 1;
+}
+
+/* Glassy pill input fields */
+.login-box input {
     width: 100%;
-    box-sizing: border-box;
+    margin: .4rem 0;
+    padding: .85rem 1.15rem;
+    border-radius: 999px;
+    border: 1px solid rgba(255, 255, 255, .7);
+    outline: none;
+    font-size: 1rem;
+    color: #1c2410;
+    background: linear-gradient(135deg, rgba(255, 255, 255, .65), rgba(255, 255, 255, .38));
+    -webkit-backdrop-filter: blur(10px);
+    backdrop-filter: blur(10px);
+    box-shadow: inset 0 1px 2px rgba(255, 255, 255, .9),
+                inset 0 -1px 3px rgba(0, 0, 0, .06),
+                0 2px 6px rgba(0, 0, 0, .08);
+}
+
+.login-box input::placeholder {
+    color: rgba(30, 40, 15, .6);
+}
+
+.login-box input:focus {
+    border-color: rgba(255, 170, 0, .9);
+    box-shadow: inset 0 1px 2px rgba(255, 255, 255, .9),
+                0 0 0 3px rgba(255, 170, 0, .35);
+}
+
+/* Glassy accent button */
+.login-box .button-big {
+    height: auto;
+    width: 100%;
+    margin: 1rem 0 0;
+    padding: .85rem;
+    border-radius: 999px;
+    border: 1px solid rgba(255, 255, 255, .45);
+    cursor: pointer;
+    font-size: 1.05rem;
+    font-weight: 600;
+    color: #fff;
+    background: linear-gradient(135deg, rgba(255, 170, 0, .92), rgba(255, 120, 0, .92));
+    -webkit-backdrop-filter: blur(6px);
+    backdrop-filter: blur(6px);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, .6),
+                0 6px 18px rgba(255, 120, 0, .4);
+    text-shadow: 0 1px 2px rgba(0, 0, 0, .25);
+}
+
+/* Dark mode: graphite smoked glass, applied automatically by the OS theme */
+@media (prefers-color-scheme: dark) {
+    .login-box {
+        color: #f2f4f0;
+        background: linear-gradient(135deg, rgba(30, 34, 40, .48), rgba(20, 24, 30, .30));
+        border: 1px solid rgba(255, 255, 255, .28);
+        box-shadow: 0 12px 44px rgba(0, 0, 0, .42),
+                    inset 0 1px 0 rgba(255, 255, 255, .4),
+                    inset 0 -1px 8px rgba(255, 255, 255, .08);
+    }
+    .login-box::before {
+        background: linear-gradient(160deg, rgba(255, 255, 255, .28) 0%, rgba(255, 255, 255, 0) 42%);
+    }
+    .login-box input {
+        color: #fff;
+        background: linear-gradient(135deg, rgba(255, 255, 255, .20), rgba(255, 255, 255, .08));
+        border: 1px solid rgba(255, 255, 255, .35);
+        box-shadow: inset 0 1px 1px rgba(255, 255, 255, .4),
+                    0 2px 6px rgba(0, 0, 0, .18);
+        text-shadow: 0 1px 2px rgba(0, 0, 0, .35);
+    }
+    .login-box input::placeholder {
+        color: rgba(255, 255, 255, .75);
+    }
+    .login-box input:focus {
+        border-color: rgba(255, 170, 0, .95);
+        box-shadow: 0 0 0 3px rgba(255, 170, 0, .4),
+                    inset 0 1px 1px rgba(255, 255, 255, .4);
+    }
+    /* Device-activation success message stays legible on dark glass */
+    .login-box .message[data-result="success"] {
+        color: #eaf0e2;
+    }
 }
 
 .login-box.error {
@@ -342,14 +444,6 @@ input {
 @media all and (max-width: 800px) {
     .navigation, .footer-item {
         justify-content: space-around;
-    }
-}
-
-/* Keep the activation card off the screen edges on small viewports */
-@media all and (max-width: 400px) {
-    body.activate main {
-        padding-left: 1rem;
-        padding-right: 1rem;
     }
 }
 
