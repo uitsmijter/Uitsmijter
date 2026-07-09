@@ -1,3 +1,13 @@
+# 0.11.1
+
+- Improvement: **Liquid Glass Login UI** - The default login, logout, token-info and device-activation pages now render on a translucent, backdrop-blurred "liquid glass" panel with pill-shaped input fields and a glassy accent button, replacing the solid white card. The card width is responsive (`min(360px, calc(100% - 2rem))`) so it always keeps a side gutter and fits small phones.
+- Improvement: **Automatic Dark Mode** - The login UI switches to a graphite smoked-glass variant automatically based on the user's operating-system colour scheme (`prefers-color-scheme: dark`); the light frosted glass remains the default.
+- Improvement: **Device Activation Autofocus** - The device-activation form now focuses the device-code field when no code is pre-filled (the "Device Code" placeholder is shown), and the username field otherwise.
+- Improvement: **e2e Screenshot Rebuild Flags** - `./tooling.sh e2e` gained `--update-screenshots` (rebuilds the Playwright VRT baselines via `--update-snapshots`) and `--amd64` (runs only the Playwright container as `linux/amd64` so locally rebuilt screenshots match the amd64 CI renderer).
+
+- Fix: **Login Fields Overflowing the Glass Card on Mobile** - The glassy pill inputs used `width: 100%` without `box-sizing: border-box`, so their horizontal padding pushed them past the card's right edge on narrow screens (text inputs default to `content-box`, unlike buttons). The inputs and button now stay inside the panel.
+- Fix: **Playwright Core Dumps Break the Release Build** - A browser crash `core` dump left in `Tests/e2e/playwright/` (multiple GB) was copied into the Docker build context by `COPY . .`, failing the release build with "no space left on device". Core dumps and Playwright run artifacts are now excluded from the build context via `.dockerignore` (in addition to `.gitignore`).
+
 # 0.11.0
 
 - Feature: **OAuth 2.0 Device Authorization Grant (RFC 8628)** - Uitsmijter now supports the device flow for input-constrained clients (CLIs, smart TVs, IoT). A client requests a `device_code` and short `user_code` at `POST /oauth/device_authorization`, the user approves it in a browser at `GET/POST /activate`, and the device polls `POST /token` with the `device_code` grant until tokens are issued. The flow is enabled per client by listing `device_code` in `grant_types`; the OIDC discovery document advertises the `device_authorization_endpoint` when a client supports it.
