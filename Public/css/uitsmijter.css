@@ -288,6 +288,7 @@ header, footer {
 /* Glassy pill input fields */
 .login-box input {
     width: 100%;
+    box-sizing: border-box;
     margin: .4rem 0;
     padding: .85rem 1.15rem;
     border-radius: 999px;
@@ -317,6 +318,7 @@ header, footer {
 .login-box .button-big {
     height: auto;
     width: 100%;
+    box-sizing: border-box;
     margin: 1rem 0 0;
     padding: .85rem;
     border-radius: 999px;
