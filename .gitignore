@@ -12,6 +12,9 @@ db.sqlite
 /Deployment/Release/*.tgz
 /Deployment/e2e/traefik/certificates
 /core
+Tests/e2e/playwright/core
+Tests/e2e/playwright/core.*
+Tests/e2e/playwright/test-results/
 /dump.rdb
 /Tests/e2e/helm/results
 Public/images/generated/**/*

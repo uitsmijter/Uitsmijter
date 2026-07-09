@@ -11,3 +11,10 @@ Deployment/tooling
 Deployment/build-compose.yml
 Deployment/*Dockerfile
 
+# Browser crash core dumps and Playwright run artifacts (can be multi-GB) —
+# never copy them into the Docker build context.
+**/core
+Tests/e2e/playwright/core
+Tests/e2e/playwright/core.*
+Tests/e2e/playwright/test-results
+Tests/e2e/playwright/node_modules
