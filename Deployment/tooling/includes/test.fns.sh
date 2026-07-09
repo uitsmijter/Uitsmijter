@@ -95,7 +95,10 @@ function e2eTests(){
   echo "Running tests:"
 
   status=0
+  # E2E_PLATFORM (e.g. linux/amd64, set by tooling.sh --amd64) forces only the
+  # Playwright container's architecture so rebuilt screenshots match the CI renderer.
   SUPPRESS_PACKAGE_WARNINGS="${SUPPRESS_PACKAGE_WARNINGS:-}" \
+  DOCKER_DEFAULT_PLATFORM="${E2E_PLATFORM:-}" \
   ARGUMENTS="${ARGUMENTS}" GITHUB_ACTION=${GITHUB_ACTION:-} docker compose \
     -f "${PROJECT_DIR}/Deployment/build-compose.yml" \
     --env-file "${PROJECT_DIR}/.env" \

@@ -39,6 +39,9 @@ help() {
   echo "        --dirty                   Use incremental temporary runtime for the local cluster"
   echo "        --fast                    runs tests only on one virtual browser and resolution."
   echo "        --hold                    Keep cluster running after e2e tests (requires manual shutdown)"
+  echo "        --update-screenshots      Rebuild the e2e VRT screenshot baselines (Playwright --update-snapshots)"
+  echo "        --amd64                   Run the e2e (Playwright) container as linux/amd64 so rebuilt"
+  echo "                                  screenshots match the amd64 CI renderer (needs QEMU; slower)"
   echo ""
   echo "Example:"
   echo "        ./tooling build run"
@@ -59,6 +62,8 @@ DEBUG=""
 USE_DIRTY=""
 USE_FAST=""
 USE_HOLD=""
+USE_UPDATE_SCREENSHOTS=""
+USE_AMD64=""
 FILTER=
 PARAMS=""
 COUNT=$#
@@ -167,6 +172,14 @@ while (("$#")); do
     USE_HOLD=1
     shift 1
     ;;
+  --update-screenshots | --update-snapshots)
+    USE_UPDATE_SCREENSHOTS=1
+    shift 1
+    ;;
+  --amd64)
+    USE_AMD64=1
+    shift 1
+    ;;
   --) # end argument parsing
     shift
     break
@@ -199,6 +212,11 @@ if [[ "${MODE}" == *"release"* ]] && [[ -n "${USE_DIRTY}" ]]; then
 fi
 if [[ "${MODE}" != *"e2e"* ]] && [[ -n "${USE_FAST}" ]]; then
   echo "${SYMBOL_FAIL} Fast makes sense for e2e tests only" "!"
+  echo ""
+  exit 1
+fi
+if [[ "${MODE}" != *"e2e"* ]] && { [[ -n "${USE_UPDATE_SCREENSHOTS}" ]] || [[ -n "${USE_AMD64}" ]]; }; then
+  echo "${SYMBOL_FAIL} --update-screenshots and --amd64 make sense for e2e tests only" "!"
   echo ""
   exit 1
 fi
@@ -272,6 +290,13 @@ if [[ "${MODE}" == *"e2e"* ]]; then
   if [[ -n "${FILTER}" ]]; then
     # Pass filter as a single argument by escaping it properly
     EXTRAS="${EXTRAS} --grep '${FILTER}'"
+  fi
+  if [[ -n "${USE_UPDATE_SCREENSHOTS}" ]]; then
+    EXTRAS="${EXTRAS} --update-snapshots"
+  fi
+  if [[ -n "${USE_AMD64}" ]]; then
+    # Force only the Playwright container to amd64 so rebuilt screenshots match CI.
+    export E2E_PLATFORM="linux/amd64"
   fi
   e2eTests "${dockerComposeBuildParameter}" "${EXTRAS}" "${TAG}" "${USE_HOLD}"
 fi
