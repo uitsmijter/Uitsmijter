@@ -18,6 +18,28 @@ document.addEventListener("DOMContentLoaded", () => {
             }
         }
     }
+
+    // Enter on username jumps to password, Enter on password submits the login
+    let username = document.getElementById("username");
+    let password = document.getElementById("password");
+    if (username) {
+        username.addEventListener("keydown", (event) => {
+            if (event.key === "Enter") {
+                event.preventDefault();
+                if (password) {
+                    password.focus();
+                }
+            }
+        });
+    }
+    if (password) {
+        password.addEventListener("keydown", (event) => {
+            if (event.key === "Enter") {
+                event.preventDefault();
+                loginButton.click();
+            }
+        });
+    }
 });
 
 // Clock
