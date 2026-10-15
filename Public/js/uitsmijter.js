@@ -1,45 +1,36 @@
 // On Page Load
 document.addEventListener("DOMContentLoaded", () => {
-    // change the form submit to a button - because js is enabled
+    // The login button stays a native submit button, so the browser submits the form
+    // on a click as well as on Enter in any of the form fields.
     let loginButton = document.getElementById("loginButton");
     let loginSpinner = document.getElementById("loginSpinner");
-    loginButton.type = "button"
-    loginButton.onclick = () => {
-        let forms = document.forms
-        for (let i = 0; i < forms.length; ++i) {
-            let form = forms.item(i)
-            if (form.action.endsWith("/login")) {
-                loginSpinner.classList.remove('login-spinner-invisible');
-                form.submit();
-                // history back.. disable spinner after 5s
-                setTimeout(() => {
-                    loginSpinner.classList.add('login-spinner-invisible');
-                }, 5000)
-            }
-        }
+    let loginForm = loginButton ? loginButton.form : null;
+    if (!loginForm) {
+        return;
     }
 
-    // Enter on username jumps to password, Enter on password submits the login
-    let username = document.getElementById("username");
-    let password = document.getElementById("password");
-    if (username) {
-        username.addEventListener("keydown", (event) => {
-            if (event.key === "Enter") {
-                event.preventDefault();
-                if (password) {
-                    password.focus();
-                }
+    let submitting = false;
+    loginForm.addEventListener("submit", (event) => {
+        // prevent double submits while the login is in progress
+        if (submitting) {
+            event.preventDefault();
+            return;
+        }
+        submitting = true;
+        if (loginSpinner) {
+            loginSpinner.classList.remove('login-spinner-invisible');
+        }
+    });
+
+    // history back restores the page from the cache: reset the spinner
+    window.addEventListener("pageshow", (event) => {
+        if (event.persisted) {
+            submitting = false;
+            if (loginSpinner) {
+                loginSpinner.classList.add('login-spinner-invisible');
             }
-        });
-    }
-    if (password) {
-        password.addEventListener("keydown", (event) => {
-            if (event.key === "Enter") {
-                event.preventDefault();
-                loginButton.click();
-            }
-        });
-    }
+        }
+    });
 });
 
 // Clock
