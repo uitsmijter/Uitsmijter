@@ -1,3 +1,8 @@
+# 0.11.2
+
+- Fix: **Enter Submits the Login Form** - Pressing Enter in the username or password field of the default login page now submits the form, just like clicking the login button. The button stays a native submit button instead of being turned into a plain button by the page script, which had disabled the browser's implicit form submission. The spinner is shown on submit, double submits are blocked, and the spinner is reset when the page is restored via history back.
+- Fix: **Script Error on Pages Without a Login Form** - The index, logout and device-activation pages load the same page script but have no login button; the script no longer throws an error there.
+
 # 0.11.1
 
 - Improvement: **Liquid Glass Login UI** - The default login, logout, token-info and device-activation pages now render on a translucent, backdrop-blurred "liquid glass" panel with pill-shaped input fields and a glassy accent button, replacing the solid white card. The card width is responsive (`min(360px, calc(100% - 2rem))`) so it always keeps a side gutter and fits small phones.
