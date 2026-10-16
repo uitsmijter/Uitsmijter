@@ -1,3 +1,7 @@
+# 0.11.3
+
+- Fix: **S3 Templates Signed for the Configured Region** - Tenant templates loaded from S3 are now requested with the region configured in the tenant's template settings. Before, the region was ignored and every request was signed for the default region, so S3-compatible stores like Garage, which reject signatures for a region they do not serve, refused to deliver the templates.
+
 # 0.11.2
 
 - Fix: **Enter Submits the Login Form** - Pressing Enter in the username or password field of the default login page now submits the form, just like clicking the login button. The button stays a native submit button instead of being turned into a plain button by the page script, which had disabled the browser's implicit form submission. The spinner is shown on submit, double submits are blocked, and the spinner is reset when the page is restored via history back.
