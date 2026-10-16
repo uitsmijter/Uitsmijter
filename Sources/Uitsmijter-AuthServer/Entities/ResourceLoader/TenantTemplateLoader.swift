@@ -227,7 +227,8 @@ actor TenantTemplateLoader {
         }
 
         // Load templates from S3
-        let s3 = S3(client: client, endpoint: templates.host) // swiftlint:disable:this identifier_name
+        // swiftlint:disable:next identifier_name
+        let s3 = S3(client: client, region: .other(templates.region), endpoint: templates.host)
         for file in ["index.leaf", "login.leaf", "logout.leaf", "error.leaf"] {
             let path = templates.path + "/" + file
             let fileRequest = S3.GetObjectRequest(bucket: templates.bucket, key: path)
